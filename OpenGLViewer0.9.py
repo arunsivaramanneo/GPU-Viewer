@@ -49,6 +49,26 @@ def OpenGL():
 		sc1.configure(state='disabled',foreground="BLUE") # Keeping the scrolled text box uneditable to the end-user
 
 
+	def clickMe():
+		win2 = tk.Tk()
+		win2.title("OpenGL Limits")
+
+		frame4 = ttk.LabelFrame(win2, text="OpenGL Limits")
+		frame4.grid(column=0,row=0, padx=20,pady=20)
+		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' > OpenGL_Limits.txt")
+
+		sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
+
+		with open("OpenGL_Limits.txt","r") as file3:
+			for line in file3:
+				sc4.insert('insert',line)
+				sc4.grid(column=0,row=0)
+
+		sc4.configure(state="disabled",foreground="BLUE")
+# Adding a Button for OpenGL Limits
+
+	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
+	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
 
 
 # Configuring different Radio Buttons
