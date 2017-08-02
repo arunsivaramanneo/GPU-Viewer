@@ -4,31 +4,19 @@ import subprocess as sp
 from tkinter import scrolledtext
 import os
 
-# Creating a window
 
-win = tk.Tk() 
+
+
+def OpenGL(win):
 
 # Creating Tabs for OpenGL , Vulkan So on ...
 
-tabcontrol = ttk.Notebook(win)
-tab1 = ttk.Frame(tabcontrol)
-tabcontrol.add(tab1, text="OpenGL")
-tabcontrol.pack(expand=1, fill="both")
-
-
-tab2 = ttk.Frame(tabcontrol)
-tabcontrol.add(tab2,text="Vulkan")
-tabcontrol.pack(expand=1,fill="both")
-
-# Title of the Window
-
-win.title("OpenGL Viewer 0.9")
-
-win.resizable(0,0)
+	tabcontrol = ttk.Notebook(win)
+	tab1 = ttk.Frame(tabcontrol)
+	tabcontrol.add(tab1, text="OpenGL")
+	tabcontrol.pack(expand=1, fill="both")
 
 # Creating the first Frame to display the OpenGL Version Core and String details along with Hardware 
-
-def OpenGL():
 
 	frame1 = ttk.LabelFrame(tab1, text="OpenGL Information")
 	frame1.grid(column=0,row=0, padx=20, pady=20)
@@ -48,6 +36,7 @@ def OpenGL():
 
 		sc1.configure(state='disabled',foreground="BLUE") # Keeping the scrolled text box uneditable to the end-user
 
+# Creating a new window for OpenGL Limits
 
 	def clickMe():
 		win2 = tk.Tk()
@@ -66,7 +55,6 @@ def OpenGL():
 
 		sc4.configure(state="disabled",foreground="BLUE")
 # Adding a Button for OpenGL Limits
-
 	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
 	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
 
@@ -304,7 +292,7 @@ def OpenGL():
 	rad10.grid(column=9,row=1)
 
 
-OpenGL()
+#OpenGL()
 
 
-win.mainloop()
+#win.mainloop()
