@@ -1,20 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-import subprocess as sp
 from tkinter import scrolledtext
 import os
 
 
 
 
-def OpenGL(win):
+def OpenGL(tab1):
 
-# Creating Tabs for OpenGL , Vulkan So on ...
 
-	tabcontrol = ttk.Notebook(win)
-	tab1 = ttk.Frame(tabcontrol)
-	tabcontrol.add(tab1, text="OpenGL")
-	tabcontrol.pack(expand=1, fill="both")
 
 # Creating the first Frame to display the OpenGL Version Core and String details along with Hardware 
 
