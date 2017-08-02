@@ -35,6 +35,7 @@ def OpenGL(tab1):
 	def clickMe():
 		win2 = tk.Tk()
 		win2.title("OpenGL Limits")
+		win2.resizable(0,0)
 
 		frame4 = ttk.LabelFrame(win2, text="OpenGL Limits")
 		frame4.grid(column=0,row=0, padx=20,pady=20)
