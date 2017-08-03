@@ -30,6 +30,8 @@ def OpenGL(tab1):
 
 		sc1.configure(state='disabled',foreground="BLUE") # Keeping the scrolled text box uneditable to the end-user
 
+#Label
+	
 # Creating a new window for OpenGL Limits
 
 	def clickMe():
@@ -63,39 +65,46 @@ def OpenGL(tab1):
 		radsel=radvar.get()
 		label1 = ttk.Label(frame2, text="No :")
 		label1.grid(column=0,row=2)
+		TotExt = ttk.Entry(frame2, width=5)
+		TotExt.grid(column=1,row=2)
+		sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
 		if radsel == 1:
 			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
 			frame3.configure(text="All") 
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
 			with open("extensions.txt") as file2:
 				count = len(file2.readlines())
-				Allcount = ttk.Entry(frame2, width=5)
-				Allcount.insert('insert',count)
-				Allcount.configure(state='disabled',foreground="BLUE")
-				Allcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground="BLUE")
 
 		if radsel == 2:
 			os.system("cat extensions.txt | grep _AMD > AMD_extensions.txt")
-			#os.system("sort extensions.txt | uniq > extensions.txt")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			frame3.configure(text="AMD")
 			with open("AMD_extensions.txt") as file2:
 				count = len(file2.readlines())
-				AMDcount = ttk.Entry(frame2, width=5)
-				AMDcount.insert('insert',count)
-				AMDcount.configure(state='disabled',foreground="BLUE")
-				AMDcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground='red')
 				os.system("rm AMD*.txt")
@@ -104,36 +113,42 @@ def OpenGL(tab1):
 			os.system("cat extensions.txt | grep _ARB > ARB_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="ARB")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("ARB_extensions.txt") as file2:
 				count = len(file2.readlines())
-				ARBcount = ttk.Entry(frame2, width=5)
-				ARBcount.insert('insert',count)
-				ARBcount.configure(state='disabled',foreground="BLUE")
-				ARBcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
-				sc2.configure(state='disabled',foreground="orange")
+				sc2.configure(state='disabled',foreground="DARK ORANGE")
 				os.system("rm ARB*.txt")
 
 		if radsel == 4:
 			os.system("cat extensions.txt | grep _EXT > EXT_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="EXT")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("EXT_extensions.txt") as file2:
 				count = len(file2.readlines())
-				EXTcount = ttk.Entry(frame2, width=5)
-				EXTcount.insert('insert',count)
-				EXTcount.configure(state='disabled',foreground="BLUE")
-				EXTcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground='BLACK')
 				os.system("rm EXT*.txt")
@@ -142,36 +157,42 @@ def OpenGL(tab1):
 			os.system("cat extensions.txt | grep _NV > NV_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="NV")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("NV_extensions.txt") as file2:
 				count = len(file2.readlines())
-				NVcount = ttk.Entry(frame2, width=5)
-				NVcount.insert('insert',count)
-				NVcount.configure(state='disabled',foreground="BLUE")
-				NVcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
-				sc2.configure(state='disabled',foreground="GREEN")
+				sc2.configure(state='disabled',foreground="DARK GREEN")
 				os.system("rm NV*.txt")
 
 		if radsel == 6:
 			os.system("cat extensions.txt | grep _ATI > ATI_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="ATI")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("ATI_extensions.txt") as file2:
 				count = len(file2.readlines())
-				ATIcount = ttk.Entry(frame2, width=5)
-				ATIcount.insert('insert',count)
-				ATIcount.configure(state='disabled',foreground="BLUE")
-				ATIcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground="RED")
 				os.system("rm ATI*.txt")
@@ -180,13 +201,11 @@ def OpenGL(tab1):
 			os.system("cat extensions.txt | grep _KHR > KHR_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="KHR")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("KHR_extensions.txt") as file2:
 				count = len(file2.readlines())
-				KHRcount = ttk.Entry(frame2, width=5)
-				KHRcount.insert('insert',count)
-				KHRcount.configure(state='disabled',foreground="BLUE")
-				KHRcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
 				for line in file2:
 					sc2.insert('insert',line)
@@ -199,58 +218,48 @@ def OpenGL(tab1):
 			os.system("cat extensions.txt | grep _MESA > MESA_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="MESA")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("MESA_extensions.txt") as file2:
 				count = len(file2.readlines())
-				KHRcount = ttk.Entry(frame2, width=5)
-				KHRcount.insert('insert',count)
-				KHRcount.configure(state='disabled',foreground="BLUE")
-				KHRcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
 				if count  > 0:
 					for line in file2:
 						sc2.insert('insert',line)
 						sc2.grid(column=0,row=2)
 				else:
-					for line in file2:
-						sc2.insert('insert',BLANK)
-						sc2.grid(column=0,row=2)
-					print("Zero")
+					sc2.delete('1.0','end')
+					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground="PURPLE")
 				os.system("rm MESA*.txt")
 
 		if radsel == 10:
-			os.system("cat extensions.txt | grep -v _AMD | grep -v _MESA | grep -v _NV | grep -v _ATI | grep -v _ARB | grep -v _SGI | grep -v _KHR | grep -v _EXT > Others_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="GLX")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			os.system("cat extensions.txt | grep -v _AMD | grep -v _MESA | grep -v _NV | grep -v _ATI | grep -v _ARB | grep -v _SGI | grep -v _KHR | grep -v _EXT | grep -v _IBM > Others_extensions.txt")
+			frame3.configure(text="Other extensions") 
 			with open("Others_extensions.txt") as file2:
 				count = len(file2.readlines())
-				Otherscount = ttk.Entry(frame2, width=5)
-				Otherscount.insert('insert',count)
-				Otherscount.configure(state='disabled',foreground="BLUE")
-				Otherscount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
 				for line in file2:
 					sc2.insert('insert',line)
 					sc2.grid(column=0,row=2)
 
 
-				sc2.configure(state='disabled', foreground='violet')
+				sc2.configure(state='disabled', foreground='VIOLET RED')
 				os.system("rm Others*.txt")
 	
 		if radsel == 9:
 			os.system("cat extensions.txt | grep _SGI > SGI_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
 			frame3.configure(text="SGI/SGIX")
-			sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+			
 			with open("SGI_extensions.txt") as file2:
 				count = len(file2.readlines())
-				KHRcount = ttk.Entry(frame2, width=5)
-				KHRcount.insert('insert',count)
-				KHRcount.configure(state='disabled',foreground="BLUE")
-				KHRcount.grid(column=1,row=2)
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
 				for line in file2:
 					sc2.insert('insert',line)
@@ -258,6 +267,22 @@ def OpenGL(tab1):
 
 				sc2.configure(state='disabled',foreground="INDIGO")
 				os.system("rm SGI*.txt")
+
+		if radsel == 11:
+			os.system("cat extensions.txt | grep _IBM > IBM_extensions.txt")
+			frame3.configure(text="IBM")
+		
+			with open("IBM_extensions.txt") as file2:
+				count = len(file2.readlines())
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
+				file2.seek(0,0)
+				for line in file2:
+					sc2.insert('insert',line)
+					sc2.grid(column=0,row=2)
+
+				sc2.configure(state='disabled',foreground="Dark Slate Gray")
+				os.system("rm IBM*.txt")
 
 
 	frame2 = ttk.LabelFrame(tab1, text="OpenGL Extensions ")
@@ -275,19 +300,16 @@ def OpenGL(tab1):
 	rad4.grid(column=3,row=1)
 	rad5 = tk.Radiobutton(frame2, text="EXT", variable=radvar, value=4, command=radcall)
 	rad5.grid(column=4,row=1)
-	rad6 = tk.Radiobutton(frame2, text="NV", variable=radvar, value=5, command=radcall)
-	rad6.grid(column=6,row=1)
+	rad6 = tk.Radiobutton(frame2, text="IBM", variable=radvar, value=11, command=radcall)
+	rad6.grid(column=5,row=1)
 	rad7 = tk.Radiobutton(frame2, text="KHR", variable=radvar, value=7, command=radcall)
-	rad7.grid(column=5,row=1)
+	rad7.grid(column=6,row=1)
 	rad8 = tk.Radiobutton(frame2, text="MESA", variable=radvar, value=8, command=radcall)
 	rad8.grid(column=7,row=1)
-	rad9 = tk.Radiobutton(frame2, text="SGI", variable=radvar, value=9, command=radcall)
+	rad9 = tk.Radiobutton(frame2, text="NV", variable=radvar, value=5, command=radcall)
 	rad9.grid(column=8,row=1)
-	rad10 = tk.Radiobutton(frame2, text="Others", variable=radvar, value=10, command=radcall)
+	rad10 = tk.Radiobutton(frame2, text="SGI", variable=radvar, value=9, command=radcall)
 	rad10.grid(column=9,row=1)
+	rad11 = tk.Radiobutton(frame2, text="Others", variable=radvar, value=10, command=radcall)
+	rad11.grid(column=10,row=1)
 
-
-#OpenGL()
-
-
-#win.mainloop()
