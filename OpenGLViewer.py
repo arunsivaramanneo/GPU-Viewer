@@ -19,7 +19,7 @@ def OpenGL(tab1):
 
 # Creating the Scrolled text box to display the above OpenGL_Information.txt
 
-	sc1 = scrolledtext.ScrolledText(frame1, width=100, height=10)
+	sc1 = scrolledtext.ScrolledText(frame1, width=100, height=10 , background="LIGHT GRAY")
 
 # Opening the OpenGL_Information.txt file in read mode
 
@@ -67,7 +67,7 @@ def OpenGL(tab1):
 		label1.grid(column=0,row=2)
 		TotExt = ttk.Entry(frame2, width=5)
 		TotExt.grid(column=1,row=2)
-		sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15)
+		sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15, background="LIGHT GRAY")
 		if radsel == 1:
 			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
@@ -244,9 +244,14 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 
 				sc2.configure(state='disabled', foreground='VIOLET RED')
@@ -261,9 +266,14 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground="INDIGO")
 				os.system("rm SGI*.txt")
@@ -277,9 +287,14 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
 					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
 				sc2.configure(state='disabled',foreground="Dark Slate Gray")
 				os.system("rm IBM*.txt")
