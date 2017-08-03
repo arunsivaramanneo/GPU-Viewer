@@ -2,10 +2,7 @@ import tkinter as tk
 from tkinter import ttk 
 import OpenGLViewer
 from OpenGLViewer import OpenGL
-<<<<<<< HEAD
 from vulkanviewer import Vulkan
-=======
->>>>>>> master
 
 win = tk.Tk() 
 
@@ -35,10 +32,8 @@ tab2 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab2, image=img2)
 tabcontrol.pack(expand=1, fill="both")
 
-<<<<<<< HEAD
-Vulkan(tab2)
-=======
 
->>>>>>> master
+Vulkan(tab2)
+
 
 win.mainloop()
