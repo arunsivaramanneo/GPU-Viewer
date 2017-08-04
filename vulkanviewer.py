@@ -28,6 +28,7 @@ def Vulkan(tab2):
 	tabcontrol.add(ExtensionsTab,text = "Extensions")
 	tabcontrol.grid(column=0,row=1)
 
+	radvar = tk.IntVar()
 	def Features(i,j):
 
 		frame2 = ttk.LabelFrame(FeatureTab, text="Device Features")
@@ -36,15 +37,19 @@ def Vulkan(tab2):
 		FS = scrolledtext.ScrolledText(frame2, width=100,height=30,bg="LIGHT GRAY")
 		FS.grid(column=0,row=1)
 
-		os.system("cat vulkaninfo.txt | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0} flag' | sort | awk '/==/{flag=1; next} flag' > Features.txt")
+		GPU = radvar.get()
+		if GPU == 0 :
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > VKDFeatures.txt")
+		elif GPU == 1 :
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = |sort > VKDFeatures.txt")
 
-		with open("Features.txt","r") as file1:
-			for line in itertools.islice(file1,i,None,j):
+		with open("VKDFeatures.txt","r") as file1:
+			for line in file1:
 				FS.insert('insert',line)
 
-		FS.configure(foreground="BLUE")	
-	radvar = tk.IntVar()
+		FS.configure(foreground="BLUE")		
 
+	
 	def Limits():
 		
 		frame3 = ttk.LabelFrame(LimitsTab, text="Device Limits")
@@ -98,12 +103,6 @@ def Vulkan(tab2):
 			Features(0,2)
 			Limits()
 			Extensions()
-		if radsel == 5:
-			Features(0,1)
-			Limits()
-			Extensions()
-
-
 
 
 	frame1 = ttk.LabelFrame(tab2,text="")
@@ -119,16 +118,12 @@ def Vulkan(tab2):
 
 	DS = ttk.Label(frame1, text="Select Device :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
-	if len(list) > 1:
-		for i in range(len(list)):
-			GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
-			GPU.grid(column=1,row=i,sticky=tk.W)
-			if i == 0:
-				GPU.invoke()
-	else:
-		GPU = tk.Radiobutton(frame1,text=list[0], variable=radvar,value=5,command=radcall)
-		GPU.grid(column=1,row=0,sticky=tk.W)
-		GPU.invoke()
+	
+	for i in range(len(list)):
+		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
+		GPU.grid(column=1,row=i,sticky=tk.W)
+		if i == 0:
+			GPU.invoke()
 	
 
 
