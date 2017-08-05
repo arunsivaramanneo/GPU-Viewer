@@ -29,6 +29,10 @@ def Vulkan(tab2):
 	tabcontrol.grid(column=0,row=1)
 
 	radvar = tk.IntVar()
+
+	def logo():
+		pass
+
 	def Features(i,j):
 
 		frame2 = ttk.LabelFrame(FeatureTab, text="Device Features")
@@ -40,14 +44,17 @@ def Vulkan(tab2):
 		GPU = radvar.get()
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > VKDFeatures.txt")
+			
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = |sort > VKDFeatures.txt")
 
+		
 		with open("VKDFeatures.txt","r") as file1:
 			for line in file1:
 				FS.insert('insert',line)
 
-		FS.configure(foreground="BLUE")		
+		FS.configure(foreground="BLUE")	
+		os.system("rm VKDFeatures.txt")	
 
 	
 	def Limits():
@@ -68,7 +75,8 @@ def Vulkan(tab2):
 			for line in file1:
 				DL.insert('insert',line)
 
-		DL.configure(foreground="BLUE")		
+		DL.configure(foreground="BLUE")
+		os.system("rm VKDlimits.txt")		
 
 	def Extensions():
 		frame4 = ttk.LabelFrame(ExtensionsTab, text="Device Extension ")
@@ -91,6 +99,7 @@ def Vulkan(tab2):
 				ES.insert('insert',line)
 
 		ES.configure(foreground="BLUE")
+		os.system("rm VKDExtensions.txt")
 
 	def radcall():
 		radsel= radvar.get()
@@ -115,8 +124,9 @@ def Vulkan(tab2):
 		file2.seek(0,0)
 		for line in file2:
 			list.append(line)
+			print(list)
 
-	DS = ttk.Label(frame1, text="Select Device :")
+	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
 	
 	for i in range(len(list)):
@@ -124,6 +134,8 @@ def Vulkan(tab2):
 		GPU.grid(column=1,row=i,sticky=tk.W)
 		if i == 0:
 			GPU.invoke()
+
+	os.system("rm GPU.txt")
 	
 
 

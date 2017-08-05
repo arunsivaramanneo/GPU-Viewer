@@ -57,16 +57,17 @@ def OpenGL(tab1):
 
 
 # Configuring different Radio Buttons
-
+	
 	radvar = tk.IntVar();
+
 	def radcall():
 		frame3 = ttk.LabelFrame(tab1, text="")
 		frame3.grid(column=0,row=2)
 		radsel=radvar.get()
 		label1 = ttk.Label(frame2, text="No :")
-		label1.grid(column=0,row=2)
+		label1.grid(column=0,row=3)
 		TotExt = ttk.Entry(frame2, width=5)
-		TotExt.grid(column=1,row=2)
+		TotExt.grid(column=1,row=3)
 		sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15, background="LIGHT GRAY")
 		if radsel == 1:
 			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
@@ -303,28 +304,27 @@ def OpenGL(tab1):
 	frame2 = ttk.LabelFrame(tab1, text="OpenGL Extensions ")
 	frame2.grid(column=0,row=1,padx=20, sticky=tk.W)
 	
-
 	rad1 = tk.Radiobutton(frame2, text="All", variable=radvar, value=1, command=radcall)
-	rad1.grid(column=0,row=1)
+	rad1.grid(column=0,row=2,sticky = tk.W)
 	rad1.invoke()
 	rad2 = tk.Radiobutton(frame2, text="AMD", variable=radvar, value=2, command=radcall)
-	rad2.grid(column=1,row=1)
+	rad2.grid(column=1,row=2, sticky=tk.W)
 	rad3 = tk.Radiobutton(frame2, text="ARB", variable=radvar, value=3, command=radcall)
-	rad3.grid(column=2,row=1)
+	rad3.grid(column=2,row=2,sticky=tk.W)
 	rad4 = tk.Radiobutton(frame2, text="ATI", variable=radvar, value=6, command=radcall)
-	rad4.grid(column=3,row=1)
+	rad4.grid(column=3,row=2,sticky=tk.W)
 	rad5 = tk.Radiobutton(frame2, text="EXT", variable=radvar, value=4, command=radcall)
-	rad5.grid(column=4,row=1)
+	rad5.grid(column=4,row=2,sticky=tk.W)
 	rad6 = tk.Radiobutton(frame2, text="IBM", variable=radvar, value=11, command=radcall)
-	rad6.grid(column=5,row=1)
+	rad6.grid(column=5,row=2)
 	rad7 = tk.Radiobutton(frame2, text="KHR", variable=radvar, value=7, command=radcall)
-	rad7.grid(column=6,row=1)
+	rad7.grid(column=6,row=2)
 	rad8 = tk.Radiobutton(frame2, text="MESA", variable=radvar, value=8, command=radcall)
-	rad8.grid(column=7,row=1)
+	rad8.grid(column=7,row=2)
 	rad9 = tk.Radiobutton(frame2, text="NV", variable=radvar, value=5, command=radcall)
-	rad9.grid(column=8,row=1)
+	rad9.grid(column=8,row=2)
 	rad10 = tk.Radiobutton(frame2, text="SGI", variable=radvar, value=9, command=radcall)
-	rad10.grid(column=9,row=1)
+	rad10.grid(column=9,row=2)
 	rad11 = tk.Radiobutton(frame2, text="Others", variable=radvar, value=10, command=radcall)
-	rad11.grid(column=10,row=1)
+	rad11.grid(column=10,row=2)
 
