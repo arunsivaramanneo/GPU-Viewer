@@ -173,7 +173,7 @@ def Vulkan(tab2):
 				tf.insert('','end',text=line)
 
 				
-
+		os.system("rm VKDFORMATS*.txt")
 
 	def radcall():
 		radsel= radvar.get()
