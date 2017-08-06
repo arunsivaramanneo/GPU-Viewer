@@ -4,8 +4,6 @@ from tkinter import scrolledtext
 import os
 
 
-
-
 def OpenGL(tab1):
 
 
@@ -14,6 +12,19 @@ def OpenGL(tab1):
 
 	frame1 = ttk.LabelFrame(tab1, text="OpenGL Information")
 	frame1.grid(column=0,row=0, padx=20, pady=20)
+
+
+	frame2 = ttk.LabelFrame(tab1, text="Extensions ")
+	frame2.grid(column=0,row=1,padx=20, sticky=tk.W)
+
+	frame3 = ttk.LabelFrame(tab1, text=" ")
+	frame3.grid(column=0,row=2,padx=20, sticky=tk.W)
+
+	frame4 = ttk.LabelFrame(tab1, text="")
+	frame4.grid(column=0,row=4)
+
+
+
 	os.system("glxinfo | grep string | grep -v glx > OpenGL_Information.txt")
 
 
@@ -39,8 +50,10 @@ def OpenGL(tab1):
 		win2.title("OpenGL Limits")
 		win2.resizable(0,0)
 
-		frame4 = ttk.LabelFrame(win2, text="OpenGL Limits")
-		frame4.grid(column=0,row=0, padx=20,pady=20)
+		frame5 = ttk.LabelFrame(tab1, text="OpenGL Limits")
+		frame5.grid(column=0,row=0, padx=20,pady=20)
+
+		
 		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' > OpenGL_Limits.txt")
 
 		sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
@@ -58,21 +71,33 @@ def OpenGL(tab1):
 
 # Configuring different Radio Buttons
 	
-	radvar = tk.IntVar();
+	radvar = tk.IntVar()
+	radvar1 = tk.IntVar()
 
-	def radcall():
-		frame3 = ttk.LabelFrame(tab1, text="")
-		frame3.grid(column=0,row=2)
-		radsel=radvar.get()
-		label1 = ttk.Label(frame2, text="No :")
-		label1.grid(column=0,row=3)
-		TotExt = ttk.Entry(frame2, width=5)
-		TotExt.grid(column=1,row=3)
-		sc2 = scrolledtext.ScrolledText(frame3, width=100, height=15, background="LIGHT GRAY")
-		if radsel == 1:
+	def select():
+		radsel1 = radvar1.get()
+
+		if radsel1 == 1:
 			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
-			frame3.configure(text="All") 
+			radcall()
+		if radsel1 == 2:
+			os.system("glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > extensions.txt")
+			radcall()
+
+
+	def radcall():
+		
+		radsel=radvar.get()
+		label1 = ttk.Label(frame3, text="No :")
+		label1.grid(column=0,row=4)
+		TotExt = ttk.Entry(frame3, width=5)
+		TotExt.grid(column=1,row=4)
+		sc2 = scrolledtext.ScrolledText(frame4, width=100, height=15, background="LIGHT GRAY",state='normal')
+		if radsel == 1:
+			#os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
+			#os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
+			frame4.configure(text="All") 
 			with open("extensions.txt") as file2:
 				count = len(file2.readlines())
 				TotExt.insert('insert',count)
@@ -92,7 +117,7 @@ def OpenGL(tab1):
 		if radsel == 2:
 			os.system("cat extensions.txt | grep _AMD > AMD_extensions.txt")
 			
-			frame3.configure(text="AMD")
+			frame4.configure(text="AMD")
 			with open("AMD_extensions.txt") as file2:
 				count = len(file2.readlines())
 				TotExt.insert('insert',count)
@@ -113,7 +138,7 @@ def OpenGL(tab1):
 		if radsel == 3:
 			os.system("cat extensions.txt | grep _ARB > ARB_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="ARB")
+			frame4.configure(text="ARB")
 			
 			with open("ARB_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -135,7 +160,7 @@ def OpenGL(tab1):
 		if radsel == 4:
 			os.system("cat extensions.txt | grep _EXT > EXT_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="EXT")
+			frame4.configure(text="EXT")
 			
 			with open("EXT_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -157,7 +182,7 @@ def OpenGL(tab1):
 		if radsel == 5:
 			os.system("cat extensions.txt | grep _NV > NV_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="NV")
+			frame4.configure(text="NV")
 			
 			with open("NV_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -179,7 +204,7 @@ def OpenGL(tab1):
 		if radsel == 6:
 			os.system("cat extensions.txt | grep _ATI > ATI_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="ATI")
+			frame4.configure(text="ATI")
 			
 			with open("ATI_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -201,7 +226,7 @@ def OpenGL(tab1):
 		if radsel == 7:
 			os.system("cat extensions.txt | grep _KHR > KHR_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="KHR")
+			frame4.configure(text="KHR")
 			
 			with open("KHR_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -218,7 +243,7 @@ def OpenGL(tab1):
 		if radsel == 8:
 			os.system("cat extensions.txt | grep _MESA > MESA_extensions.txt")
 			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame3.configure(text="MESA")
+			frame4.configure(text="MESA")
 			
 			with open("MESA_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -238,8 +263,8 @@ def OpenGL(tab1):
 				os.system("rm MESA*.txt")
 
 		if radsel == 10:
-			os.system("cat extensions.txt | grep -v _AMD | grep -v _MESA | grep -v _NV | grep -v _ATI | grep -v _ARB | grep -v _SGI | grep -v _KHR | grep -v _EXT | grep -v _IBM > Others_extensions.txt")
-			frame3.configure(text="Other extensions") 
+			os.system("cat extensions.txt | grep -v _AMD | grep -v _MESA | grep -v _NV | grep -v _ATI | grep -v _ARB | grep -v _SGI | grep -v _KHR | grep -v _EXT | grep -v _IBM | grep -v _OES > Others_extensions.txt")
+			frame4.configure(text="Other extensions") 
 			with open("Others_extensions.txt") as file2:
 				count = len(file2.readlines())
 				TotExt.insert('insert',count)
@@ -260,7 +285,7 @@ def OpenGL(tab1):
 	
 		if radsel == 9:
 			os.system("cat extensions.txt | grep _SGI > SGI_extensions.txt")
-			frame3.configure(text="SGI/SGIX")
+			frame4.configure(text="SGI/SGIX")
 			
 			with open("SGI_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -281,7 +306,7 @@ def OpenGL(tab1):
 
 		if radsel == 11:
 			os.system("cat extensions.txt | grep _IBM > IBM_extensions.txt")
-			frame3.configure(text="IBM")
+			frame4.configure(text="IBM")
 		
 			with open("IBM_extensions.txt") as file2:
 				count = len(file2.readlines())
@@ -300,31 +325,63 @@ def OpenGL(tab1):
 				sc2.configure(state='disabled',foreground="Dark Slate Gray")
 				os.system("rm IBM*.txt")
 
+		if radsel == 12:
+			os.system("cat extensions.txt | grep _OES > OES_extensions.txt")
+			frame4.configure(text="OES")
+		
+			with open("OES_extensions.txt") as file2:
+				count = len(file2.readlines())
+				TotExt.insert('insert',count)
+				TotExt.configure(state='disabled',foreground="BLUE")
+				file2.seek(0,0)
+				if count  > 0:
+					for line in file2:
+						sc2.insert('insert',line)
+						sc2.grid(column=0,row=2)
+				else:
+					sc2.delete('1.0','end')
+					sc2.grid(column=0,row=2)
+					sc2.insert('insert',"No Extensions available")
 
-	frame2 = ttk.LabelFrame(tab1, text="OpenGL Extensions ")
-	frame2.grid(column=0,row=1,padx=20, sticky=tk.W)
+				sc2.configure(state='disabled',foreground="Dark Slate Gray")
+				os.system("rm OES*.txt")
+
+
+
+
+	OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
+	OpenGLrad.grid(column=0,row=1)
+	OpenGLrad.invoke()
+
+	OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
+	OpenGLESrad.grid(column=1,row=1)
+
 	
-	rad1 = tk.Radiobutton(frame2, text="All", variable=radvar, value=1, command=radcall)
+
+	
+	rad1 = tk.Radiobutton(frame3, text="All", variable=radvar, value=1, command=radcall)
 	rad1.grid(column=0,row=2,sticky = tk.W)
 	rad1.invoke()
-	rad2 = tk.Radiobutton(frame2, text="AMD", variable=radvar, value=2, command=radcall)
-	rad2.grid(column=1,row=2, sticky=tk.W)
-	rad3 = tk.Radiobutton(frame2, text="ARB", variable=radvar, value=3, command=radcall)
+	rad2 = tk.Radiobutton(frame3, text="AMD", variable=radvar, value=2, command=radcall)
+	rad2.grid(column=1,row=2,sticky=tk.W)
+	rad3 = tk.Radiobutton(frame3, text="ARB", variable=radvar, value=3, command=radcall)
 	rad3.grid(column=2,row=2,sticky=tk.W)
-	rad4 = tk.Radiobutton(frame2, text="ATI", variable=radvar, value=6, command=radcall)
+	rad4 = tk.Radiobutton(frame3, text="ATI", variable=radvar, value=6, command=radcall)
 	rad4.grid(column=3,row=2,sticky=tk.W)
-	rad5 = tk.Radiobutton(frame2, text="EXT", variable=radvar, value=4, command=radcall)
+	rad5 = tk.Radiobutton(frame3, text="EXT", variable=radvar, value=4, command=radcall)
 	rad5.grid(column=4,row=2,sticky=tk.W)
-	rad6 = tk.Radiobutton(frame2, text="IBM", variable=radvar, value=11, command=radcall)
-	rad6.grid(column=5,row=2)
-	rad7 = tk.Radiobutton(frame2, text="KHR", variable=radvar, value=7, command=radcall)
-	rad7.grid(column=6,row=2)
-	rad8 = tk.Radiobutton(frame2, text="MESA", variable=radvar, value=8, command=radcall)
-	rad8.grid(column=7,row=2)
-	rad9 = tk.Radiobutton(frame2, text="NV", variable=radvar, value=5, command=radcall)
-	rad9.grid(column=8,row=2)
-	rad10 = tk.Radiobutton(frame2, text="SGI", variable=radvar, value=9, command=radcall)
-	rad10.grid(column=9,row=2)
-	rad11 = tk.Radiobutton(frame2, text="Others", variable=radvar, value=10, command=radcall)
-	rad11.grid(column=10,row=2)
+	rad6 = tk.Radiobutton(frame3, text="IBM", variable=radvar, value=11, command=radcall)
+	rad6.grid(column=5,row=2,sticky=tk.W)
+	rad7 = tk.Radiobutton(frame3, text="KHR", variable=radvar, value=7, command=radcall)
+	rad7.grid(column=6,row=2,sticky=tk.W)
+	rad8 = tk.Radiobutton(frame3, text="MESA", variable=radvar, value=8, command=radcall)
+	rad8.grid(column=7,row=2,sticky=tk.W)
+	rad9 = tk.Radiobutton(frame3, text="NV", variable=radvar, value=5, command=radcall)
+	rad9.grid(column=8,row=2,sticky=tk.W)
+	rad10 = tk.Radiobutton(frame3, text="SGI", variable=radvar, value=9, command=radcall)
+	rad10.grid(column=9,row=2,sticky=tk.W)
+	rad11 = tk.Radiobutton(frame3,text="OES", variable=radvar, value=12, command=radcall)
+	rad11.grid(column=10,row=2,sticky=tk.W)
+	rad12 = tk.Radiobutton(frame3, text="Others", variable=radvar, value=10, command=radcall)
+	rad12.grid(column=11,row=2, sticky=tk.W)
 
