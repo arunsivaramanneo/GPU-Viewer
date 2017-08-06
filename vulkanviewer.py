@@ -128,6 +128,7 @@ def Vulkan(tab2):
 			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'0.');print} ' | awk '{gsub(/ revision /,'0.');print} ' > VKDExtensions.txt")
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'0.');print} ' | awk '{gsub(/ revision /,'0.');print} ' > VKDExtensions.txt")
 
 		with open("VKDExtensions.txt","r") as file1:
 			count = len(file1.readlines())
@@ -137,7 +138,7 @@ def Vulkan(tab2):
 				te.insert('','end',text=line)
 
 		#ES.configure(state='disabled',foreground="BLUE")
-		#os.system("rm VKDExtensions.txt")
+		os.system("rm VKDExtensions.txt")
 
 
 	def Format():
