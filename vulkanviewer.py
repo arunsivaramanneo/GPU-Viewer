@@ -125,10 +125,10 @@ def Vulkan(tab2):
 
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'0.');print} ' | awk '{gsub(/ revision /,'0.');print} ' > VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'True');print} ' | awk '{gsub(/ revision /,'0');print} ' > VKDExtensions.txt")
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'0.');print} ' | awk '{gsub(/ revision /,'0.');print} ' > VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'True');print} ' | awk '{gsub(/ revision /,'0');print} ' > VKDExtensions.txt")
 
 		with open("VKDExtensions.txt","r") as file1:
 			count = len(file1.readlines())

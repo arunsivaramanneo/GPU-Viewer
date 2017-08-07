@@ -93,7 +93,7 @@ def OpenGL(tab1):
 		label1.grid(column=0,row=4)
 		TotExt = ttk.Entry(frame3, width=5)
 		TotExt.grid(column=1,row=4)
-		sc2 = scrolledtext.ScrolledText(frame4, width=100, height=15, background="LIGHT GRAY",state='normal')
+		sc2 = scrolledtext.ScrolledText(frame4, width=100, height=25, background="LIGHT GRAY",state='normal')
 		if radsel == 1:
 			#os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 			#os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")

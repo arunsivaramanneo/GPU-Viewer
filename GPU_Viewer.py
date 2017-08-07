@@ -9,7 +9,7 @@ win = tk.Tk()
 
 # Title of the Window
 
-win.title("GPU Viewer 0.9")
+win.title("GPU Viewer")
 
 win.resizable(0,0)
 
