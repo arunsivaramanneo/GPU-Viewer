@@ -6,7 +6,6 @@ from vulkanviewer import Vulkan
 
 win = tk.Tk() 
 
-
 # Title of the Window
 
 win.title("GPU Viewer")
