@@ -14,19 +14,34 @@ def Vulkan(tab2):
 	os.system("vulkaninfo > vulkaninfo.txt")
 
 	tabcontrol = ttk.Notebook(tab2, padding=10)
+	#tabcontrol.enable_traversal()
+	
+
+	# Creating the Device Information Tab
+
+	#DeviceInfo = ttk.Frame(tabcontrol)
+	#tabcontrol.add(DeviceInfo, text="Device Information")
+	#tabcontrol.grid(column=0,row=1,padx=10)
+
+	# Creating the Features Tab
+
 	FeatureTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(FeatureTab, text="Features")
 	tabcontrol.grid(column=0,row=1,padx=10)
 
- 	#Creating Extensions Tab
+ 	#Creating Limits Tab
 
 	LimitsTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(LimitsTab,text = "Limits")
 	tabcontrol.grid(column=0,row=1)
 
+	# creating the Extensions Tab
+
 	ExtensionsTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(ExtensionsTab,text = "Extensions")
 	tabcontrol.grid(column=0,row=1)
+
+	# Creating the Formats tab
 
 	FormatTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(FormatTab,text= "Formats")
@@ -37,7 +52,7 @@ def Vulkan(tab2):
 	def logo():
 		pass
 
-	def Features(i,j):
+	def Features():
 
 		#frame2 = ttk.LabelFrame(FeatureTab, text="Device Features")
 		#frame2.grid(column=0,row=1)
@@ -59,30 +74,28 @@ def Vulkan(tab2):
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > VKDFeatures1.txt")
 			os.system("cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
-			os.system("cat VKDFeatures1.txt | grep 0 | awk '{gsub(/= 0/,'True');print}' > VKDFeaturesFalse.txt")
-			os.system("cat VKDFeatures1.txt | grep 1 | grep -v 0 | awk '{gsub(/= 1/,'True');print}' > VKDFeaturesTrue.txt")
-
+			os.system("cat VKDFeatures1.txt | grep -o '= [1,0]' > VKDFeatures2.txt")
+			
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = |sort > VKDFeatures1.txt")
 			os.system("cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
-			os.system("cat VKDFeatures1.txt | grep 0 | awk '{gsub(/= 0/,'True');print}' > VKDFeaturesFalse.txt")
-			os.system("cat VKDFeatures1.txt | grep 1 | grep -v 0 | awk '{gsub(/= 1/,'True');print}' > VKDFeaturesTrue.txt")
+			os.system("cat VKDFeatures1.txt | grep -o '= [1,0]' > VKDFeatures2.txt")
 		
+		with open("VKDFeatures2.txt","r") as file1:
+			value = []
+			for line in file1:
+				if line == '= 1\n':
+					value.append("true")
+				else:
+					value.append("false")
+			
+		with open("VKDFeatures.txt","r") as file1:
+			file1.seek(0,0)
+			i = 0
+			for line in file1:
+				TreeFeatures.insert('','end',text=line,values=(value[i]))
+				i = i + 1
 		
-		with open("VKDFeaturesTrue.txt","r") as file1:
-			file1.seek(0,0)
-			for line in file1:
-				TreeFeatures.insert('','end',text=line,values=("True"))
-
-		with open("VKDFeaturesFalse.txt","r") as file1:
-			file1.seek(0,0)
-			for line in file1:
-				TreeFeatures.insert('','end',text=line,values=("False"))
-
-
-
-
-		#FS.configure(state='disabled',foreground="BLUE")	
 		os.system("rm VKDFeatures*.txt")	
 
 	
@@ -92,8 +105,17 @@ def Vulkan(tab2):
 		frame3.grid(column=0,row=0)
 
 
-		DL = scrolledtext.ScrolledText(frame3,width=100,height=40,bg="LIGHT GRAY")
-		DL.grid(column=0,row=1)
+		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
+		TreeLimits['columns'] = ('value')
+		TreeLimits.heading("#0", text='Device Limits')
+		TreeLimits.column('#0',width=520)
+		TreeLimits.heading('value',text="Limits")
+		TreeLimits.column('value',width=200)
+
+		TreeLimits.grid(column=0,row=0,sticky=tk.W)
+
+		#DL = scrolledtext.ScrolledText(frame3,width=100,height=40,bg="LIGHT GRAY")
+		#DL.grid(column=0,row=1)
 		GPU = radvar.get()
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits.txt")
@@ -102,40 +124,57 @@ def Vulkan(tab2):
 
 		with open("VKDlimits.txt","r") as file1:
 			for line in file1:
-				DL.insert('insert',line)
+				TreeLimits.insert('','end',text=line)
 
-		DL.configure(state='disabled',foreground="BLUE")
+		#DL.configure(state='disabled',foreground="BLUE")
 		os.system("rm VKDlimits.txt")		
 
 	def Extensions():
+
+
 		#frame4 = ttk.LabelFrame(ExtensionsTab, text="Device Extension ")
 		#frame4.grid(column=0,row=0)
 
 		te = ttk.Treeview(ExtensionsTab, height=30)
-		te.heading("#0", text='Extensions')
-		te.column('#0',width=722)
+		te.heading("#0", text='Name')
+		te.column('#0',width=522)
+		te['column'] = ('version')
 		te.grid(column=0,row=0)
+		te.heading('version',text="Version")
+		te.column('version',width=200)
 
 		#ES = scrolledtext.ScrolledText(frame4,width=100,height=30,bg="LIGHT GRAY")
 		#ES.grid(column=0,row=1)
 		GPU = radvar.get()
 		
-
-
-
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'True');print} ' | awk '{gsub(/ revision /,'0');print} ' > VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension revision  1/,'True');print} ' | awk '{gsub(/: extension revision 68/,'True');print} '> VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension/,'True');print} ' | awk '{gsub(/ revision /,'0');print} ' > VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension revision  1/,'True');print} ' | awk '{gsub(/: extension revision 68/,'True');print} '> VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
+
+		with open("version.txt","r") as file1:
+			value = []
+			for line in file1:
+				if line == ': extension revision  1\n':
+					value.append("0.0.1")
+				else:
+					value.append("0.0.68")
+
 
 		with open("VKDExtensions.txt","r") as file1:
 			count = len(file1.readlines())
 			#frame4.configure(text = count)
+			tabcontrol.tab(2,text="Extensions(%d)"%count)
 			file1.seek(0,0)
+			i = 0
 			for line in file1:
-				te.insert('','end',text=line)
+				te.insert('','end',text=line,values=(value[i]))
+				i = i + 1
+
 
 		#ES.configure(state='disabled',foreground="BLUE")
 		os.system("rm VKDExtensions.txt")
@@ -159,12 +198,13 @@ def Vulkan(tab2):
 		tf.xview()
 		tf.yview()
 
-
 		GPU = radvar.get()
 		if GPU == 0 :
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | sort > VKDFORMATS.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -v _UNKNOWN_  > VKDFORMATS.txt")
 		elif GPU == 1 :
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | sort > VKDFORMATS.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -v _UNKNOWN_ > VKDFORMATS.txt")
+
+
 
 		with open("VKDFORMATS.txt","r") as file1:
 			count = len(file1.readlines())
@@ -172,6 +212,7 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			for line in file1:
 				tf.insert('','end',text=line)
+			
 
 				
 		os.system("rm VKDFORMATS*.txt")
@@ -179,12 +220,12 @@ def Vulkan(tab2):
 	def radcall():
 		radsel= radvar.get()
 		if radsel == 0:
-			Features(1,2)
+			Features()
 			Limits()
 			Extensions()
 			Format()
 		if radsel == 1:
-			Features(0,2)
+			Features()
 			Limits()
 			Extensions()
 			Format()
