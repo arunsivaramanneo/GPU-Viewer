@@ -118,16 +118,30 @@ def Vulkan(tab2):
 		#DL.grid(column=0,row=1)
 		GPU = radvar.get()
 		if GPU == 0 :
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits1.txt")
+			os.system("cat VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > VKDlimits.txt")
+			os.system("cat VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > limits.txt")
 		elif GPU == 1 :
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits1.txt")
+			os.system("cat VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > VKDlimits.txt")
+			os.system("cat VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > limits.txt")
+
+		with open("limits.txt","r") as file1:
+			value = []
+			for line in file1:
+					value.append(line)
 
 		with open("VKDlimits.txt","r") as file1:
+			count = len(file1.readlines())
+			i = 0
+			print(count)
+			file1.seek(0,0)
 			for line in file1:
-				TreeLimits.insert('','end',text=line)
+				TreeLimits.insert('','end',text=line, values= value[i])
+				i = i + 1
 
 		#DL.configure(state='disabled',foreground="BLUE")
-		os.system("rm VKDlimits.txt")		
+		os.system("rm *limits.txt")		
 
 	def Extensions():
 
@@ -149,11 +163,11 @@ def Vulkan(tab2):
 		
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension revision  1/,'True');print} ' | awk '{gsub(/: extension revision 68/,'True');print} '> VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
 			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
-			os.system("cat VKDExtensions1.txt | awk '{gsub(/: extension revision  1/,'True');print} ' | awk '{gsub(/: extension revision 68/,'True');print} '> VKDExtensions.txt")
+			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
 			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
 
 		with open("version.txt","r") as file1:

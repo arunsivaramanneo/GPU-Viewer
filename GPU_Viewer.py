@@ -17,24 +17,29 @@ win.resizable(0,0)
 GLimg = tk.PhotoImage(file="Images/opengl_logo.png")
 img1 = GLimg.subsample(6,6)
 tabcontrol = ttk.Notebook(win, padding=10)
-tab1 = ttk.Frame(tabcontrol)
-tabcontrol.add(tab1, image=img1)
+
+#tab1 = ttk.Frame(tabcontrol)
+#tabcontrol.add(tab1,text="Device Info.")
+#tabcontrol.grid(column=0,row=0)
+
+tab2 = ttk.Frame(tabcontrol)
+tabcontrol.add(tab2, image=img1)
 tabcontrol.grid(column=0,row=0)
 
 
 
 
 
-OpenGL(tab1)
+OpenGL(tab2)
 
 
 VKimg = tk.PhotoImage(file="Images/Vulkan_logo.png")
 img2 = VKimg.subsample(5,5)
-tab2 = ttk.Frame(tabcontrol)
-tabcontrol.add(tab2, image=img2)
+tab3 = ttk.Frame(tabcontrol)
+tabcontrol.add(tab3, image=img2)
 tabcontrol.grid(column=0,row=0)
 
-Vulkan(tab2)
+Vulkan(tab3)
 
 
 win.mainloop()
