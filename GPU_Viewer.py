@@ -3,6 +3,7 @@ from tkinter import ttk
 import OpenGLViewer
 from OpenGLViewer import OpenGL
 from vulkanviewer import Vulkan
+#from DeviceInfo import Info
 
 win = tk.Tk() 
 
@@ -22,11 +23,11 @@ tabcontrol = ttk.Notebook(win, padding=10)
 #tabcontrol.add(tab1,text="Device Info.")
 #tabcontrol.grid(column=0,row=0)
 
+#Info(tab1)
+
 tab2 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab2, image=img1)
 tabcontrol.grid(column=0,row=0)
-
-
 
 
 

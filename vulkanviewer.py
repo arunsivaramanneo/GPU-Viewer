@@ -16,13 +16,6 @@ def Vulkan(tab2):
 	tabcontrol = ttk.Notebook(tab2, padding=10)
 	#tabcontrol.enable_traversal()
 	
-
-	# Creating the Device Information Tab
-
-	#DeviceInfo = ttk.Frame(tabcontrol)
-	#tabcontrol.add(DeviceInfo, text="Device Information")
-	#tabcontrol.grid(column=0,row=1,padx=10)
-
 	# Creating the Features Tab
 
 	FeatureTab = ttk.Frame(tabcontrol)
@@ -247,7 +240,7 @@ def Vulkan(tab2):
 
 	frame1 = ttk.LabelFrame(tab2,text="")
 	frame1.grid(column=0,row=0)
-	os.system("cat vulkaninfo.txt | grep '^GPU id' | grep GPU > GPU.txt")
+	os.system("cat vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > GPU.txt")
 
 	with open("GPU.txt","r") as file2:
 		count=len(file2.readlines())
