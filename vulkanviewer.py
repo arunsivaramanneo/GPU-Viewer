@@ -18,9 +18,13 @@ def Vulkan(tab2):
 	
 	# Creating the Features Tab
 
+	DeviceTab = ttk.Frame(tabcontrol)
+	tabcontrol.add(DeviceTab,text="Device")
+	tabcontrol.grid(column=0,row=1)
+
 	FeatureTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(FeatureTab, text="Features")
-	tabcontrol.grid(column=0,row=1,padx=10)
+	tabcontrol.grid(column=0,row=1)
 
  	#Creating Limits Tab
 
@@ -42,19 +46,60 @@ def Vulkan(tab2):
 
 	radvar = tk.IntVar()
 
-	def logo():
-		pass
+	def Devices():
+		
+		TreeDevice = ttk.Treeview(DeviceTab,height=30,selectmode="browse")
+		TreeDevice['columns'] =('value')
+		TreeDevice.column('#0',width=220)
+		TreeDevice.column('value',width=500)
+
+		TreeDevice.grid(column=0,row=0)
+
+		GPU = radvar.get()
+
+		if GPU == 0:
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep device > Deviceinfo1.txt")
+			os.system("cat Deviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Deviceinfo.txt")
+			os.system("cat Deviceinfo1.txt | grep -o =.* | grep -o ' .*' > Deviceinfo2.txt")
+
+		elif GPU == 1:
+
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep device > Deviceinfo1.txt")
+			os.system("cat Deviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Deviceinfo.txt")
+			os.system("cat Deviceinfo1.txt | grep -o =.* | grep -o ' .*' > Deviceinfo2.txt")
+
+
+		with open("Deviceinfo2.txt","r") as file1:
+			value = []
+			for line in file1:
+					value.append(line)
+
+		value[0] = int(value[0],16)
+
+
+		with open("Deviceinfo.txt","r") as file1:
+			file1.seek(0,0)
+			i = 0
+			for line in file1:
+				TreeDevice.insert('','end',text=line,values=(value[i],))
+				i = i + 1			
+
+		os.system("rm Device*.txt")
 
 	def Features():
 
 		TreeFeatures = ttk.Treeview(FeatureTab,height=30)
 		TreeFeatures['columns'] =('value')
 		TreeFeatures.heading("#0", text='Device Features')
-		TreeFeatures.column('#0',width=620)
+		TreeFeatures.column('#0',width=520)
 		TreeFeatures.heading('value',text="Value")
-		TreeFeatures.column('value',width=100)
+		TreeFeatures.column('value',width=200)
 
 		TreeFeatures.grid(column=0,row=0)
+
+		fsb = ttk.Scrollbar(FeatureTab, orient="vertical", command=TreeFeatures.yview)
+		TreeFeatures.configure(yscrollcommand=fsb.set)
+		fsb.grid(column=0,row=0,sticky='nse')
 
 
 		GPU = radvar.get()
@@ -80,7 +125,11 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
-				TreeFeatures.insert('','end',text=line,values=(value[i]))
+				TreeFeatures.insert('','end',text=line,values=(value[i]),tags=value[i])
+				if value[i] == "true":
+					TreeFeatures.tag_configure(value[i],foreground="GREEN")
+				else:
+					TreeFeatures.tag_configure(value[i],foreground="RED")
 				i = i + 1
 		
 		os.system("rm VKDFeatures*.txt")	
@@ -97,6 +146,10 @@ def Vulkan(tab2):
 		TreeLimits.column('value',width=200)
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
+
+		lsb = ttk.Scrollbar(LimitsTab, orient="vertical", command=TreeLimits.yview)
+		TreeLimits.configure(yscrollcommand=lsb.set)
+		lsb.grid(column=0,row=0,sticky='nse')
 
 		GPU = radvar.get()
 		if GPU == 0 :
@@ -135,6 +188,10 @@ def Vulkan(tab2):
 		te.heading('version',text="Version")
 		te.column('version',width=200)
 
+		esb = ttk.Scrollbar(ExtensionsTab, orient="vertical", command=te.yview)
+		te.configure(yscrollcommand=esb.set)
+		esb.grid(column=0,row=0,sticky='nse')
+
 		GPU = radvar.get()
 		
 		if GPU == 0 :
@@ -158,7 +215,7 @@ def Vulkan(tab2):
 		with open("VKDExtensions.txt","r") as file1:
 			count = len(file1.readlines())
 			#frame4.configure(text = count)
-			tabcontrol.tab(2,text="Extensions(%d)"%count)
+			tabcontrol.tab(3,text="Extensions(%d)"%count)
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
@@ -181,8 +238,12 @@ def Vulkan(tab2):
 		tf.heading("Buffer",text= "Buffer")
 		tf.column("Buffer",width=75)
 		tf.grid(column=0,row=0)
-		tf.xview()
-		tf.yview()
+		
+		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=tf.yview)
+		tf.configure(yscrollcommand=vsb.set)
+		vsb.grid(column=0,row=0,sticky='nse')
+
+
 
 		GPU = radvar.get()
 		if GPU == 0 :
@@ -206,11 +267,13 @@ def Vulkan(tab2):
 	def radcall():
 		radsel= radvar.get()
 		if radsel == 0:
+			Devices()
 			Features()
 			Limits()
 			Extensions()
 			Format()
 		if radsel == 1:
+			Devices()
 			Features()
 			Limits()
 			Extensions()
