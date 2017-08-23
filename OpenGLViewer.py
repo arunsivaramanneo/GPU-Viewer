@@ -23,10 +23,11 @@ def OpenGL(tab1):
 	frame4 = ttk.LabelFrame(tab1, text="")
 	frame4.grid(column=0,row=4)
 
-
+	
 
 	os.system("glxinfo | grep string | grep -v glx > OpenGL_Information.txt")
 
+	
 
 # Creating the Scrolled text box to display the above OpenGL_Information.txt
 
@@ -41,7 +42,8 @@ def OpenGL(tab1):
 
 		sc1.configure(state='disabled',foreground="BLUE") # Keeping the scrolled text box uneditable to the end-user
 
-#Label
+#Logos
+
 	
 # Creating a new window for OpenGL Limits
 

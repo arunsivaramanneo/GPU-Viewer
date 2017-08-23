@@ -47,12 +47,6 @@ def Vulkan(tab2):
 
 	def Features():
 
-		#frame2 = ttk.LabelFrame(FeatureTab, text="Device Features")
-		#frame2.grid(column=0,row=1)
-
-		#FS = scrolledtext.ScrolledText(frame2, width=100,height=30,bg="LIGHT GRAY")
-		#FS.grid(column=0,row=1)
-
 		TreeFeatures = ttk.Treeview(FeatureTab,height=30)
 		TreeFeatures['columns'] =('value')
 		TreeFeatures.heading("#0", text='Device Features')
@@ -93,9 +87,6 @@ def Vulkan(tab2):
 
 	
 	def Limits():
-		
-		frame3 = ttk.LabelFrame(LimitsTab, text="Device Limits")
-		frame3.grid(column=0,row=0)
 
 
 		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
@@ -107,8 +98,6 @@ def Vulkan(tab2):
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
-		#DL = scrolledtext.ScrolledText(frame3,width=100,height=40,bg="LIGHT GRAY")
-		#DL.grid(column=0,row=1)
 		GPU = radvar.get()
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits1.txt")
@@ -133,14 +122,10 @@ def Vulkan(tab2):
 				TreeLimits.insert('','end',text=line, values= value[i])
 				i = i + 1
 
-		#DL.configure(state='disabled',foreground="BLUE")
-		os.system("rm *limits.txt")		
+		os.system("rm *limits*.txt")		
 
 	def Extensions():
 
-
-		#frame4 = ttk.LabelFrame(ExtensionsTab, text="Device Extension ")
-		#frame4.grid(column=0,row=0)
 
 		te = ttk.Treeview(ExtensionsTab, height=30)
 		te.heading("#0", text='Name')
@@ -150,8 +135,6 @@ def Vulkan(tab2):
 		te.heading('version',text="Version")
 		te.column('version',width=200)
 
-		#ES = scrolledtext.ScrolledText(frame4,width=100,height=30,bg="LIGHT GRAY")
-		#ES.grid(column=0,row=1)
 		GPU = radvar.get()
 		
 		if GPU == 0 :
@@ -182,14 +165,10 @@ def Vulkan(tab2):
 				te.insert('','end',text=line,values=(value[i]))
 				i = i + 1
 
-
-		#ES.configure(state='disabled',foreground="BLUE")
-		os.system("rm VKDExtensions.txt")
+		os.system("rm VKDExtensions*.txt version.txt")
 
 
 	def Format():
-		#frame5 = ttk.LabelFrame(FormatTab, text="Formats ")
-		#frame5.grid(column=0,row=0)
 
 		tf = ttk.Treeview(FormatTab, height=30)
 		tf['columns'] = ("linear","optimal","Buffer")
