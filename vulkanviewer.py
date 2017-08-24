@@ -58,13 +58,13 @@ def Vulkan(tab2):
 		GPU = radvar.get()
 
 		if GPU == 0:
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep device > Deviceinfo1.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > Deviceinfo1.txt")
 			os.system("cat Deviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Deviceinfo.txt")
 			os.system("cat Deviceinfo1.txt | grep -o =.* | grep -o ' .*' > Deviceinfo2.txt")
 
 		elif GPU == 1:
 
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep device > Deviceinfo1.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > Deviceinfo1.txt")
 			os.system("cat Deviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Deviceinfo.txt")
 			os.system("cat Deviceinfo1.txt | grep -o =.* | grep -o ' .*' > Deviceinfo2.txt")
 
@@ -74,7 +74,8 @@ def Vulkan(tab2):
 			for line in file1:
 					value.append(line)
 
-		value[0] = int(value[0],16)
+		value[1] = int(value[1],16)
+		value[2] = int(value[2],16)
 
 
 		with open("Deviceinfo.txt","r") as file1:
@@ -251,7 +252,11 @@ def Vulkan(tab2):
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -v _UNKNOWN_ > VKDFORMATS.txt")
 
+		Linear = []
+		Optimal = []
+		Buffer = []
 
+		os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag'| grep -v ^FORMAT.* > linear.txt")
 
 		with open("VKDFORMATS.txt","r") as file1:
 			count = len(file1.readlines())
