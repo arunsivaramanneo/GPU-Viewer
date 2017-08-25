@@ -149,8 +149,8 @@ def Vulkan(tab2):
 
 		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
 		TreeLimits['columns'] = ('value')
-		TreeLimits.heading("#0", text='Device Limits',anchor="sw")
-		TreeLimits.column('#0',width=525)
+		TreeLimits.heading("#0", text='Device Limits')
+		TreeLimits.column('#0',width=525,anchor='center')
 		TreeLimits.heading('value',text="Limits")
 		TreeLimits.column('value',width=200,anchor='nw')
 
@@ -178,7 +178,6 @@ def Vulkan(tab2):
 		with open("VKDlimits.txt","r") as file1:
 			count = len(file1.readlines())
 			i = 0
-			print(count)
 			file1.seek(0,0)
 			for line in file1:
 				TreeLimits.insert('','end',text=line, values= value[i],tags=(i))
@@ -308,8 +307,6 @@ def Vulkan(tab2):
 		for i in range(count):
 			if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
 				Formats = Formats + 1
-
-		print(Formats)
 
 
 		with open("VKDFORMATS.txt","r") as file1:
