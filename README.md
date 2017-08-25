@@ -6,13 +6,13 @@ This project aims to capture all the required/important details of glxinfo and v
 What's developed and available?
 
 1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
-2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Memory Types
+2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types
 
 
 UNDERDEVELOPMENT
 
 1. OpenGL - Frame Buffer configuration is underdevelopment
-2. Vulkan - Vulkan Formats, Memory Heap, Queue Family
+2. Vulkan - Memory Heap, Queue Family
 
 IMPORTANT
 

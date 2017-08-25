@@ -149,7 +149,7 @@ def Vulkan(tab2):
 
 		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
 		TreeLimits['columns'] = ('value')
-		TreeLimits.heading("#0", text='Device Limits')
+		TreeLimits.heading("#0", text='Device Limits',anchor="sw")
 		TreeLimits.column('#0',width=525)
 		TreeLimits.heading('value',text="Limits")
 		TreeLimits.column('value',width=200,anchor='nw')
@@ -243,13 +243,13 @@ def Vulkan(tab2):
 		tf = ttk.Treeview(FormatTab, height=30)
 		tf['columns'] = ("linear","optimal","Buffer")
 		tf.heading("#0", text='Format')
-		tf.column('#0',width=500)
+		tf.column('#0',width=425)
 		tf.heading("linear",text="linear")
-		tf.column("linear",width=75)
+		tf.column("linear",width=100,anchor='center')
 		tf.heading("optimal",text="optimal")
-		tf.column("optimal",width=75)
+		tf.column("optimal",width=100,anchor='center')
 		tf.heading("Buffer",text= "Buffer")
-		tf.column("Buffer",width=75)
+		tf.column("Buffer",width=100,anchor='center')
 		tf.grid(column=0,row=0)
 		
 		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=tf.yview)
@@ -260,26 +260,67 @@ def Vulkan(tab2):
 
 		GPU = radvar.get()
 		if GPU == 0 :
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -v _UNKNOWN_  > VKDFORMATS.txt")
-		elif GPU == 1 :
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -v _UNKNOWN_ > VKDFORMATS.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_   > VKDFORMATS.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> VKDFORMATSlinear.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> VKDFORMATSoptimal.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> VKDFORMATSBuffer.txt")
+		
 
-		Linear = []
-		Optimal = []
+		elif GPU == 1 :
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_  > VKDFORMATS.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> VKDFORMATSlinear.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> VKDFORMATSoptimal.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> VKDFORMATSBuffer.txt")
+		
+		linear = []
+		optimal = []
 		Buffer = []
 
-		os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag'| grep -v ^FORMAT.* > linear.txt")
+		# Linear values 
 
-		with open("VKDFORMATS.txt","r") as file1:
+		with open("VKDFORMATSlinear.txt","r") as file1:
 			count = len(file1.readlines())
 			file1.seek(0,0)
+			for line in file1:
+				if line == "		None\n":
+					linear.append("false")
+				else:
+					linear.append("true")
+
+		# Optimal Values
+
+		with open("VKDFORMATSoptimal.txt","r") as file1:
+			for line in file1:
+				if line == "		None\n":
+					optimal.append("false")
+				else:
+					optimal.append("true")
+
+
+
+		with open("VKDFORMATSBuffer.txt","r") as file1:
+			for line in file1:
+				if line == "		None\n":
+					Buffer.append("false")
+				else:
+					Buffer.append("true")
+		Formats = 0
+		for i in range(count):
+			if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
+				Formats = Formats + 1
+
+		print(Formats)
+
+
+		with open("VKDFORMATS.txt","r") as file1:
+			file1.seek(0,0)
+			tabcontrol.tab(4,text="Formats(%d)"%Formats)
 			i = 0
 			for line in file1:
-				tf.insert('','end',text=line,tags=i)
+				tf.insert('','end',text=line,values=(linear[i],optimal[i],Buffer[i]),tags=i)
 				if i % 2 != 0 :
 					tf.tag_configure(i,background="GRAY91")
 				i = i + 1
-			
 
 				
 		os.system("rm VKDFORMATS*.txt")
