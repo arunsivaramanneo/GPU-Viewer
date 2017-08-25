@@ -26,25 +26,34 @@ def OpenGL(tab1):
 	
 
 	os.system("glxinfo | grep string | grep -v glx > OpenGL_Information.txt")
+	os.system("cat OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > OpenGLRHS.txt")
+	os.system("cat OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > OpenGLLHS.txt")
 
-	
+	TreeGL = ttk.Treeview(frame1,height=9)
+	TreeGL ['columns'] = ('values')
+	#TreeGL.heading('#0',text='')
+	TreeGL.column('#0',width=400, anchor="s")
+	#TreeGL.heading('values',text="")
+	TreeGL.column('values',width=325)
 
-# Creating the Scrolled text box to display the above OpenGL_Information.txt
+	TreeGL.grid(column=0,row=0)
 
-	sc1 = scrolledtext.ScrolledText(frame1, width=100, height=10 , background="LIGHT GRAY")
 
-# Opening the OpenGL_Information.txt file in read mode
-
-	with open("OpenGL_Information.txt","r") as file1:
+	with open("OpenGLRHS.txt","r") as file1:
+		value = []
 		for line in file1:
-			sc1.insert('insert',line)
-			sc1.grid(column=0,row=0)
+			value.append(line)
 
-		sc1.configure(state='disabled',foreground="BLUE") # Keeping the scrolled text box uneditable to the end-user
+	with open("OpenGLLHS.txt","r") as file1:
+		i = 0
+		for line in file1:
+			TreeGL.insert('','end',text=line,values=(value[i],),tag=i)
+			if i % 2 != 0:
+				TreeGL.tag_configure(i,background="GRAY91")
+			i = i + 1
 
-#Logos
 
-	
+	os.system("rm OpenGL*.txt")
 # Creating a new window for OpenGL Limits
 
 	def clickMe():
@@ -95,26 +104,33 @@ def OpenGL(tab1):
 		label1.grid(column=0,row=4)
 		TotExt = ttk.Entry(frame3, width=5)
 		TotExt.grid(column=1,row=4)
-		sc2 = scrolledtext.ScrolledText(frame4, width=100, height=25, background="LIGHT GRAY",state='normal')
+		TreeGLAll = ttk.Treeview(frame4,height=15)
+		TreeGLAll.column('#0',width=725)
+		TreeGLAll.grid(column=0,row=2)
+
+		Allsb = ttk.Scrollbar(frame4, orient="vertical", command=TreeGLAll.yview)
+		TreeGLAll.configure(yscrollcommand=Allsb.set)
+		Allsb.grid(column=0,row=2,sticky='nse')
+
 		if radsel == 1:
-			#os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
-			#os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
 			frame4.configure(text="All") 
 			with open("extensions.txt") as file2:
 				count = len(file2.readlines())
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="BLUE")
+					
+
 
 		if radsel == 2:
 			os.system("cat extensions.txt | grep _AMD > AMD_extensions.txt")
@@ -125,16 +141,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground='red')
 				os.system("rm AMD*.txt")
 
 		if radsel == 3:
@@ -147,16 +163,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="DARK ORANGE")
 				os.system("rm ARB*.txt")
 
 		if radsel == 4:
@@ -169,16 +185,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground='BLACK')
 				os.system("rm EXT*.txt")
 
 		if radsel == 5:
@@ -191,16 +207,15 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
-
-				sc2.configure(state='disabled',foreground="DARK GREEN")
+					TreeGLAll.insert('','end',text="No extensions available")
 				os.system("rm NV*.txt")
 
 		if radsel == 6:
@@ -213,16 +228,15 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
-
-				sc2.configure(state='disabled',foreground="RED")
+					TreeGLAll.insert('','end',text="No extensions available")
 				os.system("rm ATI*.txt")
 
 		if radsel == 7:
@@ -235,11 +249,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
-				for line in file2:
-					sc2.insert('insert',line)
-					sc2.grid(column=0,row=2)
+				i = 0
+				if count  > 0:
+					for line in file2:
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
+				else:
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="BROWN")
 				os.system("rm KHR*.txt")
 
 		if radsel == 8:
@@ -252,16 +271,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="PURPLE")
 				os.system("rm MESA*.txt")
 
 		if radsel == 10:
@@ -272,17 +291,15 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
-
-
-				sc2.configure(state='disabled', foreground='VIOLET RED')
+					TreeGLAll.insert('','end',text="No extensions available")
 				os.system("rm Others*.txt")
 	
 		if radsel == 9:
@@ -294,16 +311,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="INDIGO")
 				os.system("rm SGI*.txt")
 
 		if radsel == 11:
@@ -315,16 +332,15 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
-
-				sc2.configure(state='disabled',foreground="Dark Slate Gray")
+					TreeGLAll.insert('','end',text="No extensions available")
 				os.system("rm IBM*.txt")
 
 		if radsel == 12:
@@ -336,16 +352,16 @@ def OpenGL(tab1):
 				TotExt.insert('insert',count)
 				TotExt.configure(state='disabled',foreground="BLUE")
 				file2.seek(0,0)
+				i = 0
 				if count  > 0:
 					for line in file2:
-						sc2.insert('insert',line)
-						sc2.grid(column=0,row=2)
+						TreeGLAll.insert('','end',text=line,tags=i)
+						if i % 2 != 0:
+							TreeGLAll.tag_configure(i,background="GRAY91")
+						i = i + 1
 				else:
-					sc2.delete('1.0','end')
-					sc2.grid(column=0,row=2)
-					sc2.insert('insert',"No Extensions available")
+					TreeGLAll.insert('','end',text="No extensions available")
 
-				sc2.configure(state='disabled',foreground="Dark Slate Gray")
 				os.system("rm OES*.txt")
 
 

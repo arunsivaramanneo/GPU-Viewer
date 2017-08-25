@@ -55,7 +55,7 @@ def Vulkan(tab2):
 		TreeDevice = ttk.Treeview(DeviceTab,height=30,selectmode="browse")
 		TreeDevice['columns'] =('value')
 		TreeDevice.column('#0',width=225)
-		TreeDevice.column('value',width=500)
+		TreeDevice.column('value',width=500,anchor='nw')
 
 		TreeDevice.grid(column=0,row=0)
 
@@ -86,8 +86,10 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
-				TreeDevice.insert('','end',text=line,values=(value[i],))
-				i = i + 1			
+				TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
+				if i % 2 != 0 :
+					TreeDevice.tag_configure(i,background="GRAY91")
+				i = i + 1
 
 		os.system("rm Device*.txt")
 
@@ -130,11 +132,13 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
-				TreeFeatures.insert('','end',text=line,values=(value[i]),tags=value[i])
+				TreeFeatures.insert('','end',text=line,values=(value[i]),tags=(value[i],i))
 				if value[i] == "true":
 					TreeFeatures.tag_configure(value[i],foreground="GREEN")
 				else:
 					TreeFeatures.tag_configure(value[i],foreground="RED")
+				if i % 2 != 0:
+					TreeFeatures.tag_configure(i,background="GRAY91")
 				i = i + 1
 		
 		os.system("rm VKDFeatures*.txt")	
@@ -148,7 +152,7 @@ def Vulkan(tab2):
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=525)
 		TreeLimits.heading('value',text="Limits")
-		TreeLimits.column('value',width=200,anchor='sw')
+		TreeLimits.column('value',width=200,anchor='nw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
@@ -177,7 +181,9 @@ def Vulkan(tab2):
 			print(count)
 			file1.seek(0,0)
 			for line in file1:
-				TreeLimits.insert('','end',text=line, values= value[i])
+				TreeLimits.insert('','end',text=line, values= value[i],tags=(i))
+				if i % 2 != 0:
+					TreeLimits.tag_configure(i,background="GRAY91")
 				i = i + 1
 
 		os.system("rm *limits*.txt")		
@@ -187,7 +193,7 @@ def Vulkan(tab2):
 
 		te = ttk.Treeview(ExtensionsTab, height=30)
 		te.heading("#0", text='Name')
-		te.column('#0',width=525)
+		te.column('#0',width=525,anchor='center')
 		te['column'] = ('version')
 		te.grid(column=0,row=0)
 		te.heading('version',text="Version")
@@ -224,7 +230,9 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
-				te.insert('','end',text=line,values=(value[i]))
+				te.insert('','end',text=line,values=(value[i]),tags=i)
+				if i % 2 != 0:
+					te.tag_configure(i,background="GRAY91")
 				i = i + 1
 
 		os.system("rm VKDExtensions*.txt version.txt")
@@ -264,10 +272,13 @@ def Vulkan(tab2):
 
 		with open("VKDFORMATS.txt","r") as file1:
 			count = len(file1.readlines())
-			print(count)
 			file1.seek(0,0)
+			i = 0
 			for line in file1:
-				tf.insert('','end',text=line)
+				tf.insert('','end',text=line,tags=i)
+				if i % 2 != 0 :
+					tf.tag_configure(i,background="GRAY91")
+				i = i + 1
 			
 
 				
@@ -440,7 +451,9 @@ def Vulkan(tab2):
 			tabcontrol.tab(5,text="Memory Types(%d)"%count)
 			file1.seek(0,0)
 			for i in range(count):
-				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]))
+				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
+				if i % 2 != 0:
+					TreeMemory.tag_configure(i,background="GRAY91")
 				
 
 		os.system("rm VKDMemory*.txt")
