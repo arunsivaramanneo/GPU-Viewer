@@ -44,6 +44,8 @@ def Vulkan(tab2):
 	tabcontrol.add(FormatTab,text= "Formats")
 	tabcontrol.grid(column=0,row=1)
 
+	# Creating the Memory Type Tab
+
 	MemoryTypeTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(MemoryTypeTab,text="Memory Type")
 	tabcontrol.grid(column=0,row=1)
@@ -52,16 +54,18 @@ def Vulkan(tab2):
 
 	def Devices():
 		
+		# Creating a Treeview for the Device Tab
+
 		TreeDevice = ttk.Treeview(DeviceTab,height=30)
 		TreeDevice['columns'] =('value')
 		TreeDevice.column('#0',width=225)
-		TreeDevice.column('value',width=500,anchor='nw')
+		TreeDevice.column('value',width=500,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
 
 		GPU = radvar.get()
 
-		print(GPU)
+		# Fetching the required details using grep, Awk and Cat Commands
 
 		if GPU == 0:
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > Deviceinfo1.txt")
@@ -81,6 +85,8 @@ def Vulkan(tab2):
 			os.system("cat Deviceinfo1.txt | grep -o =.* | grep -o ' .*' > Deviceinfo2.txt")
 
 
+		# Storing the RHS values into a list
+
 		with open("Deviceinfo2.txt","r") as file1:
 			value = []
 			for line in file1:
@@ -90,6 +96,8 @@ def Vulkan(tab2):
 		value[2] = int(value[2],16)
 
 
+		# Printing the Details into the Treeview
+		
 		with open("Deviceinfo.txt","r") as file1:
 			file1.seek(0,0)
 			i = 0
@@ -397,10 +405,7 @@ def Vulkan(tab2):
 		with open("VKDMemoryHeapIndex.txt","r") as file1:
 			heapIndex = []
 			for line in file1:
-				if line == " 1\n":
-					heapIndex.append(1)
-				else:
-					heapIndex.append(0)
+					heapIndex.append(int(line))
 
 
 		Device_Local = []
