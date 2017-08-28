@@ -20,7 +20,7 @@ img1 = GLimg.subsample(6,6)
 tabcontrol = ttk.Notebook(win, padding=10)
 
 #tab1 = ttk.Frame(tabcontrol)
-#tabcontrol.add(tab1,text="Device Info.")
+#tabcontrol.add(tab1,text=icon)
 #tabcontrol.grid(column=0,row=0)
 
 #Info(tab1)

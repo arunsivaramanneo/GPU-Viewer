@@ -58,7 +58,7 @@ def Vulkan(tab2):
 
 		TreeDevice = ttk.Treeview(DeviceTab,height=30)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=225)
+		TreeDevice.column('#0',width=225,anchor='sw')
 		TreeDevice.column('value',width=500,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
@@ -90,7 +90,9 @@ def Vulkan(tab2):
 		with open("Deviceinfo2.txt","r") as file1:
 			value = []
 			for line in file1:
-					value.append(line)
+				value.append(line)
+			
+
 
 		value[1] = int(value[1],16)
 		value[2] = int(value[2],16)
@@ -200,6 +202,12 @@ def Vulkan(tab2):
 			value = []
 			for line in file1:
 					value.append(line)
+
+		# finding and converting any hexadecimal value to decimal
+		
+		for i in range(len(value)):
+			if "0x" in value[i]:
+				value[i] = int(value[i],16)
 
 		with open("VKDlimits.txt","r") as file1:
 			count = len(file1.readlines())
@@ -577,6 +585,8 @@ def Vulkan(tab2):
 		file2.seek(0,0)
 		for line in file2:
 			list.append(line)
+
+	
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
