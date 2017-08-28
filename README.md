@@ -3,12 +3,10 @@ A front-end to glxinfo and Vulkaninfo.
 
 This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 with tkinter (python3-tk). All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
 
-
-
 What's developed and available?
 
 1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
-2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types
+2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types, Partial Queue Families implemented
 
 
 UNDERDEVELOPMENT
