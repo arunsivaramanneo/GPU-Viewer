@@ -50,6 +50,10 @@ def Vulkan(tab2):
 	tabcontrol.add(MemoryTypeTab,text="Memory Type")
 	tabcontrol.grid(column=0,row=1)
 
+	QueueTab = ttk.Frame(tabcontrol)
+	tabcontrol.add(QueueTab,text="Queues Families")
+	tabcontrol.grid(column=0,row=1)
+
 	radvar = tk.IntVar()
 
 	def Devices():
@@ -58,7 +62,7 @@ def Vulkan(tab2):
 
 		TreeDevice = ttk.Treeview(DeviceTab,height=30)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=225,anchor='sw')
+		TreeDevice.column('#0',width=250,anchor='sw')
 		TreeDevice.column('value',width=500,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
@@ -118,7 +122,7 @@ def Vulkan(tab2):
 		TreeFeatures.heading("#0", text='Device Features')
 		TreeFeatures.column('#0',width=525)
 		TreeFeatures.heading('value',text="Value")
-		TreeFeatures.column('value',width=200,anchor='center')
+		TreeFeatures.column('value',width=225,anchor='center')
 
 		TreeFeatures.grid(column=0,row=0)
 
@@ -175,7 +179,7 @@ def Vulkan(tab2):
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=525,anchor='center')
 		TreeLimits.heading('value',text="Limits")
-		TreeLimits.column('value',width=200,anchor='nw')
+		TreeLimits.column('value',width=225,anchor='nw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
@@ -230,7 +234,7 @@ def Vulkan(tab2):
 		te['column'] = ('version')
 		te.grid(column=0,row=0)
 		te.heading('version',text="Version")
-		te.column('version',width=200,anchor='center')
+		te.column('version',width=225,anchor='center')
 
 		esb = ttk.Scrollbar(ExtensionsTab, orient="vertical", command=te.yview)
 		te.configure(yscrollcommand=esb.set)
@@ -282,7 +286,7 @@ def Vulkan(tab2):
 		tf = ttk.Treeview(FormatTab, height=30)
 		tf['columns'] = ("linear","optimal","Buffer")
 		tf.heading("#0", text='Format')
-		tf.column('#0',width=425)
+		tf.column('#0',width=450)
 		tf.heading("linear",text="linear")
 		tf.column("linear",width=100,anchor='center')
 		tf.heading("optimal",text="optimal")
@@ -376,7 +380,7 @@ def Vulkan(tab2):
 		TreeMemory.heading('#0',text="Types")
 		TreeMemory.column('#0',width=50,anchor='center')
 		TreeMemory.heading('value1',text="Heap Index")
-		TreeMemory.column('value1',width=85,anchor="center")
+		TreeMemory.column('value1',width=100,anchor="center")
 		TreeMemory.heading('value2',text="Device_Local")
 		TreeMemory.column('value2',width=110,anchor='center')
 		TreeMemory.heading('value3',text="Host_Visible")
@@ -384,7 +388,7 @@ def Vulkan(tab2):
 		TreeMemory.heading('value4',text="Host_Coherent")
 		TreeMemory.column('value4',width=120,anchor='center')
 		TreeMemory.heading('value5',text="Host_Cached")
-		TreeMemory.column('value5',width=115,anchor='center')
+		TreeMemory.column('value5',width=125,anchor='center')
 		TreeMemory.heading('value6',text="Lazily_Allocated")
 		TreeMemory.column('value6',width=135,anchor='center')
 
@@ -550,6 +554,99 @@ def Vulkan(tab2):
 
 		os.system("rm VKDMemory*.txt")
 
+	def Queues():
+
+
+		TreeQueue = ttk.Treeview(QueueTab,height=30)
+		TreeQueue['columns'] = ('count','bits','Gbit','Cbit','Tbit','sbit')
+		TreeQueue.heading('#0',text="Queue Family")
+		TreeQueue.column('#0',width=95,anchor='center')
+		
+		TreeQueue.heading('count',text='Count')
+		TreeQueue.column('count',width=45,anchor='center')
+		TreeQueue.heading('bits',text="timestampValidBits")
+		TreeQueue.column('bits',width=145,anchor='center')
+		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
+		TreeQueue.column('Gbit',width=100,anchor='center')
+		TreeQueue.heading('Cbit',text='COMPUTE_BIT')
+		TreeQueue.column('Cbit',width=100,anchor='center')
+		TreeQueue.heading('Tbit',text="TRANSFER_BIT")
+		TreeQueue.column('Tbit',width=100,anchor='center')
+		TreeQueue.heading('sbit',text="SPARSE_BINDING_BIT",anchor='w')
+		TreeQueue.column('sbit',width=165,anchor='center')
+		TreeQueue.grid(column=0,row=0)
+
+		Qvsb = ttk.Scrollbar(QueueTab, orient="vertical", command=TreeQueue.yview)
+		TreeQueue.configure(yscrollcommand=Qvsb.set)
+		Qvsb.grid(column=0,row=0,sticky='nse')
+
+
+		GPU = radvar.get()
+		if GPU == 0 :
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > VKDQueues.txt")
+			os.system("cat VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > VKDQueuecount.txt")
+			os.system("cat VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > VKDQueuebits.txt")
+			os.system("cat VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > VKDQueueFlags.txt")
+
+		elif GPU == 1 :
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > VKDQueues.txt")
+			os.system("cat VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > VKDQueuecount.txt")
+			os.system("cat VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > VKDQueuebits.txt")
+			os.system("cat VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > VKDQueueFlags.txt")
+
+		elif GPU == 2 :
+			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > VKDQueues.txt")
+			os.system("cat VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > VKDQueuecount.txt")
+			os.system("cat VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > VKDQueuebits.txt")
+			os.system("cat VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > VKDQueueFlags.txt")
+
+		qCount = []
+		qBits = []
+		GBit = []
+		CBit = []
+		TBit = []
+		SBit = []
+
+		# finding and storing the value for Flags
+		with open("VKDQueueFlags.txt","r") as file1:
+			for line in file1:
+				if "GRAPHICS" in line:
+					GBit.append("true")
+				else:
+					GBit.append("false")
+				if "COMPUTE" in line:
+					CBit.append("true")
+				else:
+					CBit.append("false")
+				if "TRANSFER" in line:
+					TBit.append("true")
+				else:
+					TBit.append("false")
+				if "SPARSE" in line:
+					SBit.append("true")
+				else:
+					SBit.append("false")
+
+		with open("VKDQueuecount.txt","r") as file1:
+			count = len(file1.readlines())
+			file1.seek(0,0)
+			for line in file1:
+				qCount.append(int(line))
+
+		with open("VKDQueuebits.txt","r") as file1:
+			for line in file1:
+				qBits.append(int(line))
+
+		tabcontrol.tab(6,text="Queue Families(%d)"%count)
+		for i in range(count):
+			TreeQueue.insert('','end',text=i,values=(qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
+			if i % 2 != 0:
+				TreeQueue.tag_configure(i,background="GRAY91")
+
+		os.system("rm VKDQueue*.txt")
+
+
+
 	def radcall():
 		radsel= radvar.get()
 		if radsel == 0:
@@ -559,6 +656,7 @@ def Vulkan(tab2):
 			Extensions()
 			Format()
 			MemoryTypes()
+			Queues()
 		elif radsel == 1:
 			Devices()
 			Features()
@@ -566,6 +664,7 @@ def Vulkan(tab2):
 			Extensions()
 			Format()
 			MemoryTypes()
+			Queues()
 		elif radsel == 2:
 			Devices()
 			Features()
@@ -573,6 +672,7 @@ def Vulkan(tab2):
 			Extensions()
 			Format()
 			MemoryTypes()
+			Queues()
 
 
 	frame1 = ttk.LabelFrame(tab2,text="")
