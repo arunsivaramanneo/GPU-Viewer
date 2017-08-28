@@ -79,6 +79,7 @@ def OpenGL(tab1):
 	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
 	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
 
+	
 
 # Configuring different Radio Buttons
 	
@@ -91,13 +92,64 @@ def OpenGL(tab1):
 		if radsel1 == 1:
 			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
-			radcall()
+			
 		if radsel1 == 2:
 			os.system("glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > extensions.txt")
-			radcall()
+
+		radcall()
+
 
 
 	def radcall():
+
+		GL_All = []
+		GL_ARB = []
+		GL_AMD = []
+		GL_ATI = []
+		GL_EXT = []
+		GL_IBM = []
+		GL_KHR = []
+		GL_SGI = []
+		GL_NV = []
+		GL_MESA =[]
+		GL_OES = []
+		GL_Others = []
+
+		with open("extensions.txt") as file1:
+			for line in file1:
+				if "_ARB" in line:
+					GL_ARB.append(line)
+					GL_All.append(line)
+				elif "_AMD" in line:
+					GL_AMD.append(line)
+					GL_All.append(line)
+				elif "_NV" in line:
+					GL_NV.append(line)
+					GL_All.append(line)
+				elif "_MESA" in line:
+					GL_MESA.append(line)
+					GL_All.append(line)
+				elif "_EXT" in line:
+					GL_EXT.append(line)
+					GL_All.append(line)
+				elif "_IBM" in line:
+					GL_IBM.append(line)
+					GL_All.append(line)
+				elif "_SGI" in line:
+					GL_SGI.append(line)
+					GL_All.append(line)
+				elif "_KHR" in line:
+					GL_KHR.append(line)
+					GL_All.append(line)
+				elif "_ATI" in line:
+					GL_ATI.append(line)
+					GL_All.append(line)
+				elif "_OES" in line:
+					GL_OES.append(line)
+					GL_All.append(line)
+				else:
+					GL_Others.append(line)
+					GL_All.append(line)
 		
 		radsel=radvar.get()
 		label1 = ttk.Label(frame3, text="No :")
@@ -114,257 +166,178 @@ def OpenGL(tab1):
 
 		if radsel == 1:
 			frame4.configure(text="All") 
-			with open("extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
+			count = len(GL_All)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_All[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 					
 
-
 		if radsel == 2:
-			os.system("cat extensions.txt | grep _AMD > AMD_extensions.txt")
 			
 			frame4.configure(text="AMD")
-			with open("AMD_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
-				os.system("rm AMD*.txt")
+			count = len(GL_AMD)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_AMD[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
 		if radsel == 3:
-			os.system("cat extensions.txt | grep _ARB > ARB_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame4.configure(text="ARB")
 			
-			with open("ARB_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
-				os.system("rm ARB*.txt")
+			frame4.configure(text="ARB")
+			count = len(GL_ARB)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_ARB[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
 		if radsel == 4:
-			os.system("cat extensions.txt | grep _EXT > EXT_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
+		
 			frame4.configure(text="EXT")
 			
-			with open("EXT_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
+			count = len(GL_EXT)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_EXT[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
-				os.system("rm EXT*.txt")
 
 		if radsel == 5:
-			os.system("cat extensions.txt | grep _NV > NV_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame4.configure(text="NV")
 			
-			with open("NV_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-				os.system("rm NV*.txt")
+			frame4.configure(text="NV")
+			count = len(GL_NV)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0 :
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_NV[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
+
 
 		if radsel == 6:
-			os.system("cat extensions.txt | grep _ATI > ATI_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame4.configure(text="ATI")
 			
-			with open("ATI_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-				os.system("rm ATI*.txt")
+			frame4.configure(text="ATI")
+			count = len(GL_ATI)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_ATI[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
 		if radsel == 7:
-			os.system("cat extensions.txt | grep _KHR > KHR_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame4.configure(text="KHR")
-			
-			with open("KHR_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
 
-				os.system("rm KHR*.txt")
+			frame4.configure(text="KHR")
+			count = len(GL_KHR)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_KHR[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
+
 
 		if radsel == 8:
-			os.system("cat extensions.txt | grep _MESA > MESA_extensions.txt")
-			#os.system("sort extensions1.txt | uniq > extensions.txt")
-			frame4.configure(text="MESA")
 			
-			with open("MESA_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
-				os.system("rm MESA*.txt")
+			frame4.configure(text="MESA")
+			count = len(GL_MESA)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_MESA[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
+				
 
 		if radsel == 10:
-			os.system("cat extensions.txt | grep -v _AMD | grep -v _MESA | grep -v _NV | grep -v _ATI | grep -v _ARB | grep -v _SGI | grep -v _KHR | grep -v _EXT | grep -v _IBM | grep -v _OES > Others_extensions.txt")
+			
 			frame4.configure(text="Other extensions") 
-			with open("Others_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-				os.system("rm Others*.txt")
-	
+			count = len(GL_Others)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_Others[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
+					
 		if radsel == 9:
-			os.system("cat extensions.txt | grep _SGI > SGI_extensions.txt")
+			
 			frame4.configure(text="SGI/SGIX")
 			
-			with open("SGI_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
-				os.system("rm SGI*.txt")
+			count = len(GL_SGI)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_SGI[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
 		if radsel == 11:
-			os.system("cat extensions.txt | grep _IBM > IBM_extensions.txt")
+
 			frame4.configure(text="IBM")
 		
-			with open("IBM_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-				os.system("rm IBM*.txt")
-
+			count = len(GL_IBM)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_IBM[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
+				
 		if radsel == 12:
-			os.system("cat extensions.txt | grep _OES > OES_extensions.txt")
+
 			frame4.configure(text="OES")
-		
-			with open("OES_extensions.txt") as file2:
-				count = len(file2.readlines())
-				TotExt.insert('insert',count)
-				TotExt.configure(state='disabled',foreground="BLUE")
-				file2.seek(0,0)
-				i = 0
-				if count  > 0:
-					for line in file2:
-						TreeGLAll.insert('','end',text=line,tags=i)
-						if i % 2 != 0:
-							TreeGLAll.tag_configure(i,background="GRAY91")
-						i = i + 1
-				else:
-					TreeGLAll.insert('','end',text="No extensions available")
-
-				os.system("rm OES*.txt")
-
-
+			count = len(GL_OES)
+			TotExt.insert('insert',count)
+			TotExt.configure(state='disabled',foreground="BLUE")
+			if count > 0:
+				for i in range(count):
+					TreeGLAll.insert('','end',text=GL_OES[i],tags=i)
+					if i % 2 != 0:
+						TreeGLAll.tag_configure(i,background="GRAY91")
+			else:
+				TreeGLAll.insert('','end',text="No extensions available")
 
 
 	OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
@@ -374,9 +347,6 @@ def OpenGL(tab1):
 	OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
 	OpenGLESrad.grid(column=1,row=1)
 
-	
-
-	
 	rad1 = tk.Radiobutton(frame3, text="All", variable=radvar, value=1, command=radcall)
 	rad1.grid(column=0,row=2,sticky = tk.W)
 	rad1.invoke()
@@ -402,4 +372,10 @@ def OpenGL(tab1):
 	rad11.grid(column=10,row=2,sticky=tk.W)
 	rad12 = tk.Radiobutton(frame3, text="Others", variable=radvar, value=10, command=radcall)
 	rad12.grid(column=11,row=2, sticky=tk.W)
+
+
+
+
+
+
 
