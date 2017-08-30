@@ -177,7 +177,7 @@ def Vulkan(tab2):
 		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
 		TreeLimits['columns'] = ('value')
 		TreeLimits.heading("#0", text='Device Limits')
-		TreeLimits.column('#0',width=525,anchor='center')
+		TreeLimits.column('#0',width=525)
 		TreeLimits.heading('value',text="Limits")
 		TreeLimits.column('value',width=225,anchor='nw')
 
@@ -257,13 +257,18 @@ def Vulkan(tab2):
 			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
 			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
 
+		
+		# This should take care of further versioning till 100
 		with open("version.txt","r") as file1:
 			value = []
 			for line in file1:
-				if line == ': extension revision  1\n':
-					value.append("0.0.1")
-				else:
-					value.append("0.0.68")
+				for j in range(100):
+					if line == ": extension revision  %d\n"%j:
+						value.append("0.0.%d"%j)
+						break
+					if line == ": extension revision %d\n"%j:
+						value.append("0.0.%d"%j)
+						break
 
 
 		with open("VKDExtensions.txt","r") as file1:
@@ -693,7 +698,7 @@ def Vulkan(tab2):
 	
 	for i in range(len(list)):
 		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
-		GPU.grid(column=1,row=i,sticky=tk.W)
+		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()
 

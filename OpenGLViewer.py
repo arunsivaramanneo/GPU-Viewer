@@ -61,7 +61,7 @@ def OpenGL(tab1):
 		win2.title("OpenGL Limits")
 		win2.resizable(0,0)
 
-		frame5 = ttk.LabelFrame(tab1, text="OpenGL Limits")
+		frame5 = ttk.LabelFrame(win2, text="OpenGL Limits")
 		frame5.grid(column=0,row=0, padx=20,pady=20)
 
 		
@@ -96,6 +96,32 @@ def OpenGL(tab1):
 		if radsel1 == 2:
 			os.system("glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > extensions.txt")
 
+		
+		rad1 = tk.Radiobutton(frame3, text="All", variable=radvar, value=1, command=radcall)
+		rad1.grid(column=0,row=2,sticky = tk.W)
+		rad1.invoke()
+		rad2 = tk.Radiobutton(frame3, text="AMD", variable=radvar, value=2, command=radcall)
+		rad2.grid(column=1,row=2,sticky=tk.W)
+		rad3 = tk.Radiobutton(frame3, text="ARB", variable=radvar, value=3, command=radcall)
+		rad3.grid(column=2,row=2,sticky=tk.W)
+		rad4 = tk.Radiobutton(frame3, text="ATI", variable=radvar, value=6, command=radcall)
+		rad4.grid(column=3,row=2,sticky=tk.W)
+		rad5 = tk.Radiobutton(frame3, text="EXT", variable=radvar, value=4, command=radcall)
+		rad5.grid(column=4,row=2,sticky=tk.W)
+		rad6 = tk.Radiobutton(frame3, text="IBM", variable=radvar, value=11, command=radcall)
+		rad6.grid(column=5,row=2,sticky=tk.W)
+		rad7 = tk.Radiobutton(frame3, text="KHR", variable=radvar, value=7, command=radcall)
+		rad7.grid(column=6,row=2,sticky=tk.W)
+		rad8 = tk.Radiobutton(frame3, text="MESA", variable=radvar, value=8, command=radcall)
+		rad8.grid(column=7,row=2,sticky=tk.W)
+		rad9 = tk.Radiobutton(frame3, text="NV", variable=radvar, value=5, command=radcall)
+		rad9.grid(column=8,row=2,sticky=tk.W)
+		rad10 = tk.Radiobutton(frame3, text="SGI", variable=radvar, value=9, command=radcall)
+		rad10.grid(column=9,row=2,sticky=tk.W)
+		rad11 = tk.Radiobutton(frame3,text="OES", variable=radvar, value=12, command=radcall)
+		rad11.grid(column=10,row=2,sticky=tk.W)
+		rad12 = tk.Radiobutton(frame3, text="Others", variable=radvar, value=10, command=radcall)
+		rad12.grid(column=11,row=2, sticky=tk.W)
 		radcall()
 
 
@@ -347,31 +373,7 @@ def OpenGL(tab1):
 	OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
 	OpenGLESrad.grid(column=1,row=1)
 
-	rad1 = tk.Radiobutton(frame3, text="All", variable=radvar, value=1, command=radcall)
-	rad1.grid(column=0,row=2,sticky = tk.W)
-	rad1.invoke()
-	rad2 = tk.Radiobutton(frame3, text="AMD", variable=radvar, value=2, command=radcall)
-	rad2.grid(column=1,row=2,sticky=tk.W)
-	rad3 = tk.Radiobutton(frame3, text="ARB", variable=radvar, value=3, command=radcall)
-	rad3.grid(column=2,row=2,sticky=tk.W)
-	rad4 = tk.Radiobutton(frame3, text="ATI", variable=radvar, value=6, command=radcall)
-	rad4.grid(column=3,row=2,sticky=tk.W)
-	rad5 = tk.Radiobutton(frame3, text="EXT", variable=radvar, value=4, command=radcall)
-	rad5.grid(column=4,row=2,sticky=tk.W)
-	rad6 = tk.Radiobutton(frame3, text="IBM", variable=radvar, value=11, command=radcall)
-	rad6.grid(column=5,row=2,sticky=tk.W)
-	rad7 = tk.Radiobutton(frame3, text="KHR", variable=radvar, value=7, command=radcall)
-	rad7.grid(column=6,row=2,sticky=tk.W)
-	rad8 = tk.Radiobutton(frame3, text="MESA", variable=radvar, value=8, command=radcall)
-	rad8.grid(column=7,row=2,sticky=tk.W)
-	rad9 = tk.Radiobutton(frame3, text="NV", variable=radvar, value=5, command=radcall)
-	rad9.grid(column=8,row=2,sticky=tk.W)
-	rad10 = tk.Radiobutton(frame3, text="SGI", variable=radvar, value=9, command=radcall)
-	rad10.grid(column=9,row=2,sticky=tk.W)
-	rad11 = tk.Radiobutton(frame3,text="OES", variable=radvar, value=12, command=radcall)
-	rad11.grid(column=10,row=2,sticky=tk.W)
-	rad12 = tk.Radiobutton(frame3, text="Others", variable=radvar, value=10, command=radcall)
-	rad12.grid(column=11,row=2, sticky=tk.W)
+
 
 
 
