@@ -95,11 +95,18 @@ def Vulkan(tab2):
 			value = []
 			for line in file1:
 				value.append(line)
-			
+		
+		# This should take care of api version from 1.0.10 to 1.0.99, apiversion below 1.0.10 will display as provided in the vulkaninfo report
+		for j in range(100):
+			if "1.0.%2d"%j in value[0]:
+				value[0] = "1.0.%2d"%j
+				break
 
+		for i in range(len(value)):
+			if i > 0 :
+				if "0x" in value[i]:
+					value[i] = int(value[i],16)
 
-		value[1] = int(value[1],16)
-		value[2] = int(value[2],16)
 
 
 		# Printing the Details into the Treeview
@@ -135,22 +142,20 @@ def Vulkan(tab2):
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > VKDFeatures1.txt")
 			os.system("cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
-			os.system("cat VKDFeatures1.txt | grep -o '= [1,0]' > VKDFeatures2.txt")
 			
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = |sort > VKDFeatures1.txt")
 			os.system("cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
-			os.system("cat VKDFeatures1.txt | grep -o '= [1,0]' > VKDFeatures2.txt")
 
 		elif GPU == 2 :
 			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = |sort > VKDFeatures1.txt")
 			os.system("cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
-			os.system("cat VKDFeatures1.txt | grep -o '= [1,0]' > VKDFeatures2.txt")
+
 		
-		with open("VKDFeatures2.txt","r") as file1:
+		with open("VKDFeatures1.txt","r") as file1:
 			value = []
 			for line in file1:
-				if line == '= 1\n':
+				if '= 1' in line:
 					value.append("true")
 				else:
 					value.append("false")
@@ -245,35 +250,33 @@ def Vulkan(tab2):
 		if GPU == 0 :
 			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > VKDExtensions1.txt")
 			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
-			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
+			
 		
 		elif GPU == 1 :
 			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
 			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
-			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
+			
 
 		elif GPU == 2 :
 			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag'| grep VK_ |sort > VKDExtensions1.txt")
 			os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
-			os.system("cat VKDExtensions1.txt | grep -o ':.*' > version.txt")
 
 		
 		# This should take care of further versioning till 100
-		with open("version.txt","r") as file1:
+		with open("VKDExtensions1.txt","r") as file1:
 			value = []
 			for line in file1:
 				for j in range(100):
-					if line == ": extension revision  %d\n"%j:
+					if ": extension revision  %d"%j in line:
 						value.append("0.0.%d"%j)
 						break
-					if line == ": extension revision %d\n"%j:
-						value.append("0.0.%d"%j)
+					if ": extension revision %2d"%j in line:
+						value.append("0.0.%2d"%j)
 						break
 
 
 		with open("VKDExtensions.txt","r") as file1:
 			count = len(file1.readlines())
-			#frame4.configure(text = count)
 			tabcontrol.tab(3,text="Extensions(%d)"%count)
 			file1.seek(0,0)
 			i = 0
@@ -283,7 +286,7 @@ def Vulkan(tab2):
 					te.tag_configure(i,background="GRAY91")
 				i = i + 1
 
-		os.system("rm VKDExtensions*.txt version.txt")
+		os.system("rm VKDExtensions*.txt")
 
 
 	def Format():
@@ -359,6 +362,8 @@ def Vulkan(tab2):
 					Buffer.append("false")
 				else:
 					Buffer.append("true")
+
+		# counting the number of formats supported
 		Formats = 0
 		for i in range(count):
 			if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
@@ -405,24 +410,28 @@ def Vulkan(tab2):
 
 		GPU = radvar.get()
 		if GPU == 0 :
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep memoryTypes > VKDMemoryTypes.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep heapIndex | grep -o =.* | grep -o ' .*' > VKDMemoryHeapIndex.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep propertyFlags | grep -o =.* | grep -o ' .*' > VKDMemoryFlags.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > VKDMemoryType.txt")
+			
+			
 		elif GPU == 1 :
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep memoryTypes > VKDMemoryTypes.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep heapIndex | grep -o =.* | grep -o ' .*' > VKDMemoryHeapIndex.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep propertyFlags | grep -o =.* | grep -o ' .*' > VKDMemoryFlags.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > VKDMemoryType.txt")
+			
+			
 		
 		elif GPU == 2 :
-			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep memoryTypes > VKDMemoryTypes.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep heapIndex | grep -o =.* | grep -o ' .*' > VKDMemoryHeapIndex.txt")
-			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' | grep propertyFlags | grep -o =.* | grep -o ' .*' > VKDMemoryFlags.txt")
+			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > VKDMemoryType.txt")
+			
+			
 		
 
-		with open("VKDMemoryHeapIndex.txt","r") as file1:
+		with open("VKDMemoryType.txt","r") as file1:
 			heapIndex = []
 			for line in file1:
-					heapIndex.append(int(line))
+				for j in range(100):
+					if "heapIndex" in line:
+						if "= %d"%j in line:
+							heapIndex.append(j)
+							break
 
 
 		Device_Local = []
@@ -430,66 +439,69 @@ def Vulkan(tab2):
 		Host_Coherent = []
 		Host_Cached = []
 		Lazily_Allocated = []
+		Mcount = 0
 
-		with open("VKDMemoryFlags.txt","r") as file1:
+		with open("VKDMemoryType.txt","r") as file1:
 			for line in file1:
-				if line == " 0x0:\n":
+				if "memoryTypes" in line:
+					Mcount = Mcount + 1
+				if " 0x0:\n" in line:
 					Device_Local.append("false")
 					Host_Visible.append("false")
 					Host_Coherent.append("false")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 
-				if line == " 0x1:\n":
+				if " 0x1:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("false")
 					Host_Coherent.append("false")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 
-				if line == " 0x2:\n":
+				if " 0x2:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("true")
 					Host_Coherent.append("false")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 				
-				if line == " 0x3:\n":
+				if " 0x3:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("true")
 					Host_Coherent.append("false")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 				
-				if line == " 0x4:\n":
+				if " 0x4:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("false")
 					Host_Coherent.append("true")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 				
-				if line == " 0x5:\n":
+				if " 0x5:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("false")
 					Host_Coherent.append("true")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 					
-				if line == " 0x6:\n":
+				if " 0x6:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("true")
 					Host_Coherent.append("true")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 					
-				if line == " 0x7:\n":
+				if " 0x7:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("true")
 					Host_Coherent.append("true")
 					Host_Cached.append("false")
 					Lazily_Allocated.append("false")
 
-				if line == " 0x8:\n":
+				if " 0x8:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("false")
 					Host_Coherent.append("false")
@@ -503,42 +515,42 @@ def Vulkan(tab2):
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 			
-				if line == " 0xa:\n":
+				if " 0xa:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("true")
 					Host_Coherent.append("false")
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 			
-				if line == " 0xb:\n":
+				if " 0xb:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("true")
 					Host_Coherent.append("false")
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 			
-				if line == " 0xc:\n":
+				if " 0xc:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("false")
 					Host_Coherent.append("true")
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 			
-				if line == " 0xd:\n":
+				if " 0xd:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("false")
 					Host_Coherent.append("true")
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 								
-				if line == " 0xe:\n":
+				if " 0xe:" in line:
 					Device_Local.append("false")
 					Host_Visible.append("true")
 					Host_Coherent.append("true")
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 
-				if line == " 0xf:\n":
+				if " 0xf:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("true")
 					Host_Coherent.append("true")
@@ -547,11 +559,8 @@ def Vulkan(tab2):
 			
 			
 
-		with open("VKDMemoryTypes.txt","r") as file1:
-			count = len(file1.readlines())
-			tabcontrol.tab(5,text="Memory Types(%d)"%count)
-			file1.seek(0,0)
-			for i in range(count):
+			tabcontrol.tab(5,text="Memory Types(%d)"%Mcount)
+			for i in range(Mcount):
 				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
 				if i % 2 != 0:
 					TreeMemory.tag_configure(i,background="GRAY91")
