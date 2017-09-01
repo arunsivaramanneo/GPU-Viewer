@@ -46,8 +46,8 @@ Vulkan(tab3)
 
 # About Us tab
 
-Abtimg = tk.PhotoImage(file="Images/About-icon.png")
-img3 = Abtimg.subsample(4,12)
+Abtimg = tk.PhotoImage(file="Images/about.png")
+img3 = Abtimg.subsample(3,6)
 tab4 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab4,image=img3)
 tabcontrol.grid(column=0,row=0)
