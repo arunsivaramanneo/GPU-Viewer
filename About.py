@@ -16,5 +16,9 @@ def AboutUs(tab4):
 	Aboutvsb.grid(column=0,row=0,sticky='nse')
 
 	with open("LICENSE","r") as file1:
+		i = 0
 		for line in file1:
-			TreeAbout.insert('','end',text=line)
+			TreeAbout.insert('','end',text=line,tags=i)
+			if i % 2 != 0:
+				TreeAbout.tag_configure(i,background="GRAY91")
+			i = i + 1
