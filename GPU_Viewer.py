@@ -3,6 +3,7 @@ from tkinter import ttk
 import OpenGLViewer
 from OpenGLViewer import OpenGL
 from vulkanviewer import Vulkan
+from About import AboutUs
 #from DeviceInfo import Info
 
 win = tk.Tk() 
@@ -16,7 +17,7 @@ win.resizable(0,0)
 
 # Creating Tabs for OpenGL , Vulkan So on ...
 GLimg = tk.PhotoImage(file="Images/opengl_logo.png")
-img1 = GLimg.subsample(6,6)
+img1 = GLimg.subsample(5,5)
 tabcontrol = ttk.Notebook(win, padding=10)
 
 #tab1 = ttk.Frame(tabcontrol)
@@ -33,15 +34,24 @@ tabcontrol.grid(column=0,row=0)
 
 OpenGL(tab2)
 
+# Vulkan Tab
 
 VKimg = tk.PhotoImage(file="Images/Vulkan_logo.png")
-img2 = VKimg.subsample(5,5)
+img2 = VKimg.subsample(4,4)
 tab3 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab3, image=img2)
 tabcontrol.grid(column=0,row=0)
 
 Vulkan(tab3)
 
+# About Us tab
 
+Abtimg = tk.PhotoImage(file="Images/About-icon.png")
+img3 = Abtimg.subsample(4,12)
+tab4 = ttk.Frame(tabcontrol)
+tabcontrol.add(tab4,image=img3)
+tabcontrol.grid(column=0,row=0)
+
+AboutUs(tab4)
 
 win.mainloop()
