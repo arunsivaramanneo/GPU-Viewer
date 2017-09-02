@@ -11,7 +11,7 @@ def OpenGL(tab1):
 # Creating the first Frame to display the OpenGL Version Core and String details along with Hardware 
 
 	frame1 = ttk.LabelFrame(tab1, text="OpenGL Information")
-	frame1.grid(column=0,row=0, padx=20, pady=20)
+	frame1.grid(column=0,row=0, padx=20, pady=10)
 
 
 	frame2 = ttk.LabelFrame(tab1, text="Extensions ")
@@ -62,7 +62,7 @@ def OpenGL(tab1):
 		win2.resizable(0,0)
 
 		frame5 = ttk.LabelFrame(win2, text="OpenGL Limits")
-		frame5.grid(column=0,row=0, padx=20,pady=20)
+		frame5.grid(column=0,row=0, padx=20,pady=10)
 
 		
 		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' > OpenGL_Limits.txt")
@@ -75,6 +75,9 @@ def OpenGL(tab1):
 				sc4.grid(column=0,row=0)
 
 		sc4.configure(state="disabled",foreground="BLUE")
+
+		os.system("rm OpenGL_Limits.txt")
+
 # Adding a Button for OpenGL Limits
 	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
 	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
@@ -182,7 +185,7 @@ def OpenGL(tab1):
 		label1.grid(column=0,row=4)
 		TotExt = ttk.Entry(frame3, width=5)
 		TotExt.grid(column=1,row=4)
-		TreeGLAll = ttk.Treeview(frame4,height=15)
+		TreeGLAll = ttk.Treeview(frame4,height=16)
 		TreeGLAll.column('#0',width=725)
 		TreeGLAll.grid(column=0,row=2)
 

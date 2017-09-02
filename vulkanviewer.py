@@ -5,6 +5,12 @@ from tkinter import scrolledtext
 import subprocess
 import os
 
+HT = 31
+COLOR1 = "GRAY91"
+COLOR2 = "GREEN"
+COLOR3 = "RED"
+ANCHOR1 = "center"
+
 def Vulkan(tab2):
 
 	
@@ -20,7 +26,7 @@ def Vulkan(tab2):
 
 	DeviceTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(DeviceTab,text="Device")
-	tabcontrol.grid(column=0,row=1)
+	tabcontrol.grid(column=0,row=1,padx=5)
 
 	FeatureTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(FeatureTab, text="Features")
@@ -56,11 +62,12 @@ def Vulkan(tab2):
 
 	radvar = tk.IntVar()
 
+	
 	def Devices():
 		
 		# Creating a Treeview for the Device Tab
 
-		TreeDevice = ttk.Treeview(DeviceTab,height=30)
+		TreeDevice = ttk.Treeview(DeviceTab,height=HT)
 		TreeDevice['columns'] =('value')
 		TreeDevice.column('#0',width=250,anchor='sw')
 		TreeDevice.column('value',width=500,anchor='nw') 
@@ -117,19 +124,19 @@ def Vulkan(tab2):
 			for line in file1:
 				TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
 				if i % 2 != 0 :
-					TreeDevice.tag_configure(i,background="GRAY91")
+					TreeDevice.tag_configure(i,background=COLOR1)
 				i = i + 1
 
 		os.system("rm Device*.txt")
 
 	def Features():
 
-		TreeFeatures = ttk.Treeview(FeatureTab,height=30)
+		TreeFeatures = ttk.Treeview(FeatureTab,height=HT)
 		TreeFeatures['columns'] =('value')
 		TreeFeatures.heading("#0", text='Device Features')
 		TreeFeatures.column('#0',width=525)
 		TreeFeatures.heading('value',text="Value")
-		TreeFeatures.column('value',width=225,anchor='center')
+		TreeFeatures.column('value',width=225,anchor=ANCHOR1)
 
 		TreeFeatures.grid(column=0,row=0)
 
@@ -166,11 +173,11 @@ def Vulkan(tab2):
 			for line in file1:
 				TreeFeatures.insert('','end',text=line,values=(value[i]),tags=(value[i],i))
 				if value[i] == "true":
-					TreeFeatures.tag_configure(value[i],foreground="GREEN")
+					TreeFeatures.tag_configure(value[i],foreground=COLOR2)
 				else:
-					TreeFeatures.tag_configure(value[i],foreground="RED")
+					TreeFeatures.tag_configure(value[i],foreground=COLOR3)
 				if i % 2 != 0:
-					TreeFeatures.tag_configure(i,background="GRAY91")
+					TreeFeatures.tag_configure(i,background=COLOR1)
 				i = i + 1
 		
 		os.system("rm VKDFeatures*.txt")	
@@ -179,7 +186,7 @@ def Vulkan(tab2):
 	def Limits():
 
 
-		TreeLimits = ttk.Treeview(LimitsTab,height = 30)
+		TreeLimits = ttk.Treeview(LimitsTab,height = HT)
 		TreeLimits['columns'] = ('value')
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=525)
@@ -225,7 +232,7 @@ def Vulkan(tab2):
 			for line in file1:
 				TreeLimits.insert('','end',text=line, values= value[i],tags=(i))
 				if i % 2 != 0:
-					TreeLimits.tag_configure(i,background="GRAY91")
+					TreeLimits.tag_configure(i,background=COLOR1)
 				i = i + 1
 
 		os.system("rm *limits*.txt")		
@@ -233,16 +240,16 @@ def Vulkan(tab2):
 	def Extensions():
 
 
-		te = ttk.Treeview(ExtensionsTab, height=30)
-		te.heading("#0", text='Name')
-		te.column('#0',width=525,anchor='center')
-		te['column'] = ('version')
-		te.grid(column=0,row=0)
-		te.heading('version',text="Version")
-		te.column('version',width=225,anchor='center')
+		TreeExtension = ttk.Treeview(ExtensionsTab, height=HT)
+		TreeExtension.heading("#0", text='Name')
+		TreeExtension.column('#0',width=525,anchor=ANCHOR1)
+		TreeExtension['column'] = ('version')
+		TreeExtension.grid(column=0,row=0)
+		TreeExtension.heading('version',text="Version")
+		TreeExtension.column('version',width=225,anchor=ANCHOR1)
 
-		esb = ttk.Scrollbar(ExtensionsTab, orient="vertical", command=te.yview)
-		te.configure(yscrollcommand=esb.set)
+		esb = ttk.Scrollbar(ExtensionsTab, orient="vertical", command=TreeExtension.yview)
+		TreeExtension.configure(yscrollcommand=esb.set)
 		esb.grid(column=0,row=0,sticky='nse')
 
 		GPU = radvar.get()
@@ -281,9 +288,9 @@ def Vulkan(tab2):
 			file1.seek(0,0)
 			i = 0
 			for line in file1:
-				te.insert('','end',text=line,values=(value[i]),tags=i)
+				TreeExtension.insert('','end',text=line,values=(value[i]),tags=i)
 				if i % 2 != 0:
-					te.tag_configure(i,background="GRAY91")
+					TreeExtension.tag_configure(i,background=COLOR1)
 				i = i + 1
 
 		os.system("rm VKDExtensions*.txt")
@@ -291,20 +298,20 @@ def Vulkan(tab2):
 
 	def Format():
 
-		tf = ttk.Treeview(FormatTab, height=30)
-		tf['columns'] = ("linear","optimal","Buffer")
-		tf.heading("#0", text='Format')
-		tf.column('#0',width=450)
-		tf.heading("linear",text="linear")
-		tf.column("linear",width=100,anchor='center')
-		tf.heading("optimal",text="optimal")
-		tf.column("optimal",width=100,anchor='center')
-		tf.heading("Buffer",text= "Buffer")
-		tf.column("Buffer",width=100,anchor='center')
-		tf.grid(column=0,row=0)
+		TreeFormat = ttk.Treeview(FormatTab, height=HT)
+		TreeFormat['columns'] = ("linear","optimal","Buffer")
+		TreeFormat.heading("#0", text='Format')
+		TreeFormat.column('#0',width=450)
+		TreeFormat.heading("linear",text="linear")
+		TreeFormat.column("linear",width=100,anchor=ANCHOR1)
+		TreeFormat.heading("optimal",text="optimal")
+		TreeFormat.column("optimal",width=100,anchor=ANCHOR1)
+		TreeFormat.heading("Buffer",text= "Buffer")
+		TreeFormat.column("Buffer",width=100,anchor=ANCHOR1)
+		TreeFormat.grid(column=0,row=0)
 		
-		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=tf.yview)
-		tf.configure(yscrollcommand=vsb.set)
+		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=TreeFormat.yview)
+		TreeFormat.configure(yscrollcommand=vsb.set)
 		vsb.grid(column=0,row=0,sticky='nse')
 
 
@@ -375,9 +382,9 @@ def Vulkan(tab2):
 			tabcontrol.tab(4,text="Formats(%d)"%Formats)
 			i = 0
 			for line in file1:
-				tf.insert('','end',text=line,values=(linear[i],optimal[i],Buffer[i]),tags=i)
+				TreeFormat.insert('','end',text=line,values=(linear[i],optimal[i],Buffer[i]),tags=i)
 				if i % 2 != 0 :
-					tf.tag_configure(i,background="GRAY91")
+					TreeFormat.tag_configure(i,background=COLOR1)
 				i = i + 1
 
 				
@@ -385,22 +392,22 @@ def Vulkan(tab2):
 
 	def MemoryTypes():
 
-		TreeMemory = ttk.Treeview(MemoryTypeTab,height=30)
+		TreeMemory = ttk.Treeview(MemoryTypeTab,height=HT)
 		TreeMemory['columns'] = ('value1','value2','value3','value4','value5','value6')
 		TreeMemory.heading('#0',text="Types")
-		TreeMemory.column('#0',width=50,anchor='center')
+		TreeMemory.column('#0',width=50,anchor=ANCHOR1)
 		TreeMemory.heading('value1',text="Heap Index")
-		TreeMemory.column('value1',width=100,anchor="center")
+		TreeMemory.column('value1',width=100,anchor=ANCHOR1)
 		TreeMemory.heading('value2',text="Device_Local")
-		TreeMemory.column('value2',width=110,anchor='center')
+		TreeMemory.column('value2',width=110,anchor=ANCHOR1)
 		TreeMemory.heading('value3',text="Host_Visible")
-		TreeMemory.column('value3',width=110,anchor='center')
+		TreeMemory.column('value3',width=110,anchor=ANCHOR1)
 		TreeMemory.heading('value4',text="Host_Coherent")
-		TreeMemory.column('value4',width=120,anchor='center')
+		TreeMemory.column('value4',width=120,anchor=ANCHOR1)
 		TreeMemory.heading('value5',text="Host_Cached")
-		TreeMemory.column('value5',width=125,anchor='center')
+		TreeMemory.column('value5',width=125,anchor=ANCHOR1)
 		TreeMemory.heading('value6',text="Lazily_Allocated")
-		TreeMemory.column('value6',width=135,anchor='center')
+		TreeMemory.column('value6',width=135,anchor=ANCHOR1)
 
 		TreeMemory.grid(column=0,row=0)
 		
@@ -563,7 +570,7 @@ def Vulkan(tab2):
 			for i in range(Mcount):
 				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
 				if i % 2 != 0:
-					TreeMemory.tag_configure(i,background="GRAY91")
+					TreeMemory.tag_configure(i,background=COLOR1)
 				
 
 		os.system("rm VKDMemory*.txt")
@@ -571,23 +578,23 @@ def Vulkan(tab2):
 	def Queues():
 
 
-		TreeQueue = ttk.Treeview(QueueTab,height=30)
+		TreeQueue = ttk.Treeview(QueueTab,height=HT)
 		TreeQueue['columns'] = ('count','bits','Gbit','Cbit','Tbit','sbit')
 		TreeQueue.heading('#0',text="Queue Family")
-		TreeQueue.column('#0',width=95,anchor='center')
+		TreeQueue.column('#0',width=95,anchor=ANCHOR1)
 		
 		TreeQueue.heading('count',text='Count')
-		TreeQueue.column('count',width=45,anchor='center')
+		TreeQueue.column('count',width=45,anchor=ANCHOR1)
 		TreeQueue.heading('bits',text="timestampValidBits")
-		TreeQueue.column('bits',width=145,anchor='center')
+		TreeQueue.column('bits',width=145,anchor=ANCHOR1)
 		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
-		TreeQueue.column('Gbit',width=100,anchor='center')
+		TreeQueue.column('Gbit',width=100,anchor=ANCHOR1)
 		TreeQueue.heading('Cbit',text='COMPUTE_BIT')
-		TreeQueue.column('Cbit',width=100,anchor='center')
+		TreeQueue.column('Cbit',width=100,anchor=ANCHOR1)
 		TreeQueue.heading('Tbit',text="TRANSFER_BIT")
-		TreeQueue.column('Tbit',width=100,anchor='center')
+		TreeQueue.column('Tbit',width=100,anchor=ANCHOR1)
 		TreeQueue.heading('sbit',text="SPARSE_BINDING_BIT",anchor='w')
-		TreeQueue.column('sbit',width=165,anchor='center')
+		TreeQueue.column('sbit',width=165,anchor=ANCHOR1)
 		TreeQueue.grid(column=0,row=0)
 
 		Qvsb = ttk.Scrollbar(QueueTab, orient="vertical", command=TreeQueue.yview)
@@ -655,7 +662,7 @@ def Vulkan(tab2):
 		for i in range(count):
 			TreeQueue.insert('','end',text=i,values=(qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
 			if i % 2 != 0:
-				TreeQueue.tag_configure(i,background="GRAY91")
+				TreeQueue.tag_configure(i,background=COLOR1)
 
 		os.system("rm VKDQueue*.txt")
 
@@ -689,6 +696,7 @@ def Vulkan(tab2):
 			Queues()
 
 
+
 	frame1 = ttk.LabelFrame(tab2,text="")
 	frame1.grid(column=0,row=0)
 	os.system("cat vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > GPU.txt")
@@ -700,7 +708,7 @@ def Vulkan(tab2):
 		for line in file2:
 			list.append(line)
 
-	
+
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
@@ -710,6 +718,7 @@ def Vulkan(tab2):
 		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()
+
 
 	os.system("rm GPU.txt")
 	
