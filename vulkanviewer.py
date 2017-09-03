@@ -60,6 +60,10 @@ def Vulkan(tab2):
 	tabcontrol.add(QueueTab,text="Queues Families")
 	tabcontrol.grid(column=0,row=1)
 
+	InstanceTab = ttk.Frame(tabcontrol)
+	tabcontrol.add(InstanceTab,text="Instance Extensions")
+	tabcontrol.grid(column=0,row=1)
+
 	radvar = tk.IntVar()
 
 	
@@ -69,7 +73,7 @@ def Vulkan(tab2):
 
 		TreeDevice = ttk.Treeview(DeviceTab,height=HT)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=400,anchor='sw')
+		TreeDevice.column('#0',width=450,anchor='sw')
 		TreeDevice.column('value',width=350,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
@@ -135,9 +139,9 @@ def Vulkan(tab2):
 		TreeFeatures = ttk.Treeview(FeatureTab,height=HT)
 		TreeFeatures['columns'] =('value')
 		TreeFeatures.heading("#0", text='Device Features')
-		TreeFeatures.column('#0',width=525)
+		TreeFeatures.column('#0',width=550)
 		TreeFeatures.heading('value',text="Value")
-		TreeFeatures.column('value',width=225,anchor=ANCHOR1)
+		TreeFeatures.column('value',width=250,anchor=ANCHOR1)
 
 		TreeFeatures.grid(column=0,row=0)
 
@@ -190,9 +194,9 @@ def Vulkan(tab2):
 		TreeLimits = ttk.Treeview(LimitsTab,height = HT)
 		TreeLimits['columns'] = ('value')
 		TreeLimits.heading("#0", text='Device Limits')
-		TreeLimits.column('#0',width=525)
+		TreeLimits.column('#0',width=550)
 		TreeLimits.heading('value',text="Limits")
-		TreeLimits.column('value',width=225,anchor='nw')
+		TreeLimits.column('value',width=250,anchor='nw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
@@ -242,12 +246,12 @@ def Vulkan(tab2):
 
 
 		TreeExtension = ttk.Treeview(ExtensionsTab, height=HT)
-		TreeExtension.heading("#0", text='Name')
-		TreeExtension.column('#0',width=525,anchor=ANCHOR1)
+		TreeExtension.heading("#0", text='Device Extensions')
+		TreeExtension.column('#0',width=550,anchor=ANCHOR1)
 		TreeExtension['column'] = ('version')
 		TreeExtension.grid(column=0,row=0)
 		TreeExtension.heading('version',text="Version")
-		TreeExtension.column('version',width=225,anchor=ANCHOR1)
+		TreeExtension.column('version',width=250,anchor=ANCHOR1)
 
 		esb = ttk.Scrollbar(ExtensionsTab, orient="vertical", command=TreeExtension.yview)
 		TreeExtension.configure(yscrollcommand=esb.set)
@@ -302,7 +306,7 @@ def Vulkan(tab2):
 		TreeFormat = ttk.Treeview(FormatTab, height=HT)
 		TreeFormat['columns'] = ("linear","optimal","Buffer")
 		TreeFormat.heading("#0", text='Format')
-		TreeFormat.column('#0',width=450)
+		TreeFormat.column('#0',width=500)
 		TreeFormat.heading("linear",text="linear")
 		TreeFormat.column("linear",width=100,anchor=ANCHOR1)
 		TreeFormat.heading("optimal",text="optimal")
@@ -400,15 +404,15 @@ def Vulkan(tab2):
 		TreeMemory.heading('value1',text="Heap Index")
 		TreeMemory.column('value1',width=100,anchor=ANCHOR1)
 		TreeMemory.heading('value2',text="Device_Local")
-		TreeMemory.column('value2',width=110,anchor=ANCHOR1)
+		TreeMemory.column('value2',width=120,anchor=ANCHOR1)
 		TreeMemory.heading('value3',text="Host_Visible")
-		TreeMemory.column('value3',width=110,anchor=ANCHOR1)
+		TreeMemory.column('value3',width=120,anchor=ANCHOR1)
 		TreeMemory.heading('value4',text="Host_Coherent")
 		TreeMemory.column('value4',width=120,anchor=ANCHOR1)
 		TreeMemory.heading('value5',text="Host_Cached")
-		TreeMemory.column('value5',width=125,anchor=ANCHOR1)
+		TreeMemory.column('value5',width=135,anchor=ANCHOR1)
 		TreeMemory.heading('value6',text="Lazily_Allocated")
-		TreeMemory.column('value6',width=135,anchor=ANCHOR1)
+		TreeMemory.column('value6',width=145,anchor=ANCHOR1)
 
 		TreeMemory.grid(column=0,row=0)
 		
@@ -585,17 +589,17 @@ def Vulkan(tab2):
 		TreeQueue.column('#0',width=95,anchor=ANCHOR1)
 		
 		TreeQueue.heading('count',text='Count')
-		TreeQueue.column('count',width=45,anchor=ANCHOR1)
+		TreeQueue.column('count',width=50,anchor=ANCHOR1)
 		TreeQueue.heading('bits',text="timestampValidBits")
-		TreeQueue.column('bits',width=145,anchor=ANCHOR1)
+		TreeQueue.column('bits',width=150,anchor=ANCHOR1)
 		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
-		TreeQueue.column('Gbit',width=100,anchor=ANCHOR1)
+		TreeQueue.column('Gbit',width=110,anchor=ANCHOR1)
 		TreeQueue.heading('Cbit',text='COMPUTE_BIT')
-		TreeQueue.column('Cbit',width=100,anchor=ANCHOR1)
+		TreeQueue.column('Cbit',width=110,anchor=ANCHOR1)
 		TreeQueue.heading('Tbit',text="TRANSFER_BIT")
-		TreeQueue.column('Tbit',width=100,anchor=ANCHOR1)
+		TreeQueue.column('Tbit',width=110,anchor=ANCHOR1)
 		TreeQueue.heading('sbit',text="SPARSE_BINDING_BIT",anchor='w')
-		TreeQueue.column('sbit',width=165,anchor=ANCHOR1)
+		TreeQueue.column('sbit',width=175,anchor=ANCHOR1)
 		TreeQueue.grid(column=0,row=0)
 
 		Qvsb = ttk.Scrollbar(QueueTab, orient="vertical", command=TreeQueue.yview)
@@ -667,6 +671,51 @@ def Vulkan(tab2):
 
 		os.system("rm VKDQueue*.txt")
 
+	def Instance():
+
+	
+		os.system("cat vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > VKDInstanceExtensions1.txt")
+		os.system("cat VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDInstanceExtensions.txt")
+			
+		
+		TreeInstance = ttk.Treeview(InstanceTab, height=HT)
+		TreeInstance.heading("#0", text='Instance Extensions')
+		TreeInstance.column('#0',width=550,anchor=ANCHOR1)
+		TreeInstance['column'] = ('version')
+		TreeInstance.grid(column=0,row=0)
+		TreeInstance.heading('version',text="Version")
+		TreeInstance.column('version',width=250,anchor=ANCHOR1)
+
+		Isb = ttk.Scrollbar(InstanceTab, orient="vertical", command=TreeInstance.yview)
+		TreeInstance.configure(yscrollcommand=Isb.set)
+		Isb.grid(column=0,row=0,sticky='nse')
+
+		# This should take care of further versioning till 100
+		with open("VKDInstanceExtensions1.txt","r") as file1:
+			value = []
+			for line in file1:
+				for j in range(100):
+					if ": extension revision  %d"%j in line:
+						value.append("0.0.%d"%j)
+						break
+					if ": extension revision %2d"%j in line:
+						value.append("0.0.%2d"%j)
+						break
+
+
+		with open("VKDInstanceExtensions.txt","r") as file1:
+			count = len(file1.readlines())
+			tabcontrol.tab(7,text="Instance Extensions(%d)"%count)
+			file1.seek(0,0)
+			i = 0
+			for line in file1:
+				TreeInstance.insert('','end',text=line,values=(value[i]),tags=i)
+				if i % 2 != 0:
+					TreeInstance.tag_configure(i,background=COLOR1)
+				i = i + 1
+
+		os.system("rm VKDInstanceExtensions*.txt")
+
 
 
 	def radcall():
@@ -679,6 +728,7 @@ def Vulkan(tab2):
 			Format()
 			MemoryTypes()
 			Queues()
+			Instance()
 		elif radsel == 1:
 			Devices()
 			Features()
@@ -687,6 +737,7 @@ def Vulkan(tab2):
 			Format()
 			MemoryTypes()
 			Queues()
+			Instance()
 		elif radsel == 2:
 			Devices()
 			Features()
@@ -695,6 +746,7 @@ def Vulkan(tab2):
 			Format()
 			MemoryTypes()
 			Queues()
+			Instance()
 
 
 

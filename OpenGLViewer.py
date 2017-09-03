@@ -32,9 +32,9 @@ def OpenGL(tab1):
 	TreeGL = ttk.Treeview(frame1,height=9)
 	TreeGL ['columns'] = ('values')
 	#TreeGL.heading('#0',text='')
-	TreeGL.column('#0',width=400, anchor="s")
+	TreeGL.column('#0',width=450, anchor="s")
 	#TreeGL.heading('values',text="")
-	TreeGL.column('values',width=325)
+	TreeGL.column('values',width=350)
 
 	TreeGL.grid(column=0,row=0)
 
@@ -186,7 +186,7 @@ def OpenGL(tab1):
 		TotExt = ttk.Entry(frame3, width=5)
 		TotExt.grid(column=1,row=4)
 		TreeGLAll = ttk.Treeview(frame4,height=16)
-		TreeGLAll.column('#0',width=725)
+		TreeGLAll.column('#0',width=800)
 		TreeGLAll.grid(column=0,row=2)
 
 		Allsb = ttk.Scrollbar(frame4, orient="vertical", command=TreeGLAll.yview)
