@@ -13,7 +13,7 @@ INSTALLATION
 What's developed and available?
 
 1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
-2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types, Partial Queue Families implemented
+2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types, Partial Queue Families implemented, Instance and Layers
 
 
 UNDERDEVELOPMENT
@@ -33,3 +33,5 @@ KNOWN ISSUES
 1. Currentl 4 Way SLI/crossfire will not work
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
+
+If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: paypal.me/ArunSivaraman
