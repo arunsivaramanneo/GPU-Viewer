@@ -5,9 +5,10 @@ This project aims to capture all the required/important details of glxinfo and v
 
 INSTALLATION
 
-1. Before Downloading the files please ensure python3-tk is installed if not install sudo apt-get install python3-tk
+1. Before Downloading the files please ensure python3-tk is installed if not install (sudo apt-get install python3-tk)
 2. Download the file and Extract to a folder
 3. Double click GPU Viewer (Not GPU_Viewer.py)
+4. For Vulkan Tab to work Install Vulkan-Utils (sudo apt-get install vulkan-utils) also, Vulkan enabled drivers should be installed.
 
 
 What's developed and available?
