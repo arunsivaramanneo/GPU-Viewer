@@ -369,6 +369,7 @@ def OpenGL(tab1):
 				TreeGLAll.insert('','end',text="No extensions available")
 
 
+
 	OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
 	OpenGLrad.grid(column=0,row=1)
 	OpenGLrad.invoke()

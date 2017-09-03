@@ -5,7 +5,7 @@ from tkinter import scrolledtext
 import subprocess
 import os
 
-HT = 31
+HT = 30
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
@@ -69,8 +69,8 @@ def Vulkan(tab2):
 
 		TreeDevice = ttk.Treeview(DeviceTab,height=HT)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=250,anchor='sw')
-		TreeDevice.column('value',width=500,anchor='nw') 
+		TreeDevice.column('#0',width=400,anchor='sw')
+		TreeDevice.column('value',width=350,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
 
@@ -106,13 +106,14 @@ def Vulkan(tab2):
 		# This should take care of api version from 1.0.10 to 1.0.99, apiversion below 1.0.10 will display as provided in the vulkaninfo report
 		for j in range(100):
 			if "1.0.%2d"%j in value[0]:
-				value[0] = "1.0.%2d"%j
+				value[0] = " 1.0.%2d"%j
 				break
 
 		for i in range(len(value)):
 			if i > 0 :
 				if "0x" in value[i]:
 					value[i] = int(value[i],16)
+					value[i] = str(" %d"%value[i])
 
 
 
