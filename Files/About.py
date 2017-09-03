@@ -21,7 +21,7 @@ def AboutUs(tab4):
 	sc1 = scrolledtext.ScrolledText(frameAbout,width=114,height=50)
 	sc1.grid(column=0,row=1,padx=10,sticky=tk.W)
 
-	with open("LICENSE","r") as file1:
+	with open("../LICENSE","r") as file1:
 		i = 0
 		for line in file1:
 			#TreeAbout.insert('','end',text=line,tags=i)

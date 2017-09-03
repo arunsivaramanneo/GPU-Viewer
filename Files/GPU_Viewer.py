@@ -16,7 +16,7 @@ win.resizable(0,0)
 
 
 # Creating Tabs for OpenGL , Vulkan So on ...
-GLimg = tk.PhotoImage(file="Images/opengl_logo.png")
+GLimg = tk.PhotoImage(file="../Images/opengl_logo.png")
 img1 = GLimg.subsample(5,5)
 tabcontrol = ttk.Notebook(win, padding=10)
 
@@ -37,7 +37,7 @@ OpenGL(tab2)
 
 # Vulkan Tab
 
-VKimg = tk.PhotoImage(file="Images/Vulkan_logo.png")
+VKimg = tk.PhotoImage(file="../Images/Vulkan_logo.png")
 img2 = VKimg.subsample(4,4)
 tab3 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab3, image=img2)
@@ -47,7 +47,7 @@ Vulkan(tab3)
 
 # About Us tab
 
-Abtimg = tk.PhotoImage(file="Images/about.png")
+Abtimg = tk.PhotoImage(file="../Images/about.png")
 img3 = Abtimg.subsample(3,6)
 tab4 = ttk.Frame(tabcontrol)
 tabcontrol.add(tab4,image=img3)
