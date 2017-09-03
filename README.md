@@ -3,6 +3,13 @@ A front-end to glxinfo and Vulkaninfo.
 
 This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 with tkinter (python3-tk). All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
 
+INSTALLATION
+
+1. Before Downloading the files please ensure python3-tk is installed if not install sudo apt-get install python3-tk
+2. Download the file and Extract to a folder
+3. Double click GPU Viewer (Not GPU_Viewer.py)
+
+
 What's developed and available?
 
 1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
