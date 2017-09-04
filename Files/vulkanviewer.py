@@ -11,7 +11,7 @@ COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
 ANCHOR1 = "center"
-WIDTH1 = 550
+WIDTH1 = 600
 WIDTH2 = 250
 
 def Vulkan(tab2):
@@ -80,8 +80,8 @@ def Vulkan(tab2):
 
 		TreeDevice = ttk.Treeview(DeviceTab,height=HT)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=450,anchor='sw')
-		TreeDevice.column('value',width=350,anchor='nw') 
+		TreeDevice.column('#0',width=WIDTH1,anchor='sw')
+		TreeDevice.column('value',width=WIDTH2,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
 
@@ -313,7 +313,7 @@ def Vulkan(tab2):
 		TreeFormat = ttk.Treeview(FormatTab, height=HT)
 		TreeFormat['columns'] = ("linear","optimal","Buffer")
 		TreeFormat.heading("#0", text='Format')
-		TreeFormat.column('#0',width=500)
+		TreeFormat.column('#0',width=550)
 		TreeFormat.heading("linear",text="linear")
 		TreeFormat.column("linear",width=100,anchor=ANCHOR1)
 		TreeFormat.heading("optimal",text="optimal")
@@ -404,10 +404,13 @@ def Vulkan(tab2):
 
 	def MemoryTypes():
 
-		TreeMemory = ttk.Treeview(MemoryTypeTab,height=HT)
+
+		frameType = ttk.LabelFrame(MemoryTypeTab,text="Types")
+		frameType.grid(column=0,row=0,pady=15)
+		TreeMemory = ttk.Treeview(frameType,height=HT2)
 		TreeMemory['columns'] = ('value1','value2','value3','value4','value5','value6')
 		TreeMemory.heading('#0',text="Types")
-		TreeMemory.column('#0',width=50,anchor=ANCHOR1)
+		TreeMemory.column('#0',width=95,anchor=ANCHOR1)
 		TreeMemory.heading('value1',text="Heap Index")
 		TreeMemory.column('value1',width=100,anchor=ANCHOR1)
 		TreeMemory.heading('value2',text="Device_Local")
@@ -420,10 +423,9 @@ def Vulkan(tab2):
 		TreeMemory.column('value5',width=140,anchor=ANCHOR1)
 		TreeMemory.heading('value6',text="Lazily_Allocated")
 		TreeMemory.column('value6',width=150,anchor=ANCHOR1)
-
 		TreeMemory.grid(column=0,row=0)
 		
-		Mvsb = ttk.Scrollbar(MemoryTypeTab, orient="vertical", command=TreeMemory.yview)
+		Mvsb = ttk.Scrollbar(frameType, orient="vertical", command=TreeMemory.yview)
 		TreeMemory.configure(yscrollcommand=Mvsb.set)
 		Mvsb.grid(column=0,row=0,sticky='nse')
 
@@ -578,12 +580,61 @@ def Vulkan(tab2):
 			
 			
 
-			tabcontrol.tab(5,text="Memory Types(%d)"%Mcount)
+			
 			for i in range(Mcount):
 				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
 				if i % 2 != 0:
 					TreeMemory.tag_configure(i,background=COLOR1)
 				
+
+		
+
+		# Memory Heap Details to be populated
+
+		frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Heaps")
+		frameHeap.grid(column=0,row=1)
+		TreeHeap = ttk.Treeview(frameHeap,height=10)
+		TreeHeap['columns'] = ('value1','value2')
+		TreeHeap.heading('#0',text='Heaps')
+		TreeHeap.column('#0',width=95,anchor=ANCHOR1)
+		TreeHeap.heading('value1',text='Device Size')
+		TreeHeap.column('value1',width=300,anchor=ANCHOR1)
+		TreeHeap.heading('value2',text='HEAP_DEVICE_LOCAL')
+		TreeHeap.column('value2',width=450,anchor=ANCHOR1)
+		TreeHeap.grid(column=0,row=1)
+
+		Hvsb = ttk.Scrollbar(frameHeap, orient="vertical", command=TreeHeap.yview)
+		TreeMemory.configure(yscrollcommand=Hvsb.set)
+		Hvsb.grid(column=0,row=1,sticky='nse')
+
+		HCount = 0
+		size = []
+		HEAP_DEVICE_LOCAL = []
+
+		with open("VKDMemoryType.txt","r") as file1:
+			for line in file1:
+				if "memoryHeaps" in line:
+					HCount = HCount + 1
+				if "HEAP_DEVICE_LOCAL" in line:
+					HEAP_DEVICE_LOCAL.append("true")
+				if "None" in line:
+					HEAP_DEVICE_LOCAL.append("false")
+				if "size " in line:
+					for j in range(100):
+						for k in range(100):
+							if "(%d.%d GiB)"%(j,k) in line:
+								size.append("%d.%d GB"%(j,k))
+								break
+							elif "(%d.%d0 GiB)"%(j,k) in line:
+								size.append("%d.%d0 GB"%(j,k))
+								break
+
+
+		tabcontrol.tab(5,text="Memory Types(%d) & Heaps(%d)"%(Mcount,HCount))
+		for i in range(HCount):
+				TreeHeap.insert('','end',text=i,values=(size[i],HEAP_DEVICE_LOCAL[i]),tags=(i))
+				if i % 2 != 0:
+					TreeHeap.tag_configure(i,background=COLOR1)
 
 		os.system("rm VKDMemory*.txt")
 
@@ -595,8 +646,8 @@ def Vulkan(tab2):
 		TreeQueue.heading('#0',text="Queue Family")
 		TreeQueue.column('#0',width=95,anchor=ANCHOR1)
 		
-		TreeQueue.heading('count',text='Count')
-		TreeQueue.column('count',width=50,anchor=ANCHOR1)
+		TreeQueue.heading('count',text='Queue Count')
+		TreeQueue.column('count',width=100,anchor=ANCHOR1)
 		TreeQueue.heading('bits',text="timestampValidBits")
 		TreeQueue.column('bits',width=150,anchor=ANCHOR1)
 		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
@@ -730,7 +781,7 @@ def Vulkan(tab2):
 		TreeLayer = ttk.Treeview(frame2,height=10)
 		TreeLayer['columns'] =('value1','value2','value3')
 		TreeLayer.heading('#0',text='Layer Name')
-		TreeLayer.column('#0',width=420,anchor=ANCHOR1)
+		TreeLayer.column('#0',width=460,anchor=ANCHOR1)
 		TreeLayer.heading('value1',text='Vulkan Version')
 		TreeLayer.column('value1',width=113,anchor=ANCHOR1)
 		TreeLayer.heading('value2',text="Layer Version")
