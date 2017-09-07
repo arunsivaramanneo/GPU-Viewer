@@ -1,8 +1,6 @@
 ﻿# GPU-Viewer
 A front-end to glxinfo and Vulkaninfo. 
 
-https://ibb.co/hFaTmv
-
 This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 with tkinter (python3-tk). All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
 
 INSTALLATION STEPS
@@ -36,4 +34,4 @@ KNOWN ISSUES
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 
-If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: paypal.me/ArunSivaraman
+If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: https://www.paypal.me/ArunSivaraman
