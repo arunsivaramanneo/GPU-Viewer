@@ -5,16 +5,16 @@ This project aims to capture all the required/important details of glxinfo and v
 
 INSTALLATION STEPS
 
-1. Before Downloading the files please ensure python3-tk is installed if not install (sudo apt-get install python3-tk)
+1. Before Downloading the files please ensure python3-tk is installed(sudo apt-get install python3-tk).
 2. Download the file and Extract to a folder
-3. Double click GPU Viewer (Not GPU_Viewer.py)
-4. For Vulkan Tab to work Install Vulkan-Utils (sudo apt-get install vulkan-utils) also, Vulkan enabled drivers should be installed.
+3. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPU_Viewer.py
+4. For Vulkan Tab to work Install Vulkan-Utils (sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
 
 
 What's developed and available?
 
 1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
-2. Vulkan - Device Features, Device Limits, Device Extensions have been fully developed and available to the end users,Formats,Memory Types, Partial Queue Families implemented, Instance and Layers
+2. Vulkan - Device Features, Device Limits, Device Extensions,Formats,Memory Types, Partial Queue Families implemented, Instance and Layers
 
 
 UNDERDEVELOPMENT
@@ -25,8 +25,8 @@ IMPORTANT
 
 1. Need Python 3 and python3-tk to run this Application, works only on linux Operating system
 2. Tested on Intel and Nvidia hardware
-3. For Vulkaninfo to work, nvidia, Mesa and nvidia vulkan enabled drivers should be installed
-4. Vulkaninfo should work fine on 2 way and 3 way SLI/crossfire.
+3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
+4. Vulkan Tab should work fine on 2 way and 3 way SLI/crossfire.
 
 KNOWN ISSUES
 
