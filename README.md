@@ -34,4 +34,4 @@ KNOWN ISSUES
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 
-If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: paypal.me/ArunSivaraman
+If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: https://www.paypal.me/ArunSivaraman
