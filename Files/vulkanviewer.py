@@ -115,10 +115,12 @@ def Vulkan(tab2):
 				value.append(line)
 		
 		# This should take care of api version
-		for j in range(100):
-			if "(1.0.%d)"%j in value[0]:
-				value[0] = " 1.0.%d"%j
-				break
+		for i in range(5):
+			for k in range(10):
+				for j in range(100):
+					if "(%d.%d.%d)"%(i,k,j) in value[0]:
+						value[0] = " %d.%d.%d"%(i,k,j)
+						break
 
 		for i in range(len(value)):
 			if i > 0 :
@@ -198,7 +200,7 @@ def Vulkan(tab2):
 	def Limits():
 
 
-		TreeLimits = ttk.Treeview(LimitsTab,height = HT)
+		TreeLimits = ttk.Treeview(LimitsTab,height = HT,selectmode='extended')
 		TreeLimits['columns'] = ('value')
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=WIDTH1)
@@ -236,7 +238,6 @@ def Vulkan(tab2):
 		for i in range(len(value)):
 			if "0x" in value[i]:
 				value[i] = int(value[i],16)
-
 		with open("VKDlimits.txt","r") as file1:
 			count = len(file1.readlines())
 			i = 0
@@ -387,7 +388,6 @@ def Vulkan(tab2):
 		for i in range(count):
 			if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
 				Formats = Formats + 1
-
 
 		with open("VKDFORMATS.txt","r") as file1:
 			file1.seek(0,0)

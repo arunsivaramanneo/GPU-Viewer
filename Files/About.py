@@ -18,9 +18,6 @@ def AboutUs(tab4):
 	TreeAbout.configure(yscrollcommand=Aboutvsb.set)
 	Aboutvsb.grid(column=0,row=0,sticky='nse')
 
-	#sc1 = scrolledtext.ScrolledText(frameAbout,width=122,height=50)
-	#sc1.grid(column=0,row=1,padx=10,sticky=tk.W)
-
 	with open("../About GPU Viewer","r") as file1:
 		i = 0
 		for line in file1:

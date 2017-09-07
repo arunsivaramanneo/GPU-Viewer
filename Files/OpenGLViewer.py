@@ -4,6 +4,9 @@ from tkinter import scrolledtext
 import os
 
 
+COLOR1 = "GRAY91" # even number line background
+COLOR2 = "BLUE"   # Extensions count foreground color
+
 def OpenGL(tab1):
 
 
@@ -49,7 +52,7 @@ def OpenGL(tab1):
 		for line in file1:
 			TreeGL.insert('','end',text=line,values=(value[i],),tag=i)
 			if i % 2 != 0:
-				TreeGL.tag_configure(i,background="GRAY91")
+				TreeGL.tag_configure(i,background=COLOR1)
 			i = i + 1
 
 
@@ -74,7 +77,7 @@ def OpenGL(tab1):
 				sc4.insert('insert',line)
 				sc4.grid(column=0,row=0)
 
-		sc4.configure(state="disabled",foreground="BLUE")
+		sc4.configure(state="disabled",foreground=COLOR2)
 
 		os.system("rm OpenGL_Limits.txt")
 
@@ -89,15 +92,7 @@ def OpenGL(tab1):
 	radvar = tk.IntVar()
 	radvar1 = tk.IntVar()
 
-	def select():
-		radsel1 = radvar1.get()
-
-		if radsel1 == 1:
-			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
-			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
-			
-		if radsel1 == 2:
-			os.system("glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > extensions.txt")
+	def Radio():
 
 		
 		rad1 = tk.Radiobutton(frame3, text="All", variable=radvar, value=1, command=radcall)
@@ -125,6 +120,21 @@ def OpenGL(tab1):
 		rad11.grid(column=10,row=2,sticky=tk.W)
 		rad12 = tk.Radiobutton(frame3, text="Others", variable=radvar, value=10, command=radcall)
 		rad12.grid(column=11,row=2, sticky=tk.W)
+	
+
+	def select():
+		radsel1 = radvar1.get()
+
+		if radsel1 == 1:
+			os.system("glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > extensions.txt")
+			os.system("glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> extensions.txt")
+			Radio()
+			
+		if radsel1 == 2:
+			os.system("glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > extensions.txt")
+			Radio()
+
+		
 		radcall()
 
 
@@ -197,12 +207,13 @@ def OpenGL(tab1):
 			frame4.configure(text="All") 
 			count = len(GL_All)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_All[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
+
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 					
@@ -212,12 +223,12 @@ def OpenGL(tab1):
 			frame4.configure(text="AMD")
 			count = len(GL_AMD)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_AMD[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -226,12 +237,12 @@ def OpenGL(tab1):
 			frame4.configure(text="ARB")
 			count = len(GL_ARB)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_ARB[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -241,12 +252,12 @@ def OpenGL(tab1):
 			
 			count = len(GL_EXT)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_EXT[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -256,12 +267,12 @@ def OpenGL(tab1):
 			frame4.configure(text="NV")
 			count = len(GL_NV)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0 :
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_NV[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -271,12 +282,12 @@ def OpenGL(tab1):
 			frame4.configure(text="ATI")
 			count = len(GL_ATI)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_ATI[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -285,12 +296,12 @@ def OpenGL(tab1):
 			frame4.configure(text="KHR")
 			count = len(GL_KHR)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_KHR[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -300,12 +311,12 @@ def OpenGL(tab1):
 			frame4.configure(text="MESA")
 			count = len(GL_MESA)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_MESA[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 				
@@ -315,12 +326,12 @@ def OpenGL(tab1):
 			frame4.configure(text="Other extensions") 
 			count = len(GL_Others)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_Others[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 					
@@ -330,12 +341,12 @@ def OpenGL(tab1):
 			
 			count = len(GL_SGI)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_SGI[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
@@ -345,12 +356,12 @@ def OpenGL(tab1):
 		
 			count = len(GL_IBM)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_IBM[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 				
@@ -359,12 +370,12 @@ def OpenGL(tab1):
 			frame4.configure(text="OES")
 			count = len(GL_OES)
 			TotExt.insert('insert',count)
-			TotExt.configure(state='disabled',foreground="BLUE")
+			TotExt.configure(state='disabled',foreground=COLOR2)
 			if count > 0:
 				for i in range(count):
 					TreeGLAll.insert('','end',text=GL_OES[i],tags=i)
 					if i % 2 != 0:
-						TreeGLAll.tag_configure(i,background="GRAY91")
+						TreeGLAll.tag_configure(i,background=COLOR1)
 			else:
 				TreeGLAll.insert('','end',text="No extensions available")
 
