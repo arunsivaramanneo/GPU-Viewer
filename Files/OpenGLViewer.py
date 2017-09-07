@@ -13,7 +13,7 @@ def OpenGL(tab1):
 
 # Creating the first Frame to display the OpenGL Version Core and String details along with Hardware 
 
-	frame1 = ttk.LabelFrame(tab1, text="OpenGL Information")
+	frame1 = ttk.LabelFrame(tab1, text="OpenGL Information",padding=10)
 	frame1.grid(column=0,row=0, padx=20, pady=10)
 
 
@@ -23,7 +23,7 @@ def OpenGL(tab1):
 	frame3 = ttk.LabelFrame(tab1, text=" ")
 	frame3.grid(column=0,row=2,padx=20, sticky=tk.W)
 
-	frame4 = ttk.LabelFrame(tab1, text="")
+	frame4 = ttk.LabelFrame(tab1, text="",padding=10)
 	frame4.grid(column=0,row=4)
 
 	
@@ -64,7 +64,7 @@ def OpenGL(tab1):
 		win2.title("OpenGL Limits")
 		win2.resizable(0,0)
 
-		frame5 = ttk.LabelFrame(win2, text="OpenGL Limits")
+		frame5 = ttk.LabelFrame(win2, text="OpenGL Limits",padding=10)
 		frame5.grid(column=0,row=0, padx=20,pady=10)
 
 		

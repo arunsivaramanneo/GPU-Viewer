@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 
-HT = 35 # Height of the Tab
+HT = 37 # Height of the Tab
 
 def AboutUs(tab4):
 
-	frameAbout = ttk.LabelFrame(tab4)
+	frameAbout = ttk.LabelFrame(tab4,padding=10)
 	frameAbout.grid(column=0,row=0,padx=10)
 
 	TreeAbout = ttk.Treeview(frameAbout,height=HT)

@@ -5,7 +5,7 @@ from tkinter import scrolledtext
 import subprocess
 import os
 
-HT = 30
+HT = 32
 HT2 = 15
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
@@ -27,48 +27,48 @@ def Vulkan(tab2):
 	
 	# Creating the Features Tab
 
-	DeviceTab = ttk.Frame(tabcontrol)
+	DeviceTab = ttk.Frame(tabcontrol,padding=10)
 	tabcontrol.add(DeviceTab,text="Device")
 	tabcontrol.grid(column=0,row=1,padx=5)
 
 	FeatureTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(FeatureTab, text="Features")
+	tabcontrol.add(FeatureTab, text="Features",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
  	#Creating Limits Tab
 
 	LimitsTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(LimitsTab,text = "Limits")
+	tabcontrol.add(LimitsTab,text = "Limits",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	# creating the Extensions Tab
 
 	ExtensionsTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(ExtensionsTab,text = "Extensions")
+	tabcontrol.add(ExtensionsTab,text = "Extensions",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating the Formats tab
 
 	FormatTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(FormatTab,text= "Formats")
+	tabcontrol.add(FormatTab,text= "Formats",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating the Memory Type Tab
 
 	MemoryTypeTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(MemoryTypeTab,text="Memory Type")
+	tabcontrol.add(MemoryTypeTab,text="Memory Type",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating Queue Tab
 
 	QueueTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(QueueTab,text="Queues Families")
+	tabcontrol.add(QueueTab,text="Queues Families",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	#Creating Instance Tab
 
 	InstanceTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(InstanceTab,text="Instance Extensions")
+	tabcontrol.add(InstanceTab,text="Instance Extensions",padding=10)
 	tabcontrol.grid(column=0,row=1)
 
 	radvar = tk.IntVar()
