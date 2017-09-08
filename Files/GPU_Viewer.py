@@ -52,7 +52,7 @@ finally:
 	# About Us tab
 
 	Abtimg = tk.PhotoImage(file="../Images/aboutus.png")
-	img3 = Abtimg.subsample(5,5)
+	img3 = Abtimg.subsample(3,7)
 	tab4 = ttk.Frame(tabcontrol)
 	tabcontrol.add(tab4,image=img3)
 	tabcontrol.grid(column=0,row=0)
