@@ -82,6 +82,10 @@ def Vulkan(tab2):
 
 		TreeDevice.grid(column=0,row=0)
 
+		Dsb = ttk.Scrollbar(DeviceTab, orient="vertical", command=TreeDevice.yview)
+		TreeDevice.configure(yscrollcommand=Dsb.set)
+		Dsb.grid(column=0,row=0,sticky='nse')
+
 		GPU = radvar.get()
 
 		# Fetching the required details using grep, Awk and Cat Commands
@@ -240,7 +244,7 @@ def Vulkan(tab2):
 			i = 0
 			file1.seek(0,0)
 			for line in file1:
-				TreeLimits.insert('','end',text=line, values= value[i],tags=(i))
+				TreeLimits.insert('','end',text=line, values=value[i],tags=(i))
 				if i % 2 != 0:
 					TreeLimits.tag_configure(i,background=COLOR1)
 				i = i + 1

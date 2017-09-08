@@ -78,6 +78,10 @@ def OpenGL(tab1):
 		TreeGLLimits.column('#0',width=800)
 		TreeGLLimits.grid(column=0,row=0)
 
+		lsb = ttk.Scrollbar(frame5, orient="vertical", command=TreeGLLimits.yview)
+		TreeGLLimits.configure(yscrollcommand=lsb.set)
+		lsb.grid(column=0,row=0,sticky='nse')
+
 	
 		with open("OpenGL_Limits.txt","r") as file3:
 			i = 0
