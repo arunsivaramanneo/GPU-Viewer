@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
+from tkinter import Toplevel
 import os
 
 
@@ -60,10 +61,9 @@ def OpenGL(tab1):
 # Creating a new window for OpenGL Limits
 
 	def clickMe():
-		win2 = tk.Tk()
+		win2 = Toplevel()
 		win2.title("OpenGL Limits")
 		win2.resizable(0,0)
-
 		frame5 = ttk.LabelFrame(win2,padding=10)
 		frame5.grid(column=0,row=0, padx=20,pady=10)
 
@@ -89,10 +89,13 @@ def OpenGL(tab1):
 			
 
 		os.system("rm OpenGL_Limit*.txt")
+		win2.mainloop()
+		
 
 # Adding a Button for OpenGL Limits
 	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
 	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
+	
 
 	
 

@@ -3,7 +3,7 @@ from tkinter import ttk
 import os
 
 HT = 32
-HT2 = 15
+HT2 = 16
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
