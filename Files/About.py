@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import scrolledtext
 
 HT = 37 # Height of the Tab
+COLOR1 = "GRAY91" # even number line background
+COLOR2 = "BLUE" 
 
 def AboutUs(tab4):
 
@@ -23,11 +25,11 @@ def AboutUs(tab4):
 		for line in file1:
 			TreeAbout.insert('','end',text=line,tags=i)
 			if "github.com" in line:
-				TreeAbout.tag_configure(i,foreground="BLUE")
+				TreeAbout.tag_configure(i,foreground=COLOR2)
 			if "gmail.com" in line:
-				TreeAbout.tag_configure(i,foreground="BLUE")
+				TreeAbout.tag_configure(i,foreground=COLOR2)
 			if "paypal.me" in line:
-				TreeAbout.tag_configure(i,foreground="BLUE")
+				TreeAbout.tag_configure(i,foreground=COLOR2)
 			if i % 2 != 0 :
-				TreeAbout.tag_configure(i,background="GRAY91")
+				TreeAbout.tag_configure(i,background=COLOR1)
 			i = i + 1

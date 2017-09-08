@@ -64,22 +64,31 @@ def OpenGL(tab1):
 		win2.title("OpenGL Limits")
 		win2.resizable(0,0)
 
-		frame5 = ttk.LabelFrame(win2, text="OpenGL Limits",padding=10)
+		frame5 = ttk.LabelFrame(win2,padding=10)
 		frame5.grid(column=0,row=0, padx=20,pady=10)
 
 		
 		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' > OpenGL_Limits.txt")
+		
 
-		sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
+		#sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
 
+		TreeGLLimits = ttk.Treeview(frame5,height=15)
+		TreeGLLimits.heading('#0',text="OpenGL Limits")
+		TreeGLLimits.column('#0',width=800)
+		TreeGLLimits.grid(column=0,row=0)
+
+	
 		with open("OpenGL_Limits.txt","r") as file3:
+			i = 0
 			for line in file3:
-				sc4.insert('insert',line)
-				sc4.grid(column=0,row=0)
+				TreeGLLimits.insert('','end',text=line,tags=i)
+				if i % 2 != 0:
+					TreeGLLimits.tag_configure(i,background=COLOR1)
+				i = i + 1
+			
 
-		sc4.configure(state="disabled",foreground=COLOR2)
-
-		os.system("rm OpenGL_Limits.txt")
+		os.system("rm OpenGL_Limit*.txt")
 
 # Adding a Button for OpenGL Limits
 	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)

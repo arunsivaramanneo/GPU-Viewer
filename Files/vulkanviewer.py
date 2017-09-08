@@ -1,8 +1,5 @@
 import tkinter as tk
-import itertools
 from tkinter import ttk 
-from tkinter import scrolledtext
-import subprocess
 import os
 
 HT = 32
@@ -114,7 +111,7 @@ def Vulkan(tab2):
 			for line in file1:
 				value.append(line)
 		
-		# This should take care of api version
+		# This should take care of api version from 0.0.0 to 5.9.99
 		for i in range(5):
 			for k in range(10):
 				for j in range(100):
@@ -644,7 +641,7 @@ def Vulkan(tab2):
 		TreeQueue = ttk.Treeview(QueueTab,height=HT)
 		TreeQueue['columns'] = ('count','bits','Gbit','Cbit','Tbit','sbit')
 		TreeQueue.heading('#0',text="Queue Family")
-		TreeQueue.column('#0',width=95,anchor=ANCHOR1)
+		TreeQueue.column('#0',width=100,anchor=ANCHOR1)
 		
 		TreeQueue.heading('count',text='Queue Count')
 		TreeQueue.column('count',width=100,anchor=ANCHOR1)
@@ -657,7 +654,7 @@ def Vulkan(tab2):
 		TreeQueue.heading('Tbit',text="TRANSFER_BIT")
 		TreeQueue.column('Tbit',width=110,anchor=ANCHOR1)
 		TreeQueue.heading('sbit',text="SPARSE_BINDING_BIT",anchor='center')
-		TreeQueue.column('sbit',width=175,anchor=ANCHOR1)
+		TreeQueue.column('sbit',width=170,anchor=ANCHOR1)
 		TreeQueue.grid(column=0,row=0)
 
 		Qvsb = ttk.Scrollbar(QueueTab, orient="vertical", command=TreeQueue.yview)
@@ -895,8 +892,3 @@ def Vulkan(tab2):
 
 	os.system("rm GPU.txt")
 	
-
-
-
-	
-

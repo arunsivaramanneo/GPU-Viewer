@@ -15,6 +15,7 @@ win.title("GPU Viewer")
 win.resizable(0,0)
 
 style = ttk.Style()
+
 try:
 	style.theme_use("alt")
 except Exception as e:
@@ -26,11 +27,8 @@ finally:
 	img1 = GLimg.subsample(4,4)
 	tabcontrol = ttk.Notebook(win, padding=10)
 
-	#tab1 = ttk.Frame(tabcontrol)
-	#tabcontrol.add(tab1,text=icon)
-	#tabcontrol.grid(column=0,row=0)
 
-	#Info(tab1)
+	# OpenGL Tab
 
 	tab2 = ttk.Frame(tabcontrol)
 	tabcontrol.add(tab2, image=img1)
