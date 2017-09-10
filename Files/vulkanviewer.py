@@ -4,12 +4,16 @@ import os
 
 HT = 32
 HT2 = 16
+HT3 = 10
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
 ANCHOR1 = "center"
 WIDTH1 = 600
 WIDTH2 = 250
+WIDTH3 = 100
+PAD1 = 10
+RANGE1 = 100
 
 def Vulkan(tab2):
 
@@ -19,53 +23,53 @@ def Vulkan(tab2):
 	#Creating Feature Tab
 	os.system("vulkaninfo > vulkaninfo.txt")
 
-	tabcontrol = ttk.Notebook(tab2, padding=10)
+	tabcontrol = ttk.Notebook(tab2, padding=PAD1)
 	#tabcontrol.enable_traversal()
 	
 	# Creating the Features Tab
 
-	DeviceTab = ttk.Frame(tabcontrol,padding=10)
+	DeviceTab = ttk.Frame(tabcontrol,padding=PAD1)
 	tabcontrol.add(DeviceTab,text="Device")
 	tabcontrol.grid(column=0,row=1,padx=5)
 
 	FeatureTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(FeatureTab, text="Features",padding=10)
+	tabcontrol.add(FeatureTab, text="Features",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
  	#Creating Limits Tab
 
 	LimitsTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(LimitsTab,text = "Limits",padding=10)
+	tabcontrol.add(LimitsTab,text = "Limits",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	# creating the Extensions Tab
 
 	ExtensionsTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(ExtensionsTab,text = "Extensions",padding=10)
+	tabcontrol.add(ExtensionsTab,text = "Extensions",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating the Formats tab
 
 	FormatTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(FormatTab,text= "Formats",padding=10)
+	tabcontrol.add(FormatTab,text= "Formats",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating the Memory Type Tab
 
 	MemoryTypeTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(MemoryTypeTab,text="Memory Type",padding=10)
+	tabcontrol.add(MemoryTypeTab,text="Memory Type",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	# Creating Queue Tab
 
 	QueueTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(QueueTab,text="Queues Families",padding=10)
+	tabcontrol.add(QueueTab,text="Queues Families",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	#Creating Instance Tab
 
 	InstanceTab = ttk.Frame(tabcontrol)
-	tabcontrol.add(InstanceTab,text="Instance Extensions",padding=10)
+	tabcontrol.add(InstanceTab,text="Instance Extensions",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
 
 	radvar = tk.IntVar()
@@ -75,7 +79,7 @@ def Vulkan(tab2):
 		
 		# Creating a Treeview for the Device Tab
 
-		TreeDevice = ttk.Treeview(DeviceTab,height=HT)
+		TreeDevice = ttk.Treeview(DeviceTab,height=HT2)
 		TreeDevice['columns'] =('value')
 		TreeDevice.column('#0',width=WIDTH1,anchor='sw')
 		TreeDevice.column('value',width=WIDTH2,anchor='nw') 
@@ -118,7 +122,7 @@ def Vulkan(tab2):
 		# This should take care of api version from 0.0.0 to 5.9.99
 		for i in range(5):
 			for k in range(10):
-				for j in range(100):
+				for j in range(RANGE1):
 					if "(%d.%d.%d)"%(i,k,j) in value[0]:
 						value[0] = " %d.%d.%d"%(i,k,j)
 						break
@@ -140,6 +144,57 @@ def Vulkan(tab2):
 				TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
 				if i % 2 != 0 :
 					TreeDevice.tag_configure(i,background=COLOR1)
+				i = i + 1
+
+
+		# Physical Device Sparse properties
+
+		TreeSparse = ttk.Treeview(DeviceTab,height=HT3)
+		TreeSparse['columns'] =('value')
+		TreeSparse.heading('#0',text="Device Sparse Properties")
+		TreeSparse.column('#0',width=WIDTH1,anchor='sw')
+		TreeSparse.heading('value',text='Value',anchor='sw')
+		TreeSparse.column('value',width=WIDTH2) 
+
+		TreeSparse.grid(column=0,row=1,pady=50)
+
+		ssb = ttk.Scrollbar(DeviceTab, orient="vertical", command=TreeSparse.yview)
+		TreeSparse.configure(yscrollcommand=ssb.set)
+		ssb.grid(column=0,row=1,sticky='nse',pady=50)
+
+		if GPU == 0:
+			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
+
+		elif GPU == 1:
+
+			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
+
+		elif GPU == 2:
+
+			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
+	
+		with open("Devicesparseinfo1.txt","r") as file1:
+			value = []
+			for line in file1:
+				if '= 1' in line:
+					value.append("true")
+				else:
+					value.append("false")
+
+		with open("Devicesparseinfo.txt","r") as file1:
+			file1.seek(0,0)
+			i = 0
+			for line in file1:
+				TreeSparse.insert('','end',text=line,values=(value[i],),tags=(value[i],i))
+				if value[i] == "true":
+					TreeSparse.tag_configure(value[i],foreground=COLOR2)
+				else:
+					TreeSparse.tag_configure(value[i],foreground=COLOR3)
+				if i % 2 != 0 :
+					TreeSparse.tag_configure(i,background=COLOR1)
 				i = i + 1
 
 		os.system("rm Device*.txt")
@@ -205,7 +260,7 @@ def Vulkan(tab2):
 		TreeLimits['columns'] = ('value')
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=WIDTH1)
-		TreeLimits.heading('value',text="Limits")
+		TreeLimits.heading('value',text="Limits",anchor='sw')
 		TreeLimits.column('value',width=WIDTH2,anchor='nw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
@@ -287,7 +342,7 @@ def Vulkan(tab2):
 		with open("VKDExtensions1.txt","r") as file1:
 			value = []
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if ": extension revision  %d"%j in line:
 						value.append("0.0.%d"%j)
 						break
@@ -317,11 +372,11 @@ def Vulkan(tab2):
 		TreeFormat.heading("#0", text='Format')
 		TreeFormat.column('#0',width=550)
 		TreeFormat.heading("linear",text="linear")
-		TreeFormat.column("linear",width=100,anchor=ANCHOR1)
+		TreeFormat.column("linear",width=WIDTH3,anchor=ANCHOR1)
 		TreeFormat.heading("optimal",text="optimal")
-		TreeFormat.column("optimal",width=100,anchor=ANCHOR1)
+		TreeFormat.column("optimal",width=WIDTH3,anchor=ANCHOR1)
 		TreeFormat.heading("Buffer",text= "Buffer")
-		TreeFormat.column("Buffer",width=100,anchor=ANCHOR1)
+		TreeFormat.column("Buffer",width=WIDTH3,anchor=ANCHOR1)
 		TreeFormat.grid(column=0,row=0)
 		
 		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=TreeFormat.yview)
@@ -413,7 +468,7 @@ def Vulkan(tab2):
 		TreeMemory.heading('#0',text="Types")
 		TreeMemory.column('#0',width=95,anchor=ANCHOR1)
 		TreeMemory.heading('value1',text="Heap Index")
-		TreeMemory.column('value1',width=100,anchor=ANCHOR1)
+		TreeMemory.column('value1',width=WIDTH3,anchor=ANCHOR1)
 		TreeMemory.heading('value2',text="Device_Local")
 		TreeMemory.column('value2',width=120,anchor=ANCHOR1)
 		TreeMemory.heading('value3',text="Host_Visible")
@@ -449,7 +504,7 @@ def Vulkan(tab2):
 		with open("VKDMemoryType.txt","r") as file1:
 			heapIndex = []
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if "heapIndex" in line:
 						if "= %d"%j in line:
 							heapIndex.append(j)
@@ -594,7 +649,7 @@ def Vulkan(tab2):
 
 		frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Heaps")
 		frameHeap.grid(column=0,row=1)
-		TreeHeap = ttk.Treeview(frameHeap,height=10)
+		TreeHeap = ttk.Treeview(frameHeap,height=HT3)
 		TreeHeap['columns'] = ('value1','value2')
 		TreeHeap.heading('#0',text='Heaps')
 		TreeHeap.column('#0',width=95,anchor=ANCHOR1)
@@ -621,8 +676,8 @@ def Vulkan(tab2):
 				if "None" in line:
 					HEAP_DEVICE_LOCAL.append("false")
 				if "size " in line:
-					for j in range(100):
-						for k in range(100):
+					for j in range(RANGE1):
+						for k in range(RANGE1):
 							if "(%d.%d GiB)"%(j,k) in line:
 								size.append("%d.%d GB"%(j,k))
 								break
@@ -645,10 +700,10 @@ def Vulkan(tab2):
 		TreeQueue = ttk.Treeview(QueueTab,height=HT)
 		TreeQueue['columns'] = ('count','bits','Gbit','Cbit','Tbit','sbit')
 		TreeQueue.heading('#0',text="Queue Family")
-		TreeQueue.column('#0',width=100,anchor=ANCHOR1)
+		TreeQueue.column('#0',width=WIDTH3,anchor=ANCHOR1)
 		
 		TreeQueue.heading('count',text='Queue Count')
-		TreeQueue.column('count',width=100,anchor=ANCHOR1)
+		TreeQueue.column('count',width=WIDTH3,anchor=ANCHOR1)
 		TreeQueue.heading('bits',text="timestampValidBits")
 		TreeQueue.column('bits',width=150,anchor=ANCHOR1)
 		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
@@ -757,7 +812,7 @@ def Vulkan(tab2):
 		with open("VKDInstanceExtensions1.txt","r") as file1:
 			value = []
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if ": extension revision  %d"%j in line:
 						value.append("0.0.%d"%j)
 						break
@@ -779,7 +834,7 @@ def Vulkan(tab2):
 
 		os.system("rm VKDInstanceExtensions*.txt")
 
-		TreeLayer = ttk.Treeview(frame2,height=10)
+		TreeLayer = ttk.Treeview(frame2,height=HT3)
 		TreeLayer['columns'] =('value1','value2','value3')
 		TreeLayer.heading('#0',text='Layer Name')
 		TreeLayer.column('#0',width=460,anchor=ANCHOR1)
@@ -801,7 +856,7 @@ def Vulkan(tab2):
 		Vversion = []
 		with open("VKDLayer1.txt","r") as file1:
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if "Vulkan version 1.0.%d,"%j in line:
 						Vversion.append("1.0.%d"%j)
 						
@@ -811,7 +866,7 @@ def Vulkan(tab2):
 		LVersion = []
 		with open("VKDLayer1.txt","r") as file1:
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if "layer version %d"%j in line:
 						LVersion.append("0.0.%d"%j)
 						break
@@ -819,7 +874,7 @@ def Vulkan(tab2):
 		ECount = []
 		with open("VKDLayer1.txt","r") as file1:
 			for line in file1:
-				for j in range(100):
+				for j in range(RANGE1):
 					if "Layer Extensions	count = %d"%j in line:
 						ECount.append("%d"%j)
 						break

@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk 
 import OpenGLViewer
@@ -58,5 +59,6 @@ finally:
 	tabcontrol.grid(column=0,row=0)
 
 	AboutUs(tab4)
+
 
 	win.mainloop()
