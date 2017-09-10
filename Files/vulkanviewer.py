@@ -130,9 +130,9 @@ def Vulkan(tab2):
 					value[i] = str(" %d"%value[i])
 
 
-
+	
 		# Printing the Details into the Treeview
-		
+
 		with open("Deviceinfo.txt","r") as file1:
 			file1.seek(0,0)
 			i = 0

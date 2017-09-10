@@ -13,8 +13,8 @@ INSTALLATION STEPS
 
 What's developed and available?
 
-1. OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
-2. Vulkan - Device Features, Device Limits, Device Extensions,Formats,Memory Types, Partial Queue Families implemented, Instance and Layers
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
+2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers
 
 
 UNDERDEVELOPMENT
@@ -23,14 +23,14 @@ UNDERDEVELOPMENT
 
 IMPORTANT
 
-1. Need Python 3 and python3-tk to run this Application, works only on linux Operating system
+1. Requires Python 3 and python3-tk to run this Application, works only on linux Operating system
 2. Tested on Intel and Nvidia hardware
 3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 4. Vulkan Tab should work fine on 2 way and 3 way SLI/crossfire.
 
 KNOWN ISSUES
 
-1. Currentl 4 Way SLI/crossfire will not work
+1. 4 Way SLI/crossfire will not work for Vulkan Tab.
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 
