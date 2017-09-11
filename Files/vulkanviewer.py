@@ -79,9 +79,9 @@ def Vulkan(tab2):
 		
 		# Creating a Treeview for the Device Tab
 
-		TreeDevice = ttk.Treeview(DeviceTab,height=HT2)
+		TreeDevice = ttk.Treeview(DeviceTab,height=HT3)
 		TreeDevice['columns'] =('value')
-		TreeDevice.column('#0',width=WIDTH1,anchor='sw')
+		TreeDevice.column('#0',width=WIDTH1,anchor='center')
 		TreeDevice.column('value',width=WIDTH2,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
@@ -149,7 +149,7 @@ def Vulkan(tab2):
 
 		# Physical Device Sparse properties
 
-		TreeSparse = ttk.Treeview(DeviceTab,height=HT3)
+		TreeSparse = ttk.Treeview(DeviceTab,height=HT2)
 		TreeSparse['columns'] =('value')
 		TreeSparse.heading('#0',text="Device Sparse Properties")
 		TreeSparse.column('#0',width=WIDTH1,anchor='sw')
@@ -836,12 +836,12 @@ def Vulkan(tab2):
 
 		TreeLayer = ttk.Treeview(frame2,height=HT3)
 		TreeLayer['columns'] =('value1','value2','value3')
-		TreeLayer.heading('#0',text='Layer Name')
+		TreeLayer.heading('#0',text='Instance Layers')
 		TreeLayer.column('#0',width=460,anchor=ANCHOR1)
 		TreeLayer.heading('value1',text='Vulkan Version')
-		TreeLayer.column('value1',width=113,anchor=ANCHOR1)
+		TreeLayer.column('value1',width=120,anchor=ANCHOR1)
 		TreeLayer.heading('value2',text="Layer Version")
-		TreeLayer.column('value2',width=112,anchor=ANCHOR1)
+		TreeLayer.column('value2',width=120,anchor=ANCHOR1)
 		TreeLayer.heading('value3',text='Extension Count')
 		TreeLayer.column('value3',width=150,anchor=ANCHOR1)
 		TreeLayer.grid(column=0,row=1,pady=10)
@@ -851,7 +851,7 @@ def Vulkan(tab2):
 		lsb.grid(column=0,row=1,sticky='nse',pady=10)
 
 		os.system("cat vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > VKDLayer1.txt")
-		os.system("cat VKDLayer1.txt | grep VK_ | awk '{gsub(/\(.*/,'True');print} ' > VKDLayer.txt")
+		os.system("cat VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > VKDLayer.txt")
 
 		Vversion = []
 		with open("VKDLayer1.txt","r") as file1:
