@@ -5,7 +5,6 @@ import OpenGLViewer
 from OpenGLViewer import OpenGL
 from vulkanviewer import Vulkan
 from About import AboutUs
-#from DeviceInfo import Info
 
 win = tk.Tk() 
 
@@ -19,6 +18,7 @@ style = ttk.Style()
 
 try:
 	style.theme_use("alt")
+	style.configure('.',font=('Helvetica',10))
 except Exception as e:
 	raise e
 finally:
