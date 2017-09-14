@@ -478,7 +478,7 @@ def Vulkan(tab2):
 	def MemoryTypes():
 
 
-		frameType = ttk.LabelFrame(MemoryTypeTab,text="Types")
+		frameType = ttk.LabelFrame(MemoryTypeTab,text="Memory Types")
 		frameType.grid(column=0,row=0,pady=15)
 		TreeMemory = ttk.Treeview(frameType,height=HT2)
 		TreeMemory['columns'] = ('value1','value2','value3','value4','value5','value6')
@@ -665,7 +665,7 @@ def Vulkan(tab2):
 
 				# Memory Heap Details to be populated
 
-				frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Heaps")
+				frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Memory Heaps")
 				frameHeap.grid(column=0,row=1)
 				TreeHeap = ttk.Treeview(frameHeap,height=HT3)
 				TreeHeap['columns'] = ('value1','value2')
@@ -696,18 +696,13 @@ def Vulkan(tab2):
 						if "size " in line:
 							for j in range(1024):
 								for k in range(RANGE1):
-									if "(%d.%d GiB)"%(j,k) in line:
-										size.append("%d.%d GB"%(j,k))
+									if "(%d.%02d GiB)"%(j,k) in line:
+										size.append("%d.%02d GB"%(j,k))
 										break
-									elif "(%d.%d0 GiB)"%(j,k) in line:
-										size.append("%d.%d0 GB"%(j,k))
+									elif "(%d.%02d MiB)"%(j,k) in line:
+										size.append("%d.%02d MB"%(j,k))
 										break
-									elif "(%d.%d MiB)"%(j,k) in line:
-										size.append("%d.%d MB"%(j,k))
-										break
-									elif "(%d.%d0 MiB)"%(j,k) in line:
-										size.append("%d.%d0 MB"%(j,k))
-										break
+								
 
 				try:
 					for i in range(HCount):
