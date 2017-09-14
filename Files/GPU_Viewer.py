@@ -19,6 +19,7 @@ style = ttk.Style()
 try:
 	style.theme_use("alt")
 	style.configure('.',font=('Helvetica',10))
+
 except Exception as e:
 	raise e
 finally:

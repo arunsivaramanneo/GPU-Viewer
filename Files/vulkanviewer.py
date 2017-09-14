@@ -136,68 +136,72 @@ def Vulkan(tab2):
 
 	
 		# Printing the Details into the Treeview
+		try:
+			with open("Deviceinfo.txt","r") as file1:
+				file1.seek(0,0)
+				i = 0
+				for line in file1:
+					TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
+					if i % 2 != 0 :
+						TreeDevice.tag_configure(i,background=COLOR1)
+					i = i + 1			
+		except Exception as e:
+			raise e
+		finally:
+			
+			# Physical Device Sparse properties
 
-		with open("Deviceinfo.txt","r") as file1:
-			file1.seek(0,0)
-			i = 0
-			for line in file1:
-				TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
-				if i % 2 != 0 :
-					TreeDevice.tag_configure(i,background=COLOR1)
-				i = i + 1
+			TreeSparse = ttk.Treeview(DeviceTab,height=HT2)
+			TreeSparse['columns'] =('value')
+			TreeSparse.heading('#0',text="Device Sparse Properties")
+			TreeSparse.column('#0',width=WIDTH1,anchor='sw')
+			TreeSparse.heading('value',text='Value',anchor='sw')
+			TreeSparse.column('value',width=WIDTH2) 
 
+			TreeSparse.grid(column=0,row=1,pady=50)
 
-		# Physical Device Sparse properties
+			ssb = ttk.Scrollbar(DeviceTab, orient="vertical", command=TreeSparse.yview)
+			TreeSparse.configure(yscrollcommand=ssb.set)
+			ssb.grid(column=0,row=1,sticky='nse',pady=50)
 
-		TreeSparse = ttk.Treeview(DeviceTab,height=HT2)
-		TreeSparse['columns'] =('value')
-		TreeSparse.heading('#0',text="Device Sparse Properties")
-		TreeSparse.column('#0',width=WIDTH1,anchor='sw')
-		TreeSparse.heading('value',text='Value',anchor='sw')
-		TreeSparse.column('value',width=WIDTH2) 
+			if GPU == 0:
+				os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+				os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
 
-		TreeSparse.grid(column=0,row=1,pady=50)
+			elif GPU == 1:
 
-		ssb = ttk.Scrollbar(DeviceTab, orient="vertical", command=TreeSparse.yview)
-		TreeSparse.configure(yscrollcommand=ssb.set)
-		ssb.grid(column=0,row=1,sticky='nse',pady=50)
+				os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+				os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
 
-		if GPU == 0:
-			os.system("cat vulkaninfo.txt | awk '/GPU0/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
-			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
+			elif GPU == 2:
 
-		elif GPU == 1:
-
-			os.system("cat vulkaninfo.txt | awk '/GPU1/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
-			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
-
-		elif GPU == 2:
-
-			os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
-			os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
-	
-		with open("Devicesparseinfo1.txt","r") as file1:
-			value = []
-			for line in file1:
-				if '= 1' in line:
-					value.append("true")
-				else:
-					value.append("false")
-
-		with open("Devicesparseinfo.txt","r") as file1:
-			file1.seek(0,0)
-			i = 0
-			for line in file1:
-				TreeSparse.insert('','end',text=line,values=(value[i],),tags=(value[i],i))
-				if value[i] == "true":
-					TreeSparse.tag_configure(value[i],foreground=COLOR2)
-				else:
-					TreeSparse.tag_configure(value[i],foreground=COLOR3)
-				if i % 2 != 0 :
-					TreeSparse.tag_configure(i,background=COLOR1)
-				i = i + 1
-
-		os.system("rm Device*.txt")
+				os.system("cat vulkaninfo.txt | awk '/GPU2/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > Devicesparseinfo1.txt")
+				os.system("cat Devicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > Devicesparseinfo.txt")
+		
+			with open("Devicesparseinfo1.txt","r") as file1:
+				value = []
+				for line in file1:
+					if '= 1' in line:
+						value.append("true")
+					else:
+						value.append("false")
+			try:
+				with open("Devicesparseinfo.txt","r") as file1:
+					file1.seek(0,0)
+					i = 0
+					for line in file1:
+						TreeSparse.insert('','end',text=line,values=(value[i],),tags=(value[i],i))
+						if value[i] == "true":
+							TreeSparse.tag_configure(value[i],foreground=COLOR2)
+						else:
+							TreeSparse.tag_configure(value[i],foreground=COLOR3)
+						if i % 2 != 0 :
+							TreeSparse.tag_configure(i,background=COLOR1)
+						i = i + 1			
+			except Exception as e:
+				raise e
+			finally:
+				os.system("rm Device*.txt")
 
 	def Features():
 
@@ -236,21 +240,23 @@ def Vulkan(tab2):
 					value.append("true")
 				else:
 					value.append("false")
-			
-		with open("VKDFeatures.txt","r") as file1:
-			file1.seek(0,0)
-			i = 0
-			for line in file1:
-				TreeFeatures.insert('','end',text=line,values=(value[i]),tags=(value[i],i))
-				if value[i] == "true":
-					TreeFeatures.tag_configure(value[i],foreground=COLOR2)
-				else:
-					TreeFeatures.tag_configure(value[i],foreground=COLOR3)
-				if i % 2 != 0:
-					TreeFeatures.tag_configure(i,background=COLOR1)
-				i = i + 1
-		
-		os.system("rm VKDFeatures*.txt")	
+		try:
+			with open("VKDFeatures.txt","r") as file1:
+				file1.seek(0,0)
+				i = 0
+				for line in file1:
+					TreeFeatures.insert('','end',text=line,values=(value[i]),tags=(value[i],i))
+					if value[i] == "true":
+						TreeFeatures.tag_configure(value[i],foreground=COLOR2)
+					else:
+						TreeFeatures.tag_configure(value[i],foreground=COLOR3)
+					if i % 2 != 0:
+						TreeFeatures.tag_configure(i,background=COLOR1)
+					i = i + 1			
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm VKDFeatures*.txt")	
 
 	
 	def Limits():
@@ -294,17 +300,21 @@ def Vulkan(tab2):
 		for i in range(len(value)):
 			if "0x" in value[i]:
 				value[i] = int(value[i],16)
-		with open("VKDlimits.txt","r") as file1:
-			count = len(file1.readlines())
-			i = 0
-			file1.seek(0,0)
-			for line in file1:
-				TreeLimits.insert('','end',text=line, values=value[i],tags=(i))
-				if i % 2 != 0:
-					TreeLimits.tag_configure(i,background=COLOR1)
-				i = i + 1
 
-		os.system("rm *limits*.txt")		
+		try:
+			with open("VKDlimits.txt","r") as file1:
+				count = len(file1.readlines())
+				i = 0
+				file1.seek(0,0)
+				for line in file1:
+					TreeLimits.insert('','end',text=line, values=value[i],tags=(i))
+					if i % 2 != 0:
+						TreeLimits.tag_configure(i,background=COLOR1)
+					i = i + 1
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm *limits*.txt")		
 
 	def Extensions():
 
@@ -350,19 +360,21 @@ def Vulkan(tab2):
 						value.append("0.0.%2d"%j)
 						break
 
-
-		with open("VKDExtensions.txt","r") as file1:
-			count = len(file1.readlines())
-			tabcontrol.tab(3,text="Extensions(%d)"%count)
-			file1.seek(0,0)
-			i = 0
-			for line in file1:
-				TreeExtension.insert('','end',text=line,values=(value[i]),tags=i)
-				if i % 2 != 0:
-					TreeExtension.tag_configure(i,background=COLOR1)
-				i = i + 1
-
-		os.system("rm VKDExtensions*.txt")
+		try:
+			with open("VKDExtensions.txt","r") as file1:
+				count = len(file1.readlines())
+				tabcontrol.tab(3,text="Extensions(%d)"%count)
+				file1.seek(0,0)
+				i = 0
+				for line in file1:
+					TreeExtension.insert('','end',text=line,values=(value[i]),tags=i)
+					if i % 2 != 0:
+						TreeExtension.tag_configure(i,background=COLOR1)
+					i = i + 1			
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm VKDExtensions*.txt")
 
 
 	def Format():
@@ -382,7 +394,6 @@ def Vulkan(tab2):
 		vsb = ttk.Scrollbar(FormatTab, orient="vertical", command=TreeFormat.yview)
 		TreeFormat.configure(yscrollcommand=vsb.set)
 		vsb.grid(column=0,row=0,sticky='nse')
-
 
 
 		GPU = radvar.get()
@@ -444,19 +455,20 @@ def Vulkan(tab2):
 		for i in range(count):
 			if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
 				Formats = Formats + 1
-
-		with open("VKDFORMATS.txt","r") as file1:
-			file1.seek(0,0)
-			tabcontrol.tab(4,text="Formats(%d)"%Formats)
-			i = 0
-			for line in file1:
-				TreeFormat.insert('','end',text=line,values=(linear[i],optimal[i],Buffer[i]),tags=i)
-				if i % 2 != 0 :
-					TreeFormat.tag_configure(i,background=COLOR1)
-				i = i + 1
-
-				
-		os.system("rm VKDFORMATS*.txt")
+		try:
+			with open("VKDFORMATS.txt","r") as file1:
+				file1.seek(0,0)
+				tabcontrol.tab(4,text="Formats(%d)"%Formats)
+				i = 0
+				for line in file1:
+					TreeFormat.insert('','end',text=line,values=(linear[i],optimal[i],Buffer[i]),tags=i)
+					if i % 2 != 0 :
+						TreeFormat.tag_configure(i,background=COLOR1)
+					i = i + 1			
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm VKDFORMATS*.txt")
 
 	def MemoryTypes():
 
@@ -636,63 +648,67 @@ def Vulkan(tab2):
 			
 			
 
-			
-			for i in range(Mcount):
-				TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
-				if i % 2 != 0:
-					TreeMemory.tag_configure(i,background=COLOR1)
-				
-
-		
-
-		# Memory Heap Details to be populated
-
-		frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Heaps")
-		frameHeap.grid(column=0,row=1)
-		TreeHeap = ttk.Treeview(frameHeap,height=HT3)
-		TreeHeap['columns'] = ('value1','value2')
-		TreeHeap.heading('#0',text='Heaps')
-		TreeHeap.column('#0',width=95,anchor=ANCHOR1)
-		TreeHeap.heading('value1',text='Device Size')
-		TreeHeap.column('value1',width=300,anchor=ANCHOR1)
-		TreeHeap.heading('value2',text='HEAP_DEVICE_LOCAL')
-		TreeHeap.column('value2',width=450,anchor=ANCHOR1)
-		TreeHeap.grid(column=0,row=1)
-
-		Hvsb = ttk.Scrollbar(frameHeap, orient="vertical", command=TreeHeap.yview)
-		TreeMemory.configure(yscrollcommand=Hvsb.set)
-		Hvsb.grid(column=0,row=1,sticky='nse')
-
-		HCount = 0
-		size = []
-		HEAP_DEVICE_LOCAL = []
-
-		with open("VKDMemoryType.txt","r") as file1:
-			for line in file1:
-				if "memoryHeaps" in line:
-					HCount = HCount + 1
-				if "HEAP_DEVICE_LOCAL" in line:
-					HEAP_DEVICE_LOCAL.append("true")
-				if "None" in line:
-					HEAP_DEVICE_LOCAL.append("false")
-				if "size " in line:
-					for j in range(RANGE1):
-						for k in range(RANGE1):
-							if "(%d.%d GiB)"%(j,k) in line:
-								size.append("%d.%d GB"%(j,k))
-								break
-							elif "(%d.%d0 GiB)"%(j,k) in line:
-								size.append("%d.%d0 GB"%(j,k))
-								break
+			try:
+				for i in range(Mcount):
+					TreeMemory.insert('','end',text=i,values=(heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
+					if i % 2 != 0:
+						TreeMemory.tag_configure(i,background=COLOR1)
+			except Exception as e:
+				raise e
+			finally:
 
 
-		tabcontrol.tab(5,text="Memory Types(%d) & Heaps(%d)"%(Mcount,HCount))
-		for i in range(HCount):
-				TreeHeap.insert('','end',text=i,values=(size[i],HEAP_DEVICE_LOCAL[i]),tags=(i))
-				if i % 2 != 0:
-					TreeHeap.tag_configure(i,background=COLOR1)
+				# Memory Heap Details to be populated
 
-		os.system("rm VKDMemory*.txt")
+				frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Heaps")
+				frameHeap.grid(column=0,row=1)
+				TreeHeap = ttk.Treeview(frameHeap,height=HT3)
+				TreeHeap['columns'] = ('value1','value2')
+				TreeHeap.heading('#0',text='Heaps')
+				TreeHeap.column('#0',width=95,anchor=ANCHOR1)
+				TreeHeap.heading('value1',text='Device Size')
+				TreeHeap.column('value1',width=300,anchor=ANCHOR1)
+				TreeHeap.heading('value2',text='HEAP_DEVICE_LOCAL')
+				TreeHeap.column('value2',width=450,anchor=ANCHOR1)
+				TreeHeap.grid(column=0,row=1)
+
+				Hvsb = ttk.Scrollbar(frameHeap, orient="vertical", command=TreeHeap.yview)
+				TreeMemory.configure(yscrollcommand=Hvsb.set)
+				Hvsb.grid(column=0,row=1,sticky='nse')
+
+				HCount = 0
+				size = []
+				HEAP_DEVICE_LOCAL = []
+
+				with open("VKDMemoryType.txt","r") as file1:
+					for line in file1:
+						if "memoryHeaps" in line:
+							HCount = HCount + 1
+						if "HEAP_DEVICE_LOCAL" in line:
+							HEAP_DEVICE_LOCAL.append("true")
+						if "None" in line:
+							HEAP_DEVICE_LOCAL.append("false")
+						if "size " in line:
+							for j in range(RANGE1):
+								for k in range(RANGE1):
+									if "(%d.%d GiB)"%(j,k) in line:
+										size.append("%d.%d GB"%(j,k))
+										break
+									elif "(%d.%d0 GiB)"%(j,k) in line:
+										size.append("%d.%d0 GB"%(j,k))
+										break
+
+				try:
+					for i in range(HCount):
+						TreeHeap.insert('','end',text=i,values=(size[i],HEAP_DEVICE_LOCAL[i]),tags=(i))
+						if i % 2 != 0:
+							TreeHeap.tag_configure(i,background=COLOR1)
+
+					tabcontrol.tab(5,text="Memory Types(%d) & Heaps(%d)"%(Mcount,HCount))
+				except Exception as e:
+					raise e
+				finally:
+					os.system("rm VKDMemory*.txt")
 
 	def Queues():
 
@@ -777,13 +793,16 @@ def Vulkan(tab2):
 			for line in file1:
 				qBits.append(int(line))
 
-		tabcontrol.tab(6,text="Queue Families(%d)"%count)
-		for i in range(count):
-			TreeQueue.insert('','end',text=i,values=(qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
-			if i % 2 != 0:
-				TreeQueue.tag_configure(i,background=COLOR1)
-
-		os.system("rm VKDQueue*.txt")
+		try:
+			for i in range(count):
+				TreeQueue.insert('','end',text=i,values=(qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
+				if i % 2 != 0:
+					TreeQueue.tag_configure(i,background=COLOR1)
+			tabcontrol.tab(6,text="Queue Families(%d)"%count)
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm VKDQueue*.txt")
 
 	def Instance():
 
@@ -819,81 +838,83 @@ def Vulkan(tab2):
 					if ": extension revision %2d"%j in line:
 						value.append("0.0.%2d"%j)
 						break
+		try:
+			with open("VKDInstanceExtensions.txt","r") as file1:
+				count1 = len(file1.readlines())
+				tabcontrol.tab(7,text="Instances(%d)"%count1)
+				file1.seek(0,0)
+				i = 0
+				for line in file1:
+					TreeInstance.insert('','end',text=line,values=(value[i]),tags=i)
+					if i % 2 != 0:
+						TreeInstance.tag_configure(i,background=COLOR1)
+					i = i + 1			
+		except Exception as e:
+			raise e
+		finally:
+			os.system("rm VKDInstanceExtensions*.txt")
 
+			TreeLayer = ttk.Treeview(frame2,height=HT3)
+			TreeLayer['columns'] =('value1','value2','value3')
+			TreeLayer.heading('#0',text='Instance Layers')
+			TreeLayer.column('#0',width=460,anchor=ANCHOR1)
+			TreeLayer.heading('value1',text='Vulkan Version')
+			TreeLayer.column('value1',width=120,anchor=ANCHOR1)
+			TreeLayer.heading('value2',text="Layer Version")
+			TreeLayer.column('value2',width=120,anchor=ANCHOR1)
+			TreeLayer.heading('value3',text='Extension Count')
+			TreeLayer.column('value3',width=150,anchor=ANCHOR1)
+			TreeLayer.grid(column=0,row=1,pady=10)
 
-		with open("VKDInstanceExtensions.txt","r") as file1:
-			count1 = len(file1.readlines())
-			tabcontrol.tab(7,text="Instances(%d)"%count1)
-			file1.seek(0,0)
-			i = 0
-			for line in file1:
-				TreeInstance.insert('','end',text=line,values=(value[i]),tags=i)
-				if i % 2 != 0:
-					TreeInstance.tag_configure(i,background=COLOR1)
-				i = i + 1
+			lsb = ttk.Scrollbar(frame2, orient="vertical", command=TreeLayer.yview)
+			TreeLayer.configure(yscrollcommand=lsb.set)
+			lsb.grid(column=0,row=1,sticky='nse',pady=10)
 
-		os.system("rm VKDInstanceExtensions*.txt")
+			os.system("cat vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > VKDLayer1.txt")
+			os.system("cat VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > VKDLayer.txt")
 
-		TreeLayer = ttk.Treeview(frame2,height=HT3)
-		TreeLayer['columns'] =('value1','value2','value3')
-		TreeLayer.heading('#0',text='Instance Layers')
-		TreeLayer.column('#0',width=460,anchor=ANCHOR1)
-		TreeLayer.heading('value1',text='Vulkan Version')
-		TreeLayer.column('value1',width=120,anchor=ANCHOR1)
-		TreeLayer.heading('value2',text="Layer Version")
-		TreeLayer.column('value2',width=120,anchor=ANCHOR1)
-		TreeLayer.heading('value3',text='Extension Count')
-		TreeLayer.column('value3',width=150,anchor=ANCHOR1)
-		TreeLayer.grid(column=0,row=1,pady=10)
-
-		lsb = ttk.Scrollbar(frame2, orient="vertical", command=TreeLayer.yview)
-		TreeLayer.configure(yscrollcommand=lsb.set)
-		lsb.grid(column=0,row=1,sticky='nse',pady=10)
-
-		os.system("cat vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > VKDLayer1.txt")
-		os.system("cat VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > VKDLayer.txt")
-
-		Vversion = []
-		with open("VKDLayer1.txt","r") as file1:
-			for line in file1:
-				for j in range(RANGE1):
-					if "Vulkan version 1.0.%d,"%j in line:
-						Vversion.append("1.0.%d"%j)
+			Vversion = []
+			with open("VKDLayer1.txt","r") as file1:
+				for line in file1:
+					for j in range(RANGE1):
+						if "Vulkan version 1.0.%d,"%j in line:
+							Vversion.append("1.0.%d"%j)
+							
 						
-					
 
 
-		LVersion = []
-		with open("VKDLayer1.txt","r") as file1:
-			for line in file1:
-				for j in range(RANGE1):
-					if "layer version %d"%j in line:
-						LVersion.append("0.0.%d"%j)
-						break
+			LVersion = []
+			with open("VKDLayer1.txt","r") as file1:
+				for line in file1:
+					for j in range(RANGE1):
+						if "layer version %d"%j in line:
+							LVersion.append("0.0.%d"%j)
+							break
 
-		ECount = []
-		with open("VKDLayer1.txt","r") as file1:
-			for line in file1:
-				for j in range(RANGE1):
-					if "Layer Extensions	count = %d"%j in line:
-						ECount.append("%d"%j)
-						break
-
-
+			ECount = []
+			with open("VKDLayer1.txt","r") as file1:
+				for line in file1:
+					for j in range(RANGE1):
+						if "Layer Extensions	count = %d"%j in line:
+							ECount.append("%d"%j)
+							break
 
 
 
-		count2 = len(LVersion)
-		tabcontrol.tab(7,text="Instances(%d) & Layers(%d)"%(count1,count2))
-		with open("VKDLayer.txt","r") as file1:
-			i = 0
-			for line in file1:
-				TreeLayer.insert('','end',text=line,values=(Vversion[i],LVersion[i],ECount[i]),tags=i)
-				if i % 2 != 0:
-					TreeLayer.tag_configure(i,background=COLOR1)
-				i = i + 1				
-
-		os.system("rm VKDL*.txt")
+			try:
+				count2 = len(LVersion)
+				tabcontrol.tab(7,text="Instances(%d) & Layers(%d)"%(count1,count2))
+				with open("VKDLayer.txt","r") as file1:
+					i = 0
+					for line in file1:
+						TreeLayer.insert('','end',text=line,values=(Vversion[i],LVersion[i],ECount[i]),tags=i)
+						if i % 2 != 0:
+							TreeLayer.tag_configure(i,background=COLOR1)
+						i = i + 1						
+			except Exception as e:
+				raise e
+			finally:
+				os.system("rm VKDL*.txt")
 
 
 	def radcall():
