@@ -36,17 +36,17 @@ KNOWN ISSUES
 
 DEVELOPMENT ENVIRONMENT
 
-Operating System : Linux Mint 18.2 (Sonya)
-Desktop : Cinnamon 3.4.6
-Kernel : 4.10.0-33
-IDE : SublimeText 3.0
+1. Operating System : Linux Mint 18.2 (Sonya)
+2. Desktop : Cinnamon 3.4.6
+3. Kernel : 4.10.0-33
+4. IDE : SublimeText 3.0
 
 SYSTEM SETUP
 
-ASUS G551JK ROG Laptop
-Quad Core Intel Core i7-4710HQ
-Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (propriatery) 
-Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
-8 GB RAM
+1. ASUS G551JK ROG Laptop
+2. Quad Core Intel Core i7-4710HQ
+3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (propriatery) 
+4. Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
+5. 8 GB RAM
 
 If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: https://www.paypal.me/ArunSivaraman
