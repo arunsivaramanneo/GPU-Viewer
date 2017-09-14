@@ -34,4 +34,19 @@ KNOWN ISSUES
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 
+DEVELOPMENT ENVIRONMENT
+
+Operating System : Linux Mint 18.2 (Sonya)
+Desktop : Cinnamon 3.4.6
+Kernel : 4.10.0-33
+IDE : SublimeText 3.0
+
+SYSTEM SETUP
+
+ASUS G551JK ROG Laptop
+Quad Core Intel Core i7-4710HQ
+Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (propriatery) 
+Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
+8 GB RAM
+
 If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: https://www.paypal.me/ArunSivaraman
