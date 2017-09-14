@@ -240,6 +240,9 @@ def Vulkan(tab2):
 					value.append("true")
 				else:
 					value.append("false")
+
+		style = ttk.Style()
+
 		try:
 			with open("VKDFeatures.txt","r") as file1:
 				file1.seek(0,0)
@@ -248,6 +251,8 @@ def Vulkan(tab2):
 					TreeFeatures.insert('','end',text=line,values=(value[i]),tags=(value[i],i))
 					if value[i] == "true":
 						TreeFeatures.tag_configure(value[i],foreground=COLOR2)
+						#style.configure('Treeview',foreground=COLOR2)
+
 					else:
 						TreeFeatures.tag_configure(value[i],foreground=COLOR3)
 					if i % 2 != 0:
@@ -689,13 +694,19 @@ def Vulkan(tab2):
 						if "None" in line:
 							HEAP_DEVICE_LOCAL.append("false")
 						if "size " in line:
-							for j in range(RANGE1):
+							for j in range(1024):
 								for k in range(RANGE1):
 									if "(%d.%d GiB)"%(j,k) in line:
 										size.append("%d.%d GB"%(j,k))
 										break
 									elif "(%d.%d0 GiB)"%(j,k) in line:
 										size.append("%d.%d0 GB"%(j,k))
+										break
+									elif "(%d.%d MiB)"%(j,k) in line:
+										size.append("%d.%d MB"%(j,k))
+										break
+									elif "(%d.%d0 MiB)"%(j,k) in line:
+										size.append("%d.%d0 MB"%(j,k))
 										break
 
 				try:
