@@ -602,7 +602,7 @@ def Vulkan(tab2):
 					Host_Cached.append("true")
 					Lazily_Allocated.append("false")
 			
-				if line == " 0x9:\n":
+				if " 0x9:" in line:
 					Device_Local.append("true")
 					Host_Visible.append("false")
 					Host_Coherent.append("false")

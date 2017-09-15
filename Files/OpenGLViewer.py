@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 from tkinter import Toplevel
+from Framebuffer import FrameBuffer
 import os
 
 
@@ -97,8 +98,11 @@ def OpenGL(tab1):
 		
 
 # Adding a Button for OpenGL Limits
-	Button_limits =  ttk.Button(frame1, text="OpenGL Limits", command=clickMe)
-	Button_limits.grid(column=0,row=1,padx=5, pady=10, sticky=tk.W)
+	Button_limits =  ttk.Button(frame1, text="Show OpenGL Limits", command=clickMe)
+	Button_limits.grid(column=0,row=1,padx=5,pady=10, sticky=tk.W)
+
+	Button_FrameBuffer = ttk.Button(frame1,text="Show GLX Frame Buffer Configuration",command=FrameBuffer)
+	Button_FrameBuffer.grid(column=0,row=1,pady=10)
 	
 
 	
