@@ -13,13 +13,14 @@ INSTALLATION STEPS
 
 What's developed and available?
 
-1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors.
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors,GLX Frame Buffer Configuration
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers
 
 
 UNDERDEVELOPMENT
 
-1. OpenGL - Frame Buffer configuration is underdevelopment
+1. OpenGL - Minor Bug fixes, OpenGL SPIRV support (low priority)
+2. Vulkan - Looking into VkSurfaceCapabilities Tab, Development yet to start
 
 IMPORTANT
 
@@ -33,6 +34,7 @@ KNOWN ISSUES
 1. 4 Way SLI/crossfire will not work for Vulkan Tab.
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
+4. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
 
 DEVELOPMENT ENVIRONMENT
 
