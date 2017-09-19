@@ -21,7 +21,7 @@ def Vulkan(tab2):
 	# Creating Tabs for different Features
 
 	#Creating Feature Tab
-	#os.system("vulkaninfo > vulkaninfo.txt")
+	os.system("vulkaninfo > vulkaninfo.txt")
 
 	tabcontrol = ttk.Notebook(tab2, padding=PAD1)
 	#tabcontrol.enable_traversal()
