@@ -64,7 +64,7 @@ def FrameBuffer():
 
 		if radsel == 1:
 
-			os.system("glxinfo -l | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXVisuals.txt")
+			os.system("glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXVisuals.txt")
 
 			with open("FrameBufferGLXVisuals.txt","r") as file1:
 				GLXCount = len(file1.readlines())
@@ -81,7 +81,7 @@ def FrameBuffer():
 
 		if radsel == 2:
 
-			os.system("glxinfo -l | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXFBConfigs.txt")
+			os.system("glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXFBConfigs.txt")
 			with open("FrameBufferGLXFBConfigs.txt","r") as file1:
 				FBCount = len(file1.readlines())
 				file1.seek(0,0)
