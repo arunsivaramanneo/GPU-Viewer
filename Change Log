@@ -1,0 +1,17 @@
+SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        20/9 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
+                  Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan       
+        19/9 - Implemented multi-GPU support,Code Optimizations and reduced no. of system calls in Vulkanviewer
+        16/9 - Added Show GLX Frame Buffer Configuration functionality to OpenGL Tab
+        14/9 - Fixed AMD GPU Memory Heap Issue.
+        10/9 - Added Device Sparse Properties Section in Device Tab of Vulkan Tab
+        08/9 - Updated OpenGL Limits window to use Treeview and updated Tab logo's
+        04/9 - Added About GPU Viewer Tab, Added Memory Heaps section in Vulkan Tab
+        03/9 - Added Instance and Layers Tab in Vulkan
+AUG-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        28/8 - Added Queue Tab in Vulkan, Minor UI fixes
+        25/8 - Added Formats Tab in Vulkan
+        23/8 - Added Scrollbars to all Sections
+        04/8 - Added Features,Limits and Extensions Tab in Vulkan
+        03/8 - Added Vulkan Tab
+        02/8 - v1.0 - First Point Release

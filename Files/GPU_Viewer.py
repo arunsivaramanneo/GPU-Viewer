@@ -24,7 +24,7 @@ except Exception as e:
 	raise e
 finally:
 
-	# Creating Tabs for OpenGL , Vulkan So on ...
+	# Creating Tabs for OpenGL , Vulkan So on . 	..
 	GLimg = tk.PhotoImage(file="../Images/OpenGL.png")
 	img1 = GLimg.subsample(4,4)
 	tabcontrol = ttk.Notebook(win, padding=10)
@@ -55,7 +55,7 @@ finally:
 
 	Abtimg = tk.PhotoImage(file="../Images/aboutus.png")
 	img3 = Abtimg.subsample(3,7)
-	tab4 = ttk.Frame(tabcontrol)
+	tab4 = ttk.Frame(tabcontrol,padding=10)
 	tabcontrol.add(tab4,image=img3)
 	tabcontrol.grid(column=0,row=0)
 

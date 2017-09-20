@@ -10,8 +10,8 @@ https://github.com/arunsivaramanneo/GPU-Viewer
 
 This program uses:
 
-    - Python 3 tkinter for the graphical user interface
-    - glxinfo and vulkaninfo for fetching the report
+    -  Python 3 tkinter for the graphical user interface
+    -  glxinfo and vulkaninfo for fetching the report
 
 OpenGL® and the oval logo are trademarks or registered trademarks of Silicon Graphics, Inc.
 
