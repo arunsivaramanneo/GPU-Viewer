@@ -476,184 +476,95 @@ def Vulkan(tab2):
 		Host_Coherent = []
 		Host_Cached = []
 		Lazily_Allocated = []
+		Flags = []
 		Mcount = 0
 
 		with open("VKDMemoryType.txt","r") as file1:
 			for line in file1:
 				if "memoryTypes" in line:
 					Mcount = Mcount + 1
-				if " 0x0:\n" in line:
-					Device_Local.append("false")
-					Host_Visible.append("false")
-					Host_Coherent.append("false")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
+				for i in range(32):
+					if " %s:"%hex(i) in line:
+						dec = int(hex(i),16)
+						binary = bin(dec)[2:]
+						for j in range(len(binary)):
+							if binary[j] == '0':
+								Flags.insert(j,"false")
+							if binary[j] == '1':
+								Flags.insert(j,"true")
+						for j in range(5-len(binary)):
+							Flags.insert(0,"false")
+						for i in range(len(Flags)):
+							if i == 0:
+								Lazily_Allocated.append(Flags[i])
+							elif i == 1 :
+								Host_Cached.append(Flags[i])
+							elif i == 2 :
+								Host_Coherent.append(Flags[i])
+							elif i == 3 :
+								Host_Visible.append(Flags[i])
+							elif i == 4 :
+								Device_Local.append(Flags[i])
 
-				if " 0x1:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("false")
-					Host_Coherent.append("false")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
+	
+		try:
+			for i in range(Mcount):
+				TreeMemory.insert('','end',values=(i,heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
+				if i % 2 != 0:
+					TreeMemory.tag_configure(i,background=COLOR1)
+		except Exception as e:
+			raise e
+		finally:
 
-				if " 0x2:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("true")
-					Host_Coherent.append("false")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
-				
-				if " 0x3:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("true")
-					Host_Coherent.append("false")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
-				
-				if " 0x4:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("false")
-					Host_Coherent.append("true")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
-				
-				if " 0x5:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("false")
-					Host_Coherent.append("true")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
-					
-				if " 0x6:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("true")
-					Host_Coherent.append("true")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
-					
-				if " 0x7:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("true")
-					Host_Coherent.append("true")
-					Host_Cached.append("false")
-					Lazily_Allocated.append("false")
 
-				if " 0x8:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("false")
-					Host_Coherent.append("false")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-				if " 0x9:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("false")
-					Host_Coherent.append("false")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-				if " 0xa:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("true")
-					Host_Coherent.append("false")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-				if " 0xb:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("true")
-					Host_Coherent.append("false")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-				if " 0xc:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("false")
-					Host_Coherent.append("true")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-				if " 0xd:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("false")
-					Host_Coherent.append("true")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-								
-				if " 0xe:" in line:
-					Device_Local.append("false")
-					Host_Visible.append("true")
-					Host_Coherent.append("true")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
+			# Memory Heap Details to be populated
+			cols = ('Heaps','Device Size','HEAP_DEVICE_LOCAL')
+			frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Memory Heaps",padding=PAD1)
+			frameHeap.grid(column=0,row=1,pady=PAD1)
+			TreeHeap = ttk.Treeview(frameHeap,columns=cols,show="headings",height=HT3)
+			TreeHeap.column('Heaps',width=95,anchor=ANCHOR1)
+			TreeHeap.column('Device Size',width=300,anchor=ANCHOR1)
+			TreeHeap.column('HEAP_DEVICE_LOCAL',width=450,anchor=ANCHOR1)
+			for each in cols:
+				TreeHeap.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeHeap, each_, True))
+			TreeHeap.grid(column=0,row=1)
 
-				if " 0xf:" in line:
-					Device_Local.append("true")
-					Host_Visible.append("true")
-					Host_Coherent.append("true")
-					Host_Cached.append("true")
-					Lazily_Allocated.append("false")
-			
-			
+			Hvsb = ttk.Scrollbar(frameHeap, orient="vertical", command=TreeHeap.yview)
+			TreeMemory.configure(yscrollcommand=Hvsb.set)
+			Hvsb.grid(column=0,row=1,sticky='nse')
+
+			HCount = 0
+			size = []
+			HEAP_DEVICE_LOCAL = []
+
+			with open("VKDMemoryType.txt","r") as file1:
+				for line in file1:
+					if "memoryHeaps" in line:
+						HCount = HCount + 1
+					if "HEAP_DEVICE_LOCAL" in line:
+						HEAP_DEVICE_LOCAL.append("true")
+					if "None" in line:
+						HEAP_DEVICE_LOCAL.append("false")
+					if "size " in line:
+						for j in range(1024):
+							for k in range(RANGE1):
+								if "(%d.%02d GiB)"%(j,k) in line:
+									size.append("%d.%02d GB"%(j,k))
+									break
+								elif "(%d.%02d MiB)"%(j,k) in line:
+									size.append("%d.%02d MB"%(j,k))
+									break
+							
 
 			try:
-				for i in range(Mcount):
-					TreeMemory.insert('','end',values=(i,heapIndex[i],Device_Local[i],Host_Visible[i],Host_Coherent[i],Host_Cached[i],Lazily_Allocated[i]),tags=(i))
+				for i in range(HCount):
+					TreeHeap.insert('','end',values=(i,size[i],HEAP_DEVICE_LOCAL[i]),tags=(i))
 					if i % 2 != 0:
-						TreeMemory.tag_configure(i,background=COLOR1)
+						TreeHeap.tag_configure(i,background=COLOR1)
+
+				tabcontrol.tab(5,text="Memory Types(%d) & Heaps(%d)"%(Mcount,HCount))
 			except Exception as e:
 				raise e
-			finally:
-
-
-				# Memory Heap Details to be populated
-				cols = ('Heaps','Device Size','HEAP_DEVICE_LOCAL')
-				frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Memory Heaps",padding=PAD1)
-				frameHeap.grid(column=0,row=1,pady=PAD1)
-				TreeHeap = ttk.Treeview(frameHeap,columns=cols,show="headings",height=HT3)
-				TreeHeap.column('Heaps',width=95,anchor=ANCHOR1)
-				TreeHeap.column('Device Size',width=300,anchor=ANCHOR1)
-				TreeHeap.column('HEAP_DEVICE_LOCAL',width=450,anchor=ANCHOR1)
-				for each in cols:
-					TreeHeap.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeHeap, each_, True))
-				TreeHeap.grid(column=0,row=1)
-
-				Hvsb = ttk.Scrollbar(frameHeap, orient="vertical", command=TreeHeap.yview)
-				TreeMemory.configure(yscrollcommand=Hvsb.set)
-				Hvsb.grid(column=0,row=1,sticky='nse')
-
-				HCount = 0
-				size = []
-				HEAP_DEVICE_LOCAL = []
-
-				with open("VKDMemoryType.txt","r") as file1:
-					for line in file1:
-						if "memoryHeaps" in line:
-							HCount = HCount + 1
-						if "HEAP_DEVICE_LOCAL" in line:
-							HEAP_DEVICE_LOCAL.append("true")
-						if "None" in line:
-							HEAP_DEVICE_LOCAL.append("false")
-						if "size " in line:
-							for j in range(1024):
-								for k in range(RANGE1):
-									if "(%d.%02d GiB)"%(j,k) in line:
-										size.append("%d.%02d GB"%(j,k))
-										break
-									elif "(%d.%02d MiB)"%(j,k) in line:
-										size.append("%d.%02d MB"%(j,k))
-										break
-								
-
-				try:
-					for i in range(HCount):
-						TreeHeap.insert('','end',values=(i,size[i],HEAP_DEVICE_LOCAL[i]),tags=(i))
-						if i % 2 != 0:
-							TreeHeap.tag_configure(i,background=COLOR1)
-
-					tabcontrol.tab(5,text="Memory Types(%d) & Heaps(%d)"%(Mcount,HCount))
-				except Exception as e:
-					raise e
 	
 	def Queues():
 

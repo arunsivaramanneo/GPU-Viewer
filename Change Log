@@ -1,4 +1,5 @@
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        21/9 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
         20/9 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
                   Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan       
         19/9 - Implemented multi-GPU support,Code Optimizations and reduced no. of system calls in Vulkanviewer
