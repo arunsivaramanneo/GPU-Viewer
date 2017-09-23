@@ -85,6 +85,7 @@ def Vulkan(tab2):
 	    for index, (val, k) in enumerate(l):
 	      #  print('Moving Index:%r, Value:%r, k:%r' % (index, val, k))
 	        tv.move(k, '', index)
+	 		
 
 	    # reverse sort next time
 	    tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
@@ -381,7 +382,7 @@ def Vulkan(tab2):
 
 		for i in range(GPUcount):
 			if GPU == i :
-				os.system("cat vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_   > VKDFORMATS.txt"%i)
+				os.system("cat vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.*  > VKDFORMATS.txt"%i)
 				os.system("cat vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> VKDFORMATSlinear.txt"%i)
 				os.system("cat vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> VKDFORMATSoptimal.txt"%i)
 				os.system("cat vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> VKDFORMATSBuffer.txt"%i)
@@ -572,29 +573,27 @@ def Vulkan(tab2):
 
 		frameQueue = ttk.LabelFrame(QueueTab,text="Queues",padding=PAD1)
 		frameQueue.grid(column=0,row=0)
+		col1 = ('Queue','timestamp','Flags','minImageTransferGranularity')
+		col1width = (100,80,450,220)
+		TreeQueue1 = ttk.Treeview(frameQueue,columns=col1,show="headings",height=0)
+		TreeQueue1.grid(column=0,row=0)
+		for i in range(len(col1)):
+			TreeQueue1.heading(col1[i],text=col1[i])
+			TreeQueue1.column(col1[i],width=col1width[i])
 
-		TreeQueue = ttk.Treeview(frameQueue,height=HT)
-		TreeQueue['columns'] = ('count','bits','Gbit','Cbit','Tbit','sbit')
-		TreeQueue.heading('#0',text="Queue Family")
-		TreeQueue.column('#0',width=WIDTH3,anchor=ANCHOR1)
 		
-		TreeQueue.heading('count',text='Queue Count')
-		TreeQueue.column('count',width=WIDTH3,anchor=ANCHOR1)
-		TreeQueue.heading('bits',text="timestampValidBits")
-		TreeQueue.column('bits',width=150,anchor=ANCHOR1)
-		TreeQueue.heading('Gbit',text="GRAPHICS_BIT")
-		TreeQueue.column('Gbit',width=105,anchor=ANCHOR1)
-		TreeQueue.heading('Cbit',text='COMPUTE_BIT')
-		TreeQueue.column('Cbit',width=110,anchor=ANCHOR1)
-		TreeQueue.heading('Tbit',text="TRANSFER_BIT")
-		TreeQueue.column('Tbit',width=110,anchor=ANCHOR1)
-		TreeQueue.heading('sbit',text="SPARSE_BINDING_BIT",anchor='center')
-		TreeQueue.column('sbit',width=170,anchor=ANCHOR1)
-		TreeQueue.grid(column=0,row=0)
+		cols= ('Family','Count','ValidBits','GRAPHICS_BIT','COMPUTE_BIT','TRANSFER_BIT','SPARSE_BINDING_BIT',"WIDTH","HEIGHT","DEPTH")
+		colswidth = (50,50,80,100,100,100,150,70,75,70)
+		TreeQueue = ttk.Treeview(frameQueue,column=cols,show="headings",height=HT-1)
+		for i in range(len(cols)):
+			TreeQueue.heading(cols[i],text=cols[i])
+			TreeQueue.column(cols[i],width=colswidth[i],anchor=ANCHOR1)
+
+		TreeQueue.grid(column=0,row=1,sticky=tk.W)
 
 		Qvsb = ttk.Scrollbar(frameQueue, orient="vertical", command=TreeQueue.yview)
 		TreeQueue.configure(yscrollcommand=Qvsb.set)
-		Qvsb.grid(column=0,row=0,sticky='nse')
+		Qvsb.grid(column=0,row=1,sticky='nse')
 
 
 		GPU = radvar.get()
@@ -612,6 +611,19 @@ def Vulkan(tab2):
 		CBit = []
 		TBit = []
 		SBit = []
+		width = []
+		height = []
+		depth = []
+
+		with open("VKDQueues.txt","r") as file1:
+			for line in file1:
+				for i in range(10):
+					for j in range(10):
+						for k in range(10):
+							if "(%d, %d, %d)"%(i,j,k) in line:
+								width.append("%d"%i)
+								height.append("%d"%j)
+								depth.append("%d"%k)
 
 		# finding and storing the value for Flags
 		with open("VKDQueueFlags.txt","r") as file1:
@@ -645,7 +657,7 @@ def Vulkan(tab2):
 
 		try:
 			for i in range(count):
-				TreeQueue.insert('','end',text=i,values=(qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
+				TreeQueue.insert('','end',values=(i,qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i],width[i],height[i],depth[i]),tags=i)
 				if i % 2 != 0:
 					TreeQueue.tag_configure(i,background=COLOR1)
 			tabcontrol.tab(6,text="Queue Families(%d)"%count)
@@ -793,7 +805,7 @@ def Vulkan(tab2):
 	DS.grid(column=0,row=0, padx=100, pady=10)
 
 	for i in range(len(list)):
-		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall,width=25)
+		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
 		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()
