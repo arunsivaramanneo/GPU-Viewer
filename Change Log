@@ -1,6 +1,6 @@
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan
-               Implemented sorting in Instance & layers Tab column headers        
+        23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
+                  Implemented sorting in Instance & layers Tab column headers        
         21/9 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
         20/9 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
                   Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan       
