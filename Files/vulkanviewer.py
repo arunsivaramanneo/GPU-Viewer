@@ -573,22 +573,23 @@ def Vulkan(tab2):
 
 		frameQueue = ttk.LabelFrame(QueueTab,text="Queues",padding=PAD1)
 		frameQueue.grid(column=0,row=0)
-		col1 = ('Queue','timestamp','Flags','minImageTransferGranularity')
-		col1width = (100,80,450,220)
+		col1 = ('Queue','timestamp','minImageTransferGranularity','Flags')
+		col1width = (95,80,208,467)
 		TreeQueue1 = ttk.Treeview(frameQueue,columns=col1,show="headings",height=0)
-		TreeQueue1.grid(column=0,row=0)
+		TreeQueue1.grid(column=0,row=0,sticky=tk.W)
 		for i in range(len(col1)):
 			TreeQueue1.heading(col1[i],text=col1[i])
 			TreeQueue1.column(col1[i],width=col1width[i])
 
 		
-		cols= ('Family','Count','ValidBits','GRAPHICS_BIT','COMPUTE_BIT','TRANSFER_BIT','SPARSE_BINDING_BIT',"WIDTH","HEIGHT","DEPTH")
-		colswidth = (50,50,80,100,100,100,150,70,75,70)
+		cols= ('Family','Count','ValidBits',"Width","Height","Depth",'GRAPHICS_BIT','COMPUTE_BIT','TRANSFER_BIT','SPARSE_BINDING_BIT')
+		colswidth = (50,45,80,70,70,68,100,100,102,165)
 		TreeQueue = ttk.Treeview(frameQueue,column=cols,show="headings",height=HT-1)
 		for i in range(len(cols)):
 			TreeQueue.heading(cols[i],text=cols[i])
 			TreeQueue.column(cols[i],width=colswidth[i],anchor=ANCHOR1)
 
+		TreeQueue.heading('SPARSE_BINDING_BIT',anchor=ANCHOR2)
 		TreeQueue.grid(column=0,row=1,sticky=tk.W)
 
 		Qvsb = ttk.Scrollbar(frameQueue, orient="vertical", command=TreeQueue.yview)
@@ -657,10 +658,10 @@ def Vulkan(tab2):
 
 		try:
 			for i in range(count):
-				TreeQueue.insert('','end',values=(i,qCount[i],qBits[i],GBit[i],CBit[i],TBit[i],SBit[i],width[i],height[i],depth[i]),tags=i)
+				TreeQueue.insert('','end',values=(i,qCount[i],qBits[i],width[i],height[i],depth[i],GBit[i],CBit[i],TBit[i],SBit[i]),tags=i)
 				if i % 2 != 0:
 					TreeQueue.tag_configure(i,background=COLOR1)
-			tabcontrol.tab(6,text="Queue Families(%d)"%count)
+			tabcontrol.tab(6,text="Queues(%d)"%count)
 		except Exception as e:
 			raise e
 	
@@ -672,7 +673,7 @@ def Vulkan(tab2):
 		
 		frame1 = ttk.LabelFrame(InstanceTab,text="Instance Extensions",padding=PAD1)
 		frame1.grid(column=0,row=0)	
-		frame2 = ttk.LabelFrame(InstanceTab,text="Layers",padding=PAD1)
+		frame2 = ttk.LabelFrame(InstanceTab,text="Instance Layers",padding=PAD1)
 		frame2.grid(column=0,row=1,pady=PAD1)
 		
 		cols = ('Instance Extensions','Version')
