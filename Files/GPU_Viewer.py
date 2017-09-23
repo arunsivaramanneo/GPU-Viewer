@@ -11,6 +11,9 @@ win = tk.Tk()
 # Title of the Window
 
 win.title("GPU Viewer")
+img = tk.PhotoImage(file="../Images/GPU.png")
+icon = img.subsample(1,1)
+win.tk.call('wm', 'iconphoto', win._w, icon)
 
 win.resizable(0,0)
 

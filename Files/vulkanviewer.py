@@ -791,9 +791,9 @@ def Vulkan(tab2):
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
-	
+
 	for i in range(len(list)):
-		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
+		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall,width=25)
 		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()
