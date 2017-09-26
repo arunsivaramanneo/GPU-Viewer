@@ -8,6 +8,7 @@ HT3 = 13
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
+COLOR4 = "BLUE"
 ANCHOR1 = "center"
 ANCHOR2 = "sw"
 
@@ -73,6 +74,17 @@ def Vulkan(tab2):
 	InstanceTab = ttk.Frame(tabcontrol)
 	tabcontrol.add(InstanceTab,text="Instance Extensions",padding=PAD1)
 	tabcontrol.grid(column=0,row=1)
+
+	#Creating the Surface Tab
+
+	SurfaceTab = ttk.Frame(tabcontrol)
+
+	with open("vulkaninfo.txt","r") as file1:
+		for line in file1:
+			if "VkSurfaceCapabilities" in line:
+				tabcontrol.add(SurfaceTab,text="Surface",padding=PAD1)
+				tabcontrol.grid(column=0,row=1)
+				break
 
 	radvar = tk.IntVar()
 
@@ -759,7 +771,6 @@ def Vulkan(tab2):
 							break
 
 
-
 			try:
 				count2 = len(LVersion)
 				tabcontrol.tab(7,text="Instances(%d) & Layers(%d)"%(count1,count2))
@@ -772,7 +783,51 @@ def Vulkan(tab2):
 						i = i + 1						
 			except Exception as e:
 				raise e
+
+	def Surface():
+
+		frameSurface = ttk.LabelFrame(SurfaceTab,text="Surface Capabilities",padding=PAD1)
+		frameSurface.grid(column=0,row=0)
+		cols = ('surface','value1','value2')
+		TreeSurface = ttk.Treeview(frameSurface,columns=cols,show="headings",height=HT)
+		TreeSurface.heading('surface',text='Surface Capabilities')
+		TreeSurface.column('surface',width=500,anchor=ANCHOR2)
+		TreeSurface.column('value1',width=100,anchor=ANCHOR1)
+		TreeSurface.heading('value2',text="value",anchor=ANCHOR2)
+		TreeSurface.column('value2',width=350,anchor=ANCHOR2)
+		TreeSurface.grid(column=0,row=0)
+		
+		ssb = ttk.Scrollbar(frameSurface, orient="vertical", command=TreeSurface.yview)
+		TreeSurface.configure(yscrollcommand=ssb.set)
+		ssb.grid(column=0,row=0,sticky='nse')
+
+		GPU =radvar.get()
 	
+		os.system("cat vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag'> VKDsurface.txt"%(GPU,GPU+1))
+		
+		TreeSurface["displaycolumns"]=('surface','value2')
+		with open("VKDsurface.txt","r") as file1:
+			i = 0
+			for line in file1:
+				if "====" in line:
+					continue
+				else:
+
+					TreeSurface.insert('','end',values=(line),tags=i)
+					if i % 2 != 0:
+						TreeSurface.tag_configure(i,background=COLOR1)
+					if "VkSurfaceCapabilities" in line:
+						TreeSurface.tag_configure(i,foreground=COLOR2)
+					if "Extent" in line:
+						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
+					if "supported" in line:
+						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
+					if "current" in line:
+						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
+					
+					i = i + 1
+
+
 	def radcall():
 		radsel= radvar.get()
 		for i in range(GPUcount):
@@ -784,6 +839,7 @@ def Vulkan(tab2):
 				Format()
 				MemoryTypes()
 				Queues()
+				Surface()
 
 		
 		Instance()

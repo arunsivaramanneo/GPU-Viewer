@@ -1,4 +1,5 @@
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        26/9 - Added Surface Tab to Vulkan        
         23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
                   Implemented sorting in Instance & layers Tab column headers        
         21/9 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
