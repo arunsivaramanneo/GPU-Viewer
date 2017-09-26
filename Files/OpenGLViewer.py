@@ -58,7 +58,7 @@ def OpenGL(tab1):
 			i = i + 1
 
 
-	os.system("rm OpenGL*.txt")
+	
 # Creating a new window for OpenGL Limits
 
 	def clickMe():
@@ -400,13 +400,17 @@ def OpenGL(tab1):
 				TreeGLAll.insert('','end',text="No extensions available")
 
 
+	with open("OpenGLLHS.txt","r") as file1:
+		OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
+		OpenGLrad.grid(column=0,row=1)
+		OpenGLrad.invoke()
+		for line in file1:
+			if "OpenGL ES" in line:
+				OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
+				OpenGLESrad.grid(column=1,row=1)
 
-	OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
-	OpenGLrad.grid(column=0,row=1)
-	OpenGLrad.invoke()
+	os.system("rm OpenGL*.txt")
 
-	OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
-	OpenGLESrad.grid(column=1,row=1)
 
 
 

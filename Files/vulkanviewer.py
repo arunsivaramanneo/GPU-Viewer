@@ -165,6 +165,7 @@ def Vulkan(tab2):
 			for each in cols:
 				TreeSparse.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeSparse, each_, True))
 
+			TreeSparse.heading("Value",anchor="nw")
 			TreeSparse.grid(column=0,row=1)
 
 			ssb = ttk.Scrollbar(frameSparse, orient="vertical", command=TreeSparse.yview)
@@ -583,7 +584,7 @@ def Vulkan(tab2):
 
 		
 		cols= ('Family','Count','ValidBits',"Width","Height","Depth",'GRAPHICS_BIT','COMPUTE_BIT','TRANSFER_BIT','SPARSE_BINDING_BIT')
-		colswidth = (50,45,80,70,70,68,100,100,102,165)
+		colswidth = (50,45,80,70,70,68,102,102,102,161)
 		TreeQueue = ttk.Treeview(frameQueue,column=cols,show="headings",height=HT-1)
 		for i in range(len(cols)):
 			TreeQueue.heading(cols[i],text=cols[i])
