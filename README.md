@@ -26,15 +26,14 @@ This project aims to capture all the required/important details of glxinfo and v
 ## What's developed and available?
 
 1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors,GLX Frame Buffer Configuration
-2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers
+2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
 3. About Tab - About GPU Viewer Application, Change Log
 
 
 ## UNDERDEVELOPMENT
 
 1. OpenGL - OpenGL SPIRV support (low priority)
-2. Vulkan - Looking into VkSurfaceCapabilities Tab, Development yet to start (low priority)
-3. General - Bug fixes, Code Optimizations (High Priority)
+2. General - Bug fixes, Code Optimizations (High Priority)
 
 ## IMPORTANT
 
@@ -49,7 +48,7 @@ This project aims to capture all the required/important details of glxinfo and v
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 4. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
-5. Devices which are not supporting OpenGL ES will experience few data/UI issues.
+5. Devices which are not supporting OpenGL ES will experience few data/UI issues in OpenGL Limits.
 
 ## DEVELOPMENT ENVIRONMENT
 

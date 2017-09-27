@@ -9,6 +9,7 @@ COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
 COLOR4 = "BLUE"
+COLOR5 = "GRAY70"
 ANCHOR1 = "center"
 ANCHOR2 = "sw"
 
@@ -802,30 +803,52 @@ def Vulkan(tab2):
 		ssb.grid(column=0,row=0,sticky='nse')
 
 		GPU =radvar.get()
+		Present = []
+		Surface = []
 	
 		os.system("cat vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag'> VKDsurface.txt"%(GPU,GPU+1))
 		
 		TreeSurface["displaycolumns"]=('surface','value2')
-		with open("VKDsurface.txt","r") as file1:
-			i = 0
-			for line in file1:
-				if "====" in line:
-					continue
-				else:
+		
+		os.system("cat vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' > VKDPresentableSurface.txt"%(GPU))
+		
 
-					TreeSurface.insert('','end',values=(line),tags=i)
-					if i % 2 != 0:
-						TreeSurface.tag_configure(i,background=COLOR1)
-					if "VkSurfaceCapabilities" in line:
-						TreeSurface.tag_configure(i,foreground=COLOR2)
-					if "Extent" in line:
-						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
-					if "supported" in line:
-						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
-					if "current" in line:
-						TreeSurface.tag_configure(i,foreground=COLOR4,background="GRAY70")
-					
-					i = i + 1
+
+		with open("VKDsurface.txt","r") as file1:
+			for line in file1:
+				Surface.append(line)
+
+		with open("VKDPresentableSurface.txt","r") as file1:
+			for line in file1:
+				Surface.append(line)
+ 
+
+		for i in range(len(Surface)):
+			if "====" in Surface[i]:
+				continue
+			if "type" in Surface[i]:
+				continue
+			if "Present" in Surface[i]:
+				TreeSurface.insert('','end',values=(Surface[i],),tags=i)
+				TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
+			else:
+
+				TreeSurface.insert('','end',values=(Surface[i]),tags=i)
+				if i % 2 != 0:
+					TreeSurface.tag_configure(i,background=COLOR1)
+				if "VkSurfaceCapabilities" in Surface[i]:
+					TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
+				if "Extent" in Surface[i]:
+					TreeSurface.tag_configure(i,foreground=COLOR4,background=COLOR5)
+				if "supported" in Surface[i]:
+					TreeSurface.tag_configure(i,foreground=COLOR4,background=COLOR5)
+				if "current" in Surface[i]:
+					TreeSurface.tag_configure(i,foreground=COLOR4,background=COLOR5)
+				if "Formats" in Surface[i]:
+						TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
+
+		
+				
 
 
 	def radcall():
