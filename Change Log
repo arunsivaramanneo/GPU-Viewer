@@ -1,5 +1,5 @@
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan
+        27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
         26/9 - Added Surface Tab to Vulkan        
         23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
                   Implemented sorting in Instance & layers Tab column headers        

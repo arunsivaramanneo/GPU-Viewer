@@ -73,24 +73,33 @@ def OpenGL(tab1):
 		
 
 		#sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
-
-		TreeGLLimits = ttk.Treeview(frame5,height=15)
-		TreeGLLimits.heading('#0',text="OpenGL Limits")
-		TreeGLLimits.column('#0',width=800)
+		cols = ('value1','value2','value3','value4')
+		TreeGLLimits = ttk.Treeview(frame5,columns=cols,show="headings",height=15)
+		TreeGLLimits.heading('value1',text="OpenGL Limits")
+		TreeGLLimits.column('value1',width=750)
+		TreeGLLimits.heading('value3',text="Va",anchor="se")
+		TreeGLLimits.column('value3',width=50,anchor="se")
+		TreeGLLimits.heading('value4',text="lue",anchor="sw")
+		TreeGLLimits.column('value4',width=60,anchor='sw')
 		TreeGLLimits.grid(column=0,row=0)
+		TreeGLLimits["displaycolumns"] = ('value1','value3','value4')
 
 		lsb = ttk.Scrollbar(frame5, orient="vertical", command=TreeGLLimits.yview)
 		TreeGLLimits.configure(yscrollcommand=lsb.set)
 		lsb.grid(column=0,row=0,sticky='nse')
 
+		limits = []
 	
 		with open("OpenGL_Limits.txt","r") as file3:
 			i = 0
 			for line in file3:
-				TreeGLLimits.insert('','end',text=line,tags=i)
-				if i % 2 != 0:
-					TreeGLLimits.tag_configure(i,background=COLOR1)
-				i = i + 1
+				limits.append(line)
+
+		for i in range(len(limits)):
+			TreeGLLimits.insert('','end',values=limits[i],tags=i)
+			if i % 2 != 0:
+				TreeGLLimits.tag_configure(i,background=COLOR1)
+			i = i + 1
 			
 
 		os.system("rm OpenGL_Limit*.txt")
