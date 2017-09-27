@@ -99,6 +99,9 @@ def OpenGL(tab1):
 			TreeGLLimits.insert('','end',values=limits[i],tags=i)
 			if i % 2 != 0:
 				TreeGLLimits.tag_configure(i,background=COLOR1)
+			
+			if "=" not in limits[i]:
+				TreeGLLimits.tag_configure(i,foreground=COLOR2,background="GRAY70")
 			i = i + 1
 			
 
