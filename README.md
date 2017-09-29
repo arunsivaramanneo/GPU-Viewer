@@ -48,7 +48,6 @@ This project aims to capture all the required/important details of glxinfo and v
 2. Minor UI issues.
 3. Not tested on hardware other than Intel and Nvidia
 4. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
-5. Devices which are not supporting OpenGL ES will experience few data/UI issues in OpenGL Limits.
 
 ## DEVELOPMENT ENVIRONMENT
 

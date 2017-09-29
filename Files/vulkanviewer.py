@@ -752,9 +752,6 @@ def Vulkan(tab2):
 						if "Vulkan version 1.0.%d,"%j in line:
 							Vversion.append("1.0.%d"%j)
 							
-						
-
-
 			LVersion = []
 			with open("VKDLayer1.txt","r") as file1:
 				for line in file1:
@@ -770,7 +767,6 @@ def Vulkan(tab2):
 						if "Layer Extensions	count = %d"%j in line:
 							ECount.append("%d"%j)
 							break
-
 
 			try:
 				count2 = len(LVersion)
@@ -812,8 +808,6 @@ def Vulkan(tab2):
 		
 		os.system("cat vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' > VKDPresentableSurface.txt"%(GPU))
 		
-
-
 		with open("VKDsurface.txt","r") as file1:
 			for line in file1:
 				Surface.append(line)
@@ -846,9 +840,6 @@ def Vulkan(tab2):
 					TreeSurface.tag_configure(i,foreground=COLOR4,background=COLOR5)
 				if "Formats" in Surface[i]:
 						TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
-
-		
-				
 
 
 	def radcall():

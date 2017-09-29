@@ -1,4 +1,5 @@
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        29/9 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device        
         27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
         26/9 - Added Surface Tab to Vulkan        
         23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.

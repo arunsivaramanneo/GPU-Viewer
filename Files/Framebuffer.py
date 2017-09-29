@@ -11,7 +11,7 @@ def FrameBuffer():
 
 
 
-	frame1 = ttk.LabelFrame(win,padding=10)
+	frame1 = ttk.LabelFrame(win,text= "GLX Frame Buffer Configuration",padding=10)
 	frame1.grid(column=0,row=0,padx=10,pady=10)
 	radvar = tk.IntVar()
 
