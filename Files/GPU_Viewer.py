@@ -5,6 +5,7 @@ import OpenGLViewer
 from OpenGLViewer import OpenGL
 from vulkanviewer import Vulkan
 from About import AboutUs
+from tkinter import messagebox
 
 win = tk.Tk() 
 
@@ -63,6 +64,16 @@ finally:
 	tabcontrol.grid(column=0,row=0)
 
 	AboutUs(tab4)
+
+	def on_closing():
+	    result = messagebox.askokcancel("Quit", "Do you want to quit?")
+	    if result == True:
+	    	os.system("rm *.txt")
+	    	win.destroy()
+	    
+
+
+	win.protocol("WM_DELETE_WINDOW", on_closing)
 
 
 	win.mainloop()

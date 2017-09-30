@@ -13,9 +13,11 @@ COLOR5 = "GRAY70"
 ANCHOR1 = "center"
 ANCHOR2 = "sw"
 
-WIDTH1 = 600
-WIDTH2 = 245
+WIDTH1 = 425
+WIDTH2 = 420
 WIDTH3 = 100
+WIDTH4 = 140
+
 PAD1 = 10
 RANGE1 = 100
 
@@ -160,7 +162,7 @@ def Vulkan(tab2):
 				file1.seek(0,0)
 				i = 0
 				for line in file1:
-					TreeDevice.insert('','end',text=line,values=(value[i],),tags=i)
+					TreeDevice.insert('','end',text='  '+line.strip('\t'),values=(value[i],),tags=i)
 					if i % 2 != 0 :
 						TreeDevice.tag_configure(i,background=COLOR1)
 					i = i + 1			
@@ -203,7 +205,7 @@ def Vulkan(tab2):
 					file1.seek(0,0)
 					i = 0
 					for line in file1:
-						TreeSparse.insert('','end',values=(line,value[i],),tags=(value[i],i))
+						TreeSparse.insert('','end',values=('  '+line.strip('\t'),value[i],),tags=(value[i],i))
 						if value[i] == "true":
 							TreeSparse.tag_configure(value[i],foreground=COLOR2)
 						else:
@@ -257,7 +259,7 @@ def Vulkan(tab2):
 				file1.seek(0,0)
 				i = 0
 				for line in file1:
-					TreeFeatures.insert('','end',values=(line,value[i]),tags=(value[i],i))
+					TreeFeatures.insert('','end',values=('  '+line.strip('\t'),value[i]),tags=(value[i],i))
 					if value[i] == "true":
 						TreeFeatures.tag_configure(value[i],foreground=COLOR2)
 						#style.configure('Treeview',foreground=COLOR2)
@@ -279,7 +281,7 @@ def Vulkan(tab2):
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=WIDTH1)
 		TreeLimits.heading('value',text="Limits",anchor=ANCHOR2)
-		TreeLimits.column('value',width=WIDTH2,anchor='nw')
+		TreeLimits.column('value',width=WIDTH2,anchor='sw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
@@ -305,7 +307,8 @@ def Vulkan(tab2):
 		
 		for i in range(len(value)):
 			if "0x" in value[i]:
-				value[i] = int(value[i],16)
+				value[i] = str(int(value[i],16))
+
 
 		try:
 			with open("VKDlimits.txt","r") as file1:
@@ -313,7 +316,7 @@ def Vulkan(tab2):
 				i = 0
 				file1.seek(0,0)
 				for line in file1:
-					TreeLimits.insert('','end',text=line, values=value[i],tags=(i))
+					TreeLimits.insert('','end',text=line.strip('\t'), values=(value[i]),tags=(i))
 					if i % 2 != 0:
 						TreeLimits.tag_configure(i,background=COLOR1)
 					i = i + 1
@@ -365,7 +368,7 @@ def Vulkan(tab2):
 				file1.seek(0,0)
 				i = 0
 				for line in file1:
-					TreeExtension.insert('','end',values=(line,value[i]),tags=i)
+					TreeExtension.insert('','end',values=('  '+line.strip('\t'),value[i]),tags=i)
 					if i % 2 != 0:
 						TreeExtension.tag_configure(i,background=COLOR1)
 					i = i + 1			
@@ -378,10 +381,10 @@ def Vulkan(tab2):
 		frameFormat.grid(column=0,row=0)
 		cols = ('Formats','Linear','Optimal','Buffer')
 		TreeFormat = ttk.Treeview(frameFormat,columns=cols,show="headings",height=HT)
-		TreeFormat.column('Formats',width=545,anchor=ANCHOR2)
-		TreeFormat.column("Linear",width=WIDTH3,anchor=ANCHOR1)
-		TreeFormat.column("Optimal",width=WIDTH3,anchor=ANCHOR1)
-		TreeFormat.column("Buffer",width=WIDTH3,anchor=ANCHOR1)
+		TreeFormat.column('Formats',width=WIDTH1,anchor=ANCHOR2)
+		TreeFormat.column("Linear",width=WIDTH4,anchor=ANCHOR1)
+		TreeFormat.column("Optimal",width=WIDTH4,anchor=ANCHOR1)
+		TreeFormat.column("Buffer",width=WIDTH4,anchor=ANCHOR1)
 		for each in cols:
 			TreeFormat.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeFormat, each_, True))
 
@@ -445,7 +448,7 @@ def Vulkan(tab2):
 				tabcontrol.tab(4,text="Formats(%d)"%Formats)
 				i = 0
 				for line in file1:
-					TreeFormat.insert('','end',values=(line,linear[i],optimal[i],Buffer[i]),tags=i)
+					TreeFormat.insert('','end',values=('  '+line,linear[i],optimal[i],Buffer[i]),tags=i)
 					if i % 2 != 0 :
 						TreeFormat.tag_configure(i,background=COLOR1)
 					i = i + 1			
@@ -720,7 +723,7 @@ def Vulkan(tab2):
 				file1.seek(0,0)
 				i = 0
 				for line in file1:
-					TreeInstance.insert('','end',values=(line,value[i]),tags=i)
+					TreeInstance.insert('','end',values=('  '+line.strip('\t'),value[i]),tags=i)
 					if i % 2 != 0:
 						TreeInstance.tag_configure(i,background=COLOR1)
 					i = i + 1			
@@ -730,10 +733,10 @@ def Vulkan(tab2):
 
 			cols = ('Instance Layers','Vulkan Version','Layer Version','Extension Count')
 			TreeLayer = ttk.Treeview(frame2,columns=cols,show="headings",height=HT3)
-			TreeLayer.column('Instance Layers',width=450,anchor=ANCHOR2)
-			TreeLayer.column('Vulkan Version',width=120,anchor=ANCHOR1)
-			TreeLayer.column('Layer Version',width=120,anchor=ANCHOR1)
-			TreeLayer.column('Extension Count',width=150,anchor=ANCHOR1)
+			TreeLayer.column('Instance Layers',width=WIDTH1,anchor=ANCHOR2)
+			TreeLayer.column('Vulkan Version',width=WIDTH4,anchor=ANCHOR1)
+			TreeLayer.column('Layer Version',width=WIDTH4,anchor=ANCHOR1)
+			TreeLayer.column('Extension Count',width=WIDTH4,anchor=ANCHOR1)
 			for each in cols:
 				TreeLayer.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeLayer, each_, True))
 			TreeLayer.grid(column=0,row=1)
@@ -774,7 +777,7 @@ def Vulkan(tab2):
 				with open("VKDLayer.txt","r") as file1:
 					i = 0
 					for line in file1:
-						TreeLayer.insert('','end',values=(line,Vversion[i],LVersion[i],ECount[i]),tags=i)
+						TreeLayer.insert('','end',values=('  '+line,Vversion[i],LVersion[i],ECount[i]),tags=i)
 						if i % 2 != 0:
 							TreeLayer.tag_configure(i,background=COLOR1)
 						i = i + 1						
@@ -788,10 +791,10 @@ def Vulkan(tab2):
 		cols = ('surface','value1','value2')
 		TreeSurface = ttk.Treeview(frameSurface,columns=cols,show="headings",height=HT)
 		TreeSurface.heading('surface',text='Surface Capabilities')
-		TreeSurface.column('surface',width=500,anchor=ANCHOR2)
+		TreeSurface.column('surface',width=WIDTH1,anchor=ANCHOR2)
 		TreeSurface.column('value1',width=100,anchor=ANCHOR1)
 		TreeSurface.heading('value2',text="value",anchor=ANCHOR2)
-		TreeSurface.column('value2',width=350,anchor=ANCHOR2)
+		TreeSurface.column('value2',width=WIDTH2,anchor=ANCHOR2)
 		TreeSurface.grid(column=0,row=0)
 		
 		ssb = ttk.Scrollbar(frameSurface, orient="vertical", command=TreeSurface.yview)
@@ -827,7 +830,7 @@ def Vulkan(tab2):
 				TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
 			else:
 
-				TreeSurface.insert('','end',values=(Surface[i]),tags=i)
+				TreeSurface.insert('','end',values=('  '+Surface[i]),tags=i)
 				if i % 2 != 0:
 					TreeSurface.tag_configure(i,background=COLOR1)
 				if "VkSurfaceCapabilities" in Surface[i]:
@@ -871,7 +874,7 @@ def Vulkan(tab2):
 		for line in file2:
 			list.append(line)
 
-
+	
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)

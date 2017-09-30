@@ -32,7 +32,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ## UNDERDEVELOPMENT
 
-1. OpenGL - OpenGL SPIRV support (low priority)
+1. OpenGL - OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
 2. General - Bug fixes, Code Optimizations (High Priority)
 
 ## IMPORTANT

@@ -1,3 +1,8 @@
+OCT-2107-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        01/8 - OpenGL Vendor Extensions have been updated to display only the Vendor extensions supported by the Device.
+                  Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
+                  Formatted all the texts to have consistent alignment.
+
 SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         29/9 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device        
         27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
