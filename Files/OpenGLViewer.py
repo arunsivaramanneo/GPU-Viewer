@@ -69,18 +69,17 @@ def OpenGL(tab1):
 		frame5.grid(column=0,row=0, padx=20,pady=10)
 
 	
-		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' > OpenGL_Limits.txt")
+		os.system("glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep = > OpenGL_Limits.txt")
 		
-
 		#sc4 = scrolledtext.ScrolledText(win2, width=80, height=10)
 		cols = ('value1','value2','value3','value4')
 		TreeGLLimits = ttk.Treeview(frame5,columns=cols,show="headings",height=15)
 		TreeGLLimits.heading('value1',text="OpenGL hardware limits")
-		TreeGLLimits.column('value1',width=750)
+		TreeGLLimits.column('value1',width=650)
 		TreeGLLimits.heading('value3',text="Va",anchor="se")
-		TreeGLLimits.column('value3',width=50,anchor="se")
+		TreeGLLimits.column('value3',width=100,anchor="se")
 		TreeGLLimits.heading('value4',text="lue",anchor="sw")
-		TreeGLLimits.column('value4',width=60,anchor='sw')
+		TreeGLLimits.column('value4',width=100,anchor='sw')
 		TreeGLLimits.grid(column=0,row=0)
 		TreeGLLimits["displaycolumns"] = ('value1','value3','value4')
 
