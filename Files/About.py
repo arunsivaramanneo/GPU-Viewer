@@ -7,7 +7,7 @@ HT2 = 10
 COLOR1 = "GRAY91" # even number line background
 COLOR2 = "BLUE" 
 ANCHOR1 = "center"
-WIDTH1 = 870
+WIDTH1 = 930
 
 def AboutUs(tab4):
 

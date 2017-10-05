@@ -38,9 +38,9 @@ def OpenGL(tab1):
 	TreeGL = ttk.Treeview(frame1,height=9)
 	TreeGL ['columns'] = ('values')
 	#TreeGL.heading('#0',text='')
-	TreeGL.column('#0',width=425, anchor="sw")
+	TreeGL.column('#0',width=450, anchor="sw")
 	#TreeGL.heading('values',text="")
-	TreeGL.column('values',width=420)
+	TreeGL.column('values',width=450)
 
 	TreeGL.grid(column=0,row=0)
 
@@ -169,13 +169,13 @@ def OpenGL(tab1):
 		j = 0
 		for i in range(len(vendorList)):
 
-			rad = tk.Radiobutton(frame3, text="%s(%d)"%(vendorList[i],vCount[i]), variable=radvar, value=i, command=radcall)
+			rad = tk.Radiobutton(frame3, text="%s(%d)"%(vendorList[i],vCount[i]), variable=radvar, value=i,font=('Helvetica',11),command=radcall)
 			
 			if len(vendorList) <= 9:
 				rad.grid(column=i,row=2,pady=12,sticky=tk.W)
 			else:
 				rad.grid(column=i,row=2,pady=2,sticky=tk.W)
-				if i > 9:
+				if i > 8:
 					rad.grid(column=j,row=3, sticky=tk.W)
 					j = j + 1
 			if i == 0:
@@ -227,7 +227,7 @@ def OpenGL(tab1):
 						GL_All.append(line)
 		
 		TreeGLAll = ttk.Treeview(frame4,height=16)
-		TreeGLAll.column('#0',width=850)
+		TreeGLAll.column('#0',width=900)
 		TreeGLAll.grid(column=0,row=2)
 
 		Allsb = ttk.Scrollbar(frame4, orient="vertical", command=TreeGLAll.yview)
@@ -247,12 +247,12 @@ def OpenGL(tab1):
 		
 
 	with open("OpenGLLHS.txt","r") as file1:
-		OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,command=select)
+		OpenGLrad = tk.Radiobutton(frame2,text="OpenGL", variable=radvar1, value=1,font=('Helvetica',11),command=select)
 		OpenGLrad.grid(column=0,row=1)
 		OpenGLrad.invoke()
 		for line in file1:
 			if "OpenGL ES" in line:
-				OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,command=select)
+				OpenGLESrad = tk.Radiobutton(frame2,text="OpenGL ES", variable=radvar1, value=2,font=('Helvetica',11),command=select)
 				OpenGLESrad.grid(column=1,row=1)
 
 	os.system("rm OpenGL*.txt")

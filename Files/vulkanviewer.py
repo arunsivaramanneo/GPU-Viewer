@@ -11,10 +11,11 @@ COLOR5 = "GRAY70"
 ANCHOR1 = "center"
 ANCHOR2 = "sw"
 
-WIDTH1 = 425
-WIDTH2 = 420
+WIDTH1 = 450
+WIDTH2 = 350
 WIDTH3 = 100
-WIDTH4 = 140
+WIDTH4 = 150
+WIDTH5 = 50
 
 PAD1 = 10
 RANGE1 = 100
@@ -113,7 +114,7 @@ def Vulkan(tab2):
 		TreeDevice = ttk.Treeview(frameDevice,height=HT3)
 		TreeDevice['columns'] =('value')
 		TreeDevice.column('#0',width=WIDTH1,anchor='center')
-		TreeDevice.column('value',width=WIDTH2,anchor='nw') 
+		TreeDevice.column('value',width=WIDTH1,anchor='nw') 
 
 		TreeDevice.grid(column=0,row=0)
 
@@ -174,7 +175,7 @@ def Vulkan(tab2):
 			cols = ("Device Sparse Properties","Value")
 			TreeSparse = ttk.Treeview(frameSparse,columns=cols,height=HT2,show="headings")
 			TreeSparse.column('Device Sparse Properties',width=WIDTH1,anchor=ANCHOR2)
-			TreeSparse.column('Value',width=WIDTH2) 
+			TreeSparse.column('Value',width=WIDTH1) 
 			for each in cols:
 				TreeSparse.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeSparse, each_, True))
 
@@ -222,7 +223,7 @@ def Vulkan(tab2):
 		cols = ('Device Features','Value')
 		TreeFeatures = ttk.Treeview(frameFeatures,columns=cols,height=HT,show="headings")
 		TreeFeatures.column('Device Features',width=WIDTH1)
-		TreeFeatures.column('Value',width=WIDTH2,anchor=ANCHOR1)
+		TreeFeatures.column('Value',width=WIDTH1,anchor=ANCHOR1)
 
 		for each in cols:
 			TreeFeatures.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeFeatures, each_, True))
@@ -279,7 +280,7 @@ def Vulkan(tab2):
 		TreeLimits.heading("#0", text='Device Limits')
 		TreeLimits.column('#0',width=WIDTH1)
 		TreeLimits.heading('value',text="Limits",anchor=ANCHOR2)
-		TreeLimits.column('value',width=WIDTH2,anchor='sw')
+		TreeLimits.column('value',width=WIDTH1,anchor='sw')
 
 		TreeLimits.grid(column=0,row=0,sticky=tk.W)
 
@@ -328,7 +329,7 @@ def Vulkan(tab2):
 		cols = ("Device Extensions","Version")
 		TreeExtension = ttk.Treeview(frameExtension,columns=cols,show="headings",height=HT)
 		TreeExtension.column('Device Extensions',width=WIDTH1,anchor=ANCHOR2)
-		TreeExtension.column('Version',width=WIDTH2,anchor=ANCHOR1)
+		TreeExtension.column('Version',width=WIDTH1,anchor=ANCHOR1)
 		for each in cols:
 			TreeExtension.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeExtension, each_, True))
 
@@ -456,13 +457,13 @@ def Vulkan(tab2):
 		frameType = ttk.LabelFrame(MemoryTypeTab,text="Memory Types",padding=PAD1)
 		frameType.grid(column=0,row=0)
 		TreeMemory = ttk.Treeview(frameType,columns=cols,show="headings",height=HT2)
-		TreeMemory.column('Types',width=95,anchor=ANCHOR1)
+		TreeMemory.column('Types',width=WIDTH5,anchor=ANCHOR1)
 		TreeMemory.column('Heap Index',width=WIDTH3,anchor=ANCHOR1)
-		TreeMemory.column('Device_Local',width=120,anchor=ANCHOR1)
-		TreeMemory.column('Host_Visible',width=120,anchor=ANCHOR1)
-		TreeMemory.column('Host_Coherent',width=120,anchor=ANCHOR1)
-		TreeMemory.column('Host_Cached',width=140,anchor=ANCHOR1)
-		TreeMemory.column('Lazily_Allocated',width=150,anchor=ANCHOR1)
+		TreeMemory.column('Device_Local',width=WIDTH4,anchor=ANCHOR1)
+		TreeMemory.column('Host_Visible',width=WIDTH4,anchor=ANCHOR1)
+		TreeMemory.column('Host_Coherent',width=WIDTH4,anchor=ANCHOR1)
+		TreeMemory.column('Host_Cached',width=WIDTH4,anchor=ANCHOR1)
+		TreeMemory.column('Lazily_Allocated',width=WIDTH4,anchor=ANCHOR1)
 		for each in cols:
 			TreeMemory.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeMemory, each_, True))
 		TreeMemory.grid(column=0,row=0)
@@ -537,9 +538,9 @@ def Vulkan(tab2):
 			frameHeap = ttk.LabelFrame(MemoryTypeTab,text="Memory Heaps",padding=PAD1)
 			frameHeap.grid(column=0,row=1,pady=PAD1)
 			TreeHeap = ttk.Treeview(frameHeap,columns=cols,show="headings",height=HT3)
-			TreeHeap.column('Heaps',width=95,anchor=ANCHOR1)
-			TreeHeap.column('Device Size',width=300,anchor=ANCHOR1)
-			TreeHeap.column('HEAP_DEVICE_LOCAL',width=450,anchor=ANCHOR1)
+			TreeHeap.column('Heaps',width=WIDTH3,anchor=ANCHOR1)
+			TreeHeap.column('Device Size',width=WIDTH2,anchor=ANCHOR1)
+			TreeHeap.column('HEAP_DEVICE_LOCAL',width=WIDTH1,anchor=ANCHOR1)
 			for each in cols:
 				TreeHeap.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeHeap, each_, True))
 			TreeHeap.grid(column=0,row=1)
@@ -586,7 +587,7 @@ def Vulkan(tab2):
 		frameQueue = ttk.LabelFrame(QueueTab,text="Queues",padding=PAD1)
 		frameQueue.grid(column=0,row=0)
 		col1 = ('Queue','timestamp','minImageTransferGranularity','Flags')
-		col1width = (95,80,208,467)
+		col1width = (100,80,210,510)
 		TreeQueue1 = ttk.Treeview(frameQueue,columns=col1,show="headings",height=0)
 		TreeQueue1.grid(column=0,row=0,sticky=tk.W)
 		for i in range(len(col1)):
@@ -595,7 +596,7 @@ def Vulkan(tab2):
 
 		
 		cols= ('Family','Count','ValidBits',"Width","Height","Depth",'GRAPHICS_BIT','COMPUTE_BIT','TRANSFER_BIT','SPARSE_BINDING_BIT')
-		colswidth = (50,45,80,70,70,68,102,102,102,161)
+		colswidth = (WIDTH5,WIDTH5,80,70,70,70,110,110,110,165)
 		TreeQueue = ttk.Treeview(frameQueue,column=cols,show="headings",height=HT-1)
 		for i in range(len(cols)):
 			TreeQueue.heading(cols[i],text=cols[i])
@@ -692,7 +693,7 @@ def Vulkan(tab2):
 		TreeInstance = ttk.Treeview(frame1,columns=cols,show="headings",height=HT2)
 		TreeInstance.column('Instance Extensions',width=WIDTH1,anchor=ANCHOR2)
 		TreeInstance.grid(column=0,row=0)
-		TreeInstance.column('Version',width=WIDTH2,anchor=ANCHOR1)
+		TreeInstance.column('Version',width=WIDTH1,anchor=ANCHOR1)
 		for each in cols:
 			TreeInstance.heading(each,text=each,command=lambda each_=each: treeview_sort_column(TreeInstance, each_, True))
 
@@ -786,7 +787,7 @@ def Vulkan(tab2):
 		TreeSurface.column('surface',width=WIDTH1,anchor=ANCHOR2)
 		TreeSurface.column('value1',width=100,anchor=ANCHOR1)
 		TreeSurface.heading('value2',text="value",anchor=ANCHOR2)
-		TreeSurface.column('value2',width=WIDTH2,anchor=ANCHOR2)
+		TreeSurface.column('value2',width=WIDTH1,anchor=ANCHOR2)
 		TreeSurface.grid(column=0,row=0)
 		
 		ssb = ttk.Scrollbar(frameSurface, orient="vertical", command=TreeSurface.yview)
@@ -880,7 +881,7 @@ def Vulkan(tab2):
 	DS.grid(column=0,row=0, padx=100, pady=10)
 
 	for i in range(len(list)):
-		GPU = tk.Radiobutton(frame1,text=list[i].strip('\n'), variable=radvar,value=i,command=radcall)
+		GPU = tk.Radiobutton(frame1,text=list[i].strip('\n'), variable=radvar,value=i,font=('Helvetica',11),command=radcall)
 		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()

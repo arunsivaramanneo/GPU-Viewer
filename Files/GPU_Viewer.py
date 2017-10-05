@@ -22,7 +22,7 @@ style = ttk.Style()
 
 try:
 	style.theme_use("alt")
-	style.configure('.',font=('Helvetica',10))
+	style.configure('.',font=('Helvetica',11))
 
 except Exception as e:
 	raise e
