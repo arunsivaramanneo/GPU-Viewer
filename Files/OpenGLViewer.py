@@ -23,7 +23,7 @@ def OpenGL(tab1):
 	frame2 = ttk.LabelFrame(tab1, text="Extensions ")
 	frame2.grid(column=0,row=1,padx=20, sticky=tk.W)
 
-	frame3 = ttk.LabelFrame(tab1)
+	frame3 = ttk.LabelFrame(tab1,padding=5)
 	frame3.grid(column=0,row=2,padx=20, sticky=tk.W)
 
 	frame4 = ttk.LabelFrame(tab1, text="",padding=10)
@@ -38,7 +38,7 @@ def OpenGL(tab1):
 	TreeGL = ttk.Treeview(frame1,height=9)
 	TreeGL ['columns'] = ('values')
 	#TreeGL.heading('#0',text='')
-	TreeGL.column('#0',width=425, anchor="s")
+	TreeGL.column('#0',width=425, anchor="sw")
 	#TreeGL.heading('values',text="")
 	TreeGL.column('values',width=420)
 
@@ -240,7 +240,7 @@ def OpenGL(tab1):
 				frame4.configure(text=List[i]) 
 				count = len(GL_All)
 				for i in range(count):
-					TreeGLAll.insert('','end',text=GL_All[i],tags=i)
+					TreeGLAll.insert('','end',text=GL_All[i].strip(' '),tags=i)
 					if i % 2 != 0:
 						TreeGLAll.tag_configure(i,background=COLOR1)
 				

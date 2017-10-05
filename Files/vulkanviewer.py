@@ -162,7 +162,7 @@ def Vulkan(tab2):
 				file1.seek(0,0)
 				i = 0
 				for line in file1:
-					TreeDevice.insert('','end',text='  '+line.strip('\t'),values=(value[i],),tags=i)
+					TreeDevice.insert('','end',text=line.strip('\t'),values=(value[i],),tags=i)
 					if i % 2 != 0 :
 						TreeDevice.tag_configure(i,background=COLOR1)
 					i = i + 1			
@@ -414,7 +414,7 @@ def Vulkan(tab2):
 			count = len(file1.readlines())
 			file1.seek(0,0)
 			for line in file1:
-				if line == "		None\n":
+				if "None" in line:
 					linear.append("false")
 				else:
 					linear.append("true")
@@ -423,7 +423,7 @@ def Vulkan(tab2):
 
 		with open("VKDFORMATSoptimal.txt","r") as file1:
 			for line in file1:
-				if line == "		None\n":
+				if "None" in line:
 					optimal.append("false")
 				else:
 					optimal.append("true")
@@ -432,7 +432,7 @@ def Vulkan(tab2):
 
 		with open("VKDFORMATSBuffer.txt","r") as file1:
 			for line in file1:
-				if line == "		None\n":
+				if "None" in line:
 					Buffer.append("false")
 				else:
 					Buffer.append("true")
@@ -830,7 +830,7 @@ def Vulkan(tab2):
 				TreeSurface.tag_configure(i,foreground=COLOR2,background=COLOR5)
 			else:
 
-				TreeSurface.insert('','end',values=('  '+Surface[i]),tags=i)
+				TreeSurface.insert('','end',values=(Surface[i]),tags=i)
 				if i % 2 != 0:
 					TreeSurface.tag_configure(i,background=COLOR1)
 				if "VkSurfaceCapabilities" in Surface[i]:
@@ -880,7 +880,7 @@ def Vulkan(tab2):
 	DS.grid(column=0,row=0, padx=100, pady=10)
 
 	for i in range(len(list)):
-		GPU = tk.Radiobutton(frame1,text=list[i], variable=radvar,value=i,command=radcall)
+		GPU = tk.Radiobutton(frame1,text=list[i].strip('\n'), variable=radvar,value=i,command=radcall)
 		GPU.grid(column=1,row=i,sticky=tk.W,padx=30)
 		if i == 0:
 			GPU.invoke()
