@@ -96,11 +96,11 @@ def FrameBuffer():
 			os.system("rm FrameBuffer*.txt")
 
 
-	rad1 = tk.Radiobutton(frame1, text="GLX Visuals", variable=radvar, value=1,command=radcall)
+	rad1 = tk.Radiobutton(frame1, text="GLX Visuals", variable=radvar, value=1,font=('Helvetica',11),command=radcall)
 	rad1.grid(column=0,row=0,pady=10,sticky = tk.W)
 	rad1.invoke()
 
-	rad2 = tk.Radiobutton(frame1,text="GLXFBConfigs",variable=radvar,value=2,command=radcall)
+	rad2 = tk.Radiobutton(frame1,text="GLXFBConfigs",variable=radvar,value=2,font=('Helvetica',11),command=radcall)
 	rad2.grid(column=0,row=0,pady=10)
 	#rad2.invoke()
 

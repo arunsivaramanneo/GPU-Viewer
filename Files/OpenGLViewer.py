@@ -38,7 +38,7 @@ def OpenGL(tab1):
 	TreeGL = ttk.Treeview(frame1,height=9)
 	TreeGL ['columns'] = ('values')
 	#TreeGL.heading('#0',text='')
-	TreeGL.column('#0',width=450, anchor="sw")
+	TreeGL.column('#0',width=460, anchor="sw")
 	#TreeGL.heading('values',text="")
 	TreeGL.column('values',width=450)
 
@@ -75,7 +75,7 @@ def OpenGL(tab1):
 		cols = ('value1','value2','value3','value4')
 		TreeGLLimits = ttk.Treeview(frame5,columns=cols,show="headings",height=15)
 		TreeGLLimits.heading('value1',text="OpenGL hardware limits")
-		TreeGLLimits.column('value1',width=650)
+		TreeGLLimits.column('value1',width=700)
 		TreeGLLimits.heading('value3',text="Va",anchor="se")
 		TreeGLLimits.column('value3',width=100,anchor="se")
 		TreeGLLimits.heading('value4',text="lue",anchor="sw")
@@ -141,7 +141,7 @@ def OpenGL(tab1):
 	
 		vendorList = [i.strip(' ') for i in vendorList]
 		vendorList = [i.strip('\n ') for i in vendorList]
-		vendorList.insert(0," ALL")
+		vendorList.insert(0,"ALL")
 
 		radsel1 = radvar1.get()
 
@@ -155,9 +155,9 @@ def OpenGL(tab1):
 				file1.seek(0,0)
 				GL_All = []
 				for line in file1:
-					if vendorList[i] == " ALL":
+					if vendorList[i] == "ALL":
 						GL_All.append(line)
-					elif vendorList[i] != " ALL" and vendorList[i] != "GLX" :
+					elif vendorList[i] != "ALL" and vendorList[i] != "GLX" :
 						if "_%s_"%vendorList[i] in line :
 							GL_All.append(line)
 					elif vendorList[i] == "GLX":
@@ -175,7 +175,7 @@ def OpenGL(tab1):
 				rad.grid(column=i,row=2,pady=12,sticky=tk.W)
 			else:
 				rad.grid(column=i,row=2,pady=2,sticky=tk.W)
-				if i > 8:
+				if i > 9:
 					rad.grid(column=j,row=3, sticky=tk.W)
 					j = j + 1
 			if i == 0:
@@ -227,7 +227,7 @@ def OpenGL(tab1):
 						GL_All.append(line)
 		
 		TreeGLAll = ttk.Treeview(frame4,height=16)
-		TreeGLAll.column('#0',width=900)
+		TreeGLAll.column('#0',width=910)
 		TreeGLAll.grid(column=0,row=2)
 
 		Allsb = ttk.Scrollbar(frame4, orient="vertical", command=TreeGLAll.yview)
