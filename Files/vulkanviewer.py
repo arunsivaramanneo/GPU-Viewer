@@ -2,9 +2,7 @@ import tkinter as tk
 from tkinter import ttk 
 import os
 
-HT = 30
-HT2 = 13
-HT3 = 13
+
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
 COLOR3 = "RED"
@@ -874,7 +872,15 @@ def Vulkan(tab2):
 		for line in file2:
 			list.append(line)
 
-	
+	if len(list) > 1 :
+		HT = 30
+		HT2 = 13
+		HT3 = 13
+	else :
+		HT = 31
+		HT2 = 15
+		HT3 = 12
+
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")
 	DS.grid(column=0,row=0, padx=100, pady=10)
