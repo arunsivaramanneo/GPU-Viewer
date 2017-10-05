@@ -352,11 +352,8 @@ def Vulkan(tab2):
 			value = []
 			for line in file1:
 				for j in range(RANGE1):
-					if ": extension revision  %d"%j in line:
-						value.append("0.0.%d"%j)
-						break
 					if ": extension revision %2d"%j in line:
-						value.append("0.0.%2d"%j)
+						value.append("0.0.%d"%j)
 						break
 
 		try:
@@ -708,11 +705,8 @@ def Vulkan(tab2):
 			value = []
 			for line in file1:
 				for j in range(RANGE1):
-					if ": extension revision  %d"%j in line:
-						value.append("0.0.%d"%j)
-						break
 					if ": extension revision %2d"%j in line:
-						value.append("0.0.%2d"%j)
+						value.append("0.0.%d"%j)
 						break
 		try:
 			with open("VKDInstanceExtensions.txt","r") as file1:
