@@ -26,7 +26,7 @@ def OpenGL(tab1):
 	frame3 = ttk.LabelFrame(tab1,padding=5)
 	frame3.grid(column=0,row=2,padx=20, sticky=tk.W)
 
-	frame4 = ttk.LabelFrame(tab1, text="",padding=10)
+	frame4 = ttk.LabelFrame(tab1, text="",width=900,padding=10)
 	frame4.grid(column=0,row=4)
 
 	
@@ -226,7 +226,7 @@ def OpenGL(tab1):
 					if "GLX_" in line:
 						GL_All.append(line)
 		
-		TreeGLAll = ttk.Treeview(frame4,height=16)
+		TreeGLAll = ttk.Treeview(frame4,height=17)
 		TreeGLAll.column('#0',width=910)
 		TreeGLAll.grid(column=0,row=2)
 

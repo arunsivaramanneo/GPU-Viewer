@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk 
 import os
 
+HT = 32
+HT2 = 15
+HT3 = 13
 
 COLOR1 = "GRAY91"
 COLOR2 = "GREEN"
@@ -786,7 +789,7 @@ def Vulkan(tab2):
 		TreeSurface.heading('surface',text='Surface Capabilities')
 		TreeSurface.column('surface',width=WIDTH1,anchor=ANCHOR2)
 		TreeSurface.column('value1',width=100,anchor=ANCHOR1)
-		TreeSurface.heading('value2',text="value",anchor=ANCHOR2)
+		TreeSurface.heading('value2',text="Value",anchor=ANCHOR2)
 		TreeSurface.column('value2',width=WIDTH1,anchor=ANCHOR2)
 		TreeSurface.grid(column=0,row=0)
 		
@@ -866,15 +869,6 @@ def Vulkan(tab2):
 		file2.seek(0,0)
 		for line in file2:
 			list.append(line)
-
-	if len(list) > 1 :
-		HT = 30
-		HT2 = 13
-		HT3 = 13
-	else :
-		HT = 31
-		HT2 = 15
-		HT3 = 12
 
 
 	DS = ttk.Label(frame1, text="Available Device(s) :")

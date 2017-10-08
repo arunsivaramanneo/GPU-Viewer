@@ -3,11 +3,11 @@ from tkinter import ttk
 from tkinter import scrolledtext
 
 HT = 22 # Height of the Tab
-HT2 = 10
+HT2 = 13
 COLOR1 = "GRAY91" # even number line background
 COLOR2 = "BLUE" 
 ANCHOR1 = "center"
-WIDTH1 = 930
+WIDTH1 = 940
 
 def AboutUs(tab4):
 
