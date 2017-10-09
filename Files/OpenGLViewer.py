@@ -130,11 +130,13 @@ def OpenGL(tab1):
 			i.destroy()
 
 		os.system("cat extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > Vendor.txt")
+		os.system("cat extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> Vendor.txt")
+		os.system("cat Vendor.txt | sort | uniq > Vendor1.txt")
 
 
 		vCount = []
 		vendorList = []
-		with open("Vendor.txt","r") as file1:
+		with open("Vendor1.txt","r") as file1:
 			for line in file1:
 				vendorList.append(line)
 
@@ -147,8 +149,11 @@ def OpenGL(tab1):
 
 		if radsel1 == 1:
 			frame3.configure(text="OpenGL")
+			vendorList.remove("GL")
+			vendorList.remove("GLX")
 		elif radsel1 == 2:
 			frame3.configure(text="OpenGL ES")
+			vendorList.remove("GL")
 		
 		with open("extensions.txt","r") as file1:
 			for i in range(len(vendorList)):
@@ -157,16 +162,14 @@ def OpenGL(tab1):
 				for line in file1:
 					if vendorList[i] == "ALL":
 						GL_All.append(line)
-					elif vendorList[i] != "ALL" and vendorList[i] != "GLX" :
+					elif vendorList[i] != "ALL":
 						if "_%s_"%vendorList[i] in line :
-							GL_All.append(line)
-					elif vendorList[i] == "GLX":
-						if "GLX_" in line:
 							GL_All.append(line)
 				vCount.append(len(GL_All))
 
 
 		j = 0
+		k = 0
 		for i in range(len(vendorList)):
 
 			rad = tk.Radiobutton(frame3, text="%s(%d)"%(vendorList[i],vCount[i]), variable=radvar, value=i,font=('Helvetica',11),command=radcall)
@@ -175,9 +178,12 @@ def OpenGL(tab1):
 				rad.grid(column=i,row=2,pady=12,sticky=tk.W)
 			else:
 				rad.grid(column=i,row=2,pady=2,sticky=tk.W)
-				if i > 9:
+				if i > 9 and i < 20:
 					rad.grid(column=j,row=3, sticky=tk.W)
 					j = j + 1
+				elif i >= 20 :
+					rad.grid(column=k,row=4,sticky=tk.W)
+					k = k + 1
 			if i == 0:
 				rad.invoke()
 		
@@ -204,29 +210,33 @@ def OpenGL(tab1):
 		GL_All = []
 		List = []
 
+		radsel1 = radvar1.get()
 		radsel=radvar.get()
 
 
-		with open("Vendor.txt","r") as file1:
+		with open("Vendor1.txt","r") as file1:
 			for line in file1:
 				List.append(line)
 
 		List = [i.strip(' ') for i in List]
 		List = [i.strip('\n ') for i in List]
 		List.insert(0," ALL")
+		
+		if radsel1 == 1:
+			List.remove("GL")
+			List.remove("GLX")
+		elif radsel1 == 2:
+			List.remove("GL")
 	
 		with open("extensions.txt","r") as file1:
 			for line in file1:
 				if List[radsel] == " ALL":
 					GL_All.append(line)
-				elif List[radsel] != " ALL" and List[radsel] != "GLX" :
+				elif List[radsel] != " ALL" :
 					if "_%s_"%List[radsel] in line:
 						GL_All.append(line)
-				elif List[radsel] == "GLX":
-					if "GLX_" in line:
-						GL_All.append(line)
-		
-		TreeGLAll = ttk.Treeview(frame4,height=17)
+			
+		TreeGLAll = ttk.Treeview(frame4,height=16)
 		TreeGLAll.column('#0',width=910)
 		TreeGLAll.grid(column=0,row=2)
 

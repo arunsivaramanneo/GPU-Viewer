@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import scrolledtext
 
 HT = 22 # Height of the Tab
-HT2 = 13
+HT2 = 11
 COLOR1 = "GRAY91" # even number line background
 COLOR2 = "BLUE" 
 ANCHOR1 = "center"
@@ -11,8 +11,8 @@ WIDTH1 = 940
 
 def AboutUs(tab4):
 
-	frameAbout = ttk.LabelFrame(tab4,text="About GPU Viewer",padding=10)
-	frameAbout.grid(column=0,row=0)
+	frameAbout = ttk.LabelFrame(tab4,text="About GPU Viewer",padding=15)
+	frameAbout.grid(column=0,row=0,pady=10)
 
 	TreeAbout = ttk.Treeview(frameAbout,height=HT)
 	TreeAbout.heading('#0',text="GPU Viewer 1.0",anchor=ANCHOR1)
