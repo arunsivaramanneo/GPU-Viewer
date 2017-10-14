@@ -1,25 +1,25 @@
 ﻿# GPU-Viewer
 A front-end to glxinfo and Vulkaninfo. 
 
-This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 with tkinter (python3-tk). All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
+This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
 
-![gpu viewer_003](https://user-images.githubusercontent.com/30646692/31314208-740c5450-ac18-11e7-894d-bfa82ededd32.png)
-![gpu viewer_002](https://user-images.githubusercontent.com/30646692/31314209-7dda581a-ac18-11e7-8c93-aba8bc24e91e.png)
+![gpu viewer v1 1_008](https://user-images.githubusercontent.com/30646692/31576187-97a6ffdc-b113-11e7-8195-bfcfe3a3a4a3.png)
+![gpu viewer v1 1_010](https://user-images.githubusercontent.com/30646692/31576204-cab6826c-b113-11e7-8d38-ded1934c08dc.png)
 
 ## INSTALLATION STEPS
 
 #### Ubuntu
 
 1. Before Downloading the files please see the Known issues below
-2. Ensure python3-tk is installed(sudo apt-get install python3-tk).
+2. Ensure python3 or higher is installed.
 3. Download the file and Extract to a folder
-4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPU_Viewer.py
+4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python GPU_Viewer.py
 5. For Vulkan Tab to work Install Vulkan-Utils(Ubuntu)/(Sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
 
 #### Arch 
 
 1. Before Downloading the files please see the Known issues below
-2. Ensure python tkinter is installed
+2. Ensure python 3 is installed
 3. Download the file and Extract to a folder
 4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPU_Viewer.py
 5. For Vulkan Tab to work Install vulkan-extra-layers(Arch),also Vulkan enabled drivers should be installed.
@@ -27,29 +27,28 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ## What's developed and available?
 
-1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors,GLX Frame Buffer Configuration
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
 3. About Tab - About GPU Viewer Application, Change Log
 
 
 ## UNDERDEVELOPMENT
 
-1. OpenGL - OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
+1. OpenGL - GLX Frame Buffer Configuration, OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
 2. General - Bug fixes, Code Optimizations (High Priority)
 
 ## IMPORTANT
 
-1. Requires Python 3 and python3-tk to run this Application, works only on linux Operating system
+1. Requires Python 3 pyGObjects to run this Application, works only on linux Operating system
 2. Tested on Intel and Nvidia hardware
 3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 4. Vulkan Tab should work fine for multi-gpu setup.
 
 ## KNOWN ISSUES
 
-1. Application does not render properly for system with resolution less than 1080p
-2. Minor UI issues.
-3. Not tested on hardware other than Intel and Nvidia
-4. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
+1. Minor UI issues.
+2. Not tested on hardware other than Intel and Nvidia
+3. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
 
 ## DEVELOPMENT ENVIRONMENT
 

@@ -11,7 +11,7 @@ from About import about
 class GPUViewer(Gtk.Window):
 	"""docstring for GPUViewer"""
 	def __init__(self):
-		Gtk.Window.__init__(self,title="GPU Viewer 2.0")
+		Gtk.Window.__init__(self,title="GPU Viewer v1.1")
 		Screen = Gdk.Screen.get_default()
 		if Screen.get_height() > 950 :
 			self.set_size_request(1000,950)
