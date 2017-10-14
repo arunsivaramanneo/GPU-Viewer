@@ -1,6 +1,7 @@
 import os
 import gi
 from gi.repository import Gtk
+from Framebuffer import FrameBuffer
 
 gi.require_version("Gtk", "3.0")
 
@@ -109,8 +110,9 @@ def OpenGL(tab1):
     Button_Limits = Gtk.Button.new_with_label("Show OpenGL Limits")
     Button_Limits.connect("clicked",clickme)
     grid4.attach(Button_Limits, 0, 1, 2, 1)
-    #Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
-    #grid4.attach_next_to(Button_FB, Button_Limits, Gtk.PositionType.BOTTOM, 1, 1)
+    Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
+    Button_FB.connect("clicked",FrameBuffer)
+    grid4.attach_next_to(Button_FB, Button_Limits, Gtk.PositionType.BOTTOM, 1, 1)
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
     TreeGLExt = Gtk.TreeView(OpenGLExt_list, expand=True)

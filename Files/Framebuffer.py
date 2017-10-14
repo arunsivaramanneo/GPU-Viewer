@@ -3,11 +3,13 @@ import os
 from tkinter import Toplevel
 from tkinter import ttk
 
-def FrameBuffer():
+def FrameBuffer(combo):
 
-	win = Toplevel()
+	win = tk.Tk()
 	win.title("GLX Frame Buffer Configuration")
 	win.resizable(0,0)
+	style = ttk.Style()
+	style.configure('.',font=('Helvetica','11'))
 
 
 
