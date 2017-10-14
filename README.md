@@ -48,7 +48,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 1. Minor UI issues.
 2. Not tested on hardware other than Intel and Nvidia
-3. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment   goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
+3. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
 
 ## DEVELOPMENT ENVIRONMENT
 
@@ -61,7 +61,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 1. ASUS G551JK ROG Laptop
 2. Quad Core Intel Core i7-4710HQ
-3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (propriatery) 
+3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (proprietary)
 4. Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
 5. 8 GB RAM
 
