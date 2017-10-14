@@ -61,7 +61,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 1. ASUS G551JK ROG Laptop
 2. Quad Core Intel Core i7-4710HQ
-3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (propriatery) 
+3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (proprietary)
 4. Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
 5. 8 GB RAM
 
