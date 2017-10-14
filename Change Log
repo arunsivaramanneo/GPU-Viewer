@@ -1,4 +1,11 @@
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        14/8 - V1.1 Of GPU Viewer has been releasead, Moved the GUI from tkinter to PyObject GTK3, except for the FrameBuffer part in OpenGL
+                 - Major changes to the OpenGL and Vulkan Layouts. OpenGL Vendor list is displayed as drop down instead of Radio Button
+                 - Now Available Devices in Vulkan Tab is a drop down and can display any number of Devices.
+                 - Font Colors have been added to the True and False keywords in Vulkan Tab
+                 - Ability to Resize the Window to Full Screen, and also enabled usage of the App for Monitors with a minimum resolution of 720p
+                 - Column Header Filtering has been removed in this release, will be added in coming months
+                 -  READ ME and About GPU Viewer texts have been updated accordingly
         05/8 - Minor UI/Text alignment Fixes, Increased the font size from 10 to 11 and also enabled font type/size consistent for all fields.        
         01/8 - OpenGL Vendor Extensions have been updated to display only the Vendor extensions supported by the Device.
                  - Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
