@@ -1,10 +1,10 @@
-OCT-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         05/8 - Minor UI/Text alignment Fixes, Increased the font size from 10 to 11 and also enabled font type/size consistent for all fields.        
         01/8 - OpenGL Vendor Extensions have been updated to display only the Vendor extensions supported by the Device.
-                   Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
-                   Formatted all the texts to have consistent alignment.
+                 - Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
+                 - Formatted all the texts to have consistent alignment.
 
-SEP-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SEP-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         29/9 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device        
         27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
         26/9 - Added Surface Tab to Vulkan        
@@ -20,7 +20,7 @@ SEP-2017------------------------------------------------------------------------
         08/9 - Updated OpenGL Limits window to use Treeview and updated Tab logo's
         04/9 - Added About GPU Viewer Tab, Added Memory Heaps section in Vulkan Tab
         03/9 - Added Instance and Layers Tab in Vulkan
-AUG-2017-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+AUG-2017----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         28/8 - Added Queue Tab in Vulkan, Minor UI fixes
         25/8 - Added Formats Tab in Vulkan
         23/8 - Added Scrollbars to all Sections

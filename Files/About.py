@@ -1,57 +1,78 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import scrolledtext
+import gi
+gi.require_version("Gtk","3.0")
+from gi.repository import Gtk, Gdk
 
-HT = 22 # Height of the Tab
-HT2 = 11
-COLOR1 = "GRAY91" # even number line background
-COLOR2 = "BLUE" 
-ANCHOR1 = "center"
-WIDTH1 = 940
+Title1 = ["About GPU Viewer 2.0"]
+Title2 = ["Change Log"]
 
-def AboutUs(tab4):
+def about(tab3):
 
-	frameAbout = ttk.LabelFrame(tab4,text="About GPU Viewer",padding=15)
-	frameAbout.grid(column=0,row=0,pady=10)
+	grid = Gtk.Grid()
+	grid.set_row_spacing(10)
+	tab3.add(grid)
+	frame1 = Gtk.Frame(label="")
+	grid.add(frame1)
+	frame2 = Gtk.Frame(label="")
+	grid.attach_next_to(frame2,frame1,Gtk.PositionType.BOTTOM,1,1)
 
-	TreeAbout = ttk.Treeview(frameAbout,height=HT)
-	TreeAbout.heading('#0',text="GPU Viewer 1.0",anchor=ANCHOR1)
-	TreeAbout.column('#0',width=WIDTH1)
-	TreeAbout.grid(column=0,row=0)
-
-	Aboutvsb = ttk.Scrollbar(frameAbout,orient="vertical",command=TreeAbout.yview)
-	TreeAbout.configure(yscrollcommand=Aboutvsb.set)
-	Aboutvsb.grid(column=0,row=0,sticky='nse')
-
+	About_list = Gtk.ListStore(str,str)
+	i = 0 
 	with open("../About GPU Viewer","r") as file1:
-		i = 0
 		for line in file1:
-			TreeAbout.insert('','end',text=line,tags=i)
-			if "github.com" in line:
-				TreeAbout.tag_configure(i,foreground=COLOR2)
-			if "gmail.com" in line:
-				TreeAbout.tag_configure(i,foreground=COLOR2)
-			if "paypal.me" in line:
-				TreeAbout.tag_configure(i,foreground=COLOR2)
-			if i % 2 != 0 :
-				TreeAbout.tag_configure(i,background=COLOR1)
+			if i % 2 == 0:
+				background_color = "#fff"
+			else:
+				background_color = "#ddd"
+			About_list.append([line.strip('\n'),background_color])
 			i = i + 1
 
-	frameChangeLog = ttk.LabelFrame(tab4,text="Change Log",padding=10)
-	frameChangeLog.grid(column=0,row=1,pady=10)
-	TreeChangeLog = ttk.Treeview(frameChangeLog,height=HT2)
-	TreeChangeLog.heading('#0',text="Change Log",anchor=ANCHOR1)
-	TreeChangeLog.column('#0',width=WIDTH1)
-	TreeChangeLog.grid(column=0,row=1,sticky=tk.NW)
 
-	Changelogvsb = ttk.Scrollbar(frameChangeLog,orient="vertical",command=TreeChangeLog.yview)
-	TreeChangeLog.configure(yscrollcommand=Changelogvsb.set)
-	Changelogvsb.grid(column=0,row=1,sticky='nse')
+	TreeAbout = Gtk.TreeView(About_list,expand=True)
+
+	for i,column_title in enumerate(Title1):
+		renderer1 = Gtk.CellRendererText(font="Helvetica 11")
+		renderer1.set_property("wrap-width",900)
+	#	renderer1.set_property("wrap-mode",True)
+		column = Gtk.TreeViewColumn(column_title,renderer1,text=i)
+		column.add_attribute(renderer1,"background",1)
+		column.set_alignment(0.5)
+		TreeAbout.append_column(column)
+
+	scrollable_treelist1 = Gtk.ScrolledWindow()
+	scrollable_treelist1.set_vexpand(True)
+	scrollable_treelist1.add(TreeAbout)
+
+	frame1.add(scrollable_treelist1)
+
+	ChangeLog_list = Gtk.ListStore(str,str)
 
 	with open("../Change Log","r") as file1:
 		i = 0
 		for line in file1:
-			TreeChangeLog.insert('','end',text=line,tags=i)
-			if i % 2 != 0:
-				TreeChangeLog.tag_configure(i,background=COLOR1)
+			if i % 2 == 0:
+				background_color = "#fff"
+			else:
+				background_color = "#ddd"
+			ChangeLog_list.append([line.strip('\n'),background_color])
 			i = i + 1
+
+
+	TreeChangeLog = Gtk.TreeView(ChangeLog_list,expand=True)
+
+	for i,column_title in enumerate(Title2):
+		renderer2 = Gtk.CellRendererText(font="Helvetica 11")
+		renderer2.set_property("wrap-width",990)
+		renderer2.set_property("wrap-mode",True)
+		column = Gtk.TreeViewColumn(column_title,renderer2,text=i)
+		column.add_attribute(renderer2,"background",1)
+		column.set_alignment(0.5)
+		TreeChangeLog.append_column(column)
+
+	scrollable_treelist2 = Gtk.ScrolledWindow()
+	scrollable_treelist2.set_vexpand(True)
+	scrollable_treelist2.add(TreeChangeLog)
+
+	frame2.add(scrollable_treelist2)
+
+
+
