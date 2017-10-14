@@ -24,7 +24,7 @@ def Vulkan(tab2):
 	# Creating Tabs for different Features
 
 	#Creating Feature Tab
-	#os.system("vulkaninfo > vulkaninfo.txt")
+	os.system("vulkaninfo > vulkaninfo.txt")
 
 	def Devices(GPUname):
 		
