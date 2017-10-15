@@ -63,13 +63,13 @@ def FrameBuffer(combo):
 		radsel = radvar.get()
 
 		for i in TreeFrameBuffer2.get_children():
-	  	  TreeFrameBuffer2.delete(i)
+			TreeFrameBuffer2.delete(i)
 
 		if radsel == 1:
 
-			os.system("glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXVisuals.txt")
+			os.system("glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > .Temp/FrameBufferGLXVisual.txt")
 
-			with open("FrameBufferGLXVisuals.txt","r") as file1:
+			with open(".Temp/FrameBufferGLXVisual.txt","r") as file1:
 				GLXCount = len(file1.readlines())
 				file1.seek(0,0)
 				i = 0
@@ -84,8 +84,8 @@ def FrameBuffer(combo):
 
 		if radsel == 2:
 
-			os.system("glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > FrameBufferGLXFBConfigs.txt")
-			with open("FrameBufferGLXFBConfigs.txt","r") as file1:
+			os.system("glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > .Temp/FrameBufferGLXFBconfigs.txt")
+			with open(".Temp/FrameBufferGLXFBconfigs.txt","r") as file1:
 				FBCount = len(file1.readlines())
 				file1.seek(0,0)
 				i = 0
@@ -96,7 +96,7 @@ def FrameBuffer(combo):
 						TreeFrameBuffer2.tag_configure(i,background='GRAY91')
 					i = i + 1
 
-			os.system("rm FrameBuffer*.txt")
+			os.system("rm .Temp/FrameBuffer*.txt")
 
 
 	rad1 = tk.Radiobutton(frame1, text="GLX Visuals", variable=radvar, value=1,font=('Helvetica',11),command=radcall)
