@@ -12,7 +12,7 @@ LimitsTitle = ["OpenGL Hardware Limits", "Value"]
 def OpenGL(tab1):
     grid = Gtk.Grid()
     grid.set_row_spacing(10)
-    grid.set_column_spacing(2)
+    grid.set_column_spacing(20)
     tab1.add(grid)
     grid4 = Gtk.Grid()
     grid4.set_row_spacing(10)
@@ -108,12 +108,19 @@ def OpenGL(tab1):
         os.system("rm .Temp/OpenGL*.txt")
         LimitsWin.show_all()
 
+    LimitsFrame = Gtk.Frame()
+    grid.attach(LimitsFrame,0,1,2,1)
     Button_Limits = Gtk.Button.new_with_label("Show OpenGL Limits")
     Button_Limits.connect("clicked", clickme)
-    grid4.attach(Button_Limits, 0, 1, 2, 1)
+    LimitsFrame.add(Button_Limits)
+    #grid4.attach(Button_Limits, 0, 1, 2, 1)
+
+    FBFrame = Gtk.Frame()
+    grid.attach_next_to(FBFrame,LimitsFrame,Gtk.PositionType.RIGHT,2,1)
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
-    grid4.attach_next_to(Button_FB, Button_Limits, Gtk.PositionType.BOTTOM, 1, 1)
+    FBFrame.add(Button_FB)
+   # grid4.attach_next_to(Button_FB, Button_Limits, Gtk.PositionType.BOTTOM, 1, 1)
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
     TreeGLExt = Gtk.TreeView(OpenGLExt_list, expand=True)

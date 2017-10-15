@@ -6,7 +6,7 @@ from gi.repository import Gtk
 import os
 
 RANGE1 = 100
-DeviceTitle = ["Device Information", " Details"]
+DeviceTitle = ["Device Information", "Details"]
 SparseTitle = ["Device Sparse Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
