@@ -50,7 +50,7 @@ class GPUViewer(Gtk.Window):
 
 
 def main_quit(exit, value):
-    #os.system("rm -r .Temp")
+    os.system("rm -r .Temp")
 
     Gtk.main_quit()
 
