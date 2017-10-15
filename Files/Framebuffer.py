@@ -80,7 +80,7 @@ def FrameBuffer(combo):
 						TreeFrameBuffer2.tag_configure(i,background='GRAY91')
 					i = i + 1
 
-			os.system("rm FrameBuffer*.txt")
+			os.system("rm .Temp/FrameBuffer*.txt")
 
 		if radsel == 2:
 

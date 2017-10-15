@@ -1,11 +1,12 @@
 import gi
 import os
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GdkPixbuf, Gdk
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
 I = 100
-gi.require_version("Gtk", "3.0")
+
 
 
 class GPUViewer(Gtk.Window):
@@ -49,7 +50,7 @@ class GPUViewer(Gtk.Window):
 
 
 def main_quit(exit, value):
-    os.system("rm -r .Temp")
+    #os.system("rm -r .Temp")
 
     Gtk.main_quit()
 

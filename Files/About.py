@@ -9,7 +9,6 @@ Title2 = ["Change Log"]
 
 def about(tab3):
     grid = Gtk.Grid()
-    grid.set_row_spacing(10)
     tab3.add(grid)
     frame1 = Gtk.Frame(label="")
     grid.add(frame1)
