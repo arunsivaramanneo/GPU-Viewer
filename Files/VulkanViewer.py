@@ -957,9 +957,6 @@ def Vulkan(tab2):
 	gpu_combo.set_entry_text_column(0)
 	gpu_combo.set_active(0)
 
-
-
-
 	DevicesGrid.attach_next_to(gpu_combo,DS,Gtk.PositionType.RIGHT,20,1)
 
 	tab2.show_all()

@@ -156,7 +156,6 @@ def OpenGL(tab1):
             text = GL_All[i].strip(' ')
             OpenGLExt_list.append([text.strip('\n'), background_color])
 
-    frame3 = Gtk.Frame(label="OpenGL")
     VendorExt_list = Gtk.ListStore(str, bool, str)
     TreeVendor = Gtk.TreeView(VendorExt_list, expand=True)
 
@@ -179,11 +178,6 @@ def OpenGL(tab1):
         vendorList = [i.strip(' ') for i in vendorList]
         vendorList = [i.strip('\n ') for i in vendorList]
         vendorList.insert(0, "Total")
-
-        if value == 1:
-            frame3.set_label("OpenGL")
-        elif value == 2:
-            frame3.set_label("OpenGL ES")
 
         with open("extensions.txt", "r") as file1:
             for i in range(len(vendorList)):
@@ -218,9 +212,6 @@ def OpenGL(tab1):
             VendorExt_list.append([NewList[i], Toggle[i], background_color])
             Vendor_Store.append([NewList[i]])
 
-    # frame3.show_all()
-
-
     def radcall(button, value):
         if value == 1:
             os.system(
@@ -239,24 +230,22 @@ def OpenGL(tab1):
     grid.attach(frame2, 0, 2, 12, 1)
     grid1 = Gtk.Grid()
     grid1.set_row_spacing(5)
-    grid1.set_border_width(10)
+    grid1.set_border_width(5)
     frame2.add(grid1)
     OpenGLRad = Gtk.RadioButton("OpenGL")
-    OpenGLRad.connect("toggled", radcall, 1)
+    OpenGLRad.connect("clicked", radcall, 1)
     grid1.add(OpenGLRad)
     OpenGLRadES = Gtk.RadioButton.new_with_label_from_widget(OpenGLRad, "OpenGL ES")
-    OpenGLRadES.connect("toggled", radcall, 2)
+    OpenGLRadES.connect("clicked", radcall, 2)
     with open("OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
-                OpenGLRadES.set_active(True)
                 break
             else:
-                OpenGLRadES.set_active(True)
                 OpenGLRadES.set_visible(False)
 
-    OpenGLRad.set_active(True)
+    OpenGLRad.set_active(False)
     os.system("rm OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3
@@ -270,9 +259,8 @@ def OpenGL(tab1):
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
     Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
-    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 3, 1)
 
-    frame3.show_all()
+    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
 
     for i, column_title in enumerate([" "]):
         renderer = Gtk.CellRendererText(font="Helvetica 11")

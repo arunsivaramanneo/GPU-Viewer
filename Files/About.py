@@ -2,7 +2,7 @@ import gi
 gi.require_version("Gtk","3.0")
 from gi.repository import Gtk, Gdk
 
-Title1 = ["About GPU Viewer 2.0"]
+Title1 = ["About GPU Viewer v1.1"]
 Title2 = ["Change Log"]
 
 def about(tab3):

@@ -9,6 +9,7 @@ def FrameBuffer(combo):
 	win.title("GLX Frame Buffer Configuration")
 	win.resizable(0,0)
 	style = ttk.Style()
+	style.theme_use("alt")
 	style.configure('.',font=('Helvetica','11'))
 
 

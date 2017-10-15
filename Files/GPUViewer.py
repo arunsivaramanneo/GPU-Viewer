@@ -1,4 +1,5 @@
 import gi
+import os
 
 I = 100
 gi.require_version("Gtk","3.0")
@@ -42,8 +43,14 @@ class GPUViewer(Gtk.Window):
 
 		about(self.tab3)
 
+def main_quit(exit,value):
+		os.system("rm *.txt")
+
+		Gtk.main_quit()
+
+
 
 win = GPUViewer()
-win.connect("delete-event",Gtk.main_quit)
+win.connect("delete-event",main_quit)
 win.show_all()
 Gtk.main()
