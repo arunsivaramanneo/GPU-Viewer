@@ -6,25 +6,25 @@ This project aims to capture all the required/important details of glxinfo and v
 ![gpu viewer v1 1_012](https://user-images.githubusercontent.com/30646692/31587542-4080c190-b201-11e7-8a57-639d3b214268.png)
 ![gpu viewer v1 1_013](https://user-images.githubusercontent.com/30646692/31587559-7d11dc2a-b201-11e7-9058-184d2c7c189b.png)
 
-* Please notes that the above Images solely depends on the Theme being used on the system. 
+* Please note that the above Images solely depends on the Theme being used on the system.
 
 ## INSTALLATION STEPS
 
 #### Ubuntu
 
 1. Before Downloading the files please see the Known issues below
-2. Ensure python3 or higher is installed.
+2. Ensure python3 or higher is installed,Also install Python3-tk (sudo apt-get install Python3-tk) for viewing the GLX Framebuffer configuration window.
 3. Download the file and Extract to a folder
-4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python GPU_Viewer.py
-5. For Vulkan Tab to work Install Vulkan-Utils(Ubuntu)/(Sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
+4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPUViewer.py
+5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
 
 #### Arch 
 
 1. Before Downloading the files please see the Known issues below
-2. Ensure python 3 is installed
+2. Ensure python 3 or higher is installed, Also install python tkinter for viewing the GLX Framebuffer configuration window.
 3. Download the file and Extract to a folder
-4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPU_Viewer.py
-5. For Vulkan Tab to work Install vulkan-extra-layers(Arch),also Vulkan enabled drivers should be installed.
+4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPUViewer.py
+5. For Vulkan Tab to work Install vulkan-extra-layers,also Vulkan enabled drivers should be installed.
 
 
 ## What's developed and available?
@@ -36,12 +36,12 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ## UNDERDEVELOPMENT
 
-1. OpenGL - GLX Frame Buffer Configuration, OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
+1. OpenGL - GLX Frame Buffer Configuration using GTK3, OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
 2. General - Bug fixes, Code Optimizations (High Priority)
 
 ## IMPORTANT
 
-1. Requires Python 3 pyGObjects to run this Application, works only on linux Operating system
+1. Requires Python 3 or higher to run this Application, works only on linux Operating system
 2. Tested on Intel and Nvidia hardware
 3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 4. Vulkan Tab should work fine for multi-gpu setup.
@@ -57,7 +57,7 @@ This project aims to capture all the required/important details of glxinfo and v
 1. Operating System : Linux Mint 18.2 (Sonya)
 2. Desktop : Cinnamon 3.4.6
 3. Kernel : 4.10.0-33
-4. IDE : SublimeText 3.0
+4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
 
 ## SYSTEM SETUP
 
