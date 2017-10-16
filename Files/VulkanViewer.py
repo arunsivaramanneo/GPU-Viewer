@@ -27,7 +27,8 @@ def Vulkan(tab2):
     # Creating Tabs for different Features
 
     # Creating Feature Tab
-    os.system("vulkaninfo > .Temp/vulkaninfo.txt")
+
+
 
     def Devices(GPUname):
 
@@ -662,6 +663,7 @@ def Vulkan(tab2):
     TreeDevice = Gtk.TreeView(DeviceTab_Store, expand=True)
     for i, column_title in enumerate(DeviceTitle):
         Devicerenderer = Gtk.CellRendererText(font=("%s" % FONT))
+        Devicerenderer.set_alignment(0.0,0.5)
         column = Gtk.TreeViewColumn(column_title, Devicerenderer, text=i)
         column.add_attribute(Devicerenderer, "background", 2)
         if i == 0:

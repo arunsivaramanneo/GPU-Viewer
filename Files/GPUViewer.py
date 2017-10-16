@@ -36,9 +36,17 @@ class GPUViewer(Gtk.Window):
         self.tab2.set_border_width(20)
         imgVulkan = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/Vulkan.png", width=I, height=I,
                                                             preserve_aspect_ratio=True)
-        self.notebook.append_page(self.tab2, Gtk.Image.new_from_pixbuf(imgVulkan))
 
-        Vulkan(self.tab2)
+
+        os.system("vulkaninfo > .Temp/vulkaninfo.txt")
+
+        with open(".Temp/vulkaninfo.txt","r")  as file1:
+            count = len(file1.readlines())
+
+        if count > 0:
+            self.notebook.append_page(self.tab2, Gtk.Image.new_from_pixbuf(imgVulkan))
+            Vulkan(self.tab2)
+
 
         self.tab3 = Gtk.VBox()
         self.tab3.set_border_width(20)

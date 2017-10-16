@@ -120,7 +120,6 @@ def OpenGL(tab1):
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
     FBFrame.add(Button_FB)
-   # grid4.attach_next_to(Button_FB, Button_Limits, Gtk.PositionType.BOTTOM, 1, 1)
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
     TreeGLExt = Gtk.TreeView(OpenGLExt_list, expand=True)
@@ -138,13 +137,13 @@ def OpenGL(tab1):
 
         List = [i.strip(' ') for i in List]
         List = [i.strip('\n ') for i in List]
-        List.insert(0, " Total")
+        List.insert(0, " ALL")
 
         with open(".Temp/extensions.txt", "r") as file1:
             for line in file1:
-                if List[int(value)] == " Total":
+                if List[int(value)] == " ALL":
                     GL_All.append(line)
-                elif List[int(value)] != " Total":
+                elif List[int(value)] != " ALL":
                     if "_%s_" % List[int(value)] in line:
                         GL_All.append(line)
 
