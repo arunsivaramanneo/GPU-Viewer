@@ -27,8 +27,7 @@ def FrameBuffer(button):
                     background_color = BGCOLOR1
                 else:
                     background_color = BGCOLOR2
-                FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24],background_color])
-
+                FB_Store.append(list[i]+[background_color])
             label = "%d GLX Visuals"%(len(list)-1)
             button.set_label(label)
 
@@ -51,8 +50,7 @@ def FrameBuffer(button):
                     pass
                 else:
                     list[i].insert(6," ")
-                FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24],background_color])
-
+                FB_Store.append(list[i]+[background_color])
             label = "%d  GLXFBConfigs"%(len(list)-1)
             button.set_label(label)
 
