@@ -13,9 +13,9 @@ This project aims to capture all the required/important details of glxinfo and v
 #### Ubuntu
 
 1. Before Downloading the files please see the Known issues below
-2. Ensure python3 or higher is installed,Also install Python3-tk (sudo apt-get install Python3-tk) for viewing the GLX Framebuffer configuration window.
+2. Ensure python is installed
 3. Download the file and Extract to a folder
-4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPUViewer.py
+4. Double click GPUViewer to launch the Application or You can go to Files and then open terminal and run/type python GPUViewer.py
 5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
 
 #### Arch 
@@ -23,34 +23,32 @@ This project aims to capture all the required/important details of glxinfo and v
 1. Before Downloading the files please see the Known issues below
 2. Ensure python 3 or higher is installed, Also install python tkinter for viewing the GLX Framebuffer configuration window.
 3. Download the file and Extract to a folder
-4. Double click GPU Viewer to launch the Application or You can go to Files and then open terminal and run/type python3 GPUViewer.py
+4. Double click GPUViewer to launch the Application or You can go to Files and then open terminal and run/type python GPUViewer.py
 5. For Vulkan Tab to work Install vulkan-extra-layers,also Vulkan enabled drivers should be installed.
 
 
 ## What's developed and available?
 
-1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
 3. About Tab - About GPU Viewer Application, Change Log
 
 
 ## UNDERDEVELOPMENT
 
-1. OpenGL - GLX Frame Buffer Configuration using GTK3, OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
+1. OpenGL - OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
 2. General - Bug fixes, Code Optimizations (High Priority)
 
 ## IMPORTANT
 
-1. Requires Python 3 or higher to run this Application, works only on linux Operating system
+1. Requires Python to run this Application, works only on linux Operating system
 2. Tested on Intel and Nvidia hardware
 3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
-4. Vulkan Tab should work fine for multi-gpu setup.
 
 ## KNOWN ISSUES
 
 1. Minor UI issues.
 2. Not tested on hardware other than Intel and Nvidia
-3. GLX Frame Buffer Configuration should work almost fine If there are any Blank values in the report the alignment goes out(mainly in GLXFBConfigs). Yet to figure out a fix.
 
 ## DEVELOPMENT ENVIRONMENT
 

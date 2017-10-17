@@ -1,6 +1,7 @@
 import gi
 import os
-
+BGCOLOR1 ="#fff"
+BGCOLOR2 = "#ddd"
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
@@ -22,7 +23,11 @@ def FrameBuffer(button):
                     list.append(line.split())
 
             for i in range(len(list)-1):
-                    FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24]])
+                if i % 2 == 0:
+                    background_color = BGCOLOR1
+                else:
+                    background_color = BGCOLOR2
+                FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24],background_color])
 
             label = "%d GLX Visuals"%(len(list)-1)
             button.set_label(label)
@@ -38,11 +43,15 @@ def FrameBuffer(button):
                     list.append(line.split())
 
             for i in range(len(list)-1):
+                if i % 2 == 0:
+                    background_color = BGCOLOR1
+                else:
+                    background_color = BGCOLOR2
                 if list[i][6] == "r" or list[i][6] == "c":
                     pass
                 else:
                     list[i].insert(6," ")
-                FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24]])
+                FB_Store.append([list[i][0],list[i][1],list[i][2],list[i][3],list[i][4],list[i][5],list[i][6],list[i][7],list[i][8],list[i][9],list[i][10],list[i][11],list[i][12],list[i][13],list[i][14],list[i][15],list[i][16],list[i][17],list[i][18],list[i][19],list[i][20],list[i][21],list[i][22],list[i][23],list[i][24],background_color])
 
             label = "%d  GLXFBConfigs"%(len(list)-1)
             button.set_label(label)
@@ -63,7 +72,7 @@ def FrameBuffer(button):
     FBGrid.attach_next_to(FBConfigButton, FBGLXButton, Gtk.PositionType.RIGHT, 1, 1)
     FBFrame = Gtk.Frame()
 
-    FB_Store = Gtk.ListStore(str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str)
+    FB_Store = Gtk.ListStore(str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str)
     TreeFB = Gtk.TreeView(FB_Store, expand=True)
     TreeFB.set_property("enable-grid-lines",3)
 
@@ -73,6 +82,7 @@ def FrameBuffer(button):
         FBrenderer = Gtk.CellRendererText(font="Helvetica 11")
         FBrenderer.set_alignment(0.5, 0.5)
         column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
+        column.add_attribute(FBrenderer,"background",25)
         column.set_alignment(0.5)
         column.set_property("min-width", 35)
         TreeFB.append_column(column)
