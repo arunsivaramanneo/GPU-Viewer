@@ -1,11 +1,16 @@
 import gi
-
-FONT = "Helvetica 11"
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
 import os
+from gi.repository import Gtk
 
+COLOR1 = "GREEN"
+COLOR2 = "RED"
+BGCOLOR1 = "#fff"
+BGCOLOR2 = "#ddd"
+BGCOLOR3 = "#bbb"
+FONT = "Helvetica 11"
 RANGE1 = 100
+gi.require_version("Gtk", "3.0")
+
 DeviceTitle = ["Device Information", "Details"]
 SparseTitle = ["Device Sparse Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
@@ -27,8 +32,6 @@ def Vulkan(tab2):
     # Creating Tabs for different Features
 
     # Creating Feature Tab
-
-
 
     def Devices(GPUname):
 
@@ -72,9 +75,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 DeviceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
                 i = i + 1
 
@@ -91,10 +94,10 @@ def Vulkan(tab2):
             for line in file1:
                 if '= 1' in line:
                     value.append("true")
-                    fgColor.append("GREEN")
+                    fgColor.append(COLOR1)
                 else:
                     value.append("false")
-                    fgColor.append("RED")
+                    fgColor.append(COLOR2)
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store)
         with open("VKDDevicesparseinfo.txt", "r") as file1:
@@ -103,9 +106,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 SparseTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
                 i = i + 1
 
@@ -125,10 +128,10 @@ def Vulkan(tab2):
             for line in file1:
                 if '= 1' in line:
                     value.append("true")
-                    fgColor.append("GREEN")
+                    fgColor.append(COLOR1)
                 else:
                     value.append("false")
-                    fgColor.append("RED")
+                    fgColor.append(COLOR2)
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store)
         i = 0
@@ -136,9 +139,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
                 i = i + 1
 
@@ -171,9 +174,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 LimitsTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
                 i = i + 1
 
@@ -207,9 +210,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
                 i = i + 1
 
@@ -239,10 +242,10 @@ def Vulkan(tab2):
             for line in file1:
                 if "None" in line:
                     linear.append("false")
-                    linearfg.append("RED")
+                    linearfg.append(COLOR2)
                 else:
                     linear.append("true")
-                    linearfg.append("GREEN")
+                    linearfg.append(COLOR1)
 
         # Optimal Values
 
@@ -251,20 +254,20 @@ def Vulkan(tab2):
             for line in file1:
                 if "None" in line:
                     optimal.append("false")
-                    optimalfg.append("RED")
+                    optimalfg.append(COLOR2)
                 else:
                     optimal.append("true")
-                    optimalfg.append("GREEN")
+                    optimalfg.append(COLOR1)
 
         with open("VKDFORMATSBuffer.txt", "r") as file1:
             Bufferfg = []
             for line in file1:
                 if "None" in line:
                     Buffer.append("false")
-                    Bufferfg.append("RED")
+                    Bufferfg.append(COLOR2)
                 else:
                     Buffer.append("true")
-                    Bufferfg.append("GREEN")
+                    Bufferfg.append(COLOR1)
 
         # counting the number of formats supported
         Formats = 0
@@ -280,9 +283,9 @@ def Vulkan(tab2):
             i = 0
             for line in file1:
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 FormatsTab_Store.append(
                     [line.strip('\n'), linear[i].strip('\n'), optimal[i].strip('\n'), Buffer[i].strip('\n'),
                      background_color, linearfg[i], optimalfg[i], Bufferfg[i]])
@@ -336,41 +339,41 @@ def Vulkan(tab2):
                             if i == 0:
                                 Lazily_Allocated.append(Flags[i])
                                 if Flags[i] == "false":
-                                    LAfg.append("RED")
+                                    LAfg.append(COLOR2)
                                 else:
-                                    LAfg.append("GREEN")
+                                    LAfg.append(COLOR1)
                             elif i == 1:
                                 Host_Cached.append(Flags[i])
                                 if Flags[i] == "false":
-                                    HCAfg.append("RED")
+                                    HCAfg.append(COLOR2)
                                 else:
-                                    HCAfg.append("GREEN")
+                                    HCAfg.append(COLOR1)
                             elif i == 2:
                                 Host_Coherent.append(Flags[i])
                                 if Flags[i] == "false":
-                                    HCOfg.append("RED")
+                                    HCOfg.append(COLOR2)
                                 else:
-                                    HCOfg.append("GREEN")
+                                    HCOfg.append(COLOR1)
                             elif i == 3:
                                 Host_Visible.append(Flags[i])
                                 if Flags[i] == "false":
-                                    HVfg.append("RED")
+                                    HVfg.append(COLOR2)
                                 else:
-                                    HVfg.append("GREEN")
+                                    HVfg.append(COLOR1)
                             elif i == 4:
                                 Device_Local.append(Flags[i])
                                 if Flags[i] == "false":
-                                    DLfg.append("RED")
+                                    DLfg.append(COLOR2)
                                 else:
-                                    DLfg.append("GREEN")
+                                    DLfg.append(COLOR1)
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
         for i in range(Mcount):
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
                                     Host_Coherent[i].strip('\n'), Host_Cached[i].strip('\n'),
                                     Lazily_Allocated[i].strip('\n'), background_color, DLfg[i], HVfg[i], HCOfg[i],
@@ -387,10 +390,10 @@ def Vulkan(tab2):
                     HCount = HCount + 1
                 if "HEAP_DEVICE_LOCAL" in line:
                     HEAP_DEVICE_LOCAL.append("true")
-                    Heapfg.append("GREEN")
+                    Heapfg.append(COLOR1)
                 if "None" in line:
                     HEAP_DEVICE_LOCAL.append("false")
-                    Heapfg.append("RED")
+                    Heapfg.append(COLOR2)
                 if "size " in line:
                     for j in range(1024):
                         for k in range(RANGE1):
@@ -406,9 +409,9 @@ def Vulkan(tab2):
 
         for i in range(HCount):
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             HeapTab_Store.append(
                 [i, size[i].strip('\n'), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
@@ -455,28 +458,28 @@ def Vulkan(tab2):
             for line in file1:
                 if "GRAPHICS" in line:
                     GBit.append("true")
-                    Gfg.append("GREEN")
+                    Gfg.append(COLOR1)
                 else:
                     GBit.append("false")
-                    Gfg.append("RED")
+                    Gfg.append(COLOR2)
                 if "COMPUTE" in line:
                     CBit.append("true")
-                    Cfg.append("GREEN")
+                    Cfg.append(COLOR1)
                 else:
                     CBit.append("false")
-                    Cfg.append("RED")
+                    Cfg.append(COLOR2)
                 if "TRANSFER" in line:
                     TBit.append("true")
-                    Tfg.append("GREEN")
+                    Tfg.append(COLOR1)
                 else:
                     TBit.append("false")
-                    Tfg.append("RED")
+                    Tfg.append(COLOR2)
                 if "SPARSE" in line:
                     SBit.append("true")
-                    Sfg.append("GREEN")
+                    Sfg.append(COLOR1)
                 else:
                     SBit.append("false")
-                    Sfg.append("RED")
+                    Sfg.append(COLOR2)
 
         with open("VKDQueuecount.txt", "r") as file1:
             count = len(file1.readlines())
@@ -492,9 +495,9 @@ def Vulkan(tab2):
         TreeQueue.set_model(QueueTab_Store)
         for i in range(count):
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             QueueTab_Store.append(
                 [i, qCount[i], qBits[i], GBit[i], CBit[i], TBit[i], SBit[i], width[i], height[i], depth[i],
                  background_color, Gfg[i], Cfg[i], Tfg[i], Sfg[i]])
@@ -507,7 +510,7 @@ def Vulkan(tab2):
             "cat .Temp/vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > VKDInstanceExtensions1.txt")
         os.system("cat VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDInstanceExtensions.txt")
 
-        # This should take care of further versioning till 100
+        # This should take care of further versioning till RANGE1
         with open("VKDInstanceExtensions1.txt", "r") as file1:
             value = []
             for line in file1:
@@ -526,9 +529,9 @@ def Vulkan(tab2):
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
                 i = i + 1
 
@@ -569,9 +572,9 @@ def Vulkan(tab2):
             for line in file1:
 
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 LayerTab_Store.append(
                     [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'), ECount[i].strip('\n'),
                      background_color])
@@ -620,11 +623,12 @@ def Vulkan(tab2):
             if "type" in Surface[i]:
                 continue
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
-            if "VkSurfaceCapabilities"  in Surface[i] or "Modes" in Surface[i] or "Formats" in Surface[i] or "Extent" in Surface[i] or "supported" in Surface[i] or "current" in Surface[i]:
-                background_color = "#bbb"
+                background_color = BGCOLOR2
+            if "VkSurfaceCapabilities" in Surface[i] or "Modes" in Surface[i] or "Formats" in Surface[i] or "Extent" in \
+                    Surface[i] or "supported" in Surface[i] or "current" in Surface[i]:
+                background_color = BGCOLOR3
             text = Surface[i].strip('\t')
             SurfaceTab_Store.append([text, SurfaceRHS[i].strip('\n'), background_color])
 
@@ -663,7 +667,7 @@ def Vulkan(tab2):
     TreeDevice = Gtk.TreeView(DeviceTab_Store, expand=True)
     for i, column_title in enumerate(DeviceTitle):
         Devicerenderer = Gtk.CellRendererText(font=("%s" % FONT))
-        Devicerenderer.set_alignment(0.0,0.5)
+        Devicerenderer.set_alignment(0.0, 0.5)
         column = Gtk.TreeViewColumn(column_title, Devicerenderer, text=i)
         column.add_attribute(Devicerenderer, "background", 2)
         if i == 0:
@@ -876,7 +880,6 @@ def Vulkan(tab2):
     QueueGrid.add(QueueScrollbar)
 
     # -------------------------Creating the Instances & Layers ---------------------------------------------
-
 
     InstanceTab = Gtk.VBox(spacing=10)
     InstanceTab.set_border_width(10)

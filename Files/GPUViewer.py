@@ -5,8 +5,10 @@ from gi.repository import Gtk, GdkPixbuf, Gdk
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
-I = 100
 
+
+
+WH = 100
 
 
 class GPUViewer(Gtk.Window):
@@ -26,7 +28,7 @@ class GPUViewer(Gtk.Window):
 
         self.tab1 = Gtk.VBox(spacing=10)
         self.tab1.set_border_width(20)
-        imgOpenGL = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/OpenGL.png", width=I, height=I,
+        imgOpenGL = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/OpenGL.png", width=WH, height=WH,
                                                             preserve_aspect_ratio=True)
         self.notebook.append_page(self.tab1, Gtk.Image.new_from_pixbuf(imgOpenGL))
 
@@ -34,23 +36,21 @@ class GPUViewer(Gtk.Window):
 
         self.tab2 = Gtk.VBox()
         self.tab2.set_border_width(20)
-        imgVulkan = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/Vulkan.png", width=I, height=I,
+        imgVulkan = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/Vulkan.png", width=WH, height=WH,
                                                             preserve_aspect_ratio=True)
-
 
         os.system("vulkaninfo > .Temp/vulkaninfo.txt")
 
-        with open(".Temp/vulkaninfo.txt","r")  as file1:
+        with open(".Temp/vulkaninfo.txt", "r") as file1:
             count = len(file1.readlines())
 
         if count > 0:
             self.notebook.append_page(self.tab2, Gtk.Image.new_from_pixbuf(imgVulkan))
             Vulkan(self.tab2)
 
-
         self.tab3 = Gtk.VBox()
         self.tab3.set_border_width(20)
-        imgAbout = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/aboutus.png", width=I, height=50,
+        imgAbout = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/aboutus.png", width=WH, height=50,
                                                            preserve_aspect_ratio=False)
         self.notebook.append_page(self.tab3, Gtk.Image.new_from_pixbuf(imgAbout))
 

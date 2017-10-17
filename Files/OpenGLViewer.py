@@ -1,7 +1,10 @@
 import os
 import gi
+
+BGCOLOR1 = "#fff"
+BGCOLOR2 = "#ddd"
 from gi.repository import Gtk
-from Framebuffer import FrameBuffer
+from FrameBuffer import FrameBuffer
 
 gi.require_version("Gtk", "3.0")
 
@@ -34,9 +37,9 @@ def OpenGL(tab1):
     with open(".Temp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             OpenGLInfo_list.append([line.strip('\n'), value[i].strip('\n'), background_color])
             i = i + 1
 
@@ -88,9 +91,9 @@ def OpenGL(tab1):
         with open(".Temp/OpenGLLimitsLHS.txt", "r") as file1:
             for line in file1:
                 if i % 2 == 0:
-                    background_color = "#fff"
+                    background_color = BGCOLOR1
                 else:
-                    background_color = "#ddd"
+                    background_color = BGCOLOR2
                 Limits_Store.append([line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
@@ -109,14 +112,14 @@ def OpenGL(tab1):
         LimitsWin.show_all()
 
     LimitsFrame = Gtk.Frame()
-    grid.attach(LimitsFrame,0,1,2,1)
+    grid.attach(LimitsFrame, 0, 1, 2, 1)
     Button_Limits = Gtk.Button.new_with_label("Show OpenGL Limits")
     Button_Limits.connect("clicked", clickme)
     LimitsFrame.add(Button_Limits)
-    #grid4.attach(Button_Limits, 0, 1, 2, 1)
+    # grid4.attach(Button_Limits, 0, 1, 2, 1)
 
     FBFrame = Gtk.Frame()
-    grid.attach_next_to(FBFrame,LimitsFrame,Gtk.PositionType.RIGHT,2,1)
+    grid.attach_next_to(FBFrame, LimitsFrame, Gtk.PositionType.RIGHT, 2, 1)
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
     FBFrame.add(Button_FB)
@@ -157,9 +160,9 @@ def OpenGL(tab1):
         count = len(GL_All)
         for i in range(count):
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             text = GL_All[i].strip(' ')
             OpenGLExt_list.append([text.strip('\n'), background_color])
 
@@ -213,9 +216,9 @@ def OpenGL(tab1):
         Toggle.insert(True, 0)
         for i in range(len(NewList)):
             if i % 2 == 0:
-                background_color = "#fff"
+                background_color = BGCOLOR1
             else:
-                background_color = "#ddd"
+                background_color = BGCOLOR2
             VendorExt_list.append([NewList[i], Toggle[i], background_color])
             Vendor_Store.append([NewList[i]])
 
