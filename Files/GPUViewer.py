@@ -22,7 +22,6 @@ class GPUViewer(Gtk.Window):
         else:
             self.set_size_request(1000, 720)
 
-        os.system("mkdir .Temp")
         self.notebook = Gtk.Notebook()
         self.add(self.notebook)
 
@@ -39,9 +38,9 @@ class GPUViewer(Gtk.Window):
         imgVulkan = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/Vulkan.png", width=WH, height=WH,
                                                             preserve_aspect_ratio=True)
 
-        os.system("vulkaninfo > .Temp/vulkaninfo.txt")
+        os.system("vulkaninfo > /tmp/vulkaninfo.txt")
 
-        with open(".Temp/vulkaninfo.txt", "r") as file1:
+        with open("/tmp/vulkaninfo.txt", "r") as file1:
             count = len(file1.readlines())
 
         if count > 0:
@@ -58,7 +57,6 @@ class GPUViewer(Gtk.Window):
 
 
 def main_quit(exit, value):
-    os.system("rm -r .Temp")
 
     Gtk.main_quit()
 

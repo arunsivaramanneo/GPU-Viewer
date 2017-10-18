@@ -38,14 +38,14 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > VKDDeviceinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > /tmp/VKDDeviceinfo1.txt" % i)
 
-        os.system("cat VKDDeviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > VKDDeviceinfo.txt")
-        os.system("cat VKDDeviceinfo1.txt | grep -o =.* | grep -o ' .*' > VKDDeviceinfo2.txt")
+        os.system("cat /tmp/VKDDeviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDeviceinfo.txt")
+        os.system("cat /tmp/VKDDeviceinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDeviceinfo2.txt")
 
         # Storing the RHS values into a list
 
-        with open("VKDDeviceinfo2.txt", "r") as file1:
+        with open("/tmp/VKDDeviceinfo2.txt", "r") as file1:
             value = []
             for line in file1:
                 value.append(line)
@@ -69,7 +69,7 @@ def Vulkan(tab2):
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
-        with open("VKDDeviceinfo.txt", "r") as file1:
+        with open("/tmp/VKDDeviceinfo.txt", "r") as file1:
             file1.seek(0, 0)
             i = 0
             for line in file1:
@@ -84,11 +84,11 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > VKDDevicesparseinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > /tmp/VKDDevicesparseinfo1.txt" % i)
 
-        os.system("cat VKDDevicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > VKDDevicesparseinfo.txt")
+        os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDevicesparseinfo.txt")
 
-        with open("VKDDevicesparseinfo1.txt", "r") as file1:
+        with open("/tmp/VKDDevicesparseinfo1.txt", "r") as file1:
             value = []
             fgColor = []
             for line in file1:
@@ -100,7 +100,7 @@ def Vulkan(tab2):
                     fgColor.append(COLOR2)
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store)
-        with open("VKDDevicesparseinfo.txt", "r") as file1:
+        with open("/tmp/VKDDevicesparseinfo.txt", "r") as file1:
             file1.seek(0, 0)
             i = 0
             for line in file1:
@@ -117,12 +117,12 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > VKDFeatures1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/VKDFeatures1.txt" % i)
 
         os.system(
-            "cat VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > VKDFeatures.txt")
+            "cat /tmp/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/VKDFeatures.txt")
 
-        with open("VKDFeatures1.txt", "r") as file1:
+        with open("/tmp/VKDFeatures1.txt", "r") as file1:
             value = []
             fgColor = []
             for line in file1:
@@ -135,7 +135,7 @@ def Vulkan(tab2):
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store)
         i = 0
-        with open("VKDFeatures.txt", "r") as file1:
+        with open("/tmp/VKDFeatures.txt", "r") as file1:
             for line in file1:
                 text = line.strip('\t')
                 if i % 2 == 0:
@@ -150,12 +150,12 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > VKDlimits1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > /tmp/VKDlimits1.txt" % i)
 
-        os.system("cat VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > VKDlimits.txt")
-        os.system("cat VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > VKDlimits2.txt")
+        os.system("cat /tmp/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDlimits.txt")
+        os.system("cat /tmp/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/VKDlimits2.txt")
 
-        with open("VKDlimits2.txt", "r") as file1:
+        with open("/tmp/VKDlimits2.txt", "r") as file1:
             value = []
             for line in file1:
                 value.append(line)
@@ -169,7 +169,7 @@ def Vulkan(tab2):
         LimitsTab_Store.clear()
         TreeLimits.set_model(LimitsTab_Store)
 
-        with open("VKDlimits.txt", "r") as file1:
+        with open("/tmp/VKDlimits.txt", "r") as file1:
             i = 0
             for line in file1:
                 text = line.strip('\t')
@@ -185,12 +185,12 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > VKDExtensions1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > /tmp/VKDExtensions1.txt" % i)
 
-        os.system("cat VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDExtensions.txt")
+        os.system("cat /tmp/VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDExtensions.txt")
 
         # This should take care of further versioning till 100
-        with open("VKDExtensions1.txt", "r") as file1:
+        with open("/tmp/VKDExtensions1.txt", "r") as file1:
             value = []
             for line in file1:
                 for j in range(RANGE1):
@@ -201,7 +201,7 @@ def Vulkan(tab2):
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_Store)
 
-        with open("VKDExtensions.txt", "r") as file1:
+        with open("/tmp/VKDExtensions.txt", "r") as file1:
             count = len(file1.readlines())
             label = "Extensions(%d)" % count
             notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
@@ -221,13 +221,13 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* > VKDFORMATS.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* > /tmp/VKDFORMATS.txt" % i)
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> VKDFORMATSlinear.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> /tmp/VKDFORMATSlinear.txt" % i)
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> VKDFORMATSoptimal.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> /tmp/VKDFORMATSoptimal.txt" % i)
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> VKDFORMATSBuffer.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> /tmp/VKDFORMATSBuffer.txt" % i)
 
         linear = []
         optimal = []
@@ -235,7 +235,7 @@ def Vulkan(tab2):
 
         # Linear values
 
-        with open("VKDFORMATSlinear.txt", "r") as file1:
+        with open("/tmp/VKDFORMATSlinear.txt", "r") as file1:
             count = len(file1.readlines())
             file1.seek(0, 0)
             linearfg = []
@@ -249,7 +249,7 @@ def Vulkan(tab2):
 
         # Optimal Values
 
-        with open("VKDFORMATSoptimal.txt", "r") as file1:
+        with open("/tmp/VKDFORMATSoptimal.txt", "r") as file1:
             optimalfg = []
             for line in file1:
                 if "None" in line:
@@ -259,7 +259,7 @@ def Vulkan(tab2):
                     optimal.append("true")
                     optimalfg.append(COLOR1)
 
-        with open("VKDFORMATSBuffer.txt", "r") as file1:
+        with open("/tmp/VKDFORMATSBuffer.txt", "r") as file1:
             Bufferfg = []
             for line in file1:
                 if "None" in line:
@@ -276,7 +276,7 @@ def Vulkan(tab2):
                 Formats = Formats + 1
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store)
-        with open("VKDFORMATS.txt", "r") as file1:
+        with open("/tmp/VKDFORMATS.txt", "r") as file1:
             file1.seek(0, 0)
             label = "Formats(%d)" % Formats
             notebook.set_tab_label(FormatsTab, Gtk.Label(label))
@@ -296,9 +296,9 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > VKDMemoryType.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/VKDMemoryType.txt" % i)
 
-        with open("VKDMemoryType.txt", "r") as file1:
+        with open("/tmp/VKDMemoryType.txt", "r") as file1:
             heapIndex = []
             for line in file1:
                 for j in range(RANGE1):
@@ -320,7 +320,7 @@ def Vulkan(tab2):
         HVfg = []
         DLfg = []
 
-        with open("VKDMemoryType.txt", "r") as file1:
+        with open("/tmp/VKDMemoryType.txt", "r") as file1:
             for line in file1:
                 if "memoryTypes" in line:
                     Mcount = Mcount + 1
@@ -383,7 +383,7 @@ def Vulkan(tab2):
         size = []
         HEAP_DEVICE_LOCAL = []
 
-        with open("VKDMemoryType.txt", "r") as file1:
+        with open("/tmp/VKDMemoryType.txt", "r") as file1:
             Heapfg = []
             for line in file1:
                 if "memoryHeaps" in line:
@@ -423,11 +423,11 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > VKDQueues.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > /tmp/VKDQueues.txt" % i)
 
-        os.system("cat VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > VKDQueuecount.txt")
-        os.system("cat VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > VKDQueuebits.txt")
-        os.system("cat VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > VKDQueueFlags.txt")
+        os.system("cat /tmp/VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > /tmp/VKDQueuecount.txt")
+        os.system("cat /tmp/VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > /tmp/VKDQueuebits.txt")
+        os.system("cat /tmp/VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > /tmp/VKDQueueFlags.txt")
 
         qCount = []
         qBits = []
@@ -443,7 +443,7 @@ def Vulkan(tab2):
         Tfg = []
         Sfg = []
 
-        with open("VKDQueues.txt", "r") as file1:
+        with open("/tmp/VKDQueues.txt", "r") as file1:
             for line in file1:
                 for i in range(10):
                     for j in range(10):
@@ -454,7 +454,7 @@ def Vulkan(tab2):
                                 depth.append("%d" % k)
 
         # finding and storing the value for Flags
-        with open("VKDQueueFlags.txt", "r") as file1:
+        with open("/tmp/VKDQueueFlags.txt", "r") as file1:
             for line in file1:
                 if "GRAPHICS" in line:
                     GBit.append("true")
@@ -481,13 +481,13 @@ def Vulkan(tab2):
                     SBit.append("false")
                     Sfg.append(COLOR2)
 
-        with open("VKDQueuecount.txt", "r") as file1:
+        with open("/tmp/VKDQueuecount.txt", "r") as file1:
             count = len(file1.readlines())
             file1.seek(0, 0)
             for line in file1:
                 qCount.append(int(line))
 
-        with open("VKDQueuebits.txt", "r") as file1:
+        with open("/tmp/VKDQueuebits.txt", "r") as file1:
             for line in file1:
                 qBits.append(int(line))
 
@@ -507,11 +507,11 @@ def Vulkan(tab2):
     def Instance():
 
         os.system(
-            "cat .Temp/vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > VKDInstanceExtensions1.txt")
-        os.system("cat VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > VKDInstanceExtensions.txt")
+            "cat /tmp/vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > /tmp/VKDInstanceExtensions1.txt")
+        os.system("cat /tmp/VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDInstanceExtensions.txt")
 
         # This should take care of further versioning till RANGE1
-        with open("VKDInstanceExtensions1.txt", "r") as file1:
+        with open("/tmp/VKDInstanceExtensions1.txt", "r") as file1:
             value = []
             for line in file1:
                 for j in range(RANGE1):
@@ -520,7 +520,7 @@ def Vulkan(tab2):
                         break
         InstanceTab_Store.clear()
         TreeInstance.set_model(InstanceTab_Store)
-        with open("VKDInstanceExtensions.txt", "r") as file1:
+        with open("/tmp/VKDInstanceExtensions.txt", "r") as file1:
             count1 = len(file1.readlines())
             label = "Instances(%d)" % count1
             notebook.set_tab_label(InstanceTab, Gtk.Label(label))
@@ -536,18 +536,18 @@ def Vulkan(tab2):
                 i = i + 1
 
         os.system(
-            "cat .Temp/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > VKDLayer1.txt")
-        os.system("cat VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > VKDLayer.txt")
+            "cat /tmp/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/VKDLayer1.txt")
+        os.system("cat /tmp/VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/VKDLayer.txt")
 
         Vversion = []
-        with open("VKDLayer1.txt", "r") as file1:
+        with open("/tmp/VKDLayer1.txt", "r") as file1:
             for line in file1:
                 for j in range(RANGE1):
                     if "Vulkan version 1.0.%d," % j in line:
                         Vversion.append("1.0.%d" % j)
 
         LVersion = []
-        with open("VKDLayer1.txt", "r") as file1:
+        with open("/tmp/VKDLayer1.txt", "r") as file1:
             for line in file1:
                 for j in range(RANGE1):
                     if "layer version %d" % j in line:
@@ -555,7 +555,7 @@ def Vulkan(tab2):
                         break
 
         ECount = []
-        with open("VKDLayer1.txt", "r") as file1:
+        with open("/tmp/VKDLayer1.txt", "r") as file1:
             for line in file1:
                 for j in range(RANGE1):
                     if "Layer Extensions	count = %d" % j in line:
@@ -567,7 +567,7 @@ def Vulkan(tab2):
         count2 = len(LVersion)
         label = "Instances(%d) & Layers(%d)" % (count1, count2)
         notebook.set_tab_label(InstanceTab, Gtk.Label(label))
-        with open("VKDLayer.txt", "r") as file1:
+        with open("/tmp/VKDLayer.txt", "r") as file1:
             i = 0
             for line in file1:
 
@@ -585,22 +585,22 @@ def Vulkan(tab2):
         for GPU in range(len(list)):
             if GPUname == GPU:
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag'> VKDsurface.txt" % (
+                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag'> /tmp/VKDsurface.txt" % (
                         GPU, GPU + 1))
                 os.system(
-                    "cat .Temp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type >> VKDsurface.txt" % GPU)
+                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type >> /tmp/VKDsurface.txt" % GPU)
 
-        os.system("cat VKDsurface.txt | awk '{gsub(/= .*/,'True');print} ' > VKDsurface1.txt")
-        os.system("cat VKDsurface.txt | grep -o =.* | grep -o ' .*' > VKDsurface2.txt")
+        os.system("cat /tmp/VKDsurface.txt | awk '{gsub(/= .*/,'True');print} ' > /tmp/VKDsurface1.txt")
+        os.system("cat /tmp/VKDsurface.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDsurface2.txt")
         temp = []
 
-        with open("VKDsurface2.txt", "r") as file1:
+        with open("/tmp/VKDsurface2.txt", "r") as file1:
             for line in file1:
                 temp.append(line)
 
         SurfaceRHS = []
         i = 0
-        with open("VKDsurface.txt", "r") as file1:
+        with open("/tmp/VKDsurface.txt", "r") as file1:
             for line in file1:
                 if "= " in line:
                     SurfaceRHS.append(temp[i])
@@ -609,7 +609,7 @@ def Vulkan(tab2):
                     SurfaceRHS.append(" ")
 
         Surface = []
-        with open("VKDsurface1.txt", "r") as file1:
+        with open("/tmp/VKDsurface1.txt", "r") as file1:
             for line in file1:
                 Surface.append(line)
 
@@ -645,7 +645,7 @@ def Vulkan(tab2):
                 Queues(text)
                 Surface(text)
             Instance()
-        os.system("rm VKD*.txt")
+        os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -929,7 +929,7 @@ def Vulkan(tab2):
     # ------------------ Creating the Surface Tab --------------------------------------------------
     SurfaceTab_Store = Gtk.ListStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
-    with open(".Temp/vulkaninfo.txt", "r") as file1:
+    with open("/tmp/vulkaninfo.txt", "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
                 SurfaceTab = Gtk.VBox(spacing=10)
@@ -959,9 +959,9 @@ def Vulkan(tab2):
 
     #	grid.set_column_spacing(40)
     grid.set_row_spacing(30)
-    os.system("cat .Temp/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > .Temp/GPU.txt")
+    os.system("cat /tmp/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > /tmp/GPU.txt")
 
-    with open(".Temp/GPU.txt", "r") as file2:
+    with open("/tmp/GPU.txt", "r") as file2:
         list = []
         file2.seek(0, 0)
         for line in file2:

@@ -24,17 +24,17 @@ def OpenGL(tab1):
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
 
-    os.system("glxinfo | grep string | grep -v glx > .Temp/OpenGL_Information.txt")
+    os.system("glxinfo | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
     # os.system("glxinfo | grep string | grep glx >> OpenGL_Information.txt")
-    os.system("cat .Temp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > .Temp/OpenGLRHS.txt")
-    os.system("cat .Temp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > .Temp/OpenGLLHS.txt")
+    os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
+    os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
 
-    with open(".Temp/OpenGLRHS.txt", "r") as file1:
+    with open("/tmp/OpenGLRHS.txt", "r") as file1:
         value = []
         for line in file1:
             value.append(line)
     i = 0
-    with open(".Temp/OpenGLLHS.txt", "r") as file1:
+    with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if i % 2 == 0:
                 background_color = BGCOLOR1
@@ -59,9 +59,9 @@ def OpenGL(tab1):
     def clickme(button):
 
         os.system(
-            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag'  > .Temp/OpenGL_Limits.txt")
-        os.system("cat .Temp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > .Temp/OpenGLLimitsLHS.txt")
-        os.system("cat .Temp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > .Temp/OpenGLLimitsRHS.txt")
+            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag'  > /tmp/OpenGL_Limits.txt")
+        os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
+        os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
         LimitsWin.set_size_request(1000, 500)
@@ -74,12 +74,12 @@ def OpenGL(tab1):
         temp = []
         LimitsRHS = []
 
-        with open(".Temp/OpenGLLimitsRHS.txt", "r") as file1:
+        with open("/tmp/OpenGLLimitsRHS.txt", "r") as file1:
             for line in file1:
                 temp.append(line)
 
         i = 0
-        with open(".Temp/OpenGL_Limits.txt", "r") as file1:
+        with open("/tmp/OpenGL_Limits.txt", "r") as file1:
             for line in file1:
                 if "= " in line:
                     LimitsRHS.append(temp[i])
@@ -88,7 +88,7 @@ def OpenGL(tab1):
                     LimitsRHS.append(" ")
 
         i = 0
-        with open(".Temp/OpenGLLimitsLHS.txt", "r") as file1:
+        with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
             for line in file1:
                 if i % 2 == 0:
                     background_color = BGCOLOR1
@@ -108,7 +108,7 @@ def OpenGL(tab1):
         LimitsScrollbar.add(TreeLimits)
         LimitsFrame.add(LimitsScrollbar)
 
-        os.system("rm .Temp/OpenGL*.txt")
+        os.system("rm /tmp/OpenGL*.txt")
         LimitsWin.show_all()
 
     LimitsFrame = Gtk.Frame()
@@ -126,7 +126,7 @@ def OpenGL(tab1):
     Button_FB.connect("clicked", FrameBuffer)
     FBFrame.add(Button_FB)
 
-    with open(".Temp/OpenGLRHS.txt","r") as file1:
+    with open("/tmp/OpenGLRHS.txt","r") as file1:
         for line in file1:
             if "Intel" in line :
                 vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/intel-logo.png", width=WH, height=WH,
@@ -158,7 +158,7 @@ def OpenGL(tab1):
         GL_All = []
         List = []
 
-        with open(".Temp/Vendor1.txt", "r") as file1:
+        with open("/tmp/Vendor1.txt", "r") as file1:
             for line in file1:
                 List.append(line)
 
@@ -166,7 +166,7 @@ def OpenGL(tab1):
         List = [i.strip('\n ') for i in List]
         List.insert(0, " ALL")
 
-        with open(".Temp/extensions.txt", "r") as file1:
+        with open("/tmp/extensions.txt", "r") as file1:
             for line in file1:
                 if List[int(value)] == " ALL":
                     GL_All.append(line)
@@ -199,13 +199,13 @@ def OpenGL(tab1):
 
     def Radio(value):
 
-        os.system("cat .Temp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > .Temp/Vendor.txt")
-        os.system("cat .Temp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> .Temp/Vendor.txt")
-        os.system("cat .Temp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL  > .Temp/Vendor1.txt")
+        os.system("cat /tmp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/Vendor.txt")
+        os.system("cat /tmp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/Vendor.txt")
+        os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL  > /tmp/Vendor1.txt")
 
         vCount = []
         vendorList = []
-        with open(".Temp/Vendor1.txt", "r") as file1:
+        with open("/tmp/Vendor1.txt", "r") as file1:
             for line in file1:
                 vendorList.append(line)
 
@@ -213,7 +213,7 @@ def OpenGL(tab1):
         vendorList = [i.strip('\n ') for i in vendorList]
         vendorList.insert(0, "Total")
 
-        with open(".Temp/extensions.txt", "r") as file1:
+        with open("/tmp/extensions.txt", "r") as file1:
             for i in range(len(vendorList)):
                 file1.seek(0, 0)
                 GL_All = []
@@ -248,13 +248,13 @@ def OpenGL(tab1):
     def radcall(button, value):
         if value == 1:
             os.system(
-                "glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > .Temp/extensions.txt")
+                "glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
             os.system(
-                "glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> .Temp/extensions.txt")
+                "glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/extensions.txt")
 
         elif value == 2:
             os.system(
-                "glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > .Temp/extensions.txt")
+                "glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
 
         Radio(value)
         Vendor_Combo.set_active(0)
@@ -270,7 +270,7 @@ def OpenGL(tab1):
     grid1.add(OpenGLRad)
     OpenGLRadES = Gtk.RadioButton.new_with_label_from_widget(OpenGLRad, "OpenGL ES")
     OpenGLRadES.connect("clicked", radcall, 2)
-    with open(".Temp/OpenGLLHS.txt", "r") as file1:
+    with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
@@ -279,7 +279,7 @@ def OpenGL(tab1):
                 OpenGLRadES.set_visible(False)
 
     OpenGLRad.set_active(False)
-    #os.system("rm .Temp/OpenGL*.txt")
+    #os.system("rm /tmp/OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3
 

@@ -15,10 +15,10 @@ def FrameBuffer(button):
         TreeFB.set_model(FB_Store)
         if value == 1:
             os.system(
-                "glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > .Temp/FrameBufferGLXVisual.txt")
+                "glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXVisual.txt")
 
             list = []
-            with open(".Temp/FrameBufferGLXVisual.txt", "r") as file1:
+            with open("/tmp/FrameBufferGLXVisual.txt", "r") as file1:
                 for line in file1:
                     list.append(line.split())
 
@@ -34,10 +34,10 @@ def FrameBuffer(button):
         if value == 2:
 
             os.system(
-                "glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > .Temp/FrameBufferGLXFBconfigs.txt")
+                "glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXFBconfigs.txt")
 
             list = []
-            with open(".Temp/FrameBufferGLXFBconfigs.txt", "r") as file1:
+            with open("/tmp/FrameBufferGLXFBconfigs.txt", "r") as file1:
                 for line in file1:
                     list.append(line.split())
 
