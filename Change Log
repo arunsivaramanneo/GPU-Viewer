@@ -1,4 +1,5 @@
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        18/8 - Added Vendor logo's to OpenGL Tab, app should be able to display the vendor logo's of Intel, Nvidia and AMD
         17/8 - Completely moved to GTK3, the application should work with python 2.7 or highter. GLX FrameBuffer Issue has been fixed.
         16/8 - Code for checking vulkan information, If Vulkan utils or Vulkan enabled drivers are not installed then the Vulkan Tab will not be displayed
                  - Show OpenGL Limits and Show GLX Frame Buffer Configuration buttons layout has been updated.

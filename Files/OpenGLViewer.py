@@ -3,9 +3,9 @@ import gi
 
 BGCOLOR1 = "#fff"
 BGCOLOR2 = "#ddd"
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 from FrameBuffer import FrameBuffer
-
+WH = 60
 gi.require_version("Gtk", "3.0")
 
 Title1 = [" ", " "]
@@ -118,11 +118,35 @@ def OpenGL(tab1):
     LimitsFrame.add(Button_Limits)
     # grid4.attach(Button_Limits, 0, 1, 2, 1)
 
+    #vendorFrame = Gtk.Frame()
+    #grid.attach_next_to(vendorFrame,LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+
     FBFrame = Gtk.Frame()
-    grid.attach_next_to(FBFrame, LimitsFrame, Gtk.PositionType.RIGHT, 2, 1)
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
     FBFrame.add(Button_FB)
+
+    with open(".Temp/OpenGLRHS.txt","r") as file1:
+        for line in file1:
+            if "Intel" in line :
+                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/intel-logo.png", width=WH, height=WH,
+                                                                    preserve_aspect_ratio=True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+                break
+            elif "NVIDIA" in line:
+                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/nvidia-logo.png", width=WH, height=WH,
+                                                                    preserve_aspect_ratio=True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+                break
+            elif "AMD" in  line or "ATI" in line:
+                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/AMD.png", width=WH, height=WH,
+                                                                    preserve_aspect_ratio=True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+                break
+
+        #vendorFrame.add(Gtk.Image.new_from_pixbuf(vendorImg))
+        grid.attach(FBFrame,3,1,2,1)
+
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
     TreeGLExt = Gtk.TreeView(OpenGLExt_list, expand=True)
@@ -257,7 +281,7 @@ def OpenGL(tab1):
                 OpenGLRadES.set_visible(False)
 
     OpenGLRad.set_active(False)
-    os.system("rm .Temp/OpenGL*.txt")
+    #os.system("rm .Temp/OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3
 
