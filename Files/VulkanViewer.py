@@ -895,6 +895,8 @@ def Vulkan(tab2):
     for i, column_title in enumerate(InstanceTitle):
         Instancerenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Instancerenderer, text=i)
+        if i == 0:
+            column.set_property("min-width",300)
         column.add_attribute(Instancerenderer, "background", 2)
         TreeInstance.append_column(column)
 
@@ -914,6 +916,8 @@ def Vulkan(tab2):
     for i, column_title in enumerate(LayerTitle):
         Layerrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Layerrenderer, text=i)
+        if i == 0:
+            column.set_property("min-width",300)
         column.add_attribute(Layerrenderer, "background", 4)
         TreeLayer.append_column(column)
 

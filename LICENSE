@@ -1,26 +1,4 @@
-﻿
-				     GPU Viewer 1.0
-
-Copyright (C) 2017-2018 Arun Sivaraman <arunsivaramanneo@gmail.com>
-
-GPU Viewer is a free Software: You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or(at your Option) any later version.
-
-The latest source code of this program can be found
-https://github.com/arunsivaramanneo/GPU-Viewer 
-
-This program uses:
-
-    - Python 3 tkinter for the graphical user interface
-    - glxinfo and vulkaninfo for fetching the report
-
-OpenGL® and the oval logo are trademarks or registered trademarks of Silicon Graphics, Inc.
-
-Vulkan and the Vulkan logo are registered trademarks of the Khronos Group Inc.
-
-If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: paypal.me/ArunSivaraman
-
--------------------------------------------------------------------------------------------------------------                   				
-
+ 				
 				GNU GENERAL PUBLIC LICENSE
 
 				  Version 3, 29 June 2007

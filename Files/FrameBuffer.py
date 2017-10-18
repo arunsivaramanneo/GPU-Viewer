@@ -62,11 +62,11 @@ def FrameBuffer(button):
     FBGrid.set_border_width(20)
     FBGrid.set_row_spacing(30)
     FBGLXButton = Gtk.RadioButton("GLX Visuals")
-    FBGLXButton.connect("clicked", GLXFB, 1)
+    FBGLXButton.connect("toggled", GLXFB, 1)
     FBGrid.add(FBGLXButton)
     FBConfigButton = Gtk.RadioButton.new_from_widget(FBGLXButton)
     FBConfigButton.set_label("GLXFBConfigs")
-    FBConfigButton.connect("clicked",GLXFB,2)
+    FBConfigButton.connect("toggled",GLXFB,2)
     FBGrid.attach_next_to(FBConfigButton, FBGLXButton, Gtk.PositionType.RIGHT, 1, 1)
     FBFrame = Gtk.Frame()
 
@@ -74,7 +74,8 @@ def FrameBuffer(button):
     TreeFB = Gtk.TreeView(FB_Store, expand=True)
     TreeFB.set_property("enable-grid-lines",3)
 
-    FBGLXButton.set_active(False)
+    FBConfigButton.set_active(True)
+    FBGLXButton.set_active(True)
 
     for i, column_title in enumerate(FrameBufferList):
         FBrenderer = Gtk.CellRendererText(font="Helvetica 11")
