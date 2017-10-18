@@ -199,7 +199,6 @@ def OpenGL(tab1):
 
     def Radio(value):
 
-        print(value)
         os.system("cat .Temp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > .Temp/Vendor.txt")
         os.system("cat .Temp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> .Temp/Vendor.txt")
         os.system("cat .Temp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL  > .Temp/Vendor1.txt")
@@ -231,7 +230,6 @@ def OpenGL(tab1):
             NewList.append("%s (%d)" % (vendorList[i], vCount[i]))
 
         VendorExt_list.clear()
-        print(NewList)
         TreeVendor.set_model(VendorExt_list)
         Toggle = []
         for i in range(len(NewList) - 1):

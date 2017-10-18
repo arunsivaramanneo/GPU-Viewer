@@ -3,8 +3,9 @@ A front-end to glxinfo and Vulkaninfo.
 
 This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
 
-![gpu viewer v1 1_012](https://user-images.githubusercontent.com/30646692/31587542-4080c190-b201-11e7-8a57-639d3b214268.png)
-![gpu viewer v1 1_013](https://user-images.githubusercontent.com/30646692/31587559-7d11dc2a-b201-11e7-9058-184d2c7c189b.png)
+![gpu viewer v1 1_002](https://user-images.githubusercontent.com/30646692/31717364-3ce9ff7c-b429-11e7-911c-10659a2622d5.png)
+
+![gpu viewer v1 1_003](https://user-images.githubusercontent.com/30646692/31717406-65f6bf7c-b429-11e7-9a3a-8cbdae10a5d6.png)
 
 * Please note that the above Images solely depends on the Theme being used on the system.
 
