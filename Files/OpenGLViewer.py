@@ -5,7 +5,7 @@ BGCOLOR1 = "#fff"
 BGCOLOR2 = "#ddd"
 from gi.repository import Gtk, GdkPixbuf
 from FrameBuffer import FrameBuffer
-WH = 60
+WH = 70
 gi.require_version("Gtk", "3.0")
 
 Title1 = [" ", " "]

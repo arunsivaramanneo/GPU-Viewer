@@ -79,10 +79,11 @@ def FrameBuffer(button):
 
     for i, column_title in enumerate(FrameBufferList):
         FBrenderer = Gtk.CellRendererText(font="Helvetica 11")
-        FBrenderer.set_alignment(0.5, 0.5)
         column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
         column.add_attribute(FBrenderer,"background",25)
-        column.set_alignment(0.5)
+        if i < len(FrameBufferList) - 1:
+            FBrenderer.set_alignment(0.5, 0.5)
+            column.set_alignment(0.5)
         column.set_property("min-width", 35)
         TreeFB.append_column(column)
 
