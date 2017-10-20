@@ -1,4 +1,7 @@
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        20/8 - Added the ability to Filter the Columns (ascending and descending) when clicked on the column Header,.
+                - Enabled search, press ctrl + F to start the search, search only works for first column.
+                - Users can now resize or re-order the columns to there like. Note, it does not carry over to next run
         18/8 - Added Vendor logo's to OpenGL Tab, app should be able to display the vendor logo's of Intel, Nvidia and AMD
         17/8 - Completely moved to GTK3, the application should work with python 2.7 or highter. GLX FrameBuffer Issue has been fixed.
         16/8 - Code for checking vulkan information, If Vulkan utils or Vulkan enabled drivers are not installed then the Vulkan Tab will not be displayed

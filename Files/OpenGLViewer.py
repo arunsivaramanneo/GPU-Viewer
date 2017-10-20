@@ -44,7 +44,7 @@ def OpenGL(tab1):
             i = i + 1
 
     TreeGL = Gtk.TreeView(OpenGLInfo_list, expand=True)
-
+    #TreeGL.set_enable_search(True)
     for i, column_title in enumerate([" ", " "]):
         renderer = Gtk.CellRendererText(font="Helvetica 11")
         column = Gtk.TreeViewColumn(column_title, renderer, text=i)
@@ -292,10 +292,13 @@ def OpenGL(tab1):
     Vendor_Combo.set_active(0)
 
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
-
+    TreeGLExt.set_enable_search(True)
+    TreeGLExt.set_headers_clickable(True)
+    TreeGLExt.set_headers_visible(True)
     for i, column_title in enumerate([" "]):
         renderer = Gtk.CellRendererText(font="Helvetica 11")
         column = Gtk.TreeViewColumn(column_title, renderer, text=i)
+        column.set_sort_column_id(i)
         column.add_attribute(renderer, "background", 1)
         TreeGLExt.append_column(column)
 

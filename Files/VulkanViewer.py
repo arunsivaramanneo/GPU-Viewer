@@ -686,10 +686,13 @@ def Vulkan(tab2):
 
     SparseTab_Store = Gtk.ListStore(str, str, str, str)
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
-
+    TreeSparse.set_enable_search(True)
     for i, column_title in enumerate(SparseTitle):
         Sparserenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 1:
             column.add_attribute(Sparserenderer, "foreground", 3)
         column.add_attribute(Sparserenderer, "background", 2)
@@ -711,9 +714,13 @@ def Vulkan(tab2):
 
     FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
     TreeFeatures = Gtk.TreeView(FeaturesTab_Store, expand=True)
+    TreeFeatures.set_enable_search(True)
     for i, column_title in enumerate(FeaturesTitle):
         Featurerenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Featurerenderer, text=i)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 1:
             column.add_attribute(Featurerenderer, "foreground", 3)
         column.add_attribute(Featurerenderer, "background", 2)
@@ -737,10 +744,14 @@ def Vulkan(tab2):
 
     LimitsTab_Store = Gtk.ListStore(str, str, str)
     TreeLimits = Gtk.TreeView(LimitsTab_Store, expand=True)
+    TreeLimits.set_enable_search(True)
     for i, column_title in enumerate(LimitsTitle):
         Limitsrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Limitsrenderer, text=i)
         column.add_attribute(Limitsrenderer, "background", 2)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width", 300)
         TreeLimits.append_column(column)
@@ -762,10 +773,14 @@ def Vulkan(tab2):
 
     ExtensionTab_Store = Gtk.ListStore(str, str, str)
     TreeExtension = Gtk.TreeView(ExtensionTab_Store, expand=True)
+    TreeExtension.set_enable_search(True)
     for i, column_title in enumerate(ExtensionsTitle):
         Extensionrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Extensionrenderer, text=i)
         column.add_attribute(Extensionrenderer, "background", 2)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width", 300)
         TreeExtension.append_column(column)
@@ -786,11 +801,14 @@ def Vulkan(tab2):
 
     FormatsTab_Store = Gtk.ListStore(str, str, str, str, str, str, str, str)
     TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
-
+    TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
         column.add_attribute(Formatsrenderer, "background", 4)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width", 300)
         if i > 0:
@@ -816,11 +834,14 @@ def Vulkan(tab2):
 
     MemoryTab_Store = Gtk.ListStore(int, int, str, str, str, str, str, str, str, str, str, str, str)
     TreeMemory = Gtk.TreeView(MemoryTab_Store, expand=True)
-
+    TreeMemory.set_enable_search(True)
     for i, column_title in enumerate(MemoryTitle):
         Memoryrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
         column.add_attribute(Memoryrenderer, "background", 7)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if 2 <= i < 7:
             column.set_property("min-width", 100)
             column.add_attribute(Memoryrenderer, "foreground", i + 6)
@@ -838,10 +859,13 @@ def Vulkan(tab2):
 
     HeapTab_Store = Gtk.ListStore(int, str, str, str, str)
     TreeHeap = Gtk.TreeView(HeapTab_Store, expand=True)
-
+    TreeHeap.set_enable_search(True)
     for i, column_title in enumerate(HeapTitle):
         Heaprenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Heaprenderer, text=i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
+        column.set_sort_column_id(i)
         if i == 1:
             column.set_property("min-width", 200)
         column.add_attribute(Heaprenderer, "background", 3)
@@ -865,11 +889,15 @@ def Vulkan(tab2):
 
     QueueTab_Store = Gtk.ListStore(int, int, int, str, str, str, str, str, str, str, str, str, str, str, str)
     TreeQueue = Gtk.TreeView(QueueTab_Store, expand=True)
+    TreeQueue.set_enable_search(True)
 
     for i, column_title in enumerate(QueueTitle):
         Queuerenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
         column.add_attribute(Queuerenderer, "background", 10)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if 2 < i < 7:
             column.add_attribute(Queuerenderer, "foreground", i + 8)
         TreeQueue.append_column(column)
@@ -891,10 +919,13 @@ def Vulkan(tab2):
 
     InstanceTab_Store = Gtk.ListStore(str, str, str)
     TreeInstance = Gtk.TreeView(InstanceTab_Store, expand=True)
-
+    TreeInstance.set_enable_search(True)
     for i, column_title in enumerate(InstanceTitle):
         Instancerenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Instancerenderer, text=i)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width",300)
         column.add_attribute(Instancerenderer, "background", 2)
@@ -912,10 +943,13 @@ def Vulkan(tab2):
 
     LayerTab_Store = Gtk.ListStore(str, str, str, str, str)
     TreeLayer = Gtk.TreeView(LayerTab_Store, expand=True)
-
+    TreeLayer.set_enable_search(TreeLayer)
     for i, column_title in enumerate(LayerTitle):
         Layerrenderer = Gtk.CellRendererText(font=FONT)
         column = Gtk.TreeViewColumn(column_title, Layerrenderer, text=i)
+        column.set_sort_column_id(i)
+        column.set_resizable(True)
+        column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width",300)
         column.add_attribute(Layerrenderer, "background", 4)
