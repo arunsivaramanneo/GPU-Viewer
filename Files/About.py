@@ -1,7 +1,8 @@
 import gi
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-gi.require_version("Gtk", "3.0")
+
 
 Title1 = ["About GPU Viewer v1.1"]
 Title2 = ["Change Log"]

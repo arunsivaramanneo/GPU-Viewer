@@ -1,12 +1,13 @@
 import os
 import gi
-
+gi.require_version("Gtk", "3.0")
 BGCOLOR1 = "#fff"
 BGCOLOR2 = "#ddd"
 from gi.repository import Gtk, GdkPixbuf
 from FrameBuffer import FrameBuffer
+
 WH = 70
-gi.require_version("Gtk", "3.0")
+
 
 Title1 = [" ", " "]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
@@ -48,6 +49,7 @@ def OpenGL(tab1):
     for i, column_title in enumerate([" ", " "]):
         renderer = Gtk.CellRendererText(font="Helvetica 11")
         column = Gtk.TreeViewColumn(column_title, renderer, text=i)
+        column.set_property("min-width",350)
         column.add_attribute(renderer, "background", 2)
         TreeGL.append_column(column)
 
@@ -70,6 +72,7 @@ def OpenGL(tab1):
         LimitsWin.add(LimitsFrame)
         Limits_Store = Gtk.ListStore(str, str, str)
         TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
+        TreeLimits.set_enable_search(True)
 
         temp = []
         LimitsRHS = []

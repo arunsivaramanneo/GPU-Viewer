@@ -5,7 +5,7 @@ BGCOLOR2 = "#ddd"
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-FrameBufferList = ["vid","vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "stereo", "rsz", "gsz", "bsz", "asz", "flt", "srgb", "aux", "depth", "stcl",
+FrameBufferList = ["vid","vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", "rsz", "gsz", "bsz", "asz", "flt", "srgb", "aux", "depth", "stcl",
                    "acr", "acg", "acb", "aca", "msnum", "msbufs","caveats"]
 
 def FrameBuffer(button):
@@ -56,7 +56,7 @@ def FrameBuffer(button):
 
     FBWin = Gtk.Window()
     FBWin.set_title("GLX Frame Buffer Configuration")
-    FBWin.set_size_request(1050, 500)
+    FBWin.set_size_request(1000, 500)
     FBGrid = Gtk.Grid()
     FBWin.add(FBGrid)
     FBGrid.set_border_width(20)
@@ -72,6 +72,7 @@ def FrameBuffer(button):
 
     FB_Store = Gtk.ListStore(str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str,str)
     TreeFB = Gtk.TreeView(FB_Store, expand=True)
+    TreeFB.set_enable_search(True)
     TreeFB.set_property("enable-grid-lines",3)
 
     FBConfigButton.set_active(True)

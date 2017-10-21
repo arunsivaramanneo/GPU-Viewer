@@ -1,6 +1,9 @@
 import gi
 import os
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
+
+MWIDTH = 300
 
 COLOR1 = "GREEN"
 COLOR2 = "RED"
@@ -9,7 +12,7 @@ BGCOLOR2 = "#ddd"
 BGCOLOR3 = "#bbb"
 FONT = "Helvetica 11"
 RANGE1 = 100
-gi.require_version("Gtk", "3.0")
+
 
 DeviceTitle = ["Device Information", "Details"]
 SparseTitle = ["Device Sparse Properties", "Value"]
@@ -673,7 +676,7 @@ def Vulkan(tab2):
         column = Gtk.TreeViewColumn(column_title, Devicerenderer, text=i)
         column.add_attribute(Devicerenderer, "background", 2)
         if i == 0:
-            column.set_property("min-width", 300)
+            column.set_property("min-width", MWIDTH)
         TreeDevice.append_column(column)
 
     DeviceScrollbar = Gtk.ScrolledWindow()
@@ -695,6 +698,7 @@ def Vulkan(tab2):
         column.set_sort_column_id(i)
         column.set_resizable(True)
         column.set_reorderable(True)
+        column.set_property("min-width", MWIDTH)
         if i == 1:
             column.add_attribute(Sparserenderer, "foreground", 3)
         column.add_attribute(Sparserenderer, "background", 2)
@@ -727,7 +731,7 @@ def Vulkan(tab2):
             column.add_attribute(Featurerenderer, "foreground", 3)
         column.add_attribute(Featurerenderer, "background", 2)
         if i == 0:
-            column.set_property("min-width", 300)
+            column.set_property("min-width", MWIDTH)
         TreeFeatures.append_column(column)
 
     FeatureScrollbar = Gtk.ScrolledWindow()
@@ -755,7 +759,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         if i == 0:
-            column.set_property("min-width", 300)
+            column.set_property("min-width", MWIDTH)
         else:
             Limitsrenderer.set_alignment(0.0,0.5)
         TreeLimits.append_column(column)
@@ -786,7 +790,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         if i == 0:
-            column.set_property("min-width", 300)
+            column.set_property("min-width", MWIDTH)
         TreeExtension.append_column(column)
 
     ExtensionScrollbar = Gtk.ScrolledWindow()
@@ -814,7 +818,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         if i == 0:
-            column.set_property("min-width", 300)
+            column.set_property("min-width", MWIDTH)
         if i > 0:
             column.set_property("min-width", 100)
         if 1 <= i < 4:
@@ -931,7 +935,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         if i == 0:
-            column.set_property("min-width",300)
+            column.set_property("min-width", MWIDTH)
         column.add_attribute(Instancerenderer, "background", 2)
         TreeInstance.append_column(column)
 
@@ -955,7 +959,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         if i == 0:
-            column.set_property("min-width",300)
+            column.set_property("min-width", MWIDTH)
         column.add_attribute(Layerrenderer, "background", 4)
         TreeLayer.append_column(column)
 
@@ -982,6 +986,7 @@ def Vulkan(tab2):
                     Surfacerenderer = Gtk.CellRendererText(font=FONT)
                     column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
                     column.add_attribute(Surfacerenderer, "background", 2)
+                    column.set_property("min-width", MWIDTH)
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = Gtk.ScrolledWindow()
