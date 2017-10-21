@@ -1,5 +1,7 @@
 import gi
 import os
+import Const
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GdkPixbuf, Gdk
 from OpenGLViewer import OpenGL
@@ -7,61 +9,56 @@ from VulkanViewer import Vulkan
 from About import about
 
 
+def createMainWindow():
+    gtk = Gtk.Window(title="GPU Viewer v1.1")
 
-WH = 100
+    setScreenSize(gtk)
 
+    notebook = Gtk.Notebook()
+    gtk.add(notebook)
 
-class GPUViewer(Gtk.Window):
-    """docstring for GPUViewer"""
+    openGlTab = createTab(notebook, Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT)
+    OpenGL(openGlTab)
 
-    def __init__(self):
-        Gtk.Window.__init__(self, title="GPU Viewer v1.1")
-        Screen = Gdk.Screen.get_default()
-        if Screen.get_height() > 950:
-            self.set_size_request(1000, 950)
-        else:
-            self.set_size_request(1000, 720)
+    if isVulkanSupported():
+        vulkanTab = createTab(notebook, Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT)
+        Vulkan(vulkanTab)
 
-        self.notebook = Gtk.Notebook()
-        self.add(self.notebook)
+    aboutTab = createTab(notebook, Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT)
+    about(aboutTab)
 
-        self.tab1 = Gtk.VBox(spacing=10)
-        self.tab1.set_border_width(20)
-        imgOpenGL = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/OpenGL.png", width=WH, height=WH,
-                                                            preserve_aspect_ratio=True)
-        self.notebook.append_page(self.tab1, Gtk.Image.new_from_pixbuf(imgOpenGL))
-
-        OpenGL(self.tab1)
-
-        self.tab2 = Gtk.VBox()
-        self.tab2.set_border_width(20)
-        imgVulkan = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/Vulkan.png", width=WH, height=WH,
-                                                            preserve_aspect_ratio=True)
-
-        os.system("vulkaninfo > /tmp/vulkaninfo.txt")
-
-        with open("/tmp/vulkaninfo.txt", "r") as file1:
-            count = len(file1.readlines())
-
-        if count > 0:
-            self.notebook.append_page(self.tab2, Gtk.Image.new_from_pixbuf(imgVulkan))
-            Vulkan(self.tab2)
-
-        self.tab3 = Gtk.VBox()
-        self.tab3.set_border_width(20)
-        imgAbout = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/aboutus.png", width=WH, height=50,
-                                                           preserve_aspect_ratio=False)
-        self.notebook.append_page(self.tab3, Gtk.Image.new_from_pixbuf(imgAbout))
-
-        about(self.tab3)
+    return gtk
 
 
-def main_quit(exit, value):
+def isVulkanSupported():
+    os.system("vulkaninfo > /tmp/vulkaninfo.txt")
+    with open("/tmp/vulkaninfo.txt", "r") as file1:
+        count = len(file1.readlines())
+    return count > 0
 
-    Gtk.main_quit()
+
+def createTab(notebook, iconUrl, iconWidth, iconHeight):
+    tab = Gtk.VBox(spacing=10)
+    tab.set_border_width(20)
+    openGlIcon = fetchImageFromUrl(iconUrl, iconWidth, iconHeight)
+    notebook.append_page(tab, Gtk.Image.new_from_pixbuf(openGlIcon))
+    return tab
 
 
-win = GPUViewer()
-win.connect("delete-event", main_quit)
+def fetchImageFromUrl(imgUrl, iconWidth, iconHeight):
+    return GdkPixbuf.Pixbuf.new_from_file_at_scale(
+        filename=imgUrl, width=iconWidth, height=iconHeight, preserve_aspect_ratio=True)
+
+
+def setScreenSize(gtk):
+    Screen = Gdk.Screen.get_default()
+    if Screen.get_height() > 950:
+        gtk.set_size_request(1000, 950)
+    else:
+        gtk.set_size_request(1000, 720)
+
+
+win = createMainWindow()
+win.connect("delete-event", Gtk.main_quit)
 win.show_all()
 Gtk.main()
