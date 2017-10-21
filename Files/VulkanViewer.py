@@ -169,10 +169,12 @@ def Vulkan(tab2):
         LimitsTab_Store.clear()
         TreeLimits.set_model(LimitsTab_Store)
 
+        value = [i.strip(' ') for i in value]
         with open("/tmp/VKDlimits.txt", "r") as file1:
             i = 0
             for line in file1:
                 text = line.strip('\t')
+
                 if i % 2 == 0:
                     background_color = BGCOLOR1
                 else:
@@ -754,6 +756,8 @@ def Vulkan(tab2):
         column.set_reorderable(True)
         if i == 0:
             column.set_property("min-width", 300)
+        else:
+            Limitsrenderer.set_alignment(0.0,0.5)
         TreeLimits.append_column(column)
 
     LimitsScrollbar = Gtk.ScrolledWindow()

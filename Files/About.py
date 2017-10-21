@@ -31,7 +31,6 @@ def about(tab3):
     for i, column_title in enumerate(Title1):
         renderer1 = Gtk.CellRendererText(font="Helvetica 11")
         renderer1.set_property("wrap-width", 900)
-    #  renderer1.set_property("wrap-mode",True)
         column = Gtk.TreeViewColumn(column_title, renderer1, text=i)
         column.add_attribute(renderer1, "background", 1)
         column.set_alignment(0.5)

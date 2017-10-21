@@ -293,7 +293,6 @@ def OpenGL(tab1):
 
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
     TreeGLExt.set_enable_search(True)
-    TreeGLExt.set_headers_clickable(True)
     TreeGLExt.set_headers_visible(True)
     for i, column_title in enumerate([" "]):
         renderer = Gtk.CellRendererText(font="Helvetica 11")

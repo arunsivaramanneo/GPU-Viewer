@@ -49,7 +49,7 @@ def FrameBuffer(button):
                 if list[i][6] == "r" or list[i][6] == "c":
                     pass
                 else:
-                    list[i].insert(6," ")
+                    list[i].insert(6,".")
                 FB_Store.append(list[i]+[background_color])
             label = "%d  GLXFBConfigs"%(len(list)-1)
             button.set_label(label)
