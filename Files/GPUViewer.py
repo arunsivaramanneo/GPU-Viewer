@@ -1,15 +1,15 @@
 import os
 import Const
-from Common import MyGtk, fetchImageFromUrl
+from Common import MyGtk, fetchImageFromUrl, setScreenSize
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
 
 
 def main():
-    gtk = MyGtk("GPU Viewer")
+    gtk = MyGtk("GPU Viewer v1.1")
 
-    gtk.setScreenSize()
+    setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
     OpenGL(openGlTab)

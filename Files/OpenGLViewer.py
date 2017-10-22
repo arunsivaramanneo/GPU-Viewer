@@ -1,15 +1,17 @@
 import os
 import gi
+import Const
+
 gi.require_version("Gtk", "3.0")
-BGCOLOR1 = "#fff"
-BGCOLOR2 = "#ddd"
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 from FrameBuffer import FrameBuffer
+from Common import setScreenSize, fetchImageFromUrl, copyContentsFromFile, setBackgroundColor, setColumns, \
+    createScrollbar
 
 WH = 70
 
-
-Title1 = [" ", " "]
+Title1 = [" "]
+Title2 = [" ", " "]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
 
 
@@ -30,32 +32,20 @@ def OpenGL(tab1):
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
 
-    with open("/tmp/OpenGLRHS.txt", "r") as file1:
-        value = []
-        for line in file1:
-            value.append(line)
+    value = copyContentsFromFile("/tmp/OpenGLRHS.txt")
+
     i = 0
     with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
-            if i % 2 == 0:
-                background_color = BGCOLOR1
-            else:
-                background_color = BGCOLOR2
+            background_color = setBackgroundColor(i)
             OpenGLInfo_list.append([line.strip('\n'), value[i].strip('\n'), background_color])
             i = i + 1
 
     TreeGL = Gtk.TreeView(OpenGLInfo_list, expand=True)
-    #TreeGL.set_enable_search(True)
-    for i, column_title in enumerate([" ", " "]):
-        renderer = Gtk.CellRendererText(font="Helvetica 11")
-        column = Gtk.TreeViewColumn(column_title, renderer, text=i)
-        column.set_property("min-width",350)
-        column.add_attribute(renderer, "background", 2)
-        TreeGL.append_column(column)
+    # TreeGL.set_enable_search(True)
+    setColumns(TreeGL, Title2, Const.MWIDTH)
 
-    scrollable_treelist = Gtk.ScrolledWindow()
-    scrollable_treelist.set_vexpand(True)
-    scrollable_treelist.add(TreeGL)
+    scrollable_treelist = createScrollbar(TreeGL)
     grid4.add(scrollable_treelist)
 
     def clickme(button):
@@ -66,7 +56,8 @@ def OpenGL(tab1):
         os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
-        LimitsWin.set_size_request(1000, 500)
+        #    LimitsWin.set_size_request(1000, 500)
+        setScreenSize(LimitsWin, Const.WIDTH_RATIO, Const.HEIGHT_RATIO2)
         LimitsWin.set_border_width(20)
         LimitsFrame = Gtk.Frame()
         LimitsWin.add(LimitsFrame)
@@ -77,9 +68,7 @@ def OpenGL(tab1):
         temp = []
         LimitsRHS = []
 
-        with open("/tmp/OpenGLLimitsRHS.txt", "r") as file1:
-            for line in file1:
-                temp.append(line)
+        temp = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
 
         i = 0
         with open("/tmp/OpenGL_Limits.txt", "r") as file1:
@@ -93,22 +82,12 @@ def OpenGL(tab1):
         i = 0
         with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
             for line in file1:
-                if i % 2 == 0:
-                    background_color = BGCOLOR1
-                else:
-                    background_color = BGCOLOR2
+                background_color = setBackgroundColor(i)
                 Limits_Store.append([line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
-        for i, column_title in enumerate(LimitsTitle):
-            Limitsrenderer = Gtk.CellRendererText(font="Helvetica 11")
-            column = Gtk.TreeViewColumn(column_title, Limitsrenderer, text=i)
-            column.add_attribute(Limitsrenderer, "background", 2)
-            TreeLimits.append_column(column)
-
-        LimitsScrollbar = Gtk.ScrolledWindow()
-        LimitsScrollbar.set_vexpand(True)
-        LimitsScrollbar.add(TreeLimits)
+        setColumns(TreeLimits, LimitsTitle, Const.MWIDTH)
+        LimitsScrollbar = createScrollbar(TreeLimits)
         LimitsFrame.add(LimitsScrollbar)
 
         os.system("rm /tmp/OpenGL*.txt")
@@ -121,34 +100,31 @@ def OpenGL(tab1):
     LimitsFrame.add(Button_Limits)
     # grid4.attach(Button_Limits, 0, 1, 2, 1)
 
-    #vendorFrame = Gtk.Frame()
-    #grid.attach_next_to(vendorFrame,LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+    # vendorFrame = Gtk.Frame()
+    # grid.attach_next_to(vendorFrame,LimitsFrame,Gtk.PositionType.RIGHT,1,1)
 
     FBFrame = Gtk.Frame()
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
     FBFrame.add(Button_FB)
 
-    with open("/tmp/OpenGLRHS.txt","r") as file1:
+    with open("/tmp/OpenGLRHS.txt", "r") as file1:
         for line in file1:
-            if "Intel" in line :
-                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/intel-logo.png", width=WH, height=WH,
-                                                                    preserve_aspect_ratio=True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+            if "Intel" in line:
+                vendorImg = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "NVIDIA" in line:
-                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/nvidia-logo.png", width=WH, height=WH,
-                                                                    preserve_aspect_ratio=True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+                vendorImg = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
                 break
-            elif "AMD" in  line or "ATI" in line:
-                vendorImg = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename="../Images/AMD.png", width=WH, height=WH,
-                                                                    preserve_aspect_ratio=True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg),LimitsFrame,Gtk.PositionType.RIGHT,1,1)
+            elif "AMD" in line or "ATI" in line:
+                vendorImg = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
                 break
 
-        #vendorFrame.add(Gtk.Image.new_from_pixbuf(vendorImg))
-        grid.attach(FBFrame,3,1,2,1)
+        # vendorFrame.add(Gtk.Image.new_from_pixbuf(vendorImg))
+        grid.attach(FBFrame, 3, 1, 2, 1)
 
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
@@ -161,9 +137,7 @@ def OpenGL(tab1):
         GL_All = []
         List = []
 
-        with open("/tmp/Vendor1.txt", "r") as file1:
-            for line in file1:
-                List.append(line)
+        List = copyContentsFromFile("/tmp/Vendor1.txt")
 
         List = [i.strip(' ') for i in List]
         List = [i.strip('\n ') for i in List]
@@ -184,13 +158,9 @@ def OpenGL(tab1):
             if int(value) == i:
                 frame4.set_label(List[i])
 
-
         count = len(GL_All)
         for i in range(count):
-            if i % 2 == 0:
-                background_color = BGCOLOR1
-            else:
-                background_color = BGCOLOR2
+            background_color = setBackgroundColor(i)
             text = GL_All[i].strip(' ')
             OpenGLExt_list.append([text.strip('\n'), background_color])
 
@@ -241,10 +211,7 @@ def OpenGL(tab1):
         Vendor_Combo.set_model(Vendor_Store)
         Toggle.insert(True, 0)
         for i in range(len(NewList)):
-            if i % 2 == 0:
-                background_color = BGCOLOR1
-            else:
-                background_color = BGCOLOR2
+            background_color = setBackgroundColor(i)
             VendorExt_list.append([NewList[i], Toggle[i], background_color])
             Vendor_Store.append([NewList[i]])
 
@@ -282,7 +249,7 @@ def OpenGL(tab1):
                 OpenGLRadES.set_visible(False)
 
     OpenGLRad.set_active(False)
-    #os.system("rm /tmp/OpenGL*.txt")
+    # os.system("rm /tmp/OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3
 
@@ -297,19 +264,12 @@ def OpenGL(tab1):
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
     TreeGLExt.set_enable_search(True)
     TreeGLExt.set_headers_visible(True)
-    for i, column_title in enumerate([" "]):
-        renderer = Gtk.CellRendererText(font="Helvetica 11")
-        column = Gtk.TreeViewColumn(column_title, renderer, text=i)
-        column.set_sort_column_id(i)
-        column.add_attribute(renderer, "background", 1)
-        TreeGLExt.append_column(column)
+    setColumns(TreeGLExt, Title1, Const.MWIDTH)
 
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
     frame4.add(grid3)
-    scrollable_treelist2 = Gtk.ScrolledWindow()
-    scrollable_treelist2.set_vexpand(True)
-    scrollable_treelist2.add(TreeGLExt)
+    scrollable_treelist2 = createScrollbar(TreeGLExt)
     grid3.attach(scrollable_treelist2, 0, 0, 1, 1)
 
     tab1.show_all()
