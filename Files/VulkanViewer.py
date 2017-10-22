@@ -726,7 +726,7 @@ def Vulkan(tab2):
     TreeInstance = Gtk.TreeView(InstanceTab_Store, expand=True)
     TreeInstance.set_enable_search(True)
 
-    setColumns(TreeInstance, InstanceTitle, 100)
+    setColumns(TreeInstance, InstanceTitle, 300)
 
     InstanceScrollbar = createScrollbar(TreeInstance)
     InstanceGrid.add(InstanceScrollbar)
