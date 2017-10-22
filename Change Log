@@ -1,4 +1,7 @@
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        22/8 - Removed fixed font Size, now defaults to system Font Size
+                - Application Min Size is no more fixed, now it will be automatically adjusted to the System Screen resolution
+                - Lot of code refractors, Usage of Constants, code reuse.
         20/8 - Added the ability to Filter the Columns (ascending and descending) when clicked on the column Header,.
                 - Enabled search, press ctrl + F or just start typing to start the search, search only works for first column.
                 - Users can now resize or re-order the columns to there like. Note, it does not carry over to next run

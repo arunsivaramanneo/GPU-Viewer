@@ -170,7 +170,7 @@ def Vulkan(tab2):
 
         with open("/tmp/VKDExtensions.txt", "r") as file1:
             count = len(file1.readlines())
-            label = "Extensions(%d)" % count
+            label = "Extensions (%d)" % count
             notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
             file1.seek(0, 0)
             i = 0
@@ -218,7 +218,7 @@ def Vulkan(tab2):
         TreeFormats.set_model(FormatsTab_Store)
         with open("/tmp/VKDFORMATS.txt", "r") as file1:
             file1.seek(0, 0)
-            label = "Formats(%d)" % Formats
+            label = "Formats (%d)" % Formats
             notebook.set_tab_label(FormatsTab, Gtk.Label(label))
             i = 0
             for line in file1:
@@ -346,7 +346,7 @@ def Vulkan(tab2):
             HeapTab_Store.append(
                 [i, size[i].strip('\n'), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
-        label = "Memory Types(%d) & Heaps(%d)" % (Mcount, HCount)
+        label = "Memory Types (%d) & Heaps (%d)" % (Mcount, HCount)
         notebook.set_tab_label(MemoryTab, Gtk.Label(label))
 
     def Queues(GPUname):
@@ -401,7 +401,7 @@ def Vulkan(tab2):
             QueueTab_Store.append(
                 [i, int(qCount[i]), int(qBits[i]), GBit[i], CBit[i], TBit[i], SBit[i], width[i], height[i], depth[i],
                  background_color, Gfg[i], Cfg[i], Tfg[i], Sfg[i]])
-        label = "Queues(%d)" % len(qCount)
+        label = "Queues (%d)" % len(qCount)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
 
     def Instance():
@@ -423,7 +423,7 @@ def Vulkan(tab2):
         TreeInstance.set_model(InstanceTab_Store)
         with open("/tmp/VKDInstanceExtensions.txt", "r") as file1:
             count1 = len(file1.readlines())
-            label = "Instances(%d)" % count1
+            label = "Instances (%d)" % count1
             notebook.set_tab_label(InstanceTab, Gtk.Label(label))
             file1.seek(0, 0)
             i = 0
@@ -463,7 +463,7 @@ def Vulkan(tab2):
         LayerTab_Store.clear()
         TreeLayer.set_model(LayerTab_Store)
         count2 = len(LVersion)
-        label = "Instances(%d) & Layers(%d)" % (count1, count2)
+        label = "Instances (%d) & Layers (%d)" % (count1, count2)
         notebook.set_tab_label(InstanceTab, Gtk.Label(label))
         with open("/tmp/VKDLayer.txt", "r") as file1:
             i = 0
