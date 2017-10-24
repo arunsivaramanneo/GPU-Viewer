@@ -26,7 +26,7 @@ MWIDTH = 350
 
 BGCOLOR1 = "#fff"
 
-BGCOLOR2 = "#ddd"
+BGCOLOR2 = "#eee"
 
 BGCOLOR3 = "#bbb"
 

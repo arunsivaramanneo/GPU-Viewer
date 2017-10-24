@@ -2,19 +2,17 @@ import gi
 import Const
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
-from Common import setBackgroundColor, createScrollbar
+from Common import setBackgroundColor, createScrollbar, setColumns
 
 Title1 = ["About GPU Viewer v1.1"]
 Title2 = ["Change Log"]
 
 
 def about(tab3):
-    grid = Gtk.Grid()
-    tab3.add(grid)
     frame1 = Gtk.Frame(label="")
-    grid.add(frame1)
+    tab3.add(frame1)
     frame2 = Gtk.Frame(label="")
-    grid.attach_next_to(frame2, frame1, Gtk.PositionType.BOTTOM, 1, 1)
+    tab3.add(frame2)
     screen = Gdk.Screen.get_default()
     About_list = Gtk.ListStore(str, str)
     i = 0
@@ -25,7 +23,7 @@ def about(tab3):
             i = i + 1
 
     TreeAbout = Gtk.TreeView(About_list, expand=True)
-    wrapWidth = screen.get_width() * 0.5
+    wrapWidth = screen.get_width() * 0.58
 
     for i, column_title in enumerate(Title1):
         renderer1 = Gtk.CellRendererText(font=Const.FONT)

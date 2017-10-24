@@ -550,7 +550,7 @@ def Vulkan(tab2):
     DeviceTab_Store = Gtk.ListStore(str, str, str)
     TreeDevice = Gtk.TreeView(DeviceTab_Store, expand=True)
 
-    setColumns(TreeDevice, DeviceTitle, Const.MWIDTH)
+    setColumns(TreeDevice, DeviceTitle, Const.MWIDTH,0.0)
 
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
@@ -606,7 +606,7 @@ def Vulkan(tab2):
     TreeLimits = Gtk.TreeView(LimitsTab_Store, expand=True)
     TreeLimits.set_enable_search(True)
 
-    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH)
+    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
 
     LimitsScrollbar = createScrollbar(TreeLimits)
     LimitsGrid.add(LimitsScrollbar)
@@ -620,7 +620,7 @@ def Vulkan(tab2):
     TreeExtension = Gtk.TreeView(ExtensionTab_Store, expand=True)
     TreeExtension.set_enable_search(True)
 
-    setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH)
+    setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH,0.0)
 
     ExtensionScrollbar = createScrollbar(TreeExtension)
     ExtensionGrid.add(ExtensionScrollbar)
@@ -726,7 +726,7 @@ def Vulkan(tab2):
     TreeInstance = Gtk.TreeView(InstanceTab_Store, expand=True)
     TreeInstance.set_enable_search(True)
 
-    setColumns(TreeInstance, InstanceTitle, 300)
+    setColumns(TreeInstance, InstanceTitle, 300,0.0)
 
     InstanceScrollbar = createScrollbar(TreeInstance)
     InstanceGrid.add(InstanceScrollbar)
@@ -737,7 +737,7 @@ def Vulkan(tab2):
     TreeLayer = Gtk.TreeView(LayerTab_Store, expand=True)
     TreeLayer.set_enable_search(TreeLayer)
 
-    setColumns(TreeLayer, LayerTitle, 100)
+    setColumns(TreeLayer, LayerTitle, 100,0.0)
 
     LayerScrollbar = createScrollbar(TreeLayer)
     LayerGrid.add(LayerScrollbar)
@@ -771,11 +771,7 @@ def Vulkan(tab2):
     grid.set_row_spacing(30)
     os.system("cat /tmp/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > /tmp/GPU.txt")
 
-    with open("/tmp/GPU.txt", "r") as file2:
-        list = []
-        file2.seek(0, 0)
-        for line in file2:
-            list.append(line)
+    list = copyContentsFromFile("/tmp/GPU.txt")
 
     list = [i.strip('\n ') for i in list]
 
@@ -784,7 +780,6 @@ def Vulkan(tab2):
     DevicesGrid.attach(DS, 0, 1, 1, 1)
     gpu_store = Gtk.ListStore(str)
     for i in list:
-        #		print(i)
         gpu_store.append([i])
 
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)

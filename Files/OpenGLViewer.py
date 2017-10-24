@@ -11,7 +11,7 @@ from Common import setScreenSize, fetchImageFromUrl, copyContentsFromFile, setBa
 WH = 70
 
 Title1 = [" "]
-Title2 = [" ", " "]
+Title2 = ["OpenGL Information ", " Details"]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
 
 
@@ -22,7 +22,7 @@ def OpenGL(tab1):
     tab1.add(grid)
     grid4 = Gtk.Grid()
     grid4.set_row_spacing(10)
-    frame1 = Gtk.Frame(label="OpenGL_Information", expand=True)
+    frame1 = Gtk.Frame(label="", expand=True)
     grid.attach(frame1, 0, 0, 12, 1)
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
@@ -43,7 +43,7 @@ def OpenGL(tab1):
 
     TreeGL = Gtk.TreeView(OpenGLInfo_list, expand=True)
     # TreeGL.set_enable_search(True)
-    setColumns(TreeGL, Title2, Const.MWIDTH)
+    setColumns(TreeGL, Title2, Const.MWIDTH,0.0)
 
     scrollable_treelist = createScrollbar(TreeGL)
     grid4.add(scrollable_treelist)
@@ -86,7 +86,7 @@ def OpenGL(tab1):
                 Limits_Store.append([line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
-        setColumns(TreeLimits, LimitsTitle, Const.MWIDTH)
+        setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsScrollbar = createScrollbar(TreeLimits)
         LimitsFrame.add(LimitsScrollbar)
 
@@ -264,7 +264,7 @@ def OpenGL(tab1):
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
     TreeGLExt.set_enable_search(True)
     TreeGLExt.set_headers_visible(True)
-    setColumns(TreeGLExt, Title1, Const.MWIDTH)
+    setColumns(TreeGLExt, Title1, Const.MWIDTH,0.0)
 
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
