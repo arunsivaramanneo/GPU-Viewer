@@ -9,24 +9,15 @@ This project aims to capture all the required/important details of glxinfo and v
 
 * Please note that the above Images solely depends on the Theme being used on the system.
 
-## INSTALLATION STEPS
-
-#### Ubuntu
+## INSTALLATION STEP
 
 1. Before Downloading the files please see the Known issues below
 2. Ensure python is installed
 3. Download the file and Extract to a folder
 4. Double click GPUViewer to launch the Application or You can go to Files and then open terminal and run/type python GPUViewer.py
-5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils),also Vulkan enabled drivers should be installed.
+5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 
-#### Arch 
-
-1. Before Downloading the files please see the Known issues below
-2. Ensure python 3 or higher is installed, Also install python tkinter for viewing the GLX Framebuffer configuration window.
-3. Download the file and Extract to a folder
-4. Double click GPUViewer to launch the Application or You can go to Files and then open terminal and run/type python GPUViewer.py
-5. For Vulkan Tab to work Install vulkan-extra-layers,also Vulkan enabled drivers should be installed.
-
+6. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## What's developed and available?
 
@@ -43,8 +34,7 @@ This project aims to capture all the required/important details of glxinfo and v
 ## IMPORTANT
 
 1. Requires Python to run this Application, works only on linux Operating system
-2. Tested on Intel and Nvidia hardware
-3. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
+2. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 
 ## KNOWN ISSUES
 
@@ -57,6 +47,7 @@ This project aims to capture all the required/important details of glxinfo and v
 2. Desktop : Cinnamon 3.4.6
 3. Kernel : 4.10.0-33
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
+
 
 ## SYSTEM SETUP
 
