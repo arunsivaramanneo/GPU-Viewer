@@ -1,4 +1,6 @@
-﻿# GPU-Viewer
+[![Build Status](https://travis-ci.org/flyingarg/GPU-Viewer.svg?branch=master)](https://travis-ci.org/flyingarg/GPU-Viewer)
+
+# GPU-Viewer
 A front-end to glxinfo and Vulkaninfo. 
 
 This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
