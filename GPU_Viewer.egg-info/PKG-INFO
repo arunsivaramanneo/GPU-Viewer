@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: GPU-Viewer
+Version: 1.0.0
+Summary: A GPU Info Viewer
+Home-page: ['https://www.facebook.com/arunsivaramanneo']
+Author: Arun Sivaraman
+Author-email: arunsivaraman1994@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: gpu,opengl,vulkan,gtk3,glxinfo
+Platform: UNKNOWN
