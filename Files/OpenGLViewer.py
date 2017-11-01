@@ -50,6 +50,7 @@ def OpenGL(tab1):
 
     def clickme(button):
 
+        button.set_sensitive(False)
         os.system(
             "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag'  > /tmp/OpenGL_Limits.txt")
         os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
@@ -89,6 +90,9 @@ def OpenGL(tab1):
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsScrollbar = createScrollbar(TreeLimits)
         LimitsFrame.add(LimitsScrollbar)
+        def button_enable(win,value):
+            button.set_sensitive(True)
+        LimitsWin.connect("delete-event",button_enable)
 
         os.system("rm /tmp/OpenGL*.txt")
         LimitsWin.show_all()

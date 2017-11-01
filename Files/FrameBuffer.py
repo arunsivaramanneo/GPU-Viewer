@@ -12,6 +12,8 @@ FrameBufferList = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", 
 
 
 def FrameBuffer(button):
+
+    button.set_sensitive(False)
     def GLXFB(button, value):
         FB_Store.clear()
         TreeFB.set_model(FB_Store)
@@ -89,6 +91,9 @@ def FrameBuffer(button):
     FBScrollbar = createScrollbar(TreeFB)
     FBFrame.add(FBScrollbar)
     FBGrid.attach_next_to(FBFrame, FBGLXButton, Gtk.PositionType.BOTTOM, 25, 1)
+    def button_enable(win,value):
+        button.set_sensitive(True)
+    FBWin.connect("delete-event",button_enable)
 
     FBWin.show_all()
 
