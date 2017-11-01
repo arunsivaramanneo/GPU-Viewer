@@ -174,7 +174,7 @@ def OpenGL(tab1):
 
         os.system("cat /tmp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/Vendor.txt")
         os.system("cat /tmp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/Vendor.txt")
-        os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL  > /tmp/Vendor1.txt")
+        os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/Vendor1.txt")
 
         vCount = []
         vendorList = []
