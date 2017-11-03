@@ -49,7 +49,7 @@ def FrameBuffer(button):
                 else:
                     list[i].insert(6, ".")
                 FB_Store.append(list[i] + [background_color])
-            label = "%d  GLXFBConfigs" % (len(list) - 1)
+            label = "%d  GLX FBConfigs" % (len(list) - 1)
             button.set_label(label)
 
     FBWin = Gtk.Window()

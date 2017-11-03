@@ -85,6 +85,7 @@ def setColumns(Treeview, Title, MWIDTH,align):
 
 def createScrollbar(Treeview):
     Scrollbar = Gtk.ScrolledWindow()
+    Scrollbar.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
     Scrollbar.set_vexpand(True)
     Scrollbar.add(Treeview)
     return Scrollbar

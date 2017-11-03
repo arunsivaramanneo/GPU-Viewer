@@ -1,3 +1,9 @@
+Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        01/11 - Better handling of Buttons in OpenGL Tab, Now the button will be disabled when the child window is still open
+                  - Increased the Min. Window height size, now it occupies 85% of the Screen resolution Height
+                  - Fixed Angle vendor to be displayed in the Extensions drop down
+                  - Minor UI Fixes
+
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         22/8 - Removed fixed font Size, now defaults to system Font Size
                 - Application Min Size is no more fixed, now it will be automatically adjusted to the System Screen resolution

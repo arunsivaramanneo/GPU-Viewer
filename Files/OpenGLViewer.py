@@ -90,6 +90,7 @@ def OpenGL(tab1):
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsScrollbar = createScrollbar(TreeLimits)
         LimitsFrame.add(LimitsScrollbar)
+
         def button_enable(win,value):
             button.set_sensitive(True)
         LimitsWin.connect("delete-event",button_enable)
@@ -262,8 +263,10 @@ def OpenGL(tab1):
     Vendor_renderer = Gtk.CellRendererText(font="Helvetica 10")
     Vendor_Combo.pack_start(Vendor_renderer, True)
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
-    Vendor_Combo.set_entry_text_column(0)
+   # Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
+
+
 
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
     TreeGLExt.set_enable_search(True)

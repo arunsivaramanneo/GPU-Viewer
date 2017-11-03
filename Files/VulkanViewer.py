@@ -185,7 +185,7 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* > /tmp/VKDFORMATS.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDFORMATS.txt" % i)
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> /tmp/VKDFORMATSlinear.txt" % i)
                 os.system(
