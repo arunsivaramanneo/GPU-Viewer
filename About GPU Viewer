@@ -1,14 +1,15 @@
+
 Copyright (C) 2017 Arun Sivaraman <arunsivaramanneo@gmail.com>
+
 GPU Viewer is a free Software: This program comes with absolutely no WARRANTY. You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
+
 The latest source code of this program can be found at
 https://github.com/arunsivaramanneo/GPU-Viewer
 
 This program uses:
+
     -  PyGObject with GTK3 for the graphical user interface
     -  glxinfo and vulkaninfo for fetching the report
-
-If you like/use this Application and think i deserve a cup of chai, do a Paypal donation to below
-paypal.me/ArunSivaraman
 
 Trademarks
     - OpenGL® and the oval logo are trademarks or registered trademarks of Silicon Graphics, Inc.
@@ -16,3 +17,5 @@ Trademarks
     - Intel and the Intel logo are trademarks of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
     - NVIDIA and NVIDIA logo are trademarks and/or registered trademarks of NVIDIA Corporation in the U.S. and/or other countries.
     - AMD and AMD logo are trademarks or registered trademark of AMD
+
+If you like/use this Application and think i deserve a cup of coffee, do a Paypal donation by clicking on the Donate Button below

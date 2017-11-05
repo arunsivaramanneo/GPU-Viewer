@@ -1,41 +1,42 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        05/11 - Updated About Tab, User can view the Change Log, License, FAQ by clicking on the Button
         01/11 - Better handling of Buttons in OpenGL Tab, Now the button will be disabled when the child window is still open
-                  - Increased the Min. Window height size, now it occupies 85% of the Screen resolution Height
-                  - Fixed Angle vendor to be displayed in the Extensions drop down
-                  - Minor UI Fixes
+              - Increased the Min. Window height size, now it occupies 85% of the Screen resolution Height
+              - Fixed Angle vendor to be displayed in the Extensions drop down
+              - Minor UI Fixes
 
 OCT-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         22/8 - Removed fixed font Size, now defaults to system Font Size
-                - Application Min Size is no more fixed, now it will be automatically adjusted to the System Screen resolution
-                - Lot of code refractors, Usage of Constants, code reuse.
+             - Application Min Size is no more fixed, now it will be automatically adjusted to the System Screen resolution
+             - Lot of code refractors, Usage of Constants, code reuse.
         20/8 - Added the ability to Filter the Columns (ascending and descending) when clicked on the column Header,.
-                - Enabled search, press ctrl + F or just start typing to start the search, search only works for first column.
-                - Users can now resize or re-order the columns to there like. Note, it does not carry over to next run
+             - Enabled search, press ctrl + F or just start typing to start the search, search only works for first column.
+             - Users can now resize or re-order the columns to there like. Note, it does not carry over to next run
         18/8 - Added Vendor logo's to OpenGL Tab, app should be able to display the vendor logo's of Intel, Nvidia and AMD
         17/8 - Completely moved to GTK3, the application should work with python 2.7 or highter. GLX FrameBuffer Issue has been fixed.
         16/8 - Code for checking vulkan information, If Vulkan utils or Vulkan enabled drivers are not installed then the Vulkan Tab will not be displayed
-                 - Show OpenGL Limits and Show GLX Frame Buffer Configuration buttons layout has been updated.
+             - Show OpenGL Limits and Show GLX Frame Buffer Configuration buttons layout has been updated.
         14/8 - V1.1 Of GPU Viewer has been releasead, Moved the GUI from tkinter to PyGObject GTK3, except for the FrameBuffer part in OpenGL
-                 - Major changes to the OpenGL and Vulkan Layouts. OpenGL Vendor list is displayed as drop down instead of Radio Button
-                 - Now Available Devices in Vulkan Tab is a drop down and can display any number of Devices.
-                 - Font Colors have been added to the True and False keywords in Vulkan Tab
-                 - Ability to Resize the Window to Full Screen, and also enabled usage of the App for Monitors with a minimum resolution of 720p
-                 - Column Header Filtering has been removed in this release, will be added in coming months
-                 -  READ ME and About GPU Viewer texts have been updated accordingly
-        05/8 - Minor UI/Text alignment Fixes, Increased the font size from 10 to 11 and also enabled font type/size consistent for all fields.        
+             - Major changes to the OpenGL and Vulkan Layouts. OpenGL Vendor list is displayed as drop down instead of Radio Button
+             - Now Available Devices in Vulkan Tab is a drop down and can display any number of Devices.
+             - Font Colors have been added to the True and False keywords in Vulkan Tab
+             - Ability to Resize the Window to Full Screen, and also enabled usage of the App for Monitors with a minimum resolution of 720p
+             - Column Header Filtering has been removed in this release, will be added in coming months
+             -  READ ME and About GPU Viewer texts have been updated accordingly
+        05/8 - Minor UI/Text alignment Fixes, Increased the font size from 10 to 11 and also enabled font type/size consistent for all fields.
         01/8 - OpenGL Vendor Extensions have been updated to display only the Vendor extensions supported by the Device.
-                 - Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
-                 - Formatted all the texts to have consistent alignment.
+             - Implemented check, when the user tries to close the main window.Removed all the .txt files that are generated
+             - Formatted all the texts to have consistent alignment.
 
 SEP-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         29/9 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device        
         27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
         26/9 - Added Surface Tab to Vulkan        
         23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
-                   Implemented sorting in Instance & layers Tab column headers        
+             - Implemented sorting in Instance & layers Tab column headers
         21/9 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
         20/9 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
-                   Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan       
+             - Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan
         19/9 - Implemented multi-GPU support,Code Optimizations and reduced no. of system calls in Vulkanviewer
         16/9 - Added Show GLX Frame Buffer Configuration functionality to OpenGL Tab
         14/9 - Fixed AMD GPU Memory Heap Issue.
