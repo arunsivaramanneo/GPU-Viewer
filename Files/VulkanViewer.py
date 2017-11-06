@@ -329,7 +329,7 @@ def Vulkan(tab2):
                     HEAP_DEVICE_LOCAL.append("false")
                     Heapfg.append(Const.COLOR2)
                 if "size " in line:
-                    for j in range(1024):
+                    for j in range(1025):
                         for k in range(RANGE1):
                             if "(%d.%02d GiB)" % (j, k) in line:
                                 size.append("%d.%02d GB" % (j, k))
