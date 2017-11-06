@@ -24,6 +24,8 @@ BUG_LOGO_PNG = "../Images/Bug.svg"
 
 LOG_LOGO_PNG = "../Images/Changelog.png"
 
+APP_LOGO_PNG = "../Images/GPU_Viewer.png"
+
 ICON_WIDTH = 100
 
 ICON_HEIGHT = 50

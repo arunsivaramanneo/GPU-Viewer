@@ -1,6 +1,7 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         05/11 - Updated About Tab, User can view the Change Log, License, FAQ by clicking on the Button
               - Ability to report a bug through default email client by clicking on the report a bug linkbutton
+              - Added Application Icon
         01/11 - Better handling of Buttons in OpenGL Tab, Now the button will be disabled when the child window is still open
               - Increased the Min. Window height size, now it occupies 85% of the Screen resolution Height
               - Fixed Angle vendor to be displayed in the Extensions drop down

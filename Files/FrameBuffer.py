@@ -9,6 +9,8 @@ from Common import setScreenSize, setBackgroundColor, createScrollbar
 FrameBufferList = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", "rsz", "gsz", "bsz", "asz", "flt",
                    "srgb", "aux", "depth", "stcl",
                    "acr", "acg", "acb", "aca", "msnum", "msbufs", "caveats"]
+FrameBufferToolTip = ["Visual ID","Visual Depth","Visual Type","Transparency","Buffer Size","level","Render Type","Double Buffer","Stereo","Red Colorbuffer Size","Green Colorbuffer Size","Blue Colorbuffer Size","Alpha Colorbuffer Size"
+                      "float","SRGB","Auxillary Buffer","Depth","Stencil","Accumbuffer Red","Accumbuffer Green","Accumbuffer Blue","Accumbuffer Alpha","msnum","msbufs","Caveats"]
 
 
 def FrameBuffer(button):
@@ -79,6 +81,7 @@ def FrameBuffer(button):
     FBGLXButton.set_active(True)
 
     for i, column_title in enumerate(FrameBufferList):
+        TreeFB.set_tooltip_column(i)
         FBrenderer = Gtk.CellRendererText(font=Const.FONT)
         column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
         column.add_attribute(FBrenderer, "background", 25)

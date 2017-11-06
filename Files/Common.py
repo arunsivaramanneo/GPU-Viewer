@@ -10,6 +10,7 @@ from gi.repository import Gdk, Gtk, GdkPixbuf
 class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
+        self.set_icon_from_file(Const.APP_LOGO_PNG)
         self.notebook = Gtk.Notebook()
         self.add(self.notebook)
 
