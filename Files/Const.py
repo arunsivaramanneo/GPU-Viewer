@@ -10,6 +10,20 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
+TWITTER_LOGO_PNG = "../Images/twitter-icon.png"
+
+DONATE_LOGO_PNG = "../Images/paypal_donate.png"
+
+GITHUB_LOGO_PNG = "../Images/github.png"
+
+FAQ_LOGO_PNG = "../Images/faq-icon.png"
+
+LICENSE_LOGO_PNG = "../Images/GPL3.png"
+
+BUG_LOGO_PNG = "../Images/Bug.svg"
+
+LOG_LOGO_PNG = "../Images/Changelog.png"
+
 ICON_WIDTH = 100
 
 ICON_HEIGHT = 50

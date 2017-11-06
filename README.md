@@ -7,7 +7,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ![gpu viewer v1 1_004](https://user-images.githubusercontent.com/30646692/31717602-469b1b2c-b42a-11e7-94c0-1de3f0ca40ea.png)
 
-![screenshot from 2017-11-06 12-02-23](https://user-images.githubusercontent.com/30646692/32428178-84a9af22-c2ea-11e7-8190-9c50f241ba14.png)
+![screenshot from 2017-11-06 14-14-48](https://user-images.githubusercontent.com/30646692/32432272-e99646a4-c2fc-11e7-91ae-3845f87a8214.png)
 
 * Please note that the above Images solely depends on the Theme being used on the system.
 
