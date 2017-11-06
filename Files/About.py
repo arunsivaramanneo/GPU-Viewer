@@ -1,5 +1,6 @@
 import gi
 import Const
+import os
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 from Common import setBackgroundColor, createScrollbar, setColumns
@@ -58,3 +59,8 @@ def about(tab3):
     Donatebutton = Gtk.LinkButton("https://www.paypal.me/ArunSivaraman","Donate")
     DonateFrame.add(Donatebutton)
     grid.attach_next_to(DonateFrame,Faqframe,Gtk.PositionType.RIGHT,2,1)
+
+    Reportframe = Gtk.Frame()
+    Reportbutton = Gtk.LinkButton("mailto:arunsivaramanneo@gmail.com?Subject=GPU Viewer - <Enter Bug Description here>","Report a Bug")
+    Reportframe.add(Reportbutton)
+    grid.attach_next_to(Reportframe,DonateFrame,Gtk.PositionType.RIGHT,2,1)

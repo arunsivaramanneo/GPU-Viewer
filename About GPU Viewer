@@ -3,12 +3,15 @@ Copyright (C) 2017 Arun Sivaraman <arunsivaramanneo@gmail.com>
 
 GPU Viewer is a free Software: This program comes with absolutely no WARRANTY. You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
 
+This project is developed as a basic front-end UI for the command-line outputs of glxinfo and vulkaninfo. The application helps in viewing/navigating the OpenGL and Vulkan Information in ease over command-line.
+Please do note that this project does not use any OpenGL and Vulkan programming lanuages. The entire application works as a wrapper on the glxinfo and vulkaninfo output.
+
 The latest source code of this program can be found at
 https://github.com/arunsivaramanneo/GPU-Viewer
 
 This program uses:
-
-    -  PyGObject with GTK3 for the graphical user interface
+    -  python 2.7 or higher
+    -  GTK3+ for the graphical user interface
     -  glxinfo and vulkaninfo for fetching the report
 
 Trademarks
