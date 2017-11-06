@@ -73,7 +73,7 @@ def createSubTab(Tab, notebook, label):
 # Setting Columns in TreeView
 def setColumns(Treeview, Title, MWIDTH,align):
     for i, column_title in enumerate(Title):
-        renderer = Gtk.CellRendererText(font=Const.FONT)
+        renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, renderer, text=i)
         column.set_sort_column_id(i)
         column.set_alignment(align)

@@ -27,7 +27,7 @@ def OpenGL(tab1):
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
 
-    os.system("glxinfo | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
+    os.system("glxinfo -s | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
     # os.system("glxinfo | grep string | grep glx >> OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
@@ -260,7 +260,7 @@ def OpenGL(tab1):
 
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
     Vendor_Combo.connect("changed", radcall2)
-    Vendor_renderer = Gtk.CellRendererText(font="Helvetica 10")
+    Vendor_renderer = Gtk.CellRendererText()
     Vendor_Combo.pack_start(Vendor_renderer, True)
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
    # Vendor_Combo.set_entry_text_column(0)

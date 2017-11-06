@@ -2,7 +2,7 @@ import gi
 import Const
 import os
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Pango
 from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl
 
 Title1 = ["About GPU Viewer v1.1"]
@@ -29,8 +29,9 @@ def about(tab3):
     wrapWidth = screen.get_width() * 0.50
 
     for i, column_title in enumerate(Title1):
-        renderer1 = Gtk.CellRendererText(font=Const.FONT)
+        renderer1 = Gtk.CellRendererText()
         renderer1.set_property("wrap-width", wrapWidth)
+        renderer1.set_property("wrap-mode",Pango.WrapMode(0))
         column = Gtk.TreeViewColumn(column_title, renderer1, text=i)
         column.add_attribute(renderer1, "background", 1)
         column.set_alignment(0.5)

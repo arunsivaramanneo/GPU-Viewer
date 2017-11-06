@@ -561,7 +561,7 @@ def Vulkan(tab2):
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
     TreeSparse.set_enable_search(True)
     for i, column_title in enumerate(SparseTitle):
-        Sparserenderer = Gtk.CellRendererText(font=Const.FONT)
+        Sparserenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
         column.set_sort_column_id(i)
         column.set_resizable(True)
@@ -584,7 +584,7 @@ def Vulkan(tab2):
     TreeFeatures = Gtk.TreeView(FeaturesTab_Store, expand=True)
     TreeFeatures.set_enable_search(True)
     for i, column_title in enumerate(FeaturesTitle):
-        Featurerenderer = Gtk.CellRendererText(font=Const.FONT)
+        Featurerenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Featurerenderer, text=i)
         column.set_sort_column_id(i)
         column.set_resizable(True)
@@ -633,7 +633,7 @@ def Vulkan(tab2):
     TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
     TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
-        Formatsrenderer = Gtk.CellRendererText(font=Const.FONT)
+        Formatsrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
         column.add_attribute(Formatsrenderer, "background", 4)
         column.set_sort_column_id(i)
@@ -658,7 +658,7 @@ def Vulkan(tab2):
     TreeMemory.set_enable_search(True)
 
     for i, column_title in enumerate(MemoryTitle):
-        Memoryrenderer = Gtk.CellRendererText(font=Const.FONT)
+        Memoryrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
         column.add_attribute(Memoryrenderer, "background", 7)
         column.set_sort_column_id(i)
@@ -678,7 +678,7 @@ def Vulkan(tab2):
     TreeHeap = Gtk.TreeView(HeapTab_Store, expand=True)
     TreeHeap.set_enable_search(True)
     for i, column_title in enumerate(HeapTitle):
-        Heaprenderer = Gtk.CellRendererText(font=Const.FONT)
+        Heaprenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Heaprenderer, text=i)
         column.set_resizable(True)
         column.set_reorderable(True)
@@ -702,7 +702,7 @@ def Vulkan(tab2):
     TreeQueue.set_enable_search(True)
 
     for i, column_title in enumerate(QueueTitle):
-        Queuerenderer = Gtk.CellRendererText(font=Const.FONT)
+        Queuerenderer = Gtk.CellRendererText()
         Queuerenderer.set_alignment(0.5,0.5)
         column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
         column.set_alignment(0.5)
@@ -752,7 +752,7 @@ def Vulkan(tab2):
                 SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
 
                 for i, column_title in enumerate(SurfaceTitle):
-                    Surfacerenderer = Gtk.CellRendererText(font=Const.FONT)
+                    Surfacerenderer = Gtk.CellRendererText()
                     column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
                     column.add_attribute(Surfacerenderer, "background", 2)
                     column.set_property("min-width", MWIDTH)
