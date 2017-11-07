@@ -265,9 +265,6 @@ def OpenGL(tab1):
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
    # Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
-    Vendor_Combo.set_add_tearoffs(True)
-
-
 
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
     TreeGLExt.set_enable_search(True)

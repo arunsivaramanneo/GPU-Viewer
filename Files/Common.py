@@ -113,3 +113,9 @@ def colorTrueFalse(filename, text):
                 value.append("false")
                 fgColor.append(Const.COLOR2)
     return fgColor, value
+
+def getLinkButtonImg(img,link,toolTip):
+    Logbutton = Gtk.LinkButton(link)
+    Logbutton.add(Gtk.Image.new_from_pixbuf(img))
+    Logbutton.set_tooltip_text(toolTip)
+    return Logbutton

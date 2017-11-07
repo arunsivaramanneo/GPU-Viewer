@@ -514,8 +514,7 @@ def Vulkan(tab2):
             if "type" in Surface[i]:
                 continue
             background_color = setBackgroundColor(i)
-            if "VkSurfaceCapabilities" in Surface[i] or "Modes" in Surface[i] or "Formats" in Surface[i] or "Extent" in \
-                    Surface[i] or "supported" in Surface[i] or "current" in Surface[i]:
+            if ":" in  Surface[i]:
                 background_color = Const.BGCOLOR3
             text = Surface[i].strip('\t')
             SurfaceTab_Store.append([text, SurfaceRHS[i].strip('\n'), background_color])

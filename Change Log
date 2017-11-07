@@ -1,9 +1,10 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        05/11 - Updated About Tab, User can view the Change Log, License, FAQ by clicking on the Button
+        07/11 - Updated About Tab, User can view the Change Log, License, FAQ by clicking on the Button
                   - Ability to report a bug through default email client by clicking on the report a bug linkbutton
                   - Added Application Icon, removed fixed font type, now defaults to System font Type
                   - Fixed Intel Skylake Memory Heap Issue.
                   - Better Handling of Word Wrapping in About GPU Viewer Section
+                  - Minor Bug fixes, Code refactoring
         01/11 - Better handling of Buttons in OpenGL Tab, Now the button will be disabled when the child window is still open
                   - Increased the Min. Window height size, now it occupies 85% of the Screen resolution Height
                   - Fixed Angle vendor to be displayed in the Extensions drop down
@@ -33,25 +34,25 @@ OCT-2017------------------------------------------------------------------------
                   - Formatted all the texts to have consistent alignment.
 
 SEP-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        29/9 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device        
-        27/9 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
-        26/9 - Added Surface Tab to Vulkan        
-        23/9 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
-             - Implemented sorting in Instance & layers Tab column headers
-        21/9 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
-        20/9 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
-             - Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan
-        19/9 - Implemented multi-GPU support,Code Optimizations and reduced no. of system calls in Vulkanviewer
-        16/9 - Added Show GLX Frame Buffer Configuration functionality to OpenGL Tab
-        14/9 - Fixed AMD GPU Memory Heap Issue.
-        10/9 - Added Device Sparse Properties Section in Device Tab of Vulkan Tab
-        08/9 - Updated OpenGL Limits window to use Treeview and updated Tab logo's
-        04/9 - Added About GPU Viewer Tab, Added Memory Heaps section in Vulkan Tab
-        03/9 - Added Instance and Layers Tab in Vulkan
+        29/09 - Fixed GLX FBconfig information being displayed in OpenGL Limits when OpenGL ES is not supported by device
+        27/09 - Added Surface Formats and Present Modes to the Surface Tab of Vulkan, Updated OpenGL Limits
+        26/09 - Added Surface Tab to Vulkan
+        23/09 - Added minImageTransferGranularity fields in Queues Tab of vulkan,Formats Text has been improved.
+                  - Implemented sorting in Instance & layers Tab column headers
+        21/09 - Code Optimization on vulkanviewer,removed hardcoded values for Memory Type flags.
+        20/09 - Added Change Log section in About GPU viewer Tab,Added Frames to all sections of Vulkan Tab
+                  - Implemented Sorting when user clicks on column header of Feature,Extension,Memory Tab in Vulkan
+        19/09 - Implemented multi-GPU support,Code Optimizations and reduced no. of system calls in Vulkanviewer
+        16/09 - Added Show GLX Frame Buffer Configuration functionality to OpenGL Tab
+        14/09 - Fixed AMD GPU Memory Heap Issue.
+        10/09 - Added Device Sparse Properties Section in Device Tab of Vulkan Tab
+        08/09 - Updated OpenGL Limits window to use Treeview and updated Tab logo's
+        04/09 - Added About GPU Viewer Tab, Added Memory Heaps section in Vulkan Tab
+        03/09 - Added Instance and Layers Tab in Vulkan
 AUG-2017----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        28/8 - Added Queue Tab in Vulkan, Minor UI fixes
-        25/8 - Added Formats Tab in Vulkan
-        23/8 - Added Scrollbars to all Sections
-        04/8 - Added Features,Limits and Extensions Tab in Vulkan
-        03/8 - Added Vulkan Tab
-        02/8 - v1.0 - First Point Release
+        28/08 - Added Queue Tab in Vulkan, Minor UI fixes
+        25/08 - Added Formats Tab in Vulkan
+        23/08 - Added Scrollbars to all Sections
+        04/08 - Added Features,Limits and Extensions Tab in Vulkan
+        03/08 - Added Vulkan Tab
+        02/08 - v1.0 - First Point Release

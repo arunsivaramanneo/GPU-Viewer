@@ -1,9 +1,10 @@
 import gi
 import Const
 import os
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
-from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl
+from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl, getLinkButtonImg
 
 Title1 = ["About GPU Viewer v1.1"]
 Title2 = ["Change Log"]
@@ -41,45 +42,31 @@ def about(tab3):
     frame1.add(scrollable_treelist1)
 
     Logimg = fetchImageFromUrl(Const.LOG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Logbutton = Gtk.LinkButton("https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/Change%20Log")
-    Logbutton.add(Gtk.Image.new_from_pixbuf(Logimg))
-    Logbutton.set_tooltip_text("View Change Log")
+    Logbutton = getLinkButtonImg(Logimg,Const.CHANGE_LOG_LINK,Const.TOOLTIP_CHANGE_LOG)
     grid.attach_next_to(Logbutton,frame1,Gtk.PositionType.BOTTOM,1,1)
 
     Licenseimg = fetchImageFromUrl(Const.LICENSE_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Licensebutton = Gtk.LinkButton("https://www.gnu.org/licenses/gpl-3.0-standalone.html")
-    Licensebutton.add(Gtk.Image.new_from_pixbuf(Licenseimg))
-    Licensebutton.set_tooltip_text("View License")
+    Licensebutton = getLinkButtonImg(Licenseimg,Const.LICENSE_HTML_LINK,Const.TOOLTIP_LICENSE)
     grid.attach_next_to(Licensebutton,Logbutton,Gtk.PositionType.RIGHT,1,1)
 
     Faqimg = fetchImageFromUrl(Const.FAQ_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Faqbutton = Gtk.LinkButton("https://github.com/arunsivaramanneo/GPU-Viewer/wiki/FAQ----GPU-Viewer")
-    Faqbutton.add(Gtk.Image.new_from_pixbuf(Faqimg))
-    Faqbutton.set_tooltip_text("View Frequently Asked Questions")
+    Faqbutton = getLinkButtonImg(Faqimg,Const.FAQ_LINK,Const.TOOLTIP_FAQ)
     grid.attach_next_to(Faqbutton,Licensebutton,Gtk.PositionType.RIGHT,1,1)
 
     Reportimg = fetchImageFromUrl(Const.BUG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Reportbutton = Gtk.LinkButton("mailto:arunsivaramanneo@gmail.com?Subject=GPU Viewer - <Enter Bug Description here>")
-    Reportbutton.add(Gtk.Image.new_from_pixbuf(Reportimg))
-    Reportbutton.set_tooltip_text("Click here to report a bug")
+    Reportbutton = getLinkButtonImg(Reportimg,Const.EMAIL_LINK,Const.TOOLTIP_BUG)
     grid.attach_next_to(Reportbutton,Faqbutton,Gtk.PositionType.RIGHT,1,1)
 
     Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
-    Donatebutton = Gtk.LinkButton("https://www.paypal.me/ArunSivaraman")
-    Donatebutton.set_image(Gtk.Image.new_from_pixbuf(Donateimg))
-    Donatebutton.set_tooltip_text("click here to Donate")
+    Donatebutton = getLinkButtonImg(Donateimg,Const.PAYPAL_LINK,Const.TOOLTIP_DONATE)
     grid.attach_next_to(Donatebutton,Reportbutton,Gtk.PositionType.RIGHT,1,1)
 
     Twitterimg = fetchImageFromUrl(Const.TWITTER_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-    Twitterbutton = Gtk.LinkButton("https://twitter.com/arunsivaraman")
-    Twitterbutton.set_image(Gtk.Image.new_from_pixbuf(Twitterimg))
-    Twitterbutton.set_tooltip_text("Follow me on Twitter")
+    Twitterbutton = getLinkButtonImg(Twitterimg,Const.TWITTER_LINK,Const.TOOLTIP_TWITTER)
     grid.attach_next_to(Twitterbutton, Donatebutton, Gtk.PositionType.RIGHT, 1, 1)
 
     Githubimg = fetchImageFromUrl(Const.GITHUB_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Githubbutton = Gtk.LinkButton("https://github.com/arunsivaramanneo/GPU-Viewer")
-    Githubbutton.set_image(Gtk.Image.new_from_pixbuf(Githubimg))
-    Githubbutton.set_tooltip_text("Arun Sivaraman's Github")
+    Githubbutton = getLinkButtonImg(Githubimg,Const.GITHUB_LINK,Const.TOOLTIP_GITHUB)
     grid.attach_next_to(Githubbutton,Twitterbutton,Gtk.PositionType.RIGHT,1,1)
 
 
