@@ -1,0 +1,17 @@
+#!/bin/bash
+sudo eopkg install vulkan
+sudo mkdir /usr/share/gpu-viewer
+sudo mv gpu-viewer.desktop /usr/share/applications/
+sudo mv Files /usr/share/gpu-viewer
+sudo mv Images /usr/share/gpu-viewer
+sudo mv About\ GPU\ Viewer /usr/share/gpu-viewer
+sudo mv GPUViewer /usr/share/gpu-viewer
+sudo mv Change\ Log /usr/share/gpu-viewer
+sudo mv LICENSE /usr/share/gpu-viewer
+sudo mv README.md /usr/share/gpu-viewer
+
+
+
+
+
+

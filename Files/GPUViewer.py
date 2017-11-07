@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import Const
 from Common import MyGtk, fetchImageFromUrl, setScreenSize
