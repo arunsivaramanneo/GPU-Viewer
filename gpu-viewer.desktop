@@ -4,4 +4,4 @@ Comment=A front-end to glxinfo and vulkaninfo
 Exec=/usr/share/gpu-viewer/GPUViewer
 Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png
 Type=Application
-Categories=GTK;GNOME;System;Utility
+Categories=GTK;GNOME;Utility

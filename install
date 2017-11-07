@@ -1,5 +1,6 @@
 #!/bin/bash
 sudo eopkg install vulkan
+sudo apt install vulkan-utils
 sudo mkdir /usr/share/gpu-viewer
 sudo mv gpu-viewer.desktop /usr/share/applications/
 sudo mv Files /usr/share/gpu-viewer
