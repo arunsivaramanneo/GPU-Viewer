@@ -2,14 +2,14 @@
 sudo eopkg install vulkan
 sudo apt install vulkan-utils
 sudo mkdir /usr/share/gpu-viewer
-sudo mv gpu-viewer.desktop /usr/share/applications/
-sudo mv Files /usr/share/gpu-viewer
-sudo mv Images /usr/share/gpu-viewer
-sudo mv About\ GPU\ Viewer /usr/share/gpu-viewer
-sudo mv GPUViewer /usr/share/gpu-viewer
-sudo mv Change\ Log /usr/share/gpu-viewer
-sudo mv LICENSE /usr/share/gpu-viewer
-sudo mv README.md /usr/share/gpu-viewer
+sudo cp gpu-viewer.desktop /usr/share/applications/
+sudo cp -rf Files /usr/share/gpu-viewer
+sudo cp -rf Images /usr/share/gpu-viewer
+sudo cp -rf About\ GPU\ Viewer /usr/share/gpu-viewer
+sudo cp -rf GPUViewer /usr/share/gpu-viewer
+sudo cp -rf Change\ Log /usr/share/gpu-viewer
+sudo cp -rf LICENSE /usr/share/gpu-viewer
+sudo cp -rf README.md /usr/share/gpu-viewer
 
 
 
