@@ -1,4 +1,4 @@
-ABOUT_US_PNG = "../Images/aboutus.png"
+ABOUT_US_PNG = "../Images/info_icon.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
 
