@@ -13,19 +13,21 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ## INSTALLATION STEPS
 
-1. Before Downloading the files please see the Known issues below
+1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
 3. Download the file and Extract to a folder
 4. Navigate to extracted folder, open terminal and enter ./install
-4. Once completed,Application can be accessed at menu->Accessories->GPU Viewer
-5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+5. Choose the theme between Adapta and Numix that you want to apply to the Application. If you install both the themes Adapta will be taken as default.
+If the user chooses not install both the themes, the application will take the current system theme. 
+5. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
+6. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
-6. Incase of issues launching the application please see the FAQ in Wiki section
+7. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
-1. Open menu->accessories->GPU Viewer right click and uninstall, click yes on the pop up
-2. Remove gpu-viewer directory in \usr\share\  (sudo rm \usr\share\gpu-viewer -r)
+1. Open menu->System/Administration/System tools->GPU Viewer right click and uninstall, click yes on the pop up
+2. Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove
 
 ## What's developed and available?
 
@@ -48,7 +50,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. Minor UI issues.
 2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
-3. The Application will render well under dark themes.
+3. The Application will not render well under dark themes, provided when the user does not select Adapta or Numix during installation
 
 ## DEVELOPMENT ENVIRONMENT
 
