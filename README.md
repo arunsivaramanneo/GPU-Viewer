@@ -48,6 +48,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. Minor UI issues.
 2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
+3. The Application will render well under dark themes.
 
 ## DEVELOPMENT ENVIRONMENT
 

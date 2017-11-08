@@ -1,7 +1,16 @@
 #!/bin/bash
-sudo eopkg install vulkan
-sudo apt install vulkan-utils
-sudo mkdir /usr/share/gpu-viewer
+echo installation starts...
+lsb_release -a
+file1="/usr/share/gpu-viewer"
+file2="/usr/share/themes/Numix"
+file3="/usr/share/vulkan"
+if [ -d "$file1" ]
+then
+	echo "gpu-viewer file already exist"
+else
+	sudo mkdir /usr/share/gpu-viewer
+fi
+echo "Installing files ...."
 sudo cp gpu-viewer.desktop /usr/share/applications/
 sudo cp -rf Files /usr/share/gpu-viewer
 sudo cp -rf Images /usr/share/gpu-viewer
@@ -10,9 +19,25 @@ sudo cp -rf GPUViewer /usr/share/gpu-viewer
 sudo cp -rf Change\ Log /usr/share/gpu-viewer
 sudo cp -rf LICENSE /usr/share/gpu-viewer
 sudo cp -rf README.md /usr/share/gpu-viewer
-
-
-
-
-
-
+echo "Installing files completed..."
+if [ ! -d "$file2" ]
+then
+	read -p "Do you want to install Numix(y/n):" value
+	echo $value
+	if [ $value == 'y' ]
+	then
+		tar -xvf Numix.tar.xz
+		sudo mv Numix /usr/share/themes
+	fi
+else
+	echo "Numix already Installed"
+fi
+if [ -d "$file3" ]
+then
+	echo "vulkan already installed"
+else
+	sudo eopkg install vulkan
+	sudo apt install vulkan-utils
+fi
+echo Installation complete...
+date
