@@ -592,6 +592,7 @@ def Vulkan(tab2):
             column.add_attribute(Featurerenderer, "foreground", 3)
         column.add_attribute(Featurerenderer, "background", 2)
         column.set_property("min-width", MWIDTH)
+        TreeFeatures.set_property("can-focus",False)
         TreeFeatures.append_column(column)
 
     FeatureScrollbar = createScrollbar(TreeFeatures)
@@ -642,6 +643,7 @@ def Vulkan(tab2):
         column.set_property("min-width", 100)
         if 1 <= i < 4:
             column.add_attribute(Formatsrenderer, "foreground", i + 4)
+        TreeFormats.set_property("can-focus",False)
         TreeFormats.append_column(column)
 
     FormatsScrollbar = createScrollbar(TreeFormats)
@@ -666,6 +668,7 @@ def Vulkan(tab2):
         if 2 <= i < 7:
             column.set_property("min-width", 100)
             column.add_attribute(Memoryrenderer, "foreground", i + 6)
+        TreeMemory.set_property("can-focus",False)
         TreeMemory.append_column(column)
 
     MemoryScrollbar = createScrollbar(TreeMemory)
@@ -687,6 +690,7 @@ def Vulkan(tab2):
         column.add_attribute(Heaprenderer, "background", 3)
         if i == 2:
             column.add_attribute(Heaprenderer, "foreground", 4)
+        TreeHeap.set_property("can-focus",False)
         TreeHeap.append_column(column)
 
     HeapScrollbar = createScrollbar(TreeHeap)
@@ -711,6 +715,7 @@ def Vulkan(tab2):
         column.set_reorderable(True)
         if 2 < i < 7:
             column.add_attribute(Queuerenderer, "foreground", i + 8)
+        TreeQueue.set_property("can-focus",False)
         TreeQueue.append_column(column)
 
     QueueScrollbar = createScrollbar(TreeQueue)
@@ -755,6 +760,7 @@ def Vulkan(tab2):
                     column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
                     column.add_attribute(Surfacerenderer, "background", 2)
                     column.set_property("min-width", MWIDTH)
+                    TreeSurface.set_property("can-focus",False)
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)

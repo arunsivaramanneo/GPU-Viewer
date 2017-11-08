@@ -1,6 +1,7 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		08/11 - Added two default themes, Adapta and Numix, user can choose between the two, if user installs both Adapta is taken as default
 			  - Users can install the application by running the install file. Post installation users can access the application from menu->System->GPU Viewer
+			  - removed the annoying focus when moving to other tabs.
 		07/11 - Updated About Tab, User can view the Change Log, License, FAQ by clicking on the Button
               - Ability to report a bug through default email client by clicking on the report a bug linkbutton
               - Added Application Icon, removed fixed font type, now defaults to System font Type

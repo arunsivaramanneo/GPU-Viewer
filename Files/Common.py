@@ -79,6 +79,7 @@ def setColumns(Treeview, Title, MWIDTH,align):
         column.set_alignment(align)
         column.add_attribute(renderer, "background", len(Title))
         column.set_property("min-width", MWIDTH)
+        Treeview.set_property("can-focus",False)
         Treeview.append_column(column)
 
 

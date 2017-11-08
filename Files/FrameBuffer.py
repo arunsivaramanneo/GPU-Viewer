@@ -89,6 +89,7 @@ def FrameBuffer(button):
             FBrenderer.set_alignment(0.5, 0.5)
             column.set_alignment(0.5)
         column.set_property("min-width", 40)
+        TreeFB.set_property("can-focus",False)
         TreeFB.append_column(column)
 
     FBScrollbar = createScrollbar(TreeFB)

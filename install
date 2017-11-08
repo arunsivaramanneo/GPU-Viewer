@@ -13,22 +13,27 @@ else
 fi
 echo "Installing files ...."
 sudo cp gpu-viewer.desktop /usr/share/applications/
+echo "Application shortcut Successfully Installed...."
 sudo cp -rf Files /usr/share/gpu-viewer
+echo "Application Files Successfully Installed...."
 sudo cp -rf Images /usr/share/gpu-viewer
+echo "Application Icons Successfully Installed...."
 sudo cp -rf About\ GPU\ Viewer /usr/share/gpu-viewer
 sudo cp -rf GPUViewer /usr/share/gpu-viewer
 sudo cp -rf Change\ Log /usr/share/gpu-viewer
 sudo cp -rf LICENSE /usr/share/gpu-viewer
 sudo cp -rf README.md /usr/share/gpu-viewer
+echo "Supporting documents Successfully Installed...."
 echo "Installing files completed..."
 if [ ! -d "$file2" ]
 then
 	read -p "Do you want to install Numix(y/n):" value1
 	if [ $value1 == 'y' ]
 	then
+		echo "Installing Numix Theme...."
 		tar -xvf Numix.tar.xz
 		sudo mv Numix /usr/share/themes
-        echo "Numix Successfully Installed"
+        echo "Numix Successfully Installed...."
 	fi
 else
 	echo "Numix already Installed"
@@ -38,9 +43,10 @@ then
 	read -p "Do you want to install Adapta(y/n):" value2
 	if [ $value2 == 'y' ]
 	then
+		echo "Installing Adapta Theme...."
 		tar -xvf Adapta.tar.xz
 		sudo mv Adapta /usr/share/themes
-        echo "Adapta Successfully Installed"
+        echo "Adapta Successfully Installed...."
 	fi
 else
 	echo "Adapta already Installed"
@@ -49,8 +55,10 @@ if [ -d "$file3" ]
 then
 	echo "vulkan already installed"
 else
+	echo "Installing Vulkan...."
 	sudo eopkg install vulkan
 	sudo apt install vulkan-utils
+	echo "vulkan successfully Installed..."
 fi
 echo Installation complete...
 date

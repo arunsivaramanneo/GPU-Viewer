@@ -36,6 +36,7 @@ def about(tab3):
         column = Gtk.TreeViewColumn(column_title, renderer1, text=i)
         column.add_attribute(renderer1, "background", 1)
         column.set_alignment(0.5)
+        TreeAbout.set_property("can-focus",False)
         TreeAbout.append_column(column)
 
     scrollable_treelist1 = createScrollbar(TreeAbout)
