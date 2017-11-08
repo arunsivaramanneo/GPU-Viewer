@@ -3,7 +3,8 @@ echo installation starts...
 lsb_release -a
 file1="/usr/share/gpu-viewer"
 file2="/usr/share/themes/Numix"
-file3="/usr/share/vulkan"
+file3="/usr/share/themes/Adapta"
+file4="/usr/share/vulkan"
 if [ -d "$file1" ]
 then
 	echo "gpu-viewer file already exist"
@@ -22,15 +23,27 @@ sudo cp -rf README.md /usr/share/gpu-viewer
 echo "Installing files completed..."
 if [ ! -d "$file2" ]
 then
-	read -p "Do you want to install Numix(y/n):" value
-	echo $value
-	if [ $value == 'y' ]
+	read -p "Do you want to install Numix(y/n):" value1
+	if [ $value1 == 'y' ]
 	then
 		tar -xvf Numix.tar.xz
 		sudo mv Numix /usr/share/themes
+        echo "Numix Successfully Installed"
 	fi
 else
 	echo "Numix already Installed"
+fi
+if [ ! -d "$file3" ]
+then
+	read -p "Do you want to install Adapta(y/n):" value2
+	if [ $value2 == 'y' ]
+	then
+		tar -xvf Adapta.tar.xz
+		sudo mv Adapta /usr/share/themes
+        echo "Adapta Successfully Installed"
+	fi
+else
+	echo "Adapta already Installed"
 fi
 if [ -d "$file3" ]
 then

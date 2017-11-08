@@ -1,3 +1,20 @@
 #!/bin/bash
+file2="/usr/share/themes/Numix"
+file3="/usr/share/themes/Adapta"
 cd /usr/share/gpu-viewer/Files/
-GTK_THEME=Numix python GPUViewer.py
+if [ -d "$file2" ] && [ -d "$file3" ]
+then
+    GTK_THEME=Adapta python GPUViewer.py
+    break
+elif [ -d "$file3" ]
+then
+    GTK_THEME=Adapta python GPUViewer.py
+    break
+elif [ -d "$file2" ]
+then
+    GTK_THEME=Numix python GPUViewer.py
+    break
+else
+    python GPUViewer.py
+fi
+
