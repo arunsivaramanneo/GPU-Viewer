@@ -9,23 +9,29 @@ This project aims to capture all the required/important details of glxinfo and v
 
 ![screenshot from 2017-11-07 18-44-13](https://user-images.githubusercontent.com/30646692/32495519-f4c7fc58-c3eb-11e7-8338-23869a7080e1.png)
 
-* Please note that the above Images solely depends on the Theme being used on the system.
+* Please note that the above images solely depends on the Theme being used on the system.
 
-## INSTALLATION STEP
+## INSTALLATION STEPS
 
 1. Before Downloading the files please see the Known issues below
 2. Ensure python is installed
 3. Download the file and Extract to a folder
-4. Double click GPUViewer to launch the Application or You can go to Files and then open terminal and run/type python GPUViewer.py
+4. Navigate to extracted folder, open terminal and enter ./install
+4. Once completed,Application can be accessed at menu->Accessories->GPU Viewer
 5. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
-
+The installer should be able to take care of this dependency in Debian based distro and Solus.
 6. Incase of issues launching the application please see the FAQ in Wiki section
+
+## UNINSTALL STEPS
+
+1. Open menu->accessories->GPU Viewer right click and uninstall, click yes on the pop up
+2. Remove gpu-viewer directory in \usr\share\  (sudo rm \usr\share\gpu-viewer -r)
 
 ## What's developed and available?
 
 1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
-3. About Tab - About GPU Viewer Application, Change Log
+3. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
 
 
 ## UNDERDEVELOPMENT
@@ -41,7 +47,7 @@ This project aims to capture all the required/important details of glxinfo and v
 ## KNOWN ISSUES
 
 1. Minor UI issues.
-2. Not tested on hardware other than Intel and Nvidia
+2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
 
 ## DEVELOPMENT ENVIRONMENT
 
