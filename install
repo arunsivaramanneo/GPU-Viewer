@@ -25,6 +25,14 @@ sudo cp -rf LICENSE /usr/share/gpu-viewer
 sudo cp -rf README.md /usr/share/gpu-viewer
 echo "Supporting documents Successfully Installed...."
 echo "Installing files completed..."
+read -p "Do you want to add a shortcut to desktop(y/n):" choice
+if [ $choice == 'y' ]
+then
+    user=$(whoami)
+    echo $user
+    sudo cp gpu-viewer.desktop /home/$user/Desktop/
+    echo "Desktop Shortcut successfully created ..."
+fi
 if [ ! -d "$file2" ]
 then
 	read -p "Do you want to install Numix(y/n):" value1
