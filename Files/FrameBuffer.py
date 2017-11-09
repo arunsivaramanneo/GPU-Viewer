@@ -81,7 +81,7 @@ def FrameBuffer(button):
     FBGLXButton.set_active(True)
 
     for i, column_title in enumerate(FrameBufferList):
-        TreeFB.set_tooltip_column(i)
+
         FBrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
         column.add_attribute(FBrenderer, "background", 25)

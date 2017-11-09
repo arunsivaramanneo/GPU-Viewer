@@ -33,7 +33,7 @@ then
 	if [ $choice == 'y' ]
 	then
     	sudo cp gpu-viewer.desktop /home/$user/Desktop/
-		sudo chown -R $user : /home/$user/Desktop/gpu-viewer.desktop
+		sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
     	echo "Desktop Shortcut successfully created ..."
 	fi
 fi
