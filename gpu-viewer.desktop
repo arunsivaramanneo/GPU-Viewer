@@ -9,4 +9,3 @@ Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png
 Type=Application
 Categories=GTK;GNOME;System
 Terminal=False
-NoDisplay=

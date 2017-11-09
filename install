@@ -25,13 +25,17 @@ sudo cp -rf LICENSE /usr/share/gpu-viewer
 sudo cp -rf README.md /usr/share/gpu-viewer
 echo "Supporting documents Successfully Installed...."
 echo "Installing files completed..."
-read -p "Do you want to add a shortcut to desktop(y/n):" choice
-if [ $choice == 'y' ]
+user=$(whoami)
+file5="/home/$user/Desktop/gpu-viewer.desktop"
+if [ ! -f "$file5" ]
 then
-    user=$(whoami)
-    echo $user
-    sudo cp gpu-viewer.desktop /home/$user/Desktop/
-    echo "Desktop Shortcut successfully created ..."
+	read -p "Do you want to add a shortcut to desktop(y/n):" choice
+	if [ $choice == 'y' ]
+	then
+    	sudo cp gpu-viewer.desktop /home/$user/Desktop/
+		sudo chown -R $user : /home/$user/Desktop/gpu-viewer.desktop
+    	echo "Desktop Shortcut successfully created ..."
+	fi
 fi
 if [ ! -d "$file2" ]
 then
