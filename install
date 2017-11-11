@@ -1,76 +1,108 @@
 #!/bin/bash
 echo installation starts...
+echo " "
 lsb_release -a
+echo ""
 file1="/usr/share/gpu-viewer"
 file2="/usr/share/themes/Numix"
 file3="/usr/share/themes/Adapta"
-file4="/usr/share/vulkan"
-if [ -d "$file1" ]
+file4="/usr/bin/vulkaninfo"
+echo "************************GPU Viewer 1.1 - copyright (c) 2017 - Arun Sivaraman****************************"
+if [ ! -d "$file1" ]
 then
-	echo "gpu-viewer file already exist"
-else
+    
 	sudo mkdir /usr/share/gpu-viewer
 fi
-echo "Installing files ...."
-sudo cp gpu-viewer.desktop /usr/share/applications/
-echo "Application shortcut Successfully Installed...."
-sudo cp -rf Files /usr/share/gpu-viewer
+echo " "
+echo "Installing Application files ...."
+echo " "
+sudo cp -vrf Files /usr/share/gpu-viewer
+echo " "
 echo "Application Files Successfully Installed...."
-sudo cp -rf Images /usr/share/gpu-viewer
+echo " "
+echo "Installing Application Icons ...."
+echo " "
+sudo cp -vrf Images /usr/share/gpu-viewer
+echo " "
 echo "Application Icons Successfully Installed...."
-sudo cp -rf About\ GPU\ Viewer /usr/share/gpu-viewer
-sudo cp -rf GPUViewer /usr/share/gpu-viewer
-sudo cp -rf Change\ Log /usr/share/gpu-viewer
-sudo cp -rf LICENSE /usr/share/gpu-viewer
-sudo cp -rf README.md /usr/share/gpu-viewer
+echo " "
+echo "Installing Supported Documents...."
+echo " "
+sudo cp -vrf About\ GPU\ Viewer /usr/share/gpu-viewer
+sudo cp -vrf GPUViewer /usr/share/gpu-viewer
+sudo cp -vrf Change\ Log /usr/share/gpu-viewer
+sudo cp -vrf LICENSE /usr/share/gpu-viewer
+sudo cp -vrf README.md /usr/share/gpu-viewer
+echo " "
 echo "Supporting documents Successfully Installed...."
+echo " "
 echo "Installing files completed..."
+echo " "
+sudo cp -v gpu-viewer.desktop /usr/share/applications/
+echo " "
+echo "Application successfully added to the menu"
+echo " "
 user=$(whoami)
 file5="/home/$user/Desktop/gpu-viewer.desktop"
 if [ ! -f "$file5" ]
 then
 	read -p "Do you want to add a shortcut to desktop(y/n):" choice
+    echo " "
 	if [ $choice == 'y' ]
 	then
     	sudo cp gpu-viewer.desktop /home/$user/Desktop/
 		sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
     	echo "Desktop Shortcut successfully created ..."
+        echo " "
 	fi
 fi
 if [ ! -d "$file2" ]
 then
 	read -p "Do you want to install Numix(y/n):" value1
+    echo " "
 	if [ $value1 == 'y' ]
 	then
 		echo "Installing Numix Theme...."
+        echo " "
 		tar -xvf Numix.tar.xz
 		sudo mv Numix /usr/share/themes
         echo "Numix Successfully Installed...."
+        echo " "
 	fi
 else
 	echo "Numix already Installed"
+    echo " "
 fi
 if [ ! -d "$file3" ]
 then
 	read -p "Do you want to install Adapta(y/n):" value2
+    echo " "
 	if [ $value2 == 'y' ]
 	then
 		echo "Installing Adapta Theme...."
+        echo " "
 		tar -xvf Adapta.tar.xz
 		sudo mv Adapta /usr/share/themes
         echo "Adapta Successfully Installed...."
+        echo " "
 	fi
 else
 	echo "Adapta already Installed"
+    echo " "
 fi
-if [ -d "$file3" ]
+if [ -f "$file4" ]
 then
-	echo "vulkan already installed"
+	echo "vulkan-utils already installed"
+    echo " "
 else
 	echo "Installing Vulkan...."
+    echo " "
 	sudo eopkg install vulkan
 	sudo apt install vulkan-utils
-	echo "vulkan successfully Installed..."
+	echo "vulkan-utils successfully Installed..."
+    echo " "
 fi
 echo Installation complete...
+echo "All done !!! Enjoy the Application"
+echo "Consider supporting this application by giving a star on my Github repository (https://github.com/arunsivaramanneo/GPU-Viewer) or by donating (https://www.paypal.me/ArunSivaraman)"
 date
