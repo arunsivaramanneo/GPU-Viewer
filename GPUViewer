@@ -17,4 +17,3 @@ then
 else
     python GPUViewer.py
 fi
-

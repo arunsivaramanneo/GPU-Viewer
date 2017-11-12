@@ -2,11 +2,14 @@
 echo installation starts...
 echo " "
 lsb_release -a
+user=$(whoami)
 echo ""
 file1="/usr/share/gpu-viewer"
 file2="/usr/share/themes/Numix"
 file3="/usr/share/themes/Adapta"
 file4="/usr/bin/vulkaninfo"
+file5="/home/$user/Desktop/gpu-viewer.desktop"
+file6="/usr/bin/gpu-viewer"
 echo "************************GPU Viewer 1.1 - copyright (c) 2017 - Arun Sivaraman****************************"
 if [ ! -d "$file1" ]
 then
@@ -38,12 +41,15 @@ echo "Supporting documents Successfully Installed...."
 echo " "
 echo "Installing files completed..."
 echo " "
-sudo cp -v gpu-viewer.desktop /usr/share/applications/
+sudo cp gpu-viewer.desktop /usr/share/applications/
 echo " "
+if [ ! -f "$file6" ]
+then
+    sudo ln -s /usr/share/gpu-viewer/GPUViewer /usr/bin/gpu-viewer
+    echo "Application can be accessed from Terminal, enter gpu-viewer ENTER "
+fi
 echo "Application successfully added to the menu"
 echo " "
-user=$(whoami)
-file5="/home/$user/Desktop/gpu-viewer.desktop"
 if [ ! -f "$file5" ]
 then
 	read -p "Do you want to add a shortcut to desktop(y/n):" choice
