@@ -11,23 +11,27 @@ This project aims to capture all the required/important details of glxinfo and v
 
 * Please note that the above images solely depends on the Theme being used on the system.
 
-## INSTALLATION STEPS
+## INSTALLATION STEPS 
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. Download the file and Extract to a folder
-4. Navigate to extracted folder, open terminal and enter ./install
-5. Choose the theme between Adapta and Numix that you want to apply to the Application. If you install both the themes Adapta will be taken as default.
+3. ####Debian based distro#### users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.1.deb
+4. ####Arch based distro#### users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/
+5. For others please follow steps 4 to 10
+6. Download the file and Extract to a folder
+7. Navigate to extracted folder, open terminal and enter ./install
+8. Choose the theme between Adapta and Numix that you want to apply to the Application. If you install both the themes Adapta will be taken as default.
 If the user chooses not install both the themes, the application will take the current system theme. 
-5. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-6. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+9. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
+10. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
-7. Incase of issues launching the application please see the FAQ in Wiki section
+11. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
-1. Open menu->System/Administration/System tools->GPU Viewer right click and uninstall, click yes on the pop up
-2. Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove
+1. Debian users should be able to uninstall in the default way. 
+2. For others, Open menu->System/Administration/System tools->GPU Viewer right click and uninstall, click yes on the pop up
+3. Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove
 
 ## What's developed and available?
 

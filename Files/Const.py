@@ -26,6 +26,8 @@ LOG_LOGO_PNG = "../Images/Changelog.png"
 
 APP_LOGO_PNG = "../Images/GPU_Viewer.png"
 
+CONTACT_LOGO_PNG = "../Images/Contact.png"
+
 TOOLTIP_LICENSE = "View License"
 
 TOOLTIP_CHANGE_LOG = "View Change Log"
@@ -40,7 +42,9 @@ FAQ_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer/wiki/FAQ----GPU-Viewe
 
 TOOLTIP_BUG = "Click here to report a bug"
 
-EMAIL_LINK = "mailto:arunsivaramanneo@gmail.com?Subject=GPU Viewer - <Enter Bug Description here>"
+ISSUE_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer/issues"
+
+EMAIL_LINK = "mailto:arunsivaramanneo@gmail.com?Subject=GPU Viewer - <Enter Description here>"
 
 TOOLTIP_DONATE = "click here to Donate"
 
@@ -53,6 +57,8 @@ TWITTER_LINK = "https://twitter.com/arunsivaraman"
 TOOLTIP_GITHUB = "Arun Sivaraman's Github"
 
 GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
+
+TOOLTIP_CONTACT = "Contact us"
 
 ICON_WIDTH = 100
 

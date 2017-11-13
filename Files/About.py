@@ -55,7 +55,7 @@ def about(tab3):
     grid.attach_next_to(Faqbutton,Licensebutton,Gtk.PositionType.RIGHT,1,1)
 
     Reportimg = fetchImageFromUrl(Const.BUG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
-    Reportbutton = getLinkButtonImg(Reportimg,Const.EMAIL_LINK,Const.TOOLTIP_BUG)
+    Reportbutton = getLinkButtonImg(Reportimg,Const.ISSUE_LINK,Const.TOOLTIP_BUG)
     grid.attach_next_to(Reportbutton,Faqbutton,Gtk.PositionType.RIGHT,1,1)
 
     Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
@@ -70,4 +70,6 @@ def about(tab3):
     Githubbutton = getLinkButtonImg(Githubimg,Const.GITHUB_LINK,Const.TOOLTIP_GITHUB)
     grid.attach_next_to(Githubbutton,Twitterbutton,Gtk.PositionType.RIGHT,1,1)
 
-
+    Contactimg = fetchImageFromUrl(Const.CONTACT_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Contactbutton = getLinkButtonImg(Contactimg,Const.EMAIL_LINK,Const.TOOLTIP_CONTACT)
+    grid.attach_next_to(Contactbutton,Githubbutton,Gtk.PositionType.RIGHT,1,1)

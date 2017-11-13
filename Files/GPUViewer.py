@@ -36,6 +36,7 @@ def isVulkanSupported():
 
 
 def quit(instance, value):
+    os.system("rm *.pyc")
     instance.quit()
 
 
