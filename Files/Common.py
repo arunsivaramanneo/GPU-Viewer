@@ -120,3 +120,4 @@ def getLinkButtonImg(img,link,toolTip):
     Logbutton.add(Gtk.Image.new_from_pixbuf(img))
     Logbutton.set_tooltip_text(toolTip)
     return Logbutton
+

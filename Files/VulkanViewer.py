@@ -180,7 +180,7 @@ def Vulkan(tab2):
                 ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
                 i = i + 1
 
-    def Format(GPUname):
+    def Formats(GPUname):
 
         for i in range(len(list)):
             if GPUname == i:
@@ -209,24 +209,51 @@ def Vulkan(tab2):
         Bufferfg, Buffer = colorTrueFalse("/tmp/VKDFORMATSBuffer.txt", "VK")
 
         count = len(linear)
+        trueFormats = []
+        comboboxValue = []
         # counting the number of formats supported
         Formats = 0
         for i in range(count):
             if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
                 Formats = Formats + 1
-        FormatsTab_Store.clear()
-        TreeFormats.set_model(FormatsTab_Store)
+                trueFormats.append(True)
+            else:
+                trueFormats.append(False)
+
+        label = "Formats (%d)"%Formats
+        notebook.set_tab_label(FormatsTab, Gtk.Label(label))
+
+        Format = []
         with open("/tmp/VKDFORMATS.txt", "r") as file1:
             file1.seek(0, 0)
-            label = "Formats (%d)" % Formats
-            notebook.set_tab_label(FormatsTab, Gtk.Label(label))
             i = 0
             for line in file1:
-                background_color = setBackgroundColor(i)
-                FormatsTab_Store.append(
-                    [line.strip('\n'), linear[i].strip('\n'), optimal[i].strip('\n'), Buffer[i].strip('\n'),
-                     background_color, linearfg[i], optimalfg[i], Bufferfg[i]])
-                i = i + 1
+                Format.append(line.strip('\n'))
+
+        Format.append(" ")
+
+        FormatsTab_Store.clear()
+        TreeFormats.set_model(FormatsTab_Store)
+        for i in range(len(Format) - 1):
+            background_color = setBackgroundColor(i)
+            iter = FormatsTab_Store.append(None,
+                                           [Format[i], linear[i].strip('\n'), optimal[i].strip('\n'), Buffer[i].strip('\n'),background_color,linearfg[i],optimalfg[i],Bufferfg[i]])
+            j = i
+            if trueFormats[i] == True:
+                os.system("cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' > /tmp/Tiling.txt"%(GPUname,Format[j],Format[j+1]))
+                with open("/tmp/Tiling.txt","r") as file1:
+                    k = 0
+                    value = 0
+                    for line in file1:
+                        background_color = setBackgroundColor(k)
+                        if "linear" in line:
+                            value = value + 1
+                        if value <= 1:
+                            if ":" in line:
+                                background_color = "#bbb"
+                            text = line.strip('\t')
+                            FormatsTab_Store.append(iter,[text.strip('\n')," "," "," ",background_color,"#fff","#fff","#fff"])
+                            k += 1
 
     def MemoryTypes(GPUname):
 
@@ -527,7 +554,8 @@ def Vulkan(tab2):
                 Features(text)
                 Limits(text)
                 Extensions(text)
-                Format(text)
+                #Formats(text,TreeFormats,FormatsTab_Store,list)
+                Formats(text)
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
@@ -629,19 +657,18 @@ def Vulkan(tab2):
     FormatsTab = Gtk.VBox(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
 
-    FormatsTab_Store = Gtk.ListStore(str, str, str, str, str, str, str, str)
+    FormatsTab_Store = Gtk.TreeStore(str, str, str, str, str, str, str, str)
     TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
     TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
         column.add_attribute(Formatsrenderer, "background", 4)
-        column.set_sort_column_id(i)
         column.set_resizable(True)
         column.set_reorderable(True)
         column.set_property("min-width", MWIDTH)
         column.set_property("min-width", 100)
-        if 1 <= i < 4:
+        if 1 <= i < 5:
             column.add_attribute(Formatsrenderer, "foreground", i + 4)
         TreeFormats.set_property("can-focus",False)
         TreeFormats.append_column(column)
