@@ -251,6 +251,7 @@ def Vulkan(tab2):
                         if value <= 1:
                             if ":" in line:
                                 background_color = "#bbb"
+                                k = 1
                             text = line.strip('\t')
                             FormatsTab_Store.append(iter,[text.strip('\n')," "," "," ",background_color,"#fff","#fff","#fff"])
                             k += 1
@@ -534,17 +535,19 @@ def Vulkan(tab2):
         Surface = [i.strip('\n ') for i in Surface]
         SurfaceTab_Store.clear()
         TreeSurface.set_model(SurfaceTab_Store)
-
+        k = 0
         for i in range(len(Surface)):
             if "====" in Surface[i]:
                 continue
             if "type" in Surface[i]:
                 continue
-            background_color = setBackgroundColor(i)
+            background_color = setBackgroundColor(k)
             if ":" in  Surface[i]:
                 background_color = Const.BGCOLOR3
+                k = 1
             text = Surface[i].strip('\t')
             SurfaceTab_Store.append([text, SurfaceRHS[i].strip('\n'), background_color])
+            k = k + 1
 
     def radcall(combo):
         text = combo.get_active()
