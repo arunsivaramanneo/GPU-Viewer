@@ -15,7 +15,7 @@ This project aims to capture all the required/important details of glxinfo and v
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.1.deb
+3. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.1b.deb
 4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/
 5. For others please follow steps 4 to 10
 6. Download the file and Extract to a folder

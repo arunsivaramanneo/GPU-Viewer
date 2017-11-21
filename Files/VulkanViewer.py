@@ -571,7 +571,6 @@ def Vulkan(tab2):
                 Features(text)
                 Limits(text)
                 Extensions(text)
-                #Formats(text,TreeFormats,FormatsTab_Store,list)
                 Formats(text)
                 MemoryTypes(text)
                 Queues(text)

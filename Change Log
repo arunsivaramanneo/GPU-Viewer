@@ -1,4 +1,6 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	21/11 - Updated Format Tab, Now the user can further filter linear, optimal and Buffer flags
+	      - Updated Surface Tab, now the user can collapse VkSurfaceCapabilities* , Formats, Present Modes.
         14/11 - Updated Format Tab, Now user can see all the linear, Optimal and Buffer flags (if available) by expanding the Respective rows
         08/11 - Added two default themes, Adapta and Numix, user can choose between the two, if user installs both Adapta is taken as default
               - Users can install the application by running the install file. Post installation users can access the application from menu->System->GPU Viewer
