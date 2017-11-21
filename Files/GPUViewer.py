@@ -6,6 +6,7 @@ from Common import MyGtk, fetchImageFromUrl, setScreenSize
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
+from thread import start_new_thread
 
 
 def main():

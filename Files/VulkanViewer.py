@@ -243,6 +243,7 @@ def Vulkan(tab2):
                 os.system("cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' > /tmp/Tiling.txt"%(GPUname,Format[j],Format[j+1]))
                 with open("/tmp/Tiling.txt","r") as file1:
                     k = 0
+                    z = 0
                     value = 0
                     for line in file1:
                         background_color = setBackgroundColor(k)
@@ -250,10 +251,14 @@ def Vulkan(tab2):
                             value = value + 1
                         if value <= 1:
                             if ":" in line:
-                                background_color = "#bbb"
+                                background_color = setBackgroundColor(z)
+                                text = line.strip('\t')
+                                iter2 = FormatsTab_Store.append(iter,[text.strip('\n')," "," "," ",background_color,"#fff","#fff","#fff"])
                                 k = 1
-                            text = line.strip('\t')
-                            FormatsTab_Store.append(iter,[text.strip('\n')," "," "," ",background_color,"#fff","#fff","#fff"])
+                                z += 1
+                            else:
+                                text = line.strip('\t')
+                                FormatsTab_Store.append(iter2,[text.strip('\n')," "," "," ",background_color,"#fff","#fff","#fff"])
                             k += 1
 
     def MemoryTypes(GPUname):
@@ -537,16 +542,25 @@ def Vulkan(tab2):
         TreeSurface.set_model(SurfaceTab_Store)
         k = 0
         for i in range(len(Surface)):
+            TreeSurface.expand_all()
             if "====" in Surface[i]:
                 continue
             if "type" in Surface[i]:
                 continue
             background_color = setBackgroundColor(k)
-            if ":" in  Surface[i]:
-                background_color = Const.BGCOLOR3
+
+            if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i]:
+                background_color = setBackgroundColor(i)
+                text = Surface[i].strip('\t')
                 k = 1
-            text = Surface[i].strip('\t')
-            SurfaceTab_Store.append([text, SurfaceRHS[i].strip('\n'), background_color])
+                iter1 = SurfaceTab_Store.append(None,[text, SurfaceRHS[i].strip('\n'), background_color])
+
+            else:
+                if ":" in Surface[i]:
+                    background_color = Const.BGCOLOR3
+                    k = 1
+                text = Surface[i].strip('\t')
+                SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
             k = k + 1
 
     def radcall(combo):
@@ -777,7 +791,7 @@ def Vulkan(tab2):
     LayerGrid.add(LayerScrollbar)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
-    SurfaceTab_Store = Gtk.ListStore(str, str, str)
+    SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         for line in file1:

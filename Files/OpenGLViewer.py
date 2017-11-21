@@ -62,7 +62,7 @@ def OpenGL(tab1):
         LimitsWin.set_border_width(20)
         LimitsFrame = Gtk.Frame()
         LimitsWin.add(LimitsFrame)
-        Limits_Store = Gtk.ListStore(str, str, str)
+        Limits_Store = Gtk.TreeStore(str, str, str)
         TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
         TreeLimits.set_enable_search(True)
 
@@ -84,7 +84,7 @@ def OpenGL(tab1):
         with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
             for line in file1:
                 background_color = setBackgroundColor(i)
-                Limits_Store.append([line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                iter = Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
