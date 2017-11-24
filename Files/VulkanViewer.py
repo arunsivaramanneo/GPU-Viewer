@@ -1,11 +1,12 @@
 import gi
 import os
 import Const
+import threading
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse
+    colorTrueFalse,fetchImageFromUrl
 
 MWIDTH = 300
 
@@ -554,7 +555,6 @@ def Vulkan(tab2):
                 text = Surface[i].strip('\t')
                 k = 1
                 iter1 = SurfaceTab_Store.append(None,[text, SurfaceRHS[i].strip('\n'), background_color])
-
             else:
                 if ":" in Surface[i]:
                     background_color = Const.BGCOLOR3
@@ -584,6 +584,8 @@ def Vulkan(tab2):
     grid.add(DevicesFrame)
 
     notebook = Gtk.Notebook()
+    notebook.set_property("scrollable",True)
+    notebook.set_property("enable-popup",True)
     grid.attach(notebook, 0, 2, 1, 1)
     # ----------------Creating the Device Info Tab ------------
 
@@ -833,11 +835,15 @@ def Vulkan(tab2):
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)
     gpu_combo.connect("changed", radcall)
     renderer_text = Gtk.CellRendererText()
+    gpu_combo.set_property("has-frame",False)
     gpu_combo.pack_start(renderer_text, True)
     gpu_combo.add_attribute(renderer_text, "text", 0)
     gpu_combo.set_entry_text_column(0)
     gpu_combo.set_active(0)
 
     DevicesGrid.attach_next_to(gpu_combo, DS, Gtk.PositionType.RIGHT, 20, 1)
+
+    # Logos
+
 
     tab2.show_all()

@@ -60,11 +60,11 @@ GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
 
 TOOLTIP_CONTACT = "Contact us"
 
-ICON_WIDTH = 100
+ICON_WIDTH = 120
 
 ICON_HEIGHT = 50
 
-WIDTH_RATIO = 0.60
+WIDTH_RATIO = 0.65
 
 HEIGHT_RATIO1 = 0.85
 

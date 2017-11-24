@@ -31,7 +31,8 @@ class MyGtk(Gtk.Window):
 # Setting the Minimum Screen Size
 def setScreenSize(self, widthRatio, heightRatio):
     Screen = Gdk.Screen.get_default()
-    self.set_size_request(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
+    self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
+    self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
 
 # fetching the Images/Logos from the Const File

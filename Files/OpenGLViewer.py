@@ -68,7 +68,7 @@ def OpenGL(tab1):
 
         temp = []
         LimitsRHS = []
-
+        LimitRHSValue = []
         temp = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
 
         i = 0
@@ -76,15 +76,24 @@ def OpenGL(tab1):
             for line in file1:
                 if "= " in line:
                     LimitsRHS.append(temp[i])
+                    LimitRHSValue.append(True)
                     i = i + 1
                 else:
-                    LimitsRHS.append(" ")
+                    LimitsRHS.append("")
+                    LimitRHSValue.append(False)
 
-        i = 0
+        i = 0; k = 0
         with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
             for line in file1:
                 background_color = setBackgroundColor(i)
-                iter = Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                if "TEXTURE_FORMATS" in line and LimitRHSValue[i] == True:
+                    iter2 = Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                elif ":" not in line and LimitRHSValue[i] == False:
+                    background_color = setBackgroundColor(k)
+                    Limits_Store.append(iter2,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    k += 1
+                else:
+                    Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)

@@ -1,5 +1,9 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	21/11 - Updated Format Tab, Now the user can further filter linear, optimal and Buffer flags
+	23/11 - Updated OpenGL Limits Section, to display the Texture Formats in a collapsible/Expandable rows
+	      - Increased the Application Default Min. width to 65% of Screen resolution, Also enabled popup for Vulkan tab, now users can right click on the Tab and navigate to other tabs
+	      - Now the Application will always open at the Center of the Screen, Also increased the Icon height by 20%
+	21/11 - v1.1b - Released Application version 1.1b, All the changes mentioned below are available in .deb and AUR Package, above changes will be merged in next release.
+	      - Updated Format Tab, Now the user can further filter linear, optimal and Buffer flags
 	      - Updated Surface Tab, now the user can collapse VkSurfaceCapabilities* , Formats, Present Modes.
         14/11 - Updated Format Tab, Now user can see all the linear, Optimal and Buffer flags (if available) by expanding the Respective rows
         08/11 - Added two default themes, Adapta and Numix, user can choose between the two, if user installs both Adapta is taken as default
