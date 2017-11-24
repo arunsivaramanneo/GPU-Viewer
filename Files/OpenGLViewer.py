@@ -52,7 +52,7 @@ def OpenGL(tab1):
 
         button.set_sensitive(False)
         os.system(
-            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag'  > /tmp/OpenGL_Limits.txt")
+            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
         os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
         os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
         LimitsWin = Gtk.Window()
@@ -64,7 +64,7 @@ def OpenGL(tab1):
         LimitsWin.add(LimitsFrame)
         Limits_Store = Gtk.TreeStore(str, str, str)
         TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
-        TreeLimits.set_enable_search(True)
+        TreeLimits.set_property("enable-tree-lines",True)
 
         temp = []
         LimitsRHS = []

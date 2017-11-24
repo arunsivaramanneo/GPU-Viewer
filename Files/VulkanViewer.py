@@ -241,7 +241,7 @@ def Vulkan(tab2):
                                            [Format[i], linear[i].strip('\n'), optimal[i].strip('\n'), Buffer[i].strip('\n'),background_color,linearfg[i],optimalfg[i],Bufferfg[i]])
             j = i
             if trueFormats[i] == True:
-                os.system("cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' > /tmp/Tiling.txt"%(GPUname,Format[j],Format[j+1]))
+                os.system("cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/Tiling.txt"%(GPUname,Format[j],Format[j+1]))
                 with open("/tmp/Tiling.txt","r") as file1:
                     k = 0
                     z = 0
@@ -513,10 +513,10 @@ def Vulkan(tab2):
         for GPU in range(len(list)):
             if GPUname == GPU:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag'> /tmp/VKDsurface.txt" % (
+                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag' | awk '/./'> /tmp/VKDsurface.txt" % (
                         GPU, GPU + 1))
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type >> /tmp/VKDsurface.txt" % GPU)
+                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type | awk '/./'  >> /tmp/VKDsurface.txt" % GPU)
 
         os.system("cat /tmp/VKDsurface.txt | awk '{gsub(/= .*/,'True');print} ' > /tmp/VKDsurface1.txt")
         os.system("cat /tmp/VKDsurface.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDsurface2.txt")
@@ -677,6 +677,7 @@ def Vulkan(tab2):
 
     FormatsTab_Store = Gtk.TreeStore(str, str, str, str, str, str, str, str)
     TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
+    TreeFormats.set_property("enable-tree-lines",True)
     TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
@@ -794,6 +795,7 @@ def Vulkan(tab2):
     # ------------------ Creating the Surface Tab --------------------------------------------------
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
+    TreeSurface.set_property("enable-tree-lines",True)
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
