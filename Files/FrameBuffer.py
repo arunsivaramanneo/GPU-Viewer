@@ -57,7 +57,7 @@ def FrameBuffer(button):
     FBWin = Gtk.Window()
     FBWin.set_title("GLX Frame Buffer Configuration")
     #   FBWin.set_size_request(1000, 500)
-    setScreenSize(FBWin, Const.WIDTH_RATIO, Const.HEIGHT_RATIO2)
+    setScreenSize(FBWin, Const.WIDTH_RATIO2, Const.HEIGHT_RATIO2)
     FBGrid = Gtk.Grid()
     FBWin.add(FBGrid)
     FBGrid.set_border_width(20)

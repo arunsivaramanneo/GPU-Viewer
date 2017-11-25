@@ -541,26 +541,31 @@ def Vulkan(tab2):
         Surface = [i.strip('\n ') for i in Surface]
         SurfaceTab_Store.clear()
         TreeSurface.set_model(SurfaceTab_Store)
-        k = 0
+        k = 0;count = 0
         for i in range(len(Surface)):
             TreeSurface.expand_all()
             if "====" in Surface[i]:
                 continue
             if "type" in Surface[i]:
                 continue
-            background_color = setBackgroundColor(k)
-
+            background_color = setBackgroundColor(i)
             if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i]:
-                background_color = setBackgroundColor(i)
+                background_color = Const.BGCOLOR3
                 text = Surface[i].strip('\t')
-                k = 1
+                count = 0
                 iter1 = SurfaceTab_Store.append(None,[text, SurfaceRHS[i].strip('\n'), background_color])
             else:
                 if ":" in Surface[i]:
-                    background_color = Const.BGCOLOR3
-                    k = 1
-                text = Surface[i].strip('\t')
-                SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
+                    count += 1
+                    text = Surface[i].strip('\t')
+                    iter2 = SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
+                    continue
+                if count > 0:
+                    text = Surface[i].strip('\t')
+                    SurfaceTab_Store.append(iter2,[text, SurfaceRHS[i].strip('\n'), background_color])
+                else:
+                    text = Surface[i].strip('\t')
+                    SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
             k = k + 1
 
     def radcall(combo):

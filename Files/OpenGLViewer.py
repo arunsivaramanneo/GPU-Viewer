@@ -82,18 +82,26 @@ def OpenGL(tab1):
                     LimitsRHS.append("")
                     LimitRHSValue.append(False)
 
-        i = 0; k = 0
+        k = 0;count=0
         with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
-            for line in file1:
+            for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
+                TreeLimits.expand_all()
+                text = line.strip(' ')
                 if "TEXTURE_FORMATS" in line and LimitRHSValue[i] == True:
-                    iter2 = Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    iter2 = Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 elif ":" not in line and LimitRHSValue[i] == False:
-                    background_color = setBackgroundColor(k)
-                    Limits_Store.append(iter2,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    Limits_Store.append(iter2,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                     k += 1
                 else:
-                    Limits_Store.append(None,[line.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    if ":" in line:
+                        count += 1
+                        iter2 = Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        continue
+                    if count > 0 :
+                        Limits_Store.append(iter2,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    else:
+                        Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                 i = i + 1
 
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)

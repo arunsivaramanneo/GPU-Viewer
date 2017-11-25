@@ -6,7 +6,6 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gdk, Gtk, GdkPixbuf
 
-
 class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
