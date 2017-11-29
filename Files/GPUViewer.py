@@ -9,7 +9,7 @@ from About import about
 
 
 def main():
-    gtk = MyGtk("GPU Viewer v1.1")
+    gtk = MyGtk("GPU-Viewer v1.2")
 
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 

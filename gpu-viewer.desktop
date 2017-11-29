@@ -2,7 +2,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 version=1.1
-Name=GPU Viewer
+Name=GPU-Viewer
 Comment=A front-end to glxinfo and vulkaninfo
 Exec=gpu-viewer
 Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png

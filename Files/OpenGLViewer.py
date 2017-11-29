@@ -66,7 +66,6 @@ def OpenGL(tab1):
         TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
         TreeLimits.set_property("enable-tree-lines",True)
 
-        temp = []
         LimitsRHS = []
         LimitRHSValue = []
         temp = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
@@ -102,7 +101,6 @@ def OpenGL(tab1):
                         Limits_Store.append(iter2,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                     else:
                         Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                i = i + 1
 
         setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsScrollbar = createScrollbar(TreeLimits)
@@ -157,7 +155,6 @@ def OpenGL(tab1):
         value = button.get_active()
 
         GL_All = []
-        List = []
 
         List = copyContentsFromFile("/tmp/Vendor1.txt")
 

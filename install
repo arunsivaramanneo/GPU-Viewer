@@ -5,12 +5,10 @@ lsb_release -a
 user=$(whoami)
 echo ""
 file1="/usr/share/gpu-viewer"
-file2="/usr/share/themes/Numix"
-file3="/usr/share/themes/Adapta"
 file4="/usr/bin/vulkaninfo"
 file5="/home/$user/Desktop/gpu-viewer.desktop"
 file6="/usr/bin/gpu-viewer"
-echo "************************GPU Viewer 1.1 - copyright (c) 2017 - Arun Sivaraman****************************"
+echo "************************GPU Viewer 1.1 - copyright (c) 2017-2018 - Arun Sivaraman****************************"
 if [ ! -d "$file1" ]
 then
     
@@ -43,12 +41,12 @@ echo "Installing files completed..."
 echo " "
 sudo cp gpu-viewer.desktop /usr/share/applications/
 echo " "
+echo "Application successfully added to the menu"
 if [ ! -f "$file6" ]
 then
     sudo ln -s /usr/share/gpu-viewer/GPUViewer /usr/bin/gpu-viewer
-    echo "Application can be accessed from Terminal, enter gpu-viewer ENTER "
+    echo "Symlink created - Application can be accessed from Terminal, enter gpu-viewer ENTER "
 fi
-echo "Application successfully added to the menu"
 echo " "
 if [ ! -f "$file5" ]
 then
@@ -57,56 +55,22 @@ then
 	if [ $choice == 'y' ]
 	then
     	sudo cp gpu-viewer.desktop /home/$user/Desktop/
-		sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
+	sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
     	echo "Desktop Shortcut successfully created ..."
         echo " "
 	fi
 fi
-if [ ! -d "$file2" ]
-then
-	read -p "Do you want to install Numix(y/n):" value1
-    echo " "
-	if [ $value1 == 'y' ]
-	then
-		echo "Installing Numix Theme...."
-        echo " "
-		tar -xvf Numix.tar.xz
-		sudo mv Numix /usr/share/themes
-        echo "Numix Successfully Installed...."
-        echo " "
-	fi
-else
-	echo "Numix already Installed"
-    echo " "
-fi
-if [ ! -d "$file3" ]
-then
-	read -p "Do you want to install Adapta(y/n):" value2
-    echo " "
-	if [ $value2 == 'y' ]
-	then
-		echo "Installing Adapta Theme...."
-        echo " "
-		tar -xvf Adapta.tar.xz
-		sudo mv Adapta /usr/share/themes
-        echo "Adapta Successfully Installed...."
-        echo " "
-	fi
-else
-	echo "Adapta already Installed"
-    echo " "
-fi
 if [ -f "$file4" ]
 then
 	echo "vulkan-utils already installed"
-    echo " "
+    	echo " "
 else
 	echo "Installing Vulkan...."
-    echo " "
+    	echo " "
 	sudo eopkg install vulkan
 	sudo apt install vulkan-utils
 	echo "vulkan-utils successfully Installed..."
-    echo " "
+    	echo " "
 fi
 echo Installation complete...
 echo "All done !!! Enjoy the Application"

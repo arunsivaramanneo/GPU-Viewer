@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
 from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl, getLinkButtonImg
 
-Title1 = ["About GPU Viewer v1.1"]
+Title1 = ["About GPU-Viewer v1.2"]
 Title2 = ["Change Log"]
 
 
@@ -19,12 +19,11 @@ def about(tab3):
     grid.set_column_spacing(20)
     screen = Gdk.Screen.get_default()
     About_list = Gtk.ListStore(str, str)
-    i = 0
+
     with open("../About GPU Viewer", "r") as file1:
-        for line in file1:
+        for i,line in enumerate(file1):
             background_color = setBackgroundColor(i)
             About_list.append([line.strip('\n'), background_color])
-            i = i + 1
 
     TreeAbout = Gtk.TreeView(About_list, expand=True)
     wrapWidth = screen.get_width() * 0.50

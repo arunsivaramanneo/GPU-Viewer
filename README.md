@@ -20,12 +20,10 @@ This project aims to capture all the required/important details of glxinfo and v
 5. For others please follow steps 4 to 10
 6. Download the file and Extract to a folder
 7. Navigate to extracted folder, open terminal and enter ./install
-8. Choose the theme between Adapta and Numix that you want to apply to the Application. If you install both the themes Adapta will be taken as default.
-If the user chooses not install both the themes, the application will take the current system theme. 
-9. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-10. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+8. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
+9. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
-11. Incase of issues launching the application please see the FAQ in Wiki section
+10. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
@@ -40,10 +38,13 @@ The installer should be able to take care of this dependency in Debian based dis
 3. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
 
 
-## UNDERDEVELOPMENT
+## UNDER DEVELOPMENT
 
-1. OpenGL - OpenGL SPIRV support (low priority - this feature is not available in glxinfo yet,it will be done once implemented by MESA team)
-2. General - Bug fixes, Code Optimizations (High Priority)
+1. General - Bug fixes, Code Optimizations (High Priority)
+
+##PLANNED DEVELOPMENT
+
+1. OpenGL SPIRV Support (Provided glxinfo gets updated to show SPIRV details or any other Command line)
 
 ## IMPORTANT
 
@@ -54,7 +55,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. Minor UI issues.
 2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
-3. The Application will not render well under dark themes, provided when the user does not select Adapta or Numix during installation
+3. The Application does not render well under dark themes.
 
 ## DEVELOPMENT ENVIRONMENT
 

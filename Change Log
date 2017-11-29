@@ -1,4 +1,5 @@
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	29/11 - Added driverVersion to Device Tab in Vulkan, removed Themes, now it will be defaulted to System theme	
 	25/11 - Updated Surface Tab, with expandible/collapsible rows for easy navigation
 	      - Updated OpenGL Limits Section , Texture Formats  and few of the sub details will be expandible/collapsilbe
 	      - Enabled Tree Lines for Formats Tab, Surface Tab and OpenGL Limits Section.	
