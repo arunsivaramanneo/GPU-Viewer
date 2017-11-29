@@ -17,11 +17,11 @@ This project aims to capture all the required/important details of glxinfo and v
 2. Ensure python is installed
 3. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.1b.deb
 4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/
-5. For others please follow steps 4 to 10
+5. For others please follow steps 6 to 9
 6. Download the file and Extract to a folder
-7. Navigate to extracted folder, open terminal and enter ./install
+7. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
 8. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-9. For Vulkan Tab to work Install Vulkan-Utils (Sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+9. For Vulkan Tab to work Install Vulkan-Utils (sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
 10. Incase of issues launching the application please see the FAQ in Wiki section
 
@@ -42,7 +42,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. General - Bug fixes, Code Optimizations (High Priority)
 
-##PLANNED DEVELOPMENT
+## PLANNED DEVELOPMENT
 
 1. OpenGL SPIRV Support (Provided glxinfo gets updated to show SPIRV details or any other Command line)
 
