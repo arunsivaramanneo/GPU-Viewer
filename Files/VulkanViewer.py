@@ -577,7 +577,7 @@ def Vulkan(tab2):
                     SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
 
     def radcall(combo):
-        c = time.time()
+
         text = combo.get_active()
         for i in range(len(list)):
             if text == i:
@@ -590,7 +590,7 @@ def Vulkan(tab2):
                 Queues(text)
                 Surface(text)
             Instance()
-        print(time.time() - c)
+
         os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()

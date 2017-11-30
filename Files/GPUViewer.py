@@ -11,7 +11,7 @@ import time
 
 
 def main():
-    a = time.time()
+
     gtk = MyGtk("GPU-Viewer v1.2")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
@@ -31,7 +31,7 @@ def main():
     t1.join()
     t2.join()
     t3.join()
-    print(time.time()-a)
+
     gtk.connect("delete-event", quit)
     gtk.show_all()
     gtk.mainLoop()
