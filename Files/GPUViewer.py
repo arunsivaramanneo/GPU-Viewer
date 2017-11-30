@@ -6,23 +6,32 @@ from Common import MyGtk, fetchImageFromUrl, setScreenSize
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
+import threading
+import time
 
 
 def main():
+    a = time.time()
     gtk = MyGtk("GPU-Viewer v1.2")
-
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-    OpenGL(openGlTab)
+    t1=threading.Thread(target=OpenGL,args=(openGlTab,))
+    t1.start()
 
     if isVulkanSupported():
         vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-        Vulkan(vulkanTab)
+        t2=threading.Thread(target=Vulkan,args=(vulkanTab,))
+        t2.start()
 
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
-    about(aboutTab)
+    t3=threading.Thread(target=about,args=(aboutTab,))
+    t3.start()
 
+    t1.join()
+    t2.join()
+    t3.join()
+    print(time.time()-a)
     gtk.connect("delete-event", quit)
     gtk.show_all()
     gtk.mainLoop()

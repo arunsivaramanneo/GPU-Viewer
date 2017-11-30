@@ -3,6 +3,8 @@ import os
 import gi
 
 import Const
+import time
+import threading
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -25,8 +27,8 @@ HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
 QueueTitle = ["Queue Family", "Queue Count", "timestampValidBits", "GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
               "minImageTransferGranularity.depth"]
-InstanceTitle = ["Instance Extensions", "Version"]
-LayerTitle = ["Instance Layers", "Vulkan Version", "Layer Version", "Extension Count"]
+InstanceTitle = ["Extensions", "Version"]
+LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count","Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
 
 
@@ -43,40 +45,59 @@ def Vulkan(tab2):
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > /tmp/VKDDeviceinfo1.txt" % i)
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep driverVersion | awk '{gsub(/\(.*/,'True');}1' >> /tmp/VKDDeviceinfo1.txt" % i)
-
+                break
 
         os.system("cat /tmp/VKDDeviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDeviceinfo.txt")
         os.system("cat /tmp/VKDDeviceinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDeviceinfo2.txt")
 
+        valueLHS = copyContentsFromFile("/tmp/VKDDeviceinfo.txt")
+
+        try:
+            os.system("lsb_release -d -r -c > /tmp/VKDLsbRelease.txt")
+            os.system("cat /tmp/VKDLsbRelease.txt | grep -o :.* >> /tmp/VKDDeviceinfo2.txt")
+            os.system("cat /tmp/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' >> /tmp/VKDLsbReleaseLHS.txt")
+            os.system("uname -r >> /tmp/VKDDeviceinfo2.txt")
+            valueLHS = valueLHS + copyContentsFromFile("/tmp/VKDLsbReleaseLHS.txt")
+            valueLHS.append("Kernel")
+        except Exception as e:
+            raise e
+
         # Storing the RHS values into a list
 
-        value = copyContentsFromFile("/tmp/VKDDeviceinfo2.txt")
+        valueRHS = copyContentsFromFile("/tmp/VKDDeviceinfo2.txt")
 
-        # This should take care of api version from 0.0.0 to 5.9.99
-        for i in range(5):
-            for k in range(10):
+        # This should take care of api version from 0.0.0 to 2.5.99
+        for i in range(2):
+            for k in range(5):
                 for j in range(RANGE1):
-                    if "(%d.%d.%d)" % (i, k, j) in value[0]:
-                        value[0] = " %d.%d.%d" % (i, k, j)
+                    if "(%d.%d.%d)" % (i, k, j) in valueRHS[0]:
+                        valueRHS[0] = "%d.%d.%d" % (i, k, j)
                         break
 
-        for i in range(len(value)):
+        for i in range(len(valueRHS)):
             if i > 0:
-                if "0x" in value[i]:
-                    value[i] = int(value[i], 16)
-                    value[i] = str(" %d" % value[i])
+                if "0x" in valueRHS[i]:
+                    valueRHS[i] = int(valueRHS[i], 16)
+                    valueRHS[i] = str("%d" % valueRHS[i])
 
-        value[5] = getDriverVersion(value)
+        valueRHS[5] = getDriverVersion(valueRHS)
+
+        valueLHS = [i.strip('\t') for i in valueLHS]
+        valueRHS = [i.strip(':') for i in valueRHS]
+        valueRHS = [i.strip('\t') for i in valueRHS]
+        valueRHS = [i.strip(' ') for i in valueRHS]
         # Printing the Details into the Treeview
 
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
-        with open("/tmp/VKDDeviceinfo.txt", "r") as file1:
-            for i,line in enumerate(file1):
-                text = line.strip('\t')
-                background_color = setBackgroundColor(i)
-                DeviceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
+
+        for i in range(len(valueRHS)):
+            background_color = setBackgroundColor(i)
+            if "Description" in valueLHS[i]:
+                DeviceTab_Store.append(["operatingSystem",valueRHS[i].strip('\n'),background_color])
+            else:
+                DeviceTab_Store.append([valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
 
         for i in range(len(list)):
             if GPUname == i:
@@ -90,7 +111,7 @@ def Vulkan(tab2):
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store)
         with open("/tmp/VKDDevicesparseinfo.txt", "r") as file1:
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
                 SparseTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
@@ -101,6 +122,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/VKDFeatures1.txt" % i)
+                break
 
         os.system(
             "cat /tmp/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/VKDFeatures.txt")
@@ -110,7 +132,7 @@ def Vulkan(tab2):
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store)
         with open("/tmp/VKDFeatures.txt", "r") as file1:
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
@@ -121,7 +143,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > /tmp/VKDlimits1.txt" % i)
-
+                break
         os.system("cat /tmp/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDlimits.txt")
         os.system("cat /tmp/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/VKDlimits2.txt")
 
@@ -138,7 +160,7 @@ def Vulkan(tab2):
 
         value = [i.strip(' ') for i in value]
         with open("/tmp/VKDlimits.txt", "r") as file1:
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
                 LimitsTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
@@ -149,7 +171,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > /tmp/VKDExtensions1.txt" % i)
-
+                break
         os.system("cat /tmp/VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDExtensions.txt")
 
         # This should take care of further versioning till 100
@@ -169,7 +191,7 @@ def Vulkan(tab2):
             label = "Extensions (%d)" % count
             notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
             file1.seek(0, 0)
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
                 ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
@@ -186,7 +208,7 @@ def Vulkan(tab2):
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> /tmp/VKDFORMATSoptimal.txt" % i)
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> /tmp/VKDFORMATSBuffer.txt" % i)
-
+                break
 
         # Linear values
 
@@ -209,7 +231,7 @@ def Vulkan(tab2):
             else:
                 trueFormats.append(False)
 
-        label = "Formats (%d)"%Formats
+        label = "Formats (%d)" % Formats
         notebook.set_tab_label(FormatsTab, Gtk.Label(label))
 
         Format = []
@@ -221,14 +243,18 @@ def Vulkan(tab2):
 
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store)
-        for i in range(len(Format)-1):
+        for i in range(len(Format) - 1):
             background_color = setBackgroundColor(i)
             iter = FormatsTab_Store.append(None,
-                                           [Format[i], linear[i].strip('\n'), optimal[i].strip('\n'), Buffer[i].strip('\n'),background_color,linearfg[i],optimalfg[i],Bufferfg[i]])
+                                           [Format[i], linear[i].strip('\n'), optimal[i].strip('\n'),
+                                            Buffer[i].strip('\n'), background_color, linearfg[i], optimalfg[i],
+                                            Bufferfg[i]])
             j = i
             if trueFormats[i]:
-                os.system("cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/Tiling.txt"%(GPUname,Format[j],Format[j+1]))
-                with open("/tmp/Tiling.txt","r") as file1:
+                os.system(
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/Tiling.txt" % (
+                        GPUname, Format[j], Format[j + 1]))
+                with open("/tmp/Tiling.txt", "r") as file1:
                     k = 0
                     z = 0
                     value = 0
@@ -240,12 +266,15 @@ def Vulkan(tab2):
                             if ":" in line:
                                 background_color = setBackgroundColor(z)
                                 text = line.strip('\t')
-                                iter2 = FormatsTab_Store.append(iter,[text.strip('\n')," "," "," ",background_color,Const.BGCOLOR1,Const.BGCOLOR1,Const.BGCOLOR1])
+                                iter2 = FormatsTab_Store.append(iter,
+                                                                [text.strip('\n'), " ", " ", " ", background_color,
+                                                                 Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
                                 k = 1
                                 z += 1
                             else:
                                 text = line.strip('\t')
-                                FormatsTab_Store.append(iter2,[text.strip('\n')," "," "," ",background_color,Const.BGCOLOR1,Const.BGCOLOR1,Const.BGCOLOR1])
+                                FormatsTab_Store.append(iter2, [text.strip('\n'), " ", " ", " ", background_color,
+                                                                Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
                             k += 1
 
     def MemoryTypes(GPUname):
@@ -254,6 +283,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/VKDMemoryType.txt" % i)
+                break
 
         with open("/tmp/VKDMemoryType.txt", "r") as file1:
             heapIndex = []
@@ -375,6 +405,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > /tmp/VKDQueues.txt" % i)
+                break
 
         os.system("cat /tmp/VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > /tmp/VKDQueuecount.txt")
         os.system("cat /tmp/VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > /tmp/VKDQueuebits.txt")
@@ -383,7 +414,6 @@ def Vulkan(tab2):
         width = []
         height = []
         depth = []
-
 
         with open("/tmp/VKDQueues.txt", "r") as file1:
             for line in file1:
@@ -394,6 +424,7 @@ def Vulkan(tab2):
                                 width.append("%d" % i)
                                 height.append("%d" % j)
                                 depth.append("%d" % k)
+                                break
 
         # finding and storing the value for Flags
         Gfg, GBit = colorTrueFalse("/tmp/VKDQueueFlags.txt", "GRAPHICS")
@@ -434,10 +465,10 @@ def Vulkan(tab2):
         TreeInstance.set_model(InstanceTab_Store)
         with open("/tmp/VKDInstanceExtensions.txt", "r") as file1:
             count1 = len(file1.readlines())
-            label = "Instances (%d)" % count1
-            notebook.set_tab_label(InstanceTab, Gtk.Label(label))
+            label = "Instance Extensions (%d)" % count1
+            InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label))
             file1.seek(0, 0)
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
                 InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
@@ -445,13 +476,16 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/VKDLayer1.txt")
         os.system("cat /tmp/VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/VKDLayer.txt")
-
+        os.system("cat /tmp/VKDLayer1.txt | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/VKDLayerDescription.txt")
         Vversion = []
         with open("/tmp/VKDLayer1.txt", "r") as file1:
             for line in file1:
-                for j in range(RANGE1):
-                    if "Vulkan version 1.0.%d," % j in line:
-                        Vversion.append("1.0.%d" % j)
+                for i in range(2):
+                    for j in range(5):
+                        for k in range(RANGE1):
+                            if "Vulkan version %d.%d.%d," % (i, j, k) in line:
+                                Vversion.append("%d.%d.%d" % (i, j, k))
+                                break
 
         LVersion = []
         with open("/tmp/VKDLayer1.txt", "r") as file1:
@@ -469,16 +503,19 @@ def Vulkan(tab2):
                         ECount.append("%d" % j)
                         break
 
+        layerDescription = copyContentsFromFile("/tmp/VKDLayerDescription.txt")
         LayerTab_Store.clear()
         TreeLayer.set_model(LayerTab_Store)
         count2 = len(LVersion)
         label = "Instances (%d) & Layers (%d)" % (count1, count2)
+        label2 = "Instance Layers (%d)"%count2
         notebook.set_tab_label(InstanceTab, Gtk.Label(label))
+        InstanceNotebook.set_tab_label(InstanceLayersTab,Gtk.Label(label2))
         with open("/tmp/VKDLayer.txt", "r") as file1:
-            for i,line in enumerate(file1):
+            for i, line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 LayerTab_Store.append(
-                    [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'), ECount[i].strip('\n'),
+                    [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'), ECount[i].strip('\n'),layerDescription[i].strip('\n'),
                      background_color])
 
     def Surface(GPUname):
@@ -525,21 +562,22 @@ def Vulkan(tab2):
                 background_color = Const.BGCOLOR3
                 text = Surface[i].strip('\t')
                 count = 0
-                iter1 = SurfaceTab_Store.append(None,[text, SurfaceRHS[i].strip('\n'), background_color])
+                iter1 = SurfaceTab_Store.append(None, [text, SurfaceRHS[i].strip('\n'), background_color])
             else:
                 if ":" in Surface[i]:
                     count += 1
                     text = Surface[i].strip('\t')
-                    iter2 = SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
+                    iter2 = SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
                     continue
                 if count > 0:
                     text = Surface[i].strip('\t')
-                    SurfaceTab_Store.append(iter2,[text, SurfaceRHS[i].strip('\n'), background_color])
+                    SurfaceTab_Store.append(iter2, [text, SurfaceRHS[i].strip('\n'), background_color])
                 else:
                     text = Surface[i].strip('\t')
-                    SurfaceTab_Store.append(iter1,[text, SurfaceRHS[i].strip('\n'), background_color])
+                    SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
 
     def radcall(combo):
+        c = time.time()
         text = combo.get_active()
         for i in range(len(list)):
             if text == i:
@@ -552,6 +590,7 @@ def Vulkan(tab2):
                 Queues(text)
                 Surface(text)
             Instance()
+        print(time.time() - c)
         os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()
@@ -560,8 +599,8 @@ def Vulkan(tab2):
     grid.add(DevicesFrame)
 
     notebook = Gtk.Notebook()
-    notebook.set_property("scrollable",True)
-    notebook.set_property("enable-popup",True)
+    notebook.set_property("scrollable", True)
+    notebook.set_property("enable-popup", True)
     grid.attach(notebook, 0, 2, 1, 1)
     # ----------------Creating the Device Info Tab ------------
 
@@ -571,7 +610,7 @@ def Vulkan(tab2):
     DeviceTab_Store = Gtk.ListStore(str, str, str)
     TreeDevice = Gtk.TreeView(DeviceTab_Store, expand=True)
 
-    setColumns(TreeDevice, DeviceTitle, Const.MWIDTH,0.0)
+    setColumns(TreeDevice, DeviceTitle, Const.MWIDTH, 0.0)
 
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
@@ -614,7 +653,7 @@ def Vulkan(tab2):
             column.add_attribute(Featurerenderer, "foreground", 3)
         column.add_attribute(Featurerenderer, "background", 2)
         column.set_property("min-width", MWIDTH)
-        TreeFeatures.set_property("can-focus",False)
+        TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
     FeatureScrollbar = createScrollbar(TreeFeatures)
@@ -628,7 +667,7 @@ def Vulkan(tab2):
     TreeLimits = Gtk.TreeView(LimitsTab_Store, expand=True)
     TreeLimits.set_enable_search(True)
 
-    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
+    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH, 0.0)
 
     LimitsScrollbar = createScrollbar(TreeLimits)
     LimitsGrid.add(LimitsScrollbar)
@@ -642,7 +681,7 @@ def Vulkan(tab2):
     TreeExtension = Gtk.TreeView(ExtensionTab_Store, expand=True)
     TreeExtension.set_enable_search(True)
 
-    setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH,0.0)
+    setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH, 0.0)
 
     ExtensionScrollbar = createScrollbar(TreeExtension)
     ExtensionGrid.add(ExtensionScrollbar)
@@ -653,7 +692,7 @@ def Vulkan(tab2):
 
     FormatsTab_Store = Gtk.TreeStore(str, str, str, str, str, str, str, str)
     TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
-    TreeFormats.set_property("enable-tree-lines",True)
+    TreeFormats.set_property("enable-tree-lines", True)
     TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
@@ -665,7 +704,7 @@ def Vulkan(tab2):
         column.set_property("min-width", 100)
         if 1 <= i < 5:
             column.add_attribute(Formatsrenderer, "foreground", i + 4)
-        TreeFormats.set_property("can-focus",False)
+        TreeFormats.set_property("can-focus", False)
         TreeFormats.append_column(column)
 
     FormatsScrollbar = createScrollbar(TreeFormats)
@@ -690,7 +729,7 @@ def Vulkan(tab2):
         if 2 <= i < 7:
             column.set_property("min-width", 100)
             column.add_attribute(Memoryrenderer, "foreground", i + 6)
-        TreeMemory.set_property("can-focus",False)
+        TreeMemory.set_property("can-focus", False)
         TreeMemory.append_column(column)
 
     MemoryScrollbar = createScrollbar(TreeMemory)
@@ -712,7 +751,7 @@ def Vulkan(tab2):
         column.add_attribute(Heaprenderer, "background", 3)
         if i == 2:
             column.add_attribute(Heaprenderer, "foreground", 4)
-        TreeHeap.set_property("can-focus",False)
+        TreeHeap.set_property("can-focus", False)
         TreeHeap.append_column(column)
 
     HeapScrollbar = createScrollbar(TreeHeap)
@@ -728,7 +767,7 @@ def Vulkan(tab2):
 
     for i, column_title in enumerate(QueueTitle):
         Queuerenderer = Gtk.CellRendererText()
-        Queuerenderer.set_alignment(0.5,0.5)
+        Queuerenderer.set_alignment(0.5, 0.5)
         column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
         column.set_alignment(0.5)
         column.add_attribute(Queuerenderer, "background", 10)
@@ -737,7 +776,7 @@ def Vulkan(tab2):
         column.set_reorderable(True)
         if 2 < i < 7:
             column.add_attribute(Queuerenderer, "foreground", i + 8)
-        TreeQueue.set_property("can-focus",False)
+        TreeQueue.set_property("can-focus", False)
         TreeQueue.append_column(column)
 
     QueueScrollbar = createScrollbar(TreeQueue)
@@ -747,31 +786,36 @@ def Vulkan(tab2):
 
     InstanceTab = Gtk.VBox(spacing=10)
     InstanceGrid = createSubTab(InstanceTab, notebook, "Instances & layers")
+    InstanceNotebook = Gtk.Notebook()
+    InstanceGrid.add(InstanceNotebook)
+    InstanceExtTab = Gtk.VBox(spacing=10)
+    InstanceExtGrid = createSubTab(InstanceExtTab,InstanceNotebook,"Instance Extensions")
 
     InstanceTab_Store = Gtk.ListStore(str, str, str)
     TreeInstance = Gtk.TreeView(InstanceTab_Store, expand=True)
     TreeInstance.set_enable_search(True)
 
-    setColumns(TreeInstance, InstanceTitle, 300,0.0)
+    setColumns(TreeInstance, InstanceTitle, 300, 0.0)
 
     InstanceScrollbar = createScrollbar(TreeInstance)
-    InstanceGrid.add(InstanceScrollbar)
+    InstanceExtGrid.add(InstanceScrollbar)
 
-    LayerGrid = createSubFrame(InstanceTab)
+    InstanceLayersTab = Gtk.VBox(spacing=10)
+    InstanceLayersGrid = createSubTab(InstanceLayersTab,InstanceNotebook,"Instance Layers")
 
-    LayerTab_Store = Gtk.ListStore(str, str, str, str, str)
+    LayerTab_Store = Gtk.ListStore(str, str, str, str, str,str)
     TreeLayer = Gtk.TreeView(LayerTab_Store, expand=True)
     TreeLayer.set_enable_search(TreeLayer)
 
-    setColumns(TreeLayer, LayerTitle, 100,0.0)
+    setColumns(TreeLayer, LayerTitle, 100, 0.0)
 
     LayerScrollbar = createScrollbar(TreeLayer)
-    LayerGrid.add(LayerScrollbar)
+    InstanceLayersGrid.add(LayerScrollbar)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
-    TreeSurface.set_property("enable-tree-lines",True)
+    TreeSurface.set_property("enable-tree-lines", True)
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
@@ -783,7 +827,7 @@ def Vulkan(tab2):
                     column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
                     column.add_attribute(Surfacerenderer, "background", 2)
                     column.set_property("min-width", MWIDTH)
-                    TreeSurface.set_property("can-focus",False)
+                    TreeSurface.set_property("can-focus", False)
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)
@@ -795,7 +839,6 @@ def Vulkan(tab2):
     DevicesGrid.set_column_spacing(40)
     DevicesFrame.add(DevicesGrid)
 
-    #	grid.set_column_spacing(40)
     grid.set_row_spacing(30)
     os.system("cat /tmp/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > /tmp/GPU.txt")
 
@@ -813,7 +856,7 @@ def Vulkan(tab2):
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)
     gpu_combo.connect("changed", radcall)
     renderer_text = Gtk.CellRendererText()
-    gpu_combo.set_property("has-frame",False)
+    gpu_combo.set_property("has-frame", False)
     gpu_combo.pack_start(renderer_text, True)
     gpu_combo.add_attribute(renderer_text, "text", 0)
     gpu_combo.set_entry_text_column(0)
@@ -822,6 +865,5 @@ def Vulkan(tab2):
     DevicesGrid.attach_next_to(gpu_combo, DS, Gtk.PositionType.RIGHT, 20, 1)
 
     # Logos
-
 
     tab2.show_all()

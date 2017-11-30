@@ -127,9 +127,22 @@ def getDriverVersion(value):
         minorVersion = int(value[5]) >> 14 & 255
         microVersion = int(value[5]) >> 6 & 255
         nanoVersion = int(value[5]) & 63
-        return " %d.%d.%d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
+        return "%d.%d.%d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
     else:
         majorVersion = int(value[5]) >> 22 & 1023
         minorVersion = int(value[5]) >> 12 & 255
         microVersion = int(value[5]) & 255
-    return " %d.%d.%d" % (majorVersion, minorVersion, microVersion)
+        return "%d.%d.%d" % (majorVersion, minorVersion, microVersion)
+
+def setColumnFrameBuffer(TreeFB,Title):
+    for i, column_title in enumerate(Title):
+
+        FBrenderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
+        column.add_attribute(FBrenderer, "background", 25)
+        if i < len(Title) - 1:
+            FBrenderer.set_alignment(0.5, 0.5)
+            column.set_alignment(0.5)
+        column.set_property("min-width", 40)
+        TreeFB.set_property("can-focus", False)
+        TreeFB.append_column(column)

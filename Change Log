@@ -1,4 +1,14 @@
+Dec-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	01/12 - Updated Show GLX FrameBuffer Window to use Notebook instead of Button. This resolves Gtk Warning messages getting displayed while switching Tabs
+	      - Updated Instance and Layers Tab to use Notebook instead of Frames. Now the User can view Instance Extension and Instance Layers as Tabs under Instance & Layers Tab
+	      - Added Description to Instance Layers.
+	      - Added lsb_release -c -r -d command line output to Device Tab in Vulkan, Added Kernel Version in Device Tab to Vulkan
+	      - Implemented Threading to improve App performance. Now App should open within 2 to 3 seconds prior to 4 to 5 seconds
+	      - App version bumped from 1.1 to 1.2	
+
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 	29/11 - Added driverVersion to Device Tab in Vulkan, removed Themes, now it will be defaulted to System theme	
 	25/11 - Updated Surface Tab, with expandible/collapsible rows for easy navigation
 	      - Updated OpenGL Limits Section , Texture Formats  and few of the sub details will be expandible/collapsilbe

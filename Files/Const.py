@@ -60,6 +60,10 @@ GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
 
 TOOLTIP_CONTACT = "Contact us"
 
+FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", "rsz", "gsz", "bsz", "asz", "flt",
+                   "srgb", "aux", "depth", "stcl",
+                   "acr", "acg", "acb", "aca", "msnum", "msbufs", "caveats"]
+
 ICON_WIDTH = 120
 
 ICON_HEIGHT = 50
