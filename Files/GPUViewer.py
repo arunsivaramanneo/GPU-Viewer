@@ -7,7 +7,6 @@ from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
 import threading
-import time
 
 
 def main():
@@ -23,13 +22,13 @@ def main():
         vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
         t2=threading.Thread(target=Vulkan,args=(vulkanTab,))
         t2.start()
+        t2.join()
 
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
     t3=threading.Thread(target=about,args=(aboutTab,))
     t3.start()
 
     t1.join()
-    t2.join()
     t3.join()
 
     gtk.connect("delete-event", quit)
