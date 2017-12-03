@@ -856,7 +856,7 @@ def Vulkan(tab2):
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)
     gpu_combo.connect("changed", radcall)
     renderer_text = Gtk.CellRendererText()
-    gpu_combo.set_property("has-frame", False)
+ #   gpu_combo.set_property("has-frame", False)
     gpu_combo.pack_start(renderer_text, True)
     gpu_combo.add_attribute(renderer_text, "text", 0)
     gpu_combo.set_entry_text_column(0)

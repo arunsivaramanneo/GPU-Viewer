@@ -6,6 +6,7 @@ from Common import MyGtk, fetchImageFromUrl, setScreenSize
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
+from OpenCL import openCL
 import threading
 
 
@@ -24,6 +25,11 @@ def main():
         t2.start()
         t2.join()
 
+    if isOpenclSupported():
+        openclTab = gtk.createTab(Const.OPEN_CL_PNG, 100, Const.ICON_HEIGHT,False)
+        openCL(openclTab)
+
+
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
     t3=threading.Thread(target=about,args=(aboutTab,))
     t3.start()
@@ -35,12 +41,17 @@ def main():
     gtk.show_all()
     gtk.mainLoop()
 
+def isOpenclSupported():
+    os.system("clinfo > /tmp/clinfo.txt")
+    with open("/tmp/clinfo.txt","r") as file:
+        count = len(file.readlines())
+    return count > 1
 
 def isVulkanSupported():
     os.system("vulkaninfo > /tmp/vulkaninfo.txt")
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         count = len(file1.readlines())
-    return count > 0
+    return count
 
 
 def quit(instance, value):

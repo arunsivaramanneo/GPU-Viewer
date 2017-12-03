@@ -3,7 +3,7 @@ file3="/usr/share/themes/Adapta"
 cd /usr/share/gpu-viewer/Files/
 if [ -d "$file3" ]
 then
-    GTK_THEME=Adapta python GPUViewer.py
+    GTK_THEME=FlatPlat python GPUViewer.py
 else
     python GPUViewer.py
 fi
