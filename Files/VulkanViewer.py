@@ -3,13 +3,11 @@ import os
 import gi
 
 import Const
-import time
-import threading
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion
+    colorTrueFalse, getDriverVersion, getVulkanVersion, fetchImageFromUrl
 
 MWIDTH = 300
 
@@ -602,6 +600,7 @@ def Vulkan(tab2):
     notebook.set_property("scrollable", True)
     notebook.set_property("enable-popup", True)
     grid.attach(notebook, 0, 2, 1, 1)
+
     # ----------------Creating the Device Info Tab ------------
 
     DeviceTab = Gtk.VBox(spacing=10)
@@ -839,7 +838,7 @@ def Vulkan(tab2):
     DevicesGrid.set_column_spacing(40)
     DevicesFrame.add(DevicesGrid)
 
-    grid.set_row_spacing(30)
+#    grid.set_row_spacing(10)
     os.system("cat /tmp/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > /tmp/GPU.txt")
 
     list = copyContentsFromFile("/tmp/GPU.txt")

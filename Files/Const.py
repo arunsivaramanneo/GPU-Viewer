@@ -14,6 +14,10 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
+INTEL_BANNER = "../Images/Intel_Banner.png"
+
+NVIDIA_BANNER = "../Images/nvidia-banner.jpg"
+
 TWITTER_LOGO_PNG = "../Images/twitter-icon.png"
 
 DONATE_LOGO_PNG = "../Images/paypal_donate.png"
@@ -68,7 +72,7 @@ FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", 
                    "srgb", "aux", "depth", "stcl",
                    "acr", "acg", "acb", "aca", "msnum", "msbufs", "caveats"]
 
-ICON_WIDTH = 120
+ICON_WIDTH = 150
 
 ICON_HEIGHT = 50
 

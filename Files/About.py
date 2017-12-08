@@ -57,7 +57,7 @@ def about(tab3):
     Reportbutton = getLinkButtonImg(Reportimg,Const.ISSUE_LINK,Const.TOOLTIP_BUG)
     grid.attach_next_to(Reportbutton,Faqbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
+    Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
     Donatebutton = getLinkButtonImg(Donateimg,Const.PAYPAL_LINK,Const.TOOLTIP_DONATE)
     grid.attach_next_to(Donatebutton,Reportbutton,Gtk.PositionType.RIGHT,1,1)
 

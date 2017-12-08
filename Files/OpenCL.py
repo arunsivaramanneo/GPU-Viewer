@@ -89,7 +89,7 @@ def openCL(tab):
 
     def getDeviceMemoryImageDetails(value):
 
-        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclPlatforms[value])
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceMemoryImageDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceMemoryImageDetailsRHS.txt")
 
@@ -171,11 +171,54 @@ def openCL(tab):
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
                 iter = DeviceVector_store.append(None,[oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
 
+    def getDeviceQueueExecutionCapabilities(value):
+
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceQueueExecutionDetails.txt"%oclPlatforms[value])
+        os.system("cat /tmp/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceQueueExecutionDetailsLHS.txt")
+        os.system("cat /tmp/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceQueueExecutionDetailsRHS.txt")
+
+        oclDeviceQueueExecutionDetailsLHS = copyContentsFromFile("/tmp/oclDeviceQueueExecutionDetailsLHS.txt")
+        oclDeviceQueueExecutionDetailsRHS = copyContentsFromFile("/tmp/oclDeviceQueueExecutionDetailsRHS.txt")
+
+        oclDeviceQueueExecutionDetailsLHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsLHS]
+        oclDeviceQueueExecutionDetailsRHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsRHS]
+
+        DeviceQueueExecution_store.clear()
+        DeviceQueueExecutionTreeView.set_model(DeviceQueueExecution_store)
+        fgcolor = []
+
+        for i in range(len(oclDeviceQueueExecutionDetailsRHS)):
+            if "Yes" in oclDeviceQueueExecutionDetailsRHS[i]:
+                fgcolor.append("GREEN")
+            elif "No" in oclDeviceQueueExecutionDetailsRHS[i] and "None" not in oclDeviceQueueExecutionDetailsRHS[i]:
+                fgcolor.append("RED")
+            else:
+                fgcolor.append("BLACK")
+
+
+        for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
+            DeviceQueueExecutionTreeView.expand_all()
+            if "    " in oclDeviceQueueExecutionDetailsLHS[i]:
+                DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
+            else:
+                if oclDeviceQueueExecutionDetailsLHS[i] in oclDeviceQueueExecutionDetailsRHS[i]:
+                    oclDeviceQueueExecutionDetailsRHS[i] = oclDeviceQueueExecutionDetailsRHS[i][len(oclDeviceQueueExecutionDetailsLHS[i]):].strip(' ')
+                    iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
+                elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i]:
+                    oclDeviceKernels = oclDeviceQueueExecutionDetailsRHS[i].split(';')
+                    iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),str(len(oclDeviceKernels)-1).strip('\n'),setBackgroundColor(i),fgcolor[i]])
+                    for j in range(len(oclDeviceKernels)-1):
+                        DeviceQueueExecutionTreeView.expand_all()
+                        DeviceQueueExecution_store.append(iter,[oclDeviceKernels[j].strip('\n')," ",setBackgroundColor(j),'#fff'])
+                else:
+                    iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
+
     def selectPlatform(combo):
         value = combo.get_active()
         getPlatfromDetails(value)
         getDeviceDetails(value)
         getDeviceMemoryImageDetails(value)
+        getDeviceQueueExecutionCapabilities(value)
         getDeviceVectorDetails(value)
     #    os.system("rm /tmp/ocl*.txt")
 
@@ -226,6 +269,19 @@ def openCL(tab):
 
     DeviceMemoryImageScrollbar = createScrollbar(DeviceMemoryImageTreeview)
     DeviceMemoryImageGrid.add(DeviceMemoryImageScrollbar)
+
+# Device Queue & Execution capabilities
+
+    DeviceQueueExecutionTab = Gtk.VBox(spacing=10)
+    DeviceQueueExecutionGrid = createSubTab(DeviceQueueExecutionTab,oclNotebook,"Device Queue & Execution Capabilities")
+
+    DeviceQueueExecution_store = Gtk.TreeStore(str,str,str,str)
+    DeviceQueueExecutionTreeView = Gtk.TreeView(model=DeviceQueueExecution_store,expand=True)
+
+    setOclColumns(DeviceQueueExecutionTreeView,deviceMemoryImageHeader)
+
+    DeviceQueueExecutionScrollbar = createScrollbar(DeviceQueueExecutionTreeView)
+    DeviceQueueExecutionGrid.add(DeviceQueueExecutionScrollbar)
 
 # Device Vector Details
 
