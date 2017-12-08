@@ -49,9 +49,9 @@ def openCL(tab):
                 platformDetails_Store.append(None,[oclPlatformDetailsLHS[i].strip('\n'),oclPlatformDetailsRHS[i].strip('\n'),background_color])
 
     def getDeviceDetails(value):
-
-        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Preferred \/.*/{flag=0}flag'  > /tmp/oclDeviceDetails.txt"%oclDevices[value].strip('Intel(R)'))
-        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Platform.*/{flag=0}flag'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%oclDevices[value].strip('Intel(R)'))
+        print(oclDevices[value])
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceDetailsRHS.txt")
 
@@ -70,12 +70,14 @@ def openCL(tab):
             else:
                 fgcolor.append("BLACK")
 
-
         for i in range(len(oclDeviceDetailsLHS)):
             DeviceDetailsTreeView.expand_all()
             if "    " in oclDeviceDetailsLHS[i]:
                 DeviceDetails_Store.append(iter,[oclDeviceDetailsLHS[i].strip('\n'),oclDeviceDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
             else:
+                if "Number of devices" in oclDeviceDetailsLHS[i]:
+                    oclDeviceDetailsLHS[i] = "  Number of devices"
+                    oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
                 if "Extensions" in oclDeviceDetailsLHS[i]:
                     oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(' ')
                     iter = DeviceDetails_Store.append(None,[oclDeviceDetailsLHS[i].strip('\n'),str(len(oclDeviceExtenstions)).strip('\n'),setBackgroundColor(i),fgcolor[i]])
@@ -87,7 +89,7 @@ def openCL(tab):
 
     def getDeviceMemoryImageDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Platform.*/{flag=0}flag' | awk '/Address.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclDevices[value].strip('Intel(R)'))
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceMemoryImageDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceMemoryImageDetailsRHS.txt")
 
@@ -133,7 +135,7 @@ def openCL(tab):
 
     def getDeviceVectorDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Platform.*/{flag=0}flag' | awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%oclDevices[value].strip('Intel(R)'))
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceVectorDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceVectorDetailsRHS.txt")
 
