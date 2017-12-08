@@ -1,3 +1,5 @@
+import os.path as Path
+
 ABOUT_US_PNG = "../Images/info_icon.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
@@ -79,6 +81,15 @@ HEIGHT_RATIO1 = 0.85
 HEIGHT_RATIO2 = 0.55
 
 MWIDTH = 350
+
+
+THEME1 = Path.isdir("/usr/share/themes/FlatPlat")
+
+THEME2 = Path.isdir("/usr/share/themes/Adapta")
+
+THEME3 = Path.isdir("/usr/share/themes/Numix")
+
+THEME4 = Path.isdir("/usr/share/themes/Paper")
 
 # .------------- Colors ---------------------
 

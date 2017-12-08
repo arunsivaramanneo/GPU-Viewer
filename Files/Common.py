@@ -121,17 +121,24 @@ def getLinkButtonImg(img,link,toolTip):
     Logbutton.set_tooltip_text(toolTip)
     return Logbutton
 
+def getVulkanVersion(value):
+    majorVersion = int(value) >> 22
+    minorVersion = int(value) >> 12 & 1023
+    patchVersion = int(value) & 4095
+    return "%d.%d.%d" % (majorVersion, minorVersion, patchVersion)
+
+
 def getDriverVersion(value):
-    if '4318' in value[1]:
-        majorVersion = int(value[5]) >> 22 & 1023
-        minorVersion = int(value[5]) >> 14 & 255
-        microVersion = int(value[5]) >> 6 & 255
-        nanoVersion = int(value[5]) & 63
+    if '4318' in value[5]:
+        majorVersion = int(value[4]) >> 22 & 1023
+        minorVersion = int(value[4]) >> 14 & 255
+        microVersion = int(value[4]) >> 6 & 255
+        nanoVersion = int(value[4]) & 63
         return "%d.%d.%d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
     else:
-        majorVersion = int(value[5]) >> 22 & 1023
-        minorVersion = int(value[5]) >> 12 & 255
-        microVersion = int(value[5]) & 255
+        majorVersion = int(value[4]) >> 22
+        minorVersion = int(value[4]) >> 12 & 1023
+        microVersion = int(value[4]) & 4095
         return "%d.%d.%d" % (majorVersion, minorVersion, microVersion)
 
 def setColumnFrameBuffer(TreeFB,Title):

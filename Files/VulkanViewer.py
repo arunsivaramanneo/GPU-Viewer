@@ -9,7 +9,7 @@ import threading
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion
+    colorTrueFalse, getDriverVersion, getVulkanVersion
 
 MWIDTH = 300
 
@@ -42,13 +42,13 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v driver > /tmp/VKDDeviceinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v Version > /tmp/VKDDeviceinfo1.txt" % i)
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep driverVersion | awk '{gsub(/\(.*/,'True');}1' >> /tmp/VKDDeviceinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/VKDDeviceinfo1.txt" % i)
                 break
 
-        os.system("cat /tmp/VKDDeviceinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDeviceinfo.txt")
-        os.system("cat /tmp/VKDDeviceinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDeviceinfo2.txt")
+        os.system("cat /tmp/VKDDeviceinfo1.txt | sort | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDeviceinfo.txt")
+        os.system("cat /tmp/VKDDeviceinfo1.txt | sort | grep -o =.* | grep -o ' .*' > /tmp/VKDDeviceinfo2.txt")
 
         valueLHS = copyContentsFromFile("/tmp/VKDDeviceinfo.txt")
 
@@ -75,12 +75,12 @@ def Vulkan(tab2):
                         break
 
         for i in range(len(valueRHS)):
-            if i > 0:
-                if "0x" in valueRHS[i]:
-                    valueRHS[i] = int(valueRHS[i], 16)
-                    valueRHS[i] = str("%d" % valueRHS[i])
+            if "0x" in valueRHS[i]:
+                valueRHS[i] = int(valueRHS[i], 16)
+                valueRHS[i] = str("%d" % valueRHS[i])
 
-        valueRHS[5] = getDriverVersion(valueRHS)
+        valueRHS[0] = getVulkanVersion(valueRHS[0])
+        valueRHS[4] = getDriverVersion(valueRHS)
 
         valueLHS = [i.strip('\t') for i in valueLHS]
         valueRHS = [i.strip(':') for i in valueRHS]

@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import os
 import Const
 from Common import MyGtk, fetchImageFromUrl, setScreenSize
@@ -8,9 +7,23 @@ from VulkanViewer import Vulkan
 from About import about
 from OpenCL import openCL
 import threading
+import gi
+
+gi.require_version("Gtk","3.0")
+from gi.repository import Gtk
+
 
 
 def main():
+
+    setting = Gtk.Settings.get_default()
+
+    if Const.THEME1:
+        setting.set_property("gtk-theme-name","FlatPlat")
+    elif Const.THEME2:
+        setting.set_property("gtk-theme-name","Adapta")
+    elif Const.THEME3:
+        setting.set_property("gtk-theme-name","Numix")
 
     gtk = MyGtk("GPU-Viewer v1.2")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
@@ -42,10 +55,11 @@ def main():
     gtk.mainLoop()
 
 def isOpenclSupported():
-    os.system("clinfo > /tmp/clinfo.txt")
+    os.system("clinfo | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/clinfo.txt")
     with open("/tmp/clinfo.txt","r") as file:
         count = len(file.readlines())
-    return count > 1
+        print(count)
+    return count > 2
 
 def isVulkanSupported():
     os.system("vulkaninfo > /tmp/vulkaninfo.txt")

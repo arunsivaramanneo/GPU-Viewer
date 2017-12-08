@@ -1,5 +1,9 @@
 Dec-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    08/12 - Experimental clinfo - OpenCL front-end support
+          - Fixed apiVersion detection in Vulkan, now it should display any future versions correctly.
+          - Fixed driverVersion detection in Vulkan
+          - removed theme detection in shell script, now the Application will check for these three Flat-Plat, Adapta and Paper else will default to system theme
 	01/12 - Version 1.2 Release - All Major Features of vulkaninfo and glxinfo Implemented. 
 	      -	Updated Show GLX FrameBuffer Window to use Notebook instead of Button. This resolves Gtk Warning messages getting displayed while switching Tabs
 	      - Updated Instance and Layers Tab to use Notebook instead of Frames. Now the User can view Instance Extension and Instance Layers as Tabs under Instance & Layers Tab

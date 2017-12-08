@@ -25,8 +25,8 @@ echo "Installing Application Icons ...."
 echo " "
 sudo cp -vrf Images /usr/share/gpu-viewer
 echo " "
-echo "Application Icons Successfully Installed...."
-echo " "
+echo "Application Icons Succesfully Installed ...."
+echo ""
 echo "Installing Supported Documents...."
 echo " "
 sudo cp -vrf About\ GPU\ Viewer /usr/share/gpu-viewer
@@ -55,7 +55,7 @@ then
 	if [ $choice == 'y' ]
 	then
     	sudo cp gpu-viewer.desktop /home/$user/Desktop/
-	sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
+	    sudo chown -R $user /home/$user/Desktop/gpu-viewer.desktop
     	echo "Desktop Shortcut successfully created ..."
         echo " "
 	fi

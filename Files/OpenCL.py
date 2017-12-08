@@ -23,8 +23,6 @@ def openCL(tab):
         oclDeviceNames = copyContentsFromFile("/tmp/oclDeviceNames.txt")
         oclDeviceNames = [i.strip(' ') for i in oclDeviceNames]
         oclDeviceNames = [i.strip('\n') for i in oclDeviceNames]
-
-        os.system("clinfo > /tmp/clinfo.txt")
         return oclPlatformName,oclDeviceNames
 
     def getPlatfromDetails(value):
@@ -89,7 +87,7 @@ def openCL(tab):
 
     def getDeviceMemoryImageDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Platform.*/{flag=0}flag' | awk '/Address.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclDevices[value].strip('Intel(R)'))
+        os.system("cat /tmp/clinfo.txt | awk '/%s/{flag=1}/Platform.*/{flag=0}flag' | awk '/Address.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclDevices[value].strip('Intel(R)'))
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceMemoryImageDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceMemoryImageDetailsRHS.txt")
 
@@ -98,6 +96,7 @@ def openCL(tab):
 
         oclDeviceMemoryImageDetailsLHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsLHS]
         oclDeviceMemoryImageDetailsRHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsRHS]
+
         DeviceMemoryImage_store.clear()
         DeviceMemoryImageTreeview.set_model(DeviceMemoryImage_store)
         fgcolor = []
@@ -112,7 +111,7 @@ def openCL(tab):
 
 
         for i in range(len(oclDeviceMemoryImageDetailsLHS)):
-            DeviceDetailsTreeView.expand_all()
+            DeviceMemoryImageTreeview.expand_all()
             if "    " in oclDeviceMemoryImageDetailsLHS[i]:
                 if "Base address alignment for 2D image buffers" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceMemoryImageDetailsLHS[i] = "    Base address alignment for 2D image buffers"
@@ -121,7 +120,7 @@ def openCL(tab):
                 DeviceMemoryImage_store.append(iter,[oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
             else:
                 if oclDeviceMemoryImageDetailsLHS[i] in oclDeviceMemoryImageDetailsRHS[i]:
-                    oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i].strip(oclDeviceMemoryImageDetailsLHS[i])
+                    oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
                     iter = DeviceMemoryImage_store.append(None,[oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
                 elif "Built-in" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceKernels = oclDeviceMemoryImageDetailsRHS[i].split(';')
@@ -157,7 +156,7 @@ def openCL(tab):
 
 
         for i in range(len(oclDeviceVectorDetailsLHS)):
-            DeviceDetailsTreeView.expand_all()
+            DeviceVectorTreeview.expand_all()
             if "    " in oclDeviceVectorDetailsLHS[i]:
                 DeviceVectorTreeview.expand_all()
                 if "Correctly-rounded divide and sqrt operations" in oclDeviceVectorDetailsLHS[i]:
@@ -176,7 +175,7 @@ def openCL(tab):
         getDeviceDetails(value)
         getDeviceMemoryImageDetails(value)
         getDeviceVectorDetails(value)
-        os.system("rm /tmp/ocl*.txt")
+    #    os.system("rm /tmp/ocl*.txt")
 
     mainGrid = Gtk.Grid()
     tab.add(mainGrid)
