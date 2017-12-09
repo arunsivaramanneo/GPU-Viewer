@@ -15,18 +15,24 @@ deviceMemoryImageHeader = [" "," "]
 def openCL(tab):
 
     def getPlatformNames():
-        os.system("clinfo -l | grep Platform | grep -o :.* | grep -o ' .*' > /tmp/oclPlatformNames.txt")
+
+        os.system("clinfo -l > /tmp/PlatnDev.txt")
+        os.system("cat /tmp/PlatnDev.txt | grep Platform | grep -o :.* | grep -o ' .*' > /tmp/oclPlatformNames.txt")
         oclPlatformName = copyContentsFromFile("/tmp/oclPlatformNames.txt")
         oclPlatformName = [i.strip(' ') for i in oclPlatformName]
         oclPlatformName = [i.strip('\n') for i in oclPlatformName]
         return oclPlatformName
 
-    def selectDevice(value):
-        pass
+    def selectDevice(combo):
+        value = combo.get_active()
+        getDeviceDetails(value)
+        getDeviceMemoryImageDetails(value)
+        getDeviceVectorDetails(value)
+        getDeviceQueueExecutionCapabilities(value)
 
     def getDeviceNames(value):
 
-        os.system("clinfo -l | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/oclDeviceNames.txt"%oclPlatforms[value])
+        os.system("cat /tmp/PlatnDev.txt | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/oclDeviceNames.txt"%oclPlatforms[value])
         Devices_store.clear()
         Devices_combo.set_model(Devices_store)
         oclDeviceNames = copyContentsFromFile("/tmp/oclDeviceNames.txt")
@@ -51,12 +57,12 @@ def openCL(tab):
         oclPlatformDetailsRHS = copyContentsFromFile('/tmp/oclPlatformDetailsRHS.txt')
         platformDetails_Store.clear()
         platformDetailsTreeView.set_model(platformDetails_Store)
-        oclPlatformExtensions = oclPlatformDetailsRHS[3].split(' ')
 
         for i in range(len(oclPlatformDetailsLHS)):
             platformDetailsTreeView.expand_all()
             background_color = setBackgroundColor(i)
-            if i == 3:
+            if "Extensions" in oclPlatformDetailsLHS[i] and "suffix" not in oclPlatformDetailsLHS[i]:
+                oclPlatformExtensions = oclPlatformDetailsRHS[i].split(' ')
                 iter = platformDetails_Store.append(None,[oclPlatformDetailsLHS[i].strip('\n'),str(len(oclPlatformExtensions)),background_color])
                 for j in range(len(oclPlatformExtensions)):
                     background_color = setBackgroundColor(j)
@@ -66,8 +72,14 @@ def openCL(tab):
 
     def getDeviceDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
-        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
+        value2 = platform_combo.get_active()
+
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceDetailsRHS.txt")
 
@@ -105,7 +117,13 @@ def openCL(tab):
 
     def getDeviceMemoryImageDetails(value):
 
-        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%oclPlatforms[value])
+        value2 = platform_combo.get_active()
+
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceMemoryImageDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceMemoryImageDetailsRHS.txt")
 
@@ -151,7 +169,13 @@ def openCL(tab):
 
     def getDeviceVectorDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%oclPlatforms[value])
+        value2 = platform_combo.get_active()
+
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceVectorDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceVectorDetailsRHS.txt")
 
@@ -189,7 +213,13 @@ def openCL(tab):
 
     def getDeviceQueueExecutionCapabilities(value):
 
-        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceQueueExecutionDetails.txt"%oclPlatforms[value])
+        value2 = platform_combo.get_active()
+
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceQueueExecutionDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceQueueExecutionDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceQueueExecutionDetailsRHS.txt")
 
@@ -233,10 +263,8 @@ def openCL(tab):
         value = combo.get_active()
         getDeviceNames(value)
         getPlatfromDetails(value)
-        getDeviceDetails(value)
-        getDeviceMemoryImageDetails(value)
-        getDeviceQueueExecutionCapabilities(value)
-        getDeviceVectorDetails(value)
+
+
     #    os.system("rm /tmp/ocl*.txt")
 
     mainGrid = Gtk.Grid()
