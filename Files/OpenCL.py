@@ -16,14 +16,30 @@ def openCL(tab):
 
     def getPlatformNames():
         os.system("clinfo -l | grep Platform | grep -o :.* | grep -o ' .*' > /tmp/oclPlatformNames.txt")
-        os.system("clinfo -l | grep Device | grep -o :.* | grep -o ' .*' > /tmp/oclDeviceNames.txt")
         oclPlatformName = copyContentsFromFile("/tmp/oclPlatformNames.txt")
         oclPlatformName = [i.strip(' ') for i in oclPlatformName]
         oclPlatformName = [i.strip('\n') for i in oclPlatformName]
+        return oclPlatformName
+
+    def selectDevice(value):
+        pass
+
+    def getDeviceNames(value):
+
+        os.system("clinfo -l | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/oclDeviceNames.txt"%oclPlatforms[value])
+        Devices_store.clear()
+        Devices_combo.set_model(Devices_store)
         oclDeviceNames = copyContentsFromFile("/tmp/oclDeviceNames.txt")
         oclDeviceNames = [i.strip(' ') for i in oclDeviceNames]
         oclDeviceNames = [i.strip('\n') for i in oclDeviceNames]
-        return oclPlatformName,oclDeviceNames
+
+        numberOfDevicesEntry.set_text(str(len(oclDeviceNames)))
+        numberOfDevicesEntry.set_editable(False)
+
+        for i in oclDeviceNames:
+            Devices_store.append([i])
+
+        Devices_combo.set_active(0)
 
     def getPlatfromDetails(value):
 
@@ -49,8 +65,6 @@ def openCL(tab):
                 platformDetails_Store.append(None,[oclPlatformDetailsLHS[i].strip('\n'),oclPlatformDetailsRHS[i].strip('\n'),background_color])
 
     def getDeviceDetails(value):
-
-        print(oclDevices)
 
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
@@ -217,6 +231,7 @@ def openCL(tab):
 
     def selectPlatform(combo):
         value = combo.get_active()
+        getDeviceNames(value)
         getPlatfromDetails(value)
         getDeviceDetails(value)
         getDeviceMemoryImageDetails(value)
@@ -305,7 +320,8 @@ def openCL(tab):
 
     platformGrid = Gtk.Grid()
     platformGrid.set_border_width(20)
-    platformGrid.set_column_spacing(30)
+    platformGrid.set_column_spacing(20)
+    platformGrid.set_row_spacing(20)
     mainGrid.set_row_spacing(30)
     platformFrame = Gtk.Frame(hexpand=True)
     mainGrid.add(platformFrame)
@@ -317,7 +333,23 @@ def openCL(tab):
 
     platform_store = Gtk.ListStore(str)
 
-    oclPlatforms,oclDevices = getPlatformNames()
+    oclPlatforms = getPlatformNames()
+
+    AvailableDevices = Gtk.Label()
+    AvailableDevices.set_label("Available Device(s) :")
+    platformGrid.attach_next_to(AvailableDevices,platformLabel,Gtk.PositionType.BOTTOM,2,1)
+
+    Devices_store = Gtk.ListStore(str)
+    Devices_combo = Gtk.ComboBox.new_with_model(Devices_store)
+    Devices_combo.connect("changed",selectDevice)
+    Devices_renderer = Gtk.CellRendererText(font="BOLD")
+    Devices_combo.pack_start(Devices_renderer, True)
+    Devices_combo.add_attribute(Devices_renderer, "text", 0)
+
+
+    platformGrid.attach_next_to(Devices_combo,AvailableDevices,Gtk.PositionType.RIGHT,20,1)
+
+    numberOfDevicesEntry = Gtk.Entry()
 
     for i in oclPlatforms:
         platform_store.append([i])
@@ -329,8 +361,24 @@ def openCL(tab):
     platform_combo.add_attribute(platform_renderer, "text", 0)
     platform_combo.set_active(0)
 
-    platformGrid.attach_next_to(platform_combo,platformLabel,Gtk.PositionType.RIGHT,25,1)
+    platformGrid.attach_next_to(platform_combo,platformLabel,Gtk.PositionType.RIGHT,21,1)
 
+    numberOfPlatforms = Gtk.Label()
+    numberOfPlatforms.set_label("No. of Platforms :")
+    platformGrid.attach_next_to(numberOfPlatforms,platform_combo,Gtk.PositionType.RIGHT,10,1)
+
+    numberOfPlatformsEntry = Gtk.Entry()
+    numberOfPlatformsEntry.set_text(str(len(oclPlatforms)))
+    numberOfPlatformsEntry.set_editable(False)
+    platformGrid.attach_next_to(numberOfPlatformsEntry,numberOfPlatforms,Gtk.PositionType.RIGHT,1,1)
+
+    numberOfDevices = Gtk.Label()
+    numberOfDevices.set_label("No. Of Devices :")
+    platformGrid.attach_next_to(numberOfDevices,Devices_combo,Gtk.PositionType.RIGHT,10,1)
+
+
+    numberOfDevicesEntry.set_max_length(2)
+    platformGrid.attach_next_to(numberOfDevicesEntry,numberOfDevices,Gtk.PositionType.RIGHT,1,1)
 
 
     tab.show_all()
