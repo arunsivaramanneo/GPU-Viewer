@@ -49,7 +49,9 @@ def openCL(tab):
                 platformDetails_Store.append(None,[oclPlatformDetailsLHS[i].strip('\n'),oclPlatformDetailsRHS[i].strip('\n'),background_color])
 
     def getDeviceDetails(value):
-        print(oclDevices[value])
+
+        print(oclDevices)
+
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%oclPlatforms[value])
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceDetailsLHS.txt")
@@ -277,6 +279,7 @@ def openCL(tab):
 
     DeviceQueueExecution_store = Gtk.TreeStore(str,str,str,str)
     DeviceQueueExecutionTreeView = Gtk.TreeView(model=DeviceQueueExecution_store,expand=True)
+    DeviceQueueExecutionTreeView.set_property("enable-tree-lines",True)
 
     setOclColumns(DeviceQueueExecutionTreeView,deviceMemoryImageHeader)
 
@@ -321,7 +324,7 @@ def openCL(tab):
 
     platform_combo = Gtk.ComboBox.new_with_model(platform_store)
     platform_combo.connect("changed",selectPlatform)
-    platform_renderer = Gtk.CellRendererText()
+    platform_renderer = Gtk.CellRendererText(font="BOLD")
     platform_combo.pack_start(platform_renderer, True)
     platform_combo.add_attribute(platform_renderer, "text", 0)
     platform_combo.set_active(0)
@@ -340,5 +343,6 @@ def setOclColumns(Treeview,Title):
         column.add_attribute(renderer, "background", len(Title))
         if i == 1:
             column.add_attribute(renderer, "foreground", len(Title) + 1)
+        column.set_property("min-width", Const.MWIDTH)
         Treeview.set_property("can-focus", False)
         Treeview.append_column(column)

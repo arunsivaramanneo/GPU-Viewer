@@ -115,7 +115,7 @@ def OpenGL(tab1):
 
     LimitsFrame = Gtk.Frame()
     grid.attach(LimitsFrame, 0, 1, 2, 1)
-    Button_Limits = Gtk.Button.new_with_label("Show OpenGL Limits")
+    Button_Limits = Gtk.Button("Show OpenGL Limits")
     Button_Limits.connect("clicked", clickme)
     LimitsFrame.add(Button_Limits)
     # grid4.attach(Button_Limits, 0, 1, 2, 1)
@@ -254,7 +254,8 @@ def OpenGL(tab1):
     grid1.set_row_spacing(5)
     grid1.set_border_width(5)
     frame2.add(grid1)
-    OpenGLRad = Gtk.RadioButton("OpenGL")
+
+    OpenGLRad = Gtk.RadioButton("OpenGL ES")
     OpenGLRad.connect("clicked", radcall, 1)
     grid1.add(OpenGLRad)
     OpenGLRadES = Gtk.RadioButton.new_with_label_from_widget(OpenGLRad, "OpenGL ES")

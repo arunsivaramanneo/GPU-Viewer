@@ -8,6 +8,7 @@ from About import about
 from OpenCL import openCL
 import threading
 import gi
+import time
 
 gi.require_version("Gtk","3.0")
 from gi.repository import Gtk
@@ -16,6 +17,7 @@ from gi.repository import Gtk
 
 def main():
 
+    T1 = time.time()
     setting = Gtk.Settings.get_default()
 
     if Const.THEME1:
@@ -40,16 +42,16 @@ def main():
 
     if isOpenclSupported():
         openclTab = gtk.createTab(Const.OPEN_CL_PNG, 100, Const.ICON_HEIGHT,False)
-        openCL(openclTab)
+        t4=threading.Thread(target=openCL,args=(openclTab,))
+        t4.start()
 
 
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
     t3=threading.Thread(target=about,args=(aboutTab,))
     t3.start()
-
-    t1.join()
     t3.join()
 
+    print(time.time()-T1)
     gtk.connect("delete-event", quit)
     gtk.show_all()
     gtk.mainLoop()

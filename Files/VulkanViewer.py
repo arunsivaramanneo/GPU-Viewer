@@ -4,6 +4,8 @@ import gi
 
 import Const
 
+import threading
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
@@ -170,16 +172,15 @@ def Vulkan(tab2):
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > /tmp/VKDExtensions1.txt" % i)
                 break
+        os.system("cat /tmp/VKDExtensions1.txt | grep -o 'revision.*' | grep -o ' .*' > /tmp/VKDExtensionsRHS.txt")
         os.system("cat /tmp/VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDExtensions.txt")
 
-        # This should take care of further versioning till 100
-        with open("/tmp/VKDExtensions1.txt", "r") as file1:
+        # This should take care of future versioning
+        with open("/tmp/VKDExtensionsRHS.txt", "r") as file1:
             value = []
             for line in file1:
-                for j in range(RANGE1):
-                    if ": extension revision %2d" % j in line:
-                        value.append("0.0.%d" % j)
-                        break
+                text = line.strip('\n')
+                value.append(getVulkanVersion(text))
 
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_Store)
@@ -450,15 +451,15 @@ def Vulkan(tab2):
             "cat /tmp/vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > /tmp/VKDInstanceExtensions1.txt")
         os.system(
             "cat /tmp/VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/VKDInstanceExtensions.txt")
+        os.system("cat /tmp/VKDInstanceExtensions1.txt | grep -o 'revision.*' | grep -o ' .*' > /tmp/VKDInstanceExtensionsRHS.txt")
 
         # This should take care of further versioning till RANGE1
-        with open("/tmp/VKDInstanceExtensions1.txt", "r") as file1:
+        with open("/tmp/VKDInstanceExtensionsRHS.txt", "r") as file1:
             value = []
             for line in file1:
-                for j in range(RANGE1):
-                    if ": extension revision %2d" % j in line:
-                        value.append("0.0.%d" % j)
-                        break
+                text = line.strip('\n')
+                value.append(getVulkanVersion(text))
+
         InstanceTab_Store.clear()
         TreeInstance.set_model(InstanceTab_Store)
         with open("/tmp/VKDInstanceExtensions.txt", "r") as file1:
@@ -583,7 +584,9 @@ def Vulkan(tab2):
                 Features(text)
                 Limits(text)
                 Extensions(text)
-                Formats(text)
+                t5=threading.Thread(target=Formats,args=(text,))
+                t5.start()
+                t5.join()
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
@@ -854,7 +857,7 @@ def Vulkan(tab2):
 
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)
     gpu_combo.connect("changed", radcall)
-    renderer_text = Gtk.CellRendererText()
+    renderer_text = Gtk.CellRendererText(font="BOLD")
  #   gpu_combo.set_property("has-frame", False)
     gpu_combo.pack_start(renderer_text, True)
     gpu_combo.add_attribute(renderer_text, "text", 0)
