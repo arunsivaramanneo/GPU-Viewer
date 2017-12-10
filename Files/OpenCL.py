@@ -177,7 +177,7 @@ def openCL(tab):
 
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceVectorDetailsLHS.txt")
-        os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceVectorDetailsRHS.txt")
+        os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/.*          /,'True');print}' > /tmp/oclDeviceVectorDetailsRHS.txt")
 
         oclDeviceVectorDetailsLHS = copyContentsFromFile("/tmp/oclDeviceVectorDetailsLHS.txt")
         oclDeviceVectorDetailsRHS = copyContentsFromFile("/tmp/oclDeviceVectorDetailsRHS.txt")
