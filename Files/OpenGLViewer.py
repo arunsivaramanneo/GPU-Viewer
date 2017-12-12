@@ -255,7 +255,7 @@ def OpenGL(tab1):
     grid1.set_border_width(5)
     frame2.add(grid1)
 
-    OpenGLRad = Gtk.RadioButton("OpenGL ES")
+    OpenGLRad = Gtk.RadioButton("OpenGL")
     OpenGLRad.connect("clicked", radcall, 1)
     grid1.add(OpenGLRad)
     OpenGLRadES = Gtk.RadioButton.new_with_label_from_widget(OpenGLRad, "OpenGL ES")

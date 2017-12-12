@@ -32,7 +32,16 @@ def openCL(tab):
 
     def getDeviceNames(value):
 
-        os.system("cat /tmp/PlatnDev.txt | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/oclDeviceNames.txt"%oclPlatforms[value])
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
+
+        os.system("cat /tmp/PlatnDev.txt | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/oclDeviceNames.txt"%oclPlatformslocal[value])
         Devices_store.clear()
         Devices_combo.set_model(Devices_store)
         oclDeviceNames = copyContentsFromFile("/tmp/oclDeviceNames.txt")
@@ -49,7 +58,16 @@ def openCL(tab):
 
     def getPlatfromDetails(value):
 
-        os.system("cat /tmp/clinfo.txt | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./> /tmp/oclPlatformDetails.txt"%oclPlatforms[value])
+        oclPlatformslocal = []
+        oclPlatformslocal = oclPlatformslocal + oclPlatforms
+        oclPlatformslocal.append("BLANK")
+
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
+
+        os.system("cat /tmp/clinfo.txt | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./> /tmp/oclPlatformDetails.txt"%oclPlatformslocal[value])
         os.system("cat /tmp/oclPlatformDetails.txt | grep -o Platform.* | awk '{gsub(/  .*/,'True');print}' > /tmp/oclPlatformDetailsLHS.txt")
         os.system("cat /tmp/oclPlatformDetails.txt | grep -o Platform.* | awk '{gsub(/Platform.*  /,'True');print}' > /tmp/oclPlatformDetailsRHS.txt")
 
@@ -78,7 +96,13 @@ def openCL(tab):
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
 
-        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
+
+        print oclPlatformslocal
+        os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred > /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/oclDeviceDetailsRHS.txt")
@@ -122,6 +146,12 @@ def openCL(tab):
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
+
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
+
 
         os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq > /tmp/oclDeviceMemoryImageDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceMemoryImageDetailsLHS.txt")
@@ -175,6 +205,12 @@ def openCL(tab):
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
 
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
+
+
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/oclDeviceVectorDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceVectorDetailsLHS.txt")
         os.system("cat /tmp/oclDeviceVectorDetails.txt | awk '{gsub(/.*          /,'True');print}' > /tmp/oclDeviceVectorDetailsRHS.txt")
@@ -218,6 +254,11 @@ def openCL(tab):
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
+
+        for i in range(len(oclPlatformslocal)):
+            oclPlatformslocal[i] = [j.replace("(","\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | uniq > /tmp/oclDeviceQueueExecutionDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceQueueExecutionDetailsLHS.txt")

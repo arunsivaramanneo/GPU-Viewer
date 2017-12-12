@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import os
 import Const
-from Common import MyGtk, fetchImageFromUrl, setScreenSize
+from Common import MyGtk, setScreenSize
 from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
