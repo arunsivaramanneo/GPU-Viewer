@@ -563,7 +563,7 @@ def Vulkan(tab2):
                 count = 0
                 iter1 = SurfaceTab_Store.append(None, [text, SurfaceRHS[i].strip('\n'), background_color])
             else:
-                if ":" in Surface[i]:
+                if ":" in Surface[i] or "ArrayLayers" in Surface[i]:
                     count += 1
                     text = Surface[i].strip('\t')
                     iter2 = SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])

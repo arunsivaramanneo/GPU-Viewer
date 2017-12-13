@@ -1,13 +1,15 @@
 ﻿# GPU-Viewer
-A front-end to glxinfo and Vulkaninfo. 
+A front-end to glxinfo, vulkaninfo and clinfo. 
 
-This project aims to capture all the required/important details of glxinfo and vulkaninfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo and vulkaninfo works the GPU-viewer will also work
+This project aims to capture all the required/important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![screenshot from 2017-11-07 18-43-41](https://user-images.githubusercontent.com/30646692/32495479-c813ca20-c3eb-11e7-979b-915954c6ad05.png)
+![screenshot from 2017-12-13 16 55 30](https://user-images.githubusercontent.com/30646692/33936761-a3da3df4-e026-11e7-9fc2-7d38ba267a54.png)
 
-![screenshot from 2017-11-07 18-43-57](https://user-images.githubusercontent.com/30646692/32495490-dc8d4c56-c3eb-11e7-92ee-2c1c0ed13739.png)
+![screenshot from 2017-12-13 16 55 37](https://user-images.githubusercontent.com/30646692/33936766-a7bcd5f8-e026-11e7-86bf-b8067eea7db3.png)
 
-![screenshot from 2017-11-07 18-44-13](https://user-images.githubusercontent.com/30646692/32495519-f4c7fc58-c3eb-11e7-8338-23869a7080e1.png)
+![screenshot from 2017-12-13 16 55 43](https://user-images.githubusercontent.com/30646692/33936772-ae48970e-e026-11e7-9562-0b11fa551946.png)
+
+![screenshot from 2017-12-13 16 55 48](https://user-images.githubusercontent.com/30646692/33936775-b2a2f86c-e026-11e7-8b80-30bf3668dbd6.png)
 
 * Please note that the above images solely depends on the Theme being used on the system.
 
@@ -21,9 +23,11 @@ This project aims to capture all the required/important details of glxinfo and v
 6. Download the file and Extract to a folder
 7. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
 8. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-9. For Vulkan Tab to work Install Vulkan-Utils (sudo apt-get install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+9. For **Vulkan Tab** to work Install Vulkan-Utils (sudo apt install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
-10. Incase of issues launching the application please see the FAQ in Wiki section
+10. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
+11. Some distro's don't come with glxinfo installed by default, so you will need to install mesa-utils to get the OpenGL Tab displayed properly.
+11. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
@@ -35,7 +39,8 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
-3. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
+3. OpenCL Tab - Platform Details, Device Details , Device Memory & Image Details, Device Queue and Execution capabilities, Device Vector Details, Total No. of Platforms, No. of Devices for the platform.
+4. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
 
 
 ## UNDER DEVELOPMENT
