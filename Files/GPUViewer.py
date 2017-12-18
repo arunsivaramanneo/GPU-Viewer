@@ -17,7 +17,7 @@ from gi.repository import Gtk
 
 def main():
 
-    T1 = time.time()
+#    T1 = time.time()
     setting = Gtk.Settings.get_default()
 
     if Const.THEME1:
@@ -51,7 +51,7 @@ def main():
     t3.start()
     t3.join()
 
-    print(time.time()-T1)
+#    print(time.time()-T1)
     gtk.connect("delete-event", quit)
     gtk.show_all()
     gtk.mainLoop()
@@ -60,7 +60,6 @@ def isOpenclSupported():
     os.system("clinfo | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/clinfo.txt")
     with open("/tmp/clinfo.txt","r") as file:
         count = len(file.readlines())
-        print(count)
     return count > 2
 
 def isVulkanSupported():

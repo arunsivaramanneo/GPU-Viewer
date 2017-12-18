@@ -101,7 +101,6 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")","\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        print oclPlatformslocal
         os.system("cat /tmp/clinfo.txt | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred  > /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions/' >> /tmp/oclDeviceDetails.txt"%(oclPlatformslocal[value2],oclPlatformslocal[value2+1],value+1))
         os.system("cat /tmp/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/oclDeviceDetailsLHS.txt")
@@ -243,7 +242,6 @@ def openCL(tab):
                 DeviceVector_store.append(iter,[oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i],setBackgroundColor(i),fgcolor[i]])
             else:
                 if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
-                    print(oclDeviceVectorDetailsLHS[i])
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
                 iter = DeviceVector_store.append(None,[oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
 
