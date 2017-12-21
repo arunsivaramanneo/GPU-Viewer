@@ -41,34 +41,34 @@ def about(tab3):
     scrollable_treelist1 = createScrollbar(TreeAbout)
     frame1.add(scrollable_treelist1)
 
-    Logimg = fetchImageFromUrl(Const.LOG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Logimg = fetchImageFromUrl(Const.LOG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Logbutton = getLinkButtonImg(Logimg,Const.CHANGE_LOG_LINK,Const.TOOLTIP_CHANGE_LOG)
     grid.attach_next_to(Logbutton,frame1,Gtk.PositionType.BOTTOM,1,1)
 
-    Licenseimg = fetchImageFromUrl(Const.LICENSE_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Licenseimg = fetchImageFromUrl(Const.LICENSE_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Licensebutton = getLinkButtonImg(Licenseimg,Const.LICENSE_HTML_LINK,Const.TOOLTIP_LICENSE)
     grid.attach_next_to(Licensebutton,Logbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Faqimg = fetchImageFromUrl(Const.FAQ_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Faqimg = fetchImageFromUrl(Const.FAQ_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Faqbutton = getLinkButtonImg(Faqimg,Const.FAQ_LINK,Const.TOOLTIP_FAQ)
     grid.attach_next_to(Faqbutton,Licensebutton,Gtk.PositionType.RIGHT,1,1)
 
-    Reportimg = fetchImageFromUrl(Const.BUG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Reportimg = fetchImageFromUrl(Const.BUG_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Reportbutton = getLinkButtonImg(Reportimg,Const.ISSUE_LINK,Const.TOOLTIP_BUG)
     grid.attach_next_to(Reportbutton,Faqbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+    Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
     Donatebutton = getLinkButtonImg(Donateimg,Const.PAYPAL_LINK,Const.TOOLTIP_DONATE)
     grid.attach_next_to(Donatebutton,Reportbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Twitterimg = fetchImageFromUrl(Const.TWITTER_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+    Twitterimg = fetchImageFromUrl(Const.TWITTER_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
     Twitterbutton = getLinkButtonImg(Twitterimg,Const.TWITTER_LINK,Const.TOOLTIP_TWITTER)
     grid.attach_next_to(Twitterbutton, Donatebutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Githubimg = fetchImageFromUrl(Const.GITHUB_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Githubimg = fetchImageFromUrl(Const.GITHUB_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Githubbutton = getLinkButtonImg(Githubimg,Const.GITHUB_LINK,Const.TOOLTIP_GITHUB)
     grid.attach_next_to(Githubbutton,Twitterbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Contactimg = fetchImageFromUrl(Const.CONTACT_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT,True)
+    Contactimg = fetchImageFromUrl(Const.CONTACT_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Contactbutton = getLinkButtonImg(Contactimg,Const.EMAIL_LINK,Const.TOOLTIP_CONTACT)
     grid.attach_next_to(Contactbutton,Githubbutton,Gtk.PositionType.RIGHT,1,1)

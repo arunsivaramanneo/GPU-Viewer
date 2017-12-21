@@ -1,5 +1,6 @@
 import gi
 import Const
+import os
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
@@ -24,6 +25,8 @@ class MyGtk(Gtk.Window):
         Gtk.main()
 
     def quit(self):
+        os.system("rm /tmp/ocl*.txt")
+        os.system("rm /tmp/OpenGL*.txt")
         Gtk.main_quit()
 
 

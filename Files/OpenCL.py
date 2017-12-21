@@ -124,6 +124,7 @@ def openCL(tab):
         for i in range(len(oclDeviceDetailsLHS)):
             DeviceDetailsTreeView.expand_all()
             if "    " in oclDeviceDetailsLHS[i]:
+                oclDeviceDetailsLHS[i] = oclDeviceDetailsLHS[i].strip("  ")
                 DeviceDetails_Store.append(iter,[oclDeviceDetailsLHS[i].strip('\n'),oclDeviceDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
             else:
                 if "Number of devices" in oclDeviceDetailsLHS[i]:
@@ -182,6 +183,7 @@ def openCL(tab):
                     oclDeviceMemoryImageDetailsLHS[i] = "    Base address alignment for 2D image buffers"
                     oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
                 DeviceMemoryImageTreeview.expand_all()
+                oclDeviceMemoryImageDetailsLHS[i] = oclDeviceMemoryImageDetailsLHS[i].strip("  ")
                 DeviceMemoryImage_store.append(iter,[oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
             else:
                 if oclDeviceMemoryImageDetailsLHS[i] in oclDeviceMemoryImageDetailsRHS[i]:
@@ -239,6 +241,7 @@ def openCL(tab):
                 if "Correctly-rounded divide and sqrt operations" in oclDeviceVectorDetailsLHS[i]:
                     oclDeviceVectorDetailsLHS[i] = "    Correctly-rounded divide and sqrt operations"
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i][len(oclDeviceVectorDetailsLHS[i]):].strip(' ')
+                oclDeviceVectorDetailsLHS[i] = oclDeviceVectorDetailsLHS[i].strip("  ")
                 DeviceVector_store.append(iter,[oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i],setBackgroundColor(i),fgcolor[i]])
             else:
                 if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
@@ -284,6 +287,7 @@ def openCL(tab):
         for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
             DeviceQueueExecutionTreeView.expand_all()
             if "    " in oclDeviceQueueExecutionDetailsLHS[i]:
+                oclDeviceQueueExecutionDetailsLHS[i] = oclDeviceQueueExecutionDetailsLHS[i].strip("  ")
                 DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),setBackgroundColor(i),fgcolor[i]])
             else:
                 if oclDeviceQueueExecutionDetailsLHS[i] in oclDeviceQueueExecutionDetailsRHS[i]:

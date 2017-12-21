@@ -74,9 +74,11 @@ FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", 
 
 ICON_WIDTH = 150
 
-ICON_HEIGHT = 50
+ICON_HEIGHT = 65
 
-WIDTH_RATIO = 0.60
+ICON_HEIGHT2 = 50
+
+WIDTH_RATIO = 0.65
 
 WIDTH_RATIO2 = 0.65
 
