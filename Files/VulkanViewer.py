@@ -9,7 +9,7 @@ import threading
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, fetchImageFromUrl
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize
 
 MWIDTH = 300
 
@@ -65,14 +65,6 @@ def Vulkan(tab2):
         # Storing the RHS values into a list
 
         valueRHS = copyContentsFromFile("/tmp/VKDDeviceinfo2.txt")
-
-        # This should take care of api version from 0.0.0 to 2.5.99
-        for i in range(2):
-            for k in range(5):
-                for j in range(RANGE1):
-                    if "(%d.%d.%d)" % (i, k, j) in valueRHS[0]:
-                        valueRHS[0] = "%d.%d.%d" % (i, k, j)
-                        break
 
         for i in range(len(valueRHS)):
             if "0x" in valueRHS[i]:
@@ -306,56 +298,54 @@ def Vulkan(tab2):
         HVfg = []
         DLfg = []
 
-        with open("/tmp/VKDMemoryType.txt", "r") as file1:
-            for line in file1:
-                if "memoryTypes" in line:
-                    Mcount = Mcount + 1
-                for i in range(32):
-                    if " %s:" % hex(i) in line:
-                        dec = int(hex(i), 16)
-                        binary = bin(dec)[2:]
-                        for j in range(len(binary)):
-                            if binary[j] == '0':
-                                Flags.insert(j, "false")
-                            if binary[j] == '1':
-                                Flags.insert(j, "true")
-                        for j in range(5 - len(binary)):
-                            Flags.insert(0, "false")
-                        for k in range(len(Flags)):
-                            if k == 0:
-                                Lazily_Allocated.append(Flags[k])
-                                if Flags[k] == "false":
-                                    LAfg.append(Const.COLOR2)
-                                else:
-                                    LAfg.append(Const.COLOR1)
-                            elif k == 1:
-                                Host_Cached.append(Flags[k])
-                                if Flags[k] == "false":
-                                    HCAfg.append(Const.COLOR2)
-                                else:
-                                    HCAfg.append(Const.COLOR1)
-                            elif k == 2:
-                                Host_Coherent.append(Flags[k])
-                                if Flags[k] == "false":
-                                    HCOfg.append(Const.COLOR2)
-                                else:
-                                    HCOfg.append(Const.COLOR1)
-                            elif k == 3:
-                                Host_Visible.append(Flags[k])
-                                if Flags[k] == "false":
-                                    HVfg.append(Const.COLOR2)
-                                else:
-                                    HVfg.append(Const.COLOR1)
-                            elif k == 4:
-                                Device_Local.append(Flags[k])
-                                if Flags[k] == "false":
-                                    DLfg.append(Const.COLOR2)
-                                else:
-                                    DLfg.append(Const.COLOR1)
+        os.system("cat /tmp/VKDMemoryType.txt | grep propertyFlags | grep -o  =.* | grep -o ' .*' | awk '{gsub(/:.*/,'True');print}' > /tmp/VKDMemoryPropertyFlags.txt")
+        propertyFlags = copyContentsFromFile("/tmp/VKDMemoryPropertyFlags.txt")
+
+        for i in propertyFlags:
+            dec = int(i,16)
+            binary = bin(dec)[2:]
+            for j in range(len(binary)):
+                if binary[j] == '0':
+                    Flags.insert(j, "false")
+                if binary[j] == '1':
+                    Flags.insert(j, "true")
+            for j in range(5 - len(binary)):
+                Flags.insert(0, "false")
+            for k in range(len(Flags)):
+                if k == 0:
+                    Lazily_Allocated.append(Flags[k])
+                    if Flags[k] == "false":
+                        LAfg.append(Const.COLOR2)
+                    else:
+                        LAfg.append(Const.COLOR1)
+                elif k == 1:
+                    Host_Cached.append(Flags[k])
+                    if Flags[k] == "false":
+                        HCAfg.append(Const.COLOR2)
+                    else:
+                        HCAfg.append(Const.COLOR1)
+                elif k == 2:
+                    Host_Coherent.append(Flags[k])
+                    if Flags[k] == "false":
+                        HCOfg.append(Const.COLOR2)
+                    else:
+                        HCOfg.append(Const.COLOR1)
+                elif k == 3:
+                    Host_Visible.append(Flags[k])
+                    if Flags[k] == "false":
+                        HVfg.append(Const.COLOR2)
+                    else:
+                        HVfg.append(Const.COLOR1)
+                elif k == 4:
+                    Device_Local.append(Flags[k])
+                    if Flags[k] == "false":
+                        DLfg.append(Const.COLOR2)
+                    else:
+                        DLfg.append(Const.COLOR1)
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
-        for i in range(Mcount):
+        for i in range(len(propertyFlags)):
             background_color = setBackgroundColor(i)
             MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
                                     Host_Coherent[i].strip('\n'), Host_Cached[i].strip('\n'),
@@ -363,7 +353,6 @@ def Vulkan(tab2):
                                     HCAfg[i], LAfg[i]])
 
         HCount = 0
-        size = []
         HEAP_DEVICE_LOCAL = []
 
         with open("/tmp/VKDMemoryType.txt", "r") as file1:
@@ -377,15 +366,9 @@ def Vulkan(tab2):
                 if "None" in line:
                     HEAP_DEVICE_LOCAL.append("false")
                     Heapfg.append(Const.COLOR2)
-                if "size " in line:
-                    for j in range(1025):
-                        for k in range(RANGE1):
-                            if "(%d.%02d GiB)" % (j, k) in line:
-                                size.append("%d.%02d GB" % (j, k))
-                                break
-                            elif "(%d.%02d MiB)" % (j, k) in line:
-                                size.append("%d.%02d MB" % (j, k))
-                                break
+
+        os.system("cat /tmp/VKDMemoryType.txt | grep size | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/VKDDeviceSize.txt")
+        size = copyContentsFromFile("/tmp/VKDDeviceSize.txt")
 
         HeapTab_Store.clear()
         TreeHeap.set_model(HeapTab_Store)
@@ -393,9 +376,9 @@ def Vulkan(tab2):
         for i in range(HCount):
             background_color = setBackgroundColor(i)
             HeapTab_Store.append(
-                [i, size[i].strip('\n'), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
+                [i, getDeviceSize(size[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
-        label = "Memory Types (%d) & Heaps (%d)" % (Mcount, HCount)
+        label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount)
         notebook.set_tab_label(MemoryTab, Gtk.Label(label))
 
     def Queues(GPUname):

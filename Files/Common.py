@@ -156,3 +156,11 @@ def setColumnFrameBuffer(TreeFB,Title):
         column.set_property("min-width", 40)
         TreeFB.set_property("can-focus", False)
         TreeFB.append_column(column)
+
+def getDeviceSize(size):
+    sizeMB = float(size)/(1024*1024*1024)
+    if sizeMB <= 1.0:
+        sizeMB = str(format((sizeMB*1024),'.2f')) + " MB"
+    else:
+        sizeMB = str(format(sizeMB,'.2f')) + " GB"
+    return sizeMB
