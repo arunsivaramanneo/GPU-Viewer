@@ -243,11 +243,12 @@ def Vulkan(tab2):
             j = i
             if trueFormats[i]:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/Tiling.txt" % (
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/VKDTiling.txt" % (
                         GPUname, Format[j], Format[j + 1]))
-                with open("/tmp/Tiling.txt", "r") as file1:
+                with open("/tmp/VKDTiling.txt", "r") as file1:
                     k = 0
                     z = 0
+                    j = 1
                     value = 0
                     for line in file1:
                         background_color = setBackgroundColor(k)
@@ -263,9 +264,11 @@ def Vulkan(tab2):
                                 k = 1
                                 z += 1
                             else:
+                                background_color = setBackgroundColor(j)
                                 text = line.strip('\t')
                                 FormatsTab_Store.append(iter2, [text.strip('\n'), " ", " ", " ", background_color,
                                                                 Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
+                                j += 1
                             k += 1
 
     def MemoryTypes(GPUname):
@@ -291,7 +294,6 @@ def Vulkan(tab2):
         Host_Cached = []
         Lazily_Allocated = []
         Flags = []
-        Mcount = 0
         LAfg = []
         HCAfg = []
         HCOfg = []
@@ -455,27 +457,15 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
-        os.system(
-            "cat /tmp/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/VKDLayer1.txt")
+        os.system("cat /tmp/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/VKDLayer1.txt")
         os.system("cat /tmp/VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/VKDLayer.txt")
         os.system("cat /tmp/VKDLayer1.txt | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/VKDLayerDescription.txt")
-        Vversion = []
-        with open("/tmp/VKDLayer1.txt", "r") as file1:
-            for line in file1:
-                for i in range(2):
-                    for j in range(5):
-                        for k in range(RANGE1):
-                            if "Vulkan version %d.%d.%d," % (i, j, k) in line:
-                                Vversion.append("%d.%d.%d" % (i, j, k))
-                                break
+        os.system("cat /tmp/VKDLayer1.txt | grep ^VK | grep -o Vulkan.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/VKDVulkanVersion.txt")
+        os.system("cat /tmp/VKDLayer1.txt | grep ^VK | grep -o layer.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/VKDLayerVersion.txt")
 
-        LVersion = []
-        with open("/tmp/VKDLayer1.txt", "r") as file1:
-            for line in file1:
-                for j in range(RANGE1):
-                    if "layer version %d" % j in line:
-                        LVersion.append("0.0.%d" % j)
-                        break
+        Vversion = copyContentsFromFile("/tmp/VKDVulkanVersion.txt")
+
+        LVersion = copyContentsFromFile("/tmp/VKDLayerVersion.txt")
 
         ECount = []
         with open("/tmp/VKDLayer1.txt", "r") as file1:
@@ -497,7 +487,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 LayerTab_Store.append(
-                    [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'), ECount[i].strip('\n'),layerDescription[i].strip('\n'),
+                    [line.strip('\n'), Vversion[i].strip('\n'), getVulkanVersion(LVersion[i]).strip('\n'), ECount[i].strip('\n'),layerDescription[i].strip('\n'),
                      background_color])
 
     def Surface(GPUname):
@@ -575,7 +565,7 @@ def Vulkan(tab2):
                 Surface(text)
             Instance()
 
-        os.system("rm /tmp/VKD*.txt")
+    #    os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()
     tab2.add(grid)
