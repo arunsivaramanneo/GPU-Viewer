@@ -565,7 +565,7 @@ def Vulkan(tab2):
                 Surface(text)
             Instance()
 
-    #    os.system("rm /tmp/VKD*.txt")
+        os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()
     tab2.add(grid)
