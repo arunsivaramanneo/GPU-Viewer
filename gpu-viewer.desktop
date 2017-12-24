@@ -3,7 +3,7 @@
 Encoding=UTF-8
 version=1.2
 Name=GPU-Viewer
-Comment=A front-end to glxinfo and vulkaninfo
+Comment=A front-end to glxinfo,vulkaninfo and clinfo
 Exec=gpu-viewer
 Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png
 Type=Application

@@ -1,4 +1,6 @@
 Dec-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	22/12 - Memory Heap Device Size,Memory Type Flags, Layer Version and Vulkan Version in Instance Tab detection has been improved
+	21/12 - Code Clean up , Removed Unwanted loops to improve performance.
 	20/12 - v1.3 released - All the Changes mentioned below are available in the latest Update
 	10/12 - Improved Extensions Version Detection in Device Extensions and Instance Extensions
 	      - Updated Nvidia and AMD Logo's. Increase Icon Width to 150
