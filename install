@@ -8,7 +8,7 @@ file1="/usr/share/gpu-viewer"
 file4="/usr/bin/vulkaninfo"
 file5="/home/$user/Desktop/gpu-viewer.desktop"
 file6="/usr/bin/gpu-viewer"
-echo "************************GPU Viewer 1.2 - copyright (c) 2017-2018 - Arun Sivaraman****************************"
+echo "************************GPU Viewer 1.3 - copyright (c) 2017-2018 - Arun Sivaraman****************************"
 if [ ! -d "$file1" ]
 then
     
@@ -67,8 +67,8 @@ then
 else
 	echo "Installing Vulkan...."
     	echo " "
-	sudo eopkg install vulkan
 	sudo apt install vulkan-utils
+	sudo eopkg install vulkan
 	echo "vulkan-utils successfully Installed..."
     	echo " "
 fi

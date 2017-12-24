@@ -18,7 +18,7 @@ This project aims to capture all the required/important details of glxinfo, vulk
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
 3. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.3.deb
-4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/
+4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by using command yaourt -s gpu-viewer from the terminal . This should automatically should take care of the dependencies.
 5. For others please follow steps 6 to 9
 6. Download the file and Extract to a folder
 7. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
@@ -27,13 +27,12 @@ This project aims to capture all the required/important details of glxinfo, vulk
 The installer should be able to take care of this dependency in Debian based distro and Solus.
 10. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
 11. Some distro's don't come with glxinfo installed by default, so you will need to install mesa-utils to get the OpenGL Tab displayed properly.
-11. Incase of issues launching the application please see the FAQ in Wiki section
+12. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
-1. Debian users should be able to uninstall in the default way. 
-2. For others, Open menu->System/Administration/System tools->GPU Viewer right click and uninstall, click yes on the pop up
-3. Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove
+1. Debian users should be able to uninstall in the default way i.e. sudo apt remove gpu-viewer
+2. For others, Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove. Also you need to remove the symlink sudo rm /usr/bin/gpu-viewer
 
 ## What's developed and available?
 
@@ -54,7 +53,8 @@ The installer should be able to take care of this dependency in Debian based dis
 ## IMPORTANT
 
 1. Requires Python to run this Application, works only on linux Operating system
-2. For Vulkaninfo to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
+2. For Vulkan Tab to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
+3. For OpenCL Tab to work, install clinfo along with OpenCL drivers for your respective GPU's
 
 ## KNOWN ISSUES
 
@@ -64,9 +64,9 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Linux Mint 18.2 (Sonya)/Solus 3
-2. Desktop : Cinnamon 3.4.6/Budgie
-3. Kernel : 4.13.11-31
+1. Operating System : Linux Mint 18.2 (Sonya)/Solus 3/Ubuntu Budgie
+2. Desktop : Cinnamon 3.6/Budgie 10.4
+3. Kernel : 4.14.8
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
 
 
