@@ -45,7 +45,6 @@ def main():
         t4=threading.Thread(target=openCL,args=(openclTab,))
         t4.start()
 
-
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
     t3=threading.Thread(target=about,args=(aboutTab,))
     t3.start()

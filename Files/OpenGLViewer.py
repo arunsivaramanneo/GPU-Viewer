@@ -26,8 +26,8 @@ def OpenGL(tab1):
     grid.attach(frame1, 0, 0, 12, 1)
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
-
-    os.system("glxinfo -s | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
+    os.system("glxinfo -s > /tmp/glxinfo.txt")
+    os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
     # os.system("glxinfo | grep string | grep glx >> OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
@@ -237,13 +237,13 @@ def OpenGL(tab1):
     def radcall(button, value):
         if value == 1:
             os.system(
-                "glxinfo -s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
+                "cat /tmp/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
             os.system(
-                "glxinfo -s | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/extensions.txt")
+                "cat /tmp/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/extensions.txt")
 
         elif value == 2:
             os.system(
-                "glxinfo -s | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
+                "cat /tmp/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
 
         Radio(value)
         Vendor_Combo.set_active(0)

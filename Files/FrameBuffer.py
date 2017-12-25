@@ -35,7 +35,7 @@ def FrameBuffer(button):
     button.set_sensitive(False)
 
     os.system(
-        "glxinfo | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXVisual.txt")
+        "cat /tmp/glxinfo.txt  | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXVisual.txt")
 
     list = []
     with open("/tmp/FrameBufferGLXVisual.txt", "r") as file1:
@@ -55,7 +55,7 @@ def FrameBuffer(button):
     TreeFBConfig.set_property("enable-grid-lines", 3)
 
     os.system(
-        "glxinfo | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXFBconfigs.txt")
+        "cat /tmp/glxinfo.txt | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXFBconfigs.txt")
 
     list = []
     with open("/tmp/FrameBufferGLXFBconfigs.txt", "r") as file1:
