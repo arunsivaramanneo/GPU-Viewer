@@ -1,24 +1,24 @@
 ﻿# GPU-Viewer
 A front-end to glxinfo, vulkaninfo and clinfo. 
 
-This project aims to capture all the required/important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 PyGObjects with GTK3. All the required/Important details were extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
+This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![screenshot from 2017-12-13 16 55 30](https://user-images.githubusercontent.com/30646692/33936761-a3da3df4-e026-11e7-9fc2-7d38ba267a54.png)
+![screenshot_20171225_224901](https://user-images.githubusercontent.com/30646692/34341850-377e9e3a-e9c6-11e7-8c83-2b6f62f2c334.png)
 
-![screenshot from 2017-12-13 16 55 37](https://user-images.githubusercontent.com/30646692/33936766-a7bcd5f8-e026-11e7-86bf-b8067eea7db3.png)
+![screenshot_20171225_224833](https://user-images.githubusercontent.com/30646692/34341852-40922b0e-e9c6-11e7-97c0-e5d186edc474.png)
 
-![screenshot from 2017-12-13 16 55 43](https://user-images.githubusercontent.com/30646692/33936772-ae48970e-e026-11e7-9562-0b11fa551946.png)
+![screenshot_20171225_224947](https://user-images.githubusercontent.com/30646692/34341854-48156ae4-e9c6-11e7-8273-f7e793618de4.png)
 
-![screenshot from 2017-12-13 16 55 48](https://user-images.githubusercontent.com/30646692/33936775-b2a2f86c-e026-11e7-8b80-30bf3668dbd6.png)
+![screenshot_20171225_225014](https://user-images.githubusercontent.com/30646692/34341855-4bb1233c-e9c6-11e7-8fc2-ea78e416cc3d.png)
 
-* Please note that the above images solely depends on the Theme being used on the system.
+* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Flat-Plat and Adapta
 
 ## INSTALLATION STEPS 
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
 3. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.3.deb
-4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by using command yaourt -s gpu-viewer from the terminal . This should automatically should take care of the dependencies.
+4. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command yaourt -s gpu-viewer from the terminal . This should automatically take care of the dependencies.
 5. For others please follow steps 6 to 9
 6. Download the file and Extract to a folder
 7. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
@@ -32,7 +32,7 @@ The installer should be able to take care of this dependency in Debian based dis
 ## UNINSTALL STEPS
 
 1. Debian users should be able to uninstall in the default way i.e. sudo apt remove gpu-viewer
-2. For others, Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove. Also you need to remove the symlink sudo rm /usr/bin/gpu-viewer
+2. For others, Remove gpu-viewer directory in \usr\share\  or run sudo rm \usr\share\gpu-viewer -r to remove. Also you need to remove the symlink by running sudo rm \usr\bin\gpu-viewer
 
 ## What's developed and available?
 
@@ -48,7 +48,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## PLANNED DEVELOPMENT
 
-1. OpenGL SPIRV Support (Provided glxinfo gets updated to show SPIRV details or any other Command line)
+1. OpenGL SPIR Support (Provided glxinfo gets updated to show SPIRV details or any other Command line)
 
 ## IMPORTANT
 
