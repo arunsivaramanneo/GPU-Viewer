@@ -278,7 +278,6 @@ def OpenGL(tab1):
         search_query = entry.get_text().lower()
         for i in range(TreeGLExt.get_n_columns()):
             value = model.get_value(iter,i).lower()
-            print value
             if search_query in value:
                 return True
 
@@ -303,7 +302,7 @@ def OpenGL(tab1):
     grid3 = Gtk.Grid()
     frame4.add(grid3)
     entry = Gtk.Entry()
-    entry.set_placeholder_text("Type to filter.....")
+    entry.set_placeholder_text("Type here to filter.....")
     entry.connect("changed",refresh_filter)
     grid3.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
