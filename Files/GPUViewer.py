@@ -21,7 +21,7 @@ def main():
     setting = Gtk.Settings.get_default()
 
     if Const.THEME1:
-        setting.set_property("gtk-theme-name","FlatPlat")
+        setting.set_property("gtk-theme-name","Adapta")
     elif Const.THEME2:
         setting.set_property("gtk-theme-name","Adapta")
     elif Const.THEME3:
@@ -41,7 +41,7 @@ def main():
         t2.join()
 
     if isOpenclSupported():
-        openclTab = gtk.createTab(Const.OPEN_CL_PNG, 100, Const.ICON_HEIGHT,False)
+        openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const.ICON_HEIGHT,False)
         t4=threading.Thread(target=openCL,args=(openclTab,))
         t4.start()
 

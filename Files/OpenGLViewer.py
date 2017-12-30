@@ -150,6 +150,7 @@ def OpenGL(tab1):
     OpenGLExt_list = Gtk.ListStore(str, str)
     OpenGLExt_list_filter = OpenGLExt_list.filter_new()
     TreeGLExt = Gtk.TreeView(OpenGLExt_list_filter, expand=True)
+    TreeGLExt.set_headers_visible(False)
     frame4 = Gtk.Frame(label=" ")
 
     def radcall2(button):
@@ -301,12 +302,14 @@ def OpenGL(tab1):
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
     frame4.add(grid3)
-    entry = Gtk.Entry()
+    frame5 = Gtk.Frame()
+    grid3.attach(frame5,0,0,1,1)
+    entry = Gtk.SearchEntry()
     entry.set_placeholder_text("Type here to filter.....")
-    entry.connect("changed",refresh_filter)
-    grid3.add(entry)
+    entry.connect("search-changed",refresh_filter)
+    frame5.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
-    grid3.attach_next_to(scrollable_treelist2,entry,Gtk.PositionType.BOTTOM, 1, 1)
+    grid3.attach_next_to(scrollable_treelist2,frame5,Gtk.PositionType.BOTTOM, 1, 1)
 
     OpenGLExt_list_filter.set_visible_func(searchTree)
 
