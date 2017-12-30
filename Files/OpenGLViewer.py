@@ -148,7 +148,8 @@ def OpenGL(tab1):
 
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)
-    TreeGLExt = Gtk.TreeView(OpenGLExt_list, expand=True)
+    OpenGLExt_list_filter = OpenGLExt_list.filter_new()
+    TreeGLExt = Gtk.TreeView(OpenGLExt_list_filter, expand=True)
     frame4 = Gtk.Frame(label=" ")
 
     def radcall2(button):
@@ -171,7 +172,7 @@ def OpenGL(tab1):
                         GL_All.append(line)
 
         OpenGLExt_list.clear()
-        TreeGLExt.set_model(OpenGLExt_list)
+        TreeGLExt.set_model(OpenGLExt_list_filter)
 
         for i in range(len(List)):
             if int(value) == i:
@@ -273,6 +274,18 @@ def OpenGL(tab1):
     # End of Frame 2 and grid 1
     # Start of Frame 3
 
+    def searchTree(model,iter,data=None):
+        search_query = entry.get_text().lower()
+        for i in range(TreeGLExt.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            print value
+            if search_query in value:
+                return True
+
+
+    def refresh_filter(self):
+        OpenGLExt_list_filter.refilter()
+
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
     Vendor_Combo.connect("changed", radcall2)
     Vendor_renderer = Gtk.CellRendererText()
@@ -289,7 +302,13 @@ def OpenGL(tab1):
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
     frame4.add(grid3)
+    entry = Gtk.Entry()
+    entry.set_placeholder_text("Type to filter.....")
+    entry.connect("changed",refresh_filter)
+    grid3.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
-    grid3.attach(scrollable_treelist2, 0, 0, 1, 1)
+    grid3.attach_next_to(scrollable_treelist2,entry,Gtk.PositionType.BOTTOM, 1, 1)
+
+    OpenGLExt_list_filter.set_visible_func(searchTree)
 
     tab1.show_all()
