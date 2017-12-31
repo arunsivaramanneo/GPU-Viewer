@@ -3,13 +3,13 @@ A front-end to glxinfo, vulkaninfo and clinfo.
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![screenshot_20171225_224901](https://user-images.githubusercontent.com/30646692/34341850-377e9e3a-e9c6-11e7-8c83-2b6f62f2c334.png)
+![screenshot_20171231_112430](https://user-images.githubusercontent.com/30646692/34459687-8801a9aa-ee1d-11e7-9753-e1e128acf3f2.png)
 
-![screenshot_20171225_224833](https://user-images.githubusercontent.com/30646692/34341852-40922b0e-e9c6-11e7-97c0-e5d186edc474.png)
+![screenshot_20171231_112502](https://user-images.githubusercontent.com/30646692/34459688-9577d85c-ee1d-11e7-965b-822f2992045b.png)
 
-![screenshot_20171225_224947](https://user-images.githubusercontent.com/30646692/34341854-48156ae4-e9c6-11e7-8273-f7e793618de4.png)
+![screenshot_20171231_112533](https://user-images.githubusercontent.com/30646692/34459695-a526d79e-ee1d-11e7-8109-2187105e2558.png)
 
-![screenshot_20171225_225014](https://user-images.githubusercontent.com/30646692/34341855-4bb1233c-e9c6-11e7-8fc2-ea78e416cc3d.png)
+![screenshot_20171231_112601](https://user-images.githubusercontent.com/30646692/34459696-b014fad2-ee1d-11e7-97b3-7c9fd7c6a8b1.png)
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Flat-Plat and Adapta
 
@@ -23,7 +23,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     * sudo apt-get update
     * sudo apt-get install gpu-viewer
     
-    Please note the dependencies vulkan-utils,clinfo needs to be installed seperately. Work in progress to have the dependencies installed using PPA
+    Please note all the dependencies python, vulkan-utils,clinfo will be installed seperately.
     
 4. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.3.deb
 5. **Arch based distro** users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies.

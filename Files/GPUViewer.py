@@ -20,14 +20,14 @@ def main():
 #    T1 = time.time()
     setting = Gtk.Settings.get_default()
 
-    if Const.THEME1:
+    if Const.THEME2:
         setting.set_property("gtk-theme-name","Adapta")
-    elif Const.THEME2:
-        setting.set_property("gtk-theme-name","Adapta")
+    elif Const.THEME1:
+        setting.set_property("gtk-theme-name","FlatPlat")
     elif Const.THEME3:
         setting.set_property("gtk-theme-name","Numix")
 
-    gtk = MyGtk("GPU-Viewer v1.3")
+    gtk = MyGtk("GPU-Viewer v1.4")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)

@@ -305,7 +305,7 @@ def OpenGL(tab1):
     frame5 = Gtk.Frame()
     grid3.attach(frame5,0,0,1,1)
     entry = Gtk.SearchEntry()
-    entry.set_placeholder_text("Type here to filter.....")
+    entry.set_placeholder_text("Type here to filter extensions.....")
     entry.connect("search-changed",refresh_filter)
     frame5.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
