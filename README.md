@@ -17,7 +17,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 16.04 (Xenial)/Linux Mint 18.x** users should be able to install this application using the below PPA
+3. **Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 17.04 (Zesty)/Ubuntu 16.04 (Xenial)/Linux Mint 18.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update

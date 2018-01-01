@@ -3,36 +3,36 @@ Dec-2017------------------------------------------------------------------------
     31/12 - V1.4 Released 
           - Added Search Feature to OpenGL Extensions
     22/12 - Memory Heap Device Size,Memory Type Flags, Layer Version and Vulkan Version in Instance Tab detection has been improved
-	21/12 - Code Clean up , Removed Unwanted loops to improve performance.
-	20/12 - v1.3 released - All the Changes mentioned below are available in the latest Update
-	10/12 - Improved Extensions Version Detection in Device Extensions and Instance Extensions
-	      - Updated Nvidia and AMD Logo's. Increase Icon Width to 150
-	      - Updated OpenCL Tab to display Available devices for the platform, No. of Platforms and No. of devices for the platform
-	      - Added support for Multi GPU OpenCL detection.
+    21/12 - Code Clean up , Removed Unwanted loops to improve performance.
+    20/12 - v1.3 released - All the Changes mentioned below are available in the latest Update
+    10/12 - Improved Extensions Version Detection in Device Extensions and Instance Extensions
+          - Updated Nvidia and AMD Logo's. Increase Icon Width to 150
+          - Updated OpenCL Tab to display Available devices for the platform, No. of Platforms and No. of devices for the platform
+          - Added support for Multi GPU OpenCL detection.
     08/12 - Experimental clinfo - OpenCL front-end support
           - Fixed apiVersion detection in Vulkan, now it should display any future versions correctly.
           - Fixed driverVersion detection in Vulkan
           - removed theme detection in shell script, now the Application will check for these three Flat-Plat, Adapta and Paper else will default to system theme
-	01/12 - Version 1.2 Release - All Major Features of vulkaninfo and glxinfo Implemented. 
-	      -	Updated Show GLX FrameBuffer Window to use Notebook instead of Button. This resolves Gtk Warning messages getting displayed while switching Tabs
-	      - Updated Instance and Layers Tab to use Notebook instead of Frames. Now the User can view Instance Extension and Instance Layers as Tabs under Instance & Layers Tab
-	      - Added Description to Instance Layers.
-	      - Added lsb_release -c -r -d command line output to Device Tab in Vulkan, Added Kernel Version in Device Tab to Vulkan
-	      - Implemented Threading to improve App performance. Now App should open within 2 to 3 seconds prior to 4 to 5 seconds
-	      - App version bumped from 1.1 to 1.2	
+    01/12 - Version 1.2 Release - All Major Features of vulkaninfo and glxinfo Implemented. 
+          - Updated Show GLX FrameBuffer Window to use Notebook instead of Button. This resolves Gtk Warning messages getting displayed while switching Tabs
+          - Updated Instance and Layers Tab to use Notebook instead of Frames. Now the User can view Instance Extension and Instance Layers as Tabs under Instance & Layers Tab
+          - Added Description to Instance Layers.
+          - Added lsb_release -c -r -d command line output to Device Tab in Vulkan, Added Kernel Version in Device Tab to Vulkan
+          - Implemented Threading to improve App performance. Now App should open within 2 to 3 seconds prior to 4 to 5 seconds
+          - App version bumped from 1.1 to 1.2	
 
 Nov-2017---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	29/11 - Added driverVersion to Device Tab in Vulkan, removed Themes, now it will be defaulted to System theme	
-	25/11 - Updated Surface Tab, with expandible/collapsible rows for easy navigation
-	      - Updated OpenGL Limits Section , Texture Formats  and few of the sub details will be expandible/collapsilbe
-	      - Enabled Tree Lines for Formats Tab, Surface Tab and OpenGL Limits Section.	
-	23/11 - Updated OpenGL Limits Section, to display the Texture Formats in a collapsible/Expandable rows
-	      - enabled popup for Vulkan tab, now users can right click on the Tab and navigate to other tabs
-	      - Now the Application will always open at the Center of the Screen, Also increased the Icon height by 20%
-	21/11 - v1.1b - Released Application version 1.1b, All the changes mentioned below are available in .deb and AUR Package, above changes will be merged in next release.
-	      - Updated Format Tab, Now the user can further filter linear, optimal and Buffer flags
-	      - Updated Surface Tab, now the user can collapse VkSurfaceCapabilities* , Formats, Present Modes.
+    29/11 - Added driverVersion to Device Tab in Vulkan, removed Themes, now it will be defaulted to System theme	
+    25/11 - Updated Surface Tab, with expandible/collapsible rows for easy navigation
+          - Updated OpenGL Limits Section , Texture Formats  and few of the sub details will be expandible/collapsilbe
+          - Enabled Tree Lines for Formats Tab, Surface Tab and OpenGL Limits Section.	
+    23/11 - Updated OpenGL Limits Section, to display the Texture Formats in a collapsible/Expandable rows
+          - enabled popup for Vulkan tab, now users can right click on the Tab and navigate to other tabs
+          - Now the Application will always open at the Center of the Screen, Also increased the Icon height by 20%
+    21/11 - v1.1b - Released Application version 1.1b, All the changes mentioned below are available in .deb and AUR Package, above changes will be merged in next release.
+          - Updated Format Tab, Now the user can further filter linear, optimal and Buffer flags
+          - Updated Surface Tab, now the user can collapse VkSurfaceCapabilities* , Formats, Present Modes.
     14/11 - Updated Format Tab, Now user can see all the linear, Optimal and Buffer flags (if available) by expanding the Respective rows
     08/11 - Added two default themes, Adapta and Numix, user can choose between the two, if user installs both Adapta is taken as default
           - Users can install the application by running the install file. Post installation users can access the application from menu->System->GPU Viewer
