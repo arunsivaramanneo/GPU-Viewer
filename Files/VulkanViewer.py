@@ -655,6 +655,7 @@ def Vulkan(tab2):
     # ------------ Creating the Limits Tab -------------------------------------------
     LimitsTab = Gtk.VBox(spacing=10)
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
+    LimitsGrid.set_row_spacing(3)
 
     LimitsTab_Store = Gtk.ListStore(str, str, str)
     LimitsTab_Store_filter = LimitsTab_Store.filter_new()
@@ -676,6 +677,7 @@ def Vulkan(tab2):
 
     ExtensionTab = Gtk.VBox(spacing=10)
     ExtensionGrid = createSubTab(ExtensionTab, notebook, "Extensions")
+    ExtensionGrid.set_row_spacing(2)
 
     ExtensionTab_Store = Gtk.ListStore(str, str, str)
     ExtensionTab_store_filter = ExtensionTab_Store.filter_new()

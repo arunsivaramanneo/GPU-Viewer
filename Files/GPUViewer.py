@@ -20,10 +20,10 @@ def main():
 #    T1 = time.time()
     setting = Gtk.Settings.get_default()
 
-    if Const.THEME2:
-        setting.set_property("gtk-theme-name","Adapta")
-    elif Const.THEME1:
+    if Const.THEME1:
         setting.set_property("gtk-theme-name","FlatPlat")
+    elif Const.THEME2:
+        setting.set_property("gtk-theme-name","Adapta")
     elif Const.THEME3:
         setting.set_property("gtk-theme-name","Numix")
 
