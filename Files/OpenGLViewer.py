@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from FrameBuffer import FrameBuffer
 from Common import setScreenSize, fetchImageFromUrl, copyContentsFromFile, setBackgroundColor, setColumns, \
-    createScrollbar
+    createScrollbar, refresh_filter
 
 WH = 70
 
@@ -283,9 +283,6 @@ def OpenGL(tab1):
                 return True
 
 
-    def refresh_filter(self):
-        OpenGLExt_list_filter.refilter()
-
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
     Vendor_Combo.connect("changed", radcall2)
     Vendor_renderer = Gtk.CellRendererText()
@@ -302,14 +299,15 @@ def OpenGL(tab1):
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
     frame4.add(grid3)
-    frame5 = Gtk.Frame()
-    grid3.attach(frame5,0,0,1,1)
+    frameSearch = Gtk.Frame()
     entry = Gtk.SearchEntry()
     entry.set_placeholder_text("Type here to filter extensions.....")
-    entry.connect("search-changed",refresh_filter)
-    frame5.add(entry)
+    entry.connect("search-changed",refresh_filter,OpenGLExt_list_filter)
+    entry.grab_focus()
+    frameSearch.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
-    grid3.attach_next_to(scrollable_treelist2,frame5,Gtk.PositionType.BOTTOM, 1, 1)
+    grid3.attach(frameSearch,0,0,1,1)
+    grid3.attach_next_to(scrollable_treelist2,frameSearch,Gtk.PositionType.BOTTOM, 1, 1)
 
     OpenGLExt_list_filter.set_visible_func(searchTree)
 

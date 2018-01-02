@@ -163,3 +163,16 @@ def getDeviceSize(size):
     else:
         sizeMB = str(format(sizeMB,'.2f')) + " GB"
     return sizeMB
+
+def searchStore(TreeGLExt, grid3, refresh_filter):
+    frameSearch = Gtk.Frame()
+    entry = Gtk.SearchEntry()
+    entry.set_placeholder_text("Type here to filter extensions.....")
+    entry.connect("search-changed", refresh_filter)
+    frameSearch.add(entry)
+    scrollable_treelist2 = createScrollbar(TreeGLExt)
+    grid3.attach(frameSearch, 0, 0, 1, 1)
+    grid3.attach_next_to(scrollable_treelist2, frameSearch, Gtk.PositionType.BOTTOM, 1, 1)
+
+def refresh_filter(self,store_filter):
+    store_filter.refilter()

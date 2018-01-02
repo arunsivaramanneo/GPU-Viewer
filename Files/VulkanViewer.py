@@ -9,7 +9,7 @@ import threading
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter
 
 MWIDTH = 300
 
@@ -148,7 +148,7 @@ def Vulkan(tab2):
                 value[i] = str(int(value[i], 16))
 
         LimitsTab_Store.clear()
-        TreeLimits.set_model(LimitsTab_Store)
+        TreeLimits.set_model(LimitsTab_Store_filter)
 
         value = [i.strip(' ') for i in value]
         with open("/tmp/VKDlimits.txt", "r") as file1:
@@ -175,7 +175,7 @@ def Vulkan(tab2):
                 value.append(getVulkanVersion(text))
 
         ExtensionTab_Store.clear()
-        TreeExtension.set_model(ExtensionTab_Store)
+        TreeExtension.set_model(ExtensionTab_store_filter)
 
         with open("/tmp/VKDExtensions.txt", "r") as file1:
             count = len(file1.readlines())
@@ -548,6 +548,24 @@ def Vulkan(tab2):
                     text = Surface[i].strip('\t')
                     SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
 
+    def searchExtensionTree(model,iter,Tree):
+        search_query = Extensionentry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
+    def searchLimitsTree(model,iter,Tree):
+        search_query = limitsSearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
+
+    def refresh_filter(self,store_filter):
+        store_filter.refilter()
+
     def radcall(combo):
 
         text = combo.get_active()
@@ -639,13 +657,20 @@ def Vulkan(tab2):
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
 
     LimitsTab_Store = Gtk.ListStore(str, str, str)
-    TreeLimits = Gtk.TreeView(LimitsTab_Store, expand=True)
+    LimitsTab_Store_filter = LimitsTab_Store.filter_new()
+    TreeLimits = Gtk.TreeView(LimitsTab_Store_filter, expand=True)
     TreeLimits.set_enable_search(True)
 
     setColumns(TreeLimits, LimitsTitle, Const.MWIDTH, 0.0)
 
+    limitsFrameSearch = Gtk.Frame()
+    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
+    limitsFrameSearch.add(limitsSearchEntry)
+    LimitsGrid.add(limitsFrameSearch)
     LimitsScrollbar = createScrollbar(TreeLimits)
-    LimitsGrid.add(LimitsScrollbar)
+    LimitsGrid.attach_next_to(LimitsScrollbar,limitsFrameSearch,Gtk.PositionType.BOTTOM,1,1)
+
+    LimitsTab_Store_filter.set_visible_func(searchLimitsTree,data=TreeLimits)
 
     # ------------ Creating the Extensions Tab-------------------------------------------
 
@@ -653,13 +678,20 @@ def Vulkan(tab2):
     ExtensionGrid = createSubTab(ExtensionTab, notebook, "Extensions")
 
     ExtensionTab_Store = Gtk.ListStore(str, str, str)
-    TreeExtension = Gtk.TreeView(ExtensionTab_Store, expand=True)
-    TreeExtension.set_enable_search(True)
+    ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
+    TreeExtension = Gtk.TreeView(ExtensionTab_store_filter, expand=True)
 
     setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH, 0.0)
 
+    frameSearch = Gtk.Frame()
+    Extensionentry = createSearchEntry(ExtensionTab_store_filter)
+    frameSearch.add(Extensionentry)
+    ExtensionGrid.add(frameSearch)
     ExtensionScrollbar = createScrollbar(TreeExtension)
-    ExtensionGrid.add(ExtensionScrollbar)
+    ExtensionGrid.attach_next_to(ExtensionScrollbar,frameSearch,Gtk.PositionType.BOTTOM,1,1)
+
+    ExtensionTab_store_filter.set_visible_func(searchExtensionTree,data=TreeExtension)
+
     # ------------Creating the Formats Tab --------------------------------------------------
 
     FormatsTab = Gtk.VBox(spacing=10)
@@ -842,3 +874,10 @@ def Vulkan(tab2):
     # Logos
 
     tab2.show_all()
+
+
+def createSearchEntry(ExtensionTab_store_filter):
+    Extensionentry = Gtk.SearchEntry()
+    Extensionentry.set_placeholder_text("Type here to filter.....")
+    Extensionentry.connect("search-changed", refresh_filter, ExtensionTab_store_filter)
+    return Extensionentry
