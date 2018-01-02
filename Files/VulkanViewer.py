@@ -122,7 +122,7 @@ def Vulkan(tab2):
         fgColor, value = colorTrueFalse("/tmp/VKDFeatures1.txt", "= 1")
 
         FeaturesTab_Store.clear()
-        TreeFeatures.set_model(FeaturesTab_Store)
+
         with open("/tmp/VKDFeatures.txt", "r") as file1:
             for i, line in enumerate(file1):
                 text = line.strip('\t')
@@ -548,8 +548,15 @@ def Vulkan(tab2):
                     text = Surface[i].strip('\t')
                     SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
 
+    def searchFeaturesTree(model,iter,Tree):
+        search_query = featureSearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
     def searchExtensionTree(model,iter,Tree):
-        search_query = Extensionentry.get_text().lower()
+        search_query = extensionSearchEntry.get_text().lower()
         for i in range(Tree.get_n_columns()):
             value = model.get_value(iter,i).lower()
             if search_query in value:
@@ -632,9 +639,11 @@ def Vulkan(tab2):
 
     FeatureTab = Gtk.VBox(spacing=10)
     FeaturesGrid = createSubTab(FeatureTab, notebook, "Features")
+    FeaturesGrid.set_row_spacing(3)
 
     FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
-    TreeFeatures = Gtk.TreeView(FeaturesTab_Store, expand=True)
+    FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
+    TreeFeatures = Gtk.TreeView(FeaturesTab_Store_filter, expand=True)
     TreeFeatures.set_enable_search(True)
     for i, column_title in enumerate(FeaturesTitle):
         Featurerenderer = Gtk.CellRendererText()
@@ -649,8 +658,14 @@ def Vulkan(tab2):
         TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
+    featureFrameSearch = Gtk.Frame()
+    featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
+    featureFrameSearch.add(featureSearchEntry)
+    FeaturesGrid.add(featureFrameSearch)
     FeatureScrollbar = createScrollbar(TreeFeatures)
-    FeaturesGrid.add(FeatureScrollbar)
+    FeaturesGrid.attach_next_to(FeatureScrollbar,featureFrameSearch,Gtk.PositionType.BOTTOM,1,1)
+
+    FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree,data=TreeFeatures)
 
     # ------------ Creating the Limits Tab -------------------------------------------
     LimitsTab = Gtk.VBox(spacing=10)
@@ -685,12 +700,12 @@ def Vulkan(tab2):
 
     setColumns(TreeExtension, ExtensionsTitle, Const.MWIDTH, 0.0)
 
-    frameSearch = Gtk.Frame()
-    Extensionentry = createSearchEntry(ExtensionTab_store_filter)
-    frameSearch.add(Extensionentry)
-    ExtensionGrid.add(frameSearch)
+    extensionFrameSearch = Gtk.Frame()
+    extensionSearchEntry = createSearchEntry(ExtensionTab_store_filter)
+    extensionFrameSearch.add(extensionSearchEntry)
+    ExtensionGrid.add(extensionFrameSearch)
     ExtensionScrollbar = createScrollbar(TreeExtension)
-    ExtensionGrid.attach_next_to(ExtensionScrollbar,frameSearch,Gtk.PositionType.BOTTOM,1,1)
+    ExtensionGrid.attach_next_to(ExtensionScrollbar,extensionFrameSearch,Gtk.PositionType.BOTTOM,1,1)
 
     ExtensionTab_store_filter.set_visible_func(searchExtensionTree,data=TreeExtension)
 
