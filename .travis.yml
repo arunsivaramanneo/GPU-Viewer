@@ -9,3 +9,4 @@ python:
   - "3.6-dev"  # 3.6 development branch
 sudo: enabled
 dist: artful
+script: pytest
