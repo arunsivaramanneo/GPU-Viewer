@@ -72,9 +72,9 @@ FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", 
                    "srgb", "aux", "depth", "stcl",
                    "acr", "acg", "acb", "aca", "msnum", "msbufs", "caveats"]
 
-ICON_WIDTH = 150
+ICON_WIDTH = 130
 
-ICON_HEIGHT = 65
+ICON_HEIGHT = 60
 
 ICON_HEIGHT2 = 50
 
@@ -82,7 +82,7 @@ WIDTH_RATIO = 0.60
 
 WIDTH_RATIO2 = 0.65
 
-HEIGHT_RATIO1 = 0.82
+HEIGHT_RATIO1 = 0.86
 
 HEIGHT_RATIO2 = 0.55
 

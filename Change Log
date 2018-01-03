@@ -1,7 +1,9 @@
 -----------------------------------------------------------------------Jan-2018-----------------------------------------------------------------------------------------------------------------
-
+03/01   - Added Search option to Formats sub tab in Vulkan
+    - Removed Twitter Icon in About Tab
+    - Reduced the Images Height and Width
 02/01	- Added Search option to Features,Limits and Extensions sub tab in Vulkan
-	- Reduced the Application default size. Now the application will default to 60% width and 82% height of display resolution
+	- updated the Application default size. Now the application will default to 60% width and 82% height of display resolution
 
 -----------------------------------------------------------------------Dec-2017-----------------------------------------------------------------------------------------------------------------
 

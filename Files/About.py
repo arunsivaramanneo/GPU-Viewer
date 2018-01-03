@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
 from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl, getLinkButtonImg
 
-Title1 = ["About GPU-Viewer v1.4"]
+Title1 = ["About GPU-Viewer v1.5"]
 Title2 = ["Change Log"]
 
 
@@ -61,13 +61,9 @@ def about(tab3):
     Donatebutton = getLinkButtonImg(Donateimg,Const.PAYPAL_LINK,Const.TOOLTIP_DONATE)
     grid.attach_next_to(Donatebutton,Reportbutton,Gtk.PositionType.RIGHT,1,1)
 
-    Twitterimg = fetchImageFromUrl(Const.TWITTER_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Twitterbutton = getLinkButtonImg(Twitterimg,Const.TWITTER_LINK,Const.TOOLTIP_TWITTER)
-    grid.attach_next_to(Twitterbutton, Donatebutton, Gtk.PositionType.RIGHT, 1, 1)
-
     Githubimg = fetchImageFromUrl(Const.GITHUB_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Githubbutton = getLinkButtonImg(Githubimg,Const.GITHUB_LINK,Const.TOOLTIP_GITHUB)
-    grid.attach_next_to(Githubbutton,Twitterbutton,Gtk.PositionType.RIGHT,1,1)
+    grid.attach_next_to(Githubbutton,Donatebutton,Gtk.PositionType.RIGHT,1,1)
 
     Contactimg = fetchImageFromUrl(Const.CONTACT_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT2,True)
     Contactbutton = getLinkButtonImg(Contactimg,Const.EMAIL_LINK,Const.TOOLTIP_CONTACT)

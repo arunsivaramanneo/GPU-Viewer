@@ -233,7 +233,7 @@ def Vulkan(tab2):
         Format.append("BLANK")
 
         FormatsTab_Store.clear()
-        TreeFormats.set_model(FormatsTab_Store)
+
         for i in range(len(Format) - 1):
             background_color = setBackgroundColor(i)
             iter = FormatsTab_Store.append(None,
@@ -569,6 +569,12 @@ def Vulkan(tab2):
             if search_query in value:
                 return True
 
+    def searchFormatsTree(model,iter,Tree):
+        search_query = formatSearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
 
     def refresh_filter(self,store_filter):
         store_filter.refilter()
@@ -713,9 +719,11 @@ def Vulkan(tab2):
 
     FormatsTab = Gtk.VBox(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
+    FormatsGrid.set_row_spacing(3)
 
     FormatsTab_Store = Gtk.TreeStore(str, str, str, str, str, str, str, str)
-    TreeFormats = Gtk.TreeView(FormatsTab_Store, expand=True)
+    FormatsTab_Store_filter = FormatsTab_Store.filter_new()
+    TreeFormats = Gtk.TreeView(FormatsTab_Store_filter, expand=True)
     TreeFormats.set_property("enable-tree-lines", True)
     TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
@@ -731,8 +739,14 @@ def Vulkan(tab2):
         TreeFormats.set_property("can-focus", False)
         TreeFormats.append_column(column)
 
+    formatSearchFrame = Gtk.Frame()
+    formatSearchEntry = createSearchEntry(FormatsTab_Store_filter)
+    formatSearchFrame.add(formatSearchEntry)
+    FormatsGrid.add(formatSearchFrame)
     FormatsScrollbar = createScrollbar(TreeFormats)
-    FormatsGrid.add(FormatsScrollbar)
+    FormatsGrid.attach_next_to(FormatsScrollbar,formatSearchFrame,Gtk.PositionType.BOTTOM,1,1)
+
+    FormatsTab_Store_filter.set_visible_func(searchFormatsTree,data=TreeFormats)
 
     # ------------------------Memory Types & Heaps----------------------------------------------
 

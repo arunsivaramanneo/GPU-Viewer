@@ -27,7 +27,7 @@ def main():
     elif Const.THEME3:
         setting.set_property("gtk-theme-name","Numix")
 
-    gtk = MyGtk("GPU-Viewer v1.4")
+    gtk = MyGtk("GPU-Viewer v1.5")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
