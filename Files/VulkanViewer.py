@@ -446,7 +446,7 @@ def Vulkan(tab2):
                 value.append(getVulkanVersion(text))
 
         InstanceTab_Store.clear()
-        TreeInstance.set_model(InstanceTab_Store)
+
         with open("/tmp/VKDInstanceExtensions.txt", "r") as file1:
             count1 = len(file1.readlines())
             label = "Instance Extensions (%d)" % count1
@@ -477,7 +477,7 @@ def Vulkan(tab2):
 
         layerDescription = copyContentsFromFile("/tmp/VKDLayerDescription.txt")
         LayerTab_Store.clear()
-        TreeLayer.set_model(LayerTab_Store)
+
         count2 = len(LVersion)
         label = "Instances (%d) & Layers (%d)" % (count1, count2)
         label2 = "Instance Layers (%d)"%count2
@@ -576,8 +576,19 @@ def Vulkan(tab2):
             if search_query in value:
                 return True
 
-    def refresh_filter(self,store_filter):
-        store_filter.refilter()
+    def searchInstanceExtTree(model,iter,Tree):
+        search_query = instanceSearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
+    def searchInstanceLayersTree(model,iter,Tree):
+        search_query = layerSearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
 
     def radcall(combo):
 
@@ -830,25 +841,39 @@ def Vulkan(tab2):
     InstanceExtGrid = createSubTab(InstanceExtTab,InstanceNotebook,"Instance Extensions")
 
     InstanceTab_Store = Gtk.ListStore(str, str, str)
-    TreeInstance = Gtk.TreeView(InstanceTab_Store, expand=True)
+    InstanceTab_Store_filter = InstanceTab_Store.filter_new()
+    TreeInstance = Gtk.TreeView(InstanceTab_Store_filter, expand=True)
     TreeInstance.set_enable_search(True)
 
     setColumns(TreeInstance, InstanceTitle, 300, 0.0)
 
+    instanceSearchFrame = Gtk.Frame()
+    instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
+    instanceSearchFrame.add(instanceSearchEntry)
+    InstanceExtGrid.add(instanceSearchFrame)
     InstanceScrollbar = createScrollbar(TreeInstance)
-    InstanceExtGrid.add(InstanceScrollbar)
+    InstanceExtGrid.attach_next_to(InstanceScrollbar,instanceSearchFrame,Gtk.PositionType.BOTTOM,1,1)
+
+    InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree,data=TreeInstance)
 
     InstanceLayersTab = Gtk.VBox(spacing=10)
     InstanceLayersGrid = createSubTab(InstanceLayersTab,InstanceNotebook,"Instance Layers")
 
     LayerTab_Store = Gtk.ListStore(str, str, str, str, str,str)
-    TreeLayer = Gtk.TreeView(LayerTab_Store, expand=True)
+    LayerTab_Store_filter = LayerTab_Store.filter_new()
+    TreeLayer = Gtk.TreeView(LayerTab_Store_filter, expand=True)
     TreeLayer.set_enable_search(TreeLayer)
 
     setColumns(TreeLayer, LayerTitle, 100, 0.0)
 
+    layerSearchFrame = Gtk.Frame()
+    layerSearchEntry = createSearchEntry(LayerTab_Store_filter)
+    layerSearchFrame.add(layerSearchEntry)
+    InstanceLayersGrid.add(layerSearchFrame)
     LayerScrollbar = createScrollbar(TreeLayer)
-    InstanceLayersGrid.add(LayerScrollbar)
+    InstanceLayersGrid.attach_next_to(LayerScrollbar,layerSearchFrame,Gtk.PositionType.BOTTOM,1,1)
+
+    LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree,data=TreeLayer)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
