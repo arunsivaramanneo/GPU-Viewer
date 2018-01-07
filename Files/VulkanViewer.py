@@ -839,6 +839,7 @@ def Vulkan(tab2):
     InstanceGrid.add(InstanceNotebook)
     InstanceExtTab = Gtk.VBox(spacing=10)
     InstanceExtGrid = createSubTab(InstanceExtTab,InstanceNotebook,"Instance Extensions")
+    InstanceExtGrid.set_row_spacing(3)
 
     InstanceTab_Store = Gtk.ListStore(str, str, str)
     InstanceTab_Store_filter = InstanceTab_Store.filter_new()
@@ -858,6 +859,7 @@ def Vulkan(tab2):
 
     InstanceLayersTab = Gtk.VBox(spacing=10)
     InstanceLayersGrid = createSubTab(InstanceLayersTab,InstanceNotebook,"Instance Layers")
+    InstanceLayersGrid.set_row_spacing(3)
 
     LayerTab_Store = Gtk.ListStore(str, str, str, str, str,str)
     LayerTab_Store_filter = LayerTab_Store.filter_new()
