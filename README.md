@@ -1,7 +1,6 @@
 ﻿# GPU-Viewer
 A front-end to glxinfo, vulkaninfo and clinfo. 
 
-https://img.shields.io/badge/vulkan--loader--1.0.67-Passed-brightgreen.svg
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
