@@ -1,4 +1,6 @@
 -----------------------------------------------------------------------Jan-2018-----------------------------------------------------------------------------------------------------------------
+10/01   - Added Filter Option to Instance Extensions and Instance Layers tab in Vulkan
+        - Updated About GPU Viewer Section
 03/01   - Added Search option to Formats sub tab in Vulkan
         - Removed Twitter Icon in About Tab
         - Reduced the Images Height and Width
