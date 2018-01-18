@@ -723,7 +723,6 @@ def Vulkan(tab2):
     ExtensionGrid.add(extensionFrameSearch)
     ExtensionScrollbar = createScrollbar(TreeExtension)
     ExtensionGrid.attach_next_to(ExtensionScrollbar,extensionFrameSearch,Gtk.PositionType.BOTTOM,1,1)
-
     ExtensionTab_store_filter.set_visible_func(searchExtensionTree,data=TreeExtension)
 
     # ------------Creating the Formats Tab --------------------------------------------------

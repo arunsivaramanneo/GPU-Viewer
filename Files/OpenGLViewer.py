@@ -28,18 +28,16 @@ def OpenGL(tab1):
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
     os.system("glxinfo -s > /tmp/glxinfo.txt")
     os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
-    # os.system("glxinfo | grep string | grep glx >> OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
 
     value = copyContentsFromFile("/tmp/OpenGLRHS.txt")
 
-    i = 0
     with open("/tmp/OpenGLLHS.txt", "r") as file1:
-        for line in file1:
+        for i,line in enumerate(file1):
             background_color = setBackgroundColor(i)
             OpenGLInfo_list.append([line.strip('\n'), value[i].strip('\n'), background_color])
-            i = i + 1
+
 
     TreeGL = Gtk.TreeView(OpenGLInfo_list, expand=True)
     # TreeGL.set_enable_search(True)
@@ -110,7 +108,6 @@ def OpenGL(tab1):
             button.set_sensitive(True)
         LimitsWin.connect("delete-event",button_enable)
 
-        os.system("rm /tmp/OpenGL*.txt")
         LimitsWin.show_all()
 
     LimitsFrame = Gtk.Frame()

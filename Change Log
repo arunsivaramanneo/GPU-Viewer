@@ -1,4 +1,5 @@
 -----------------------------------------------------------------------Jan-2018-----------------------------------------------------------------------------------------------------------------
+18/01   - Increased the default border width for FrameBuffer window from 10 to 15
 13/01   - v1.5 released with all the below mentioned Features and fixes
 10/01   - Added Filter Option to Instance Extensions and Instance Layers tab in Vulkan
         - Updated About GPU Viewer Section
