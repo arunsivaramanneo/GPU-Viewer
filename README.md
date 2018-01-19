@@ -4,13 +4,13 @@ A front-end to glxinfo, vulkaninfo and clinfo.
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![screenshot_20171231_112430](https://user-images.githubusercontent.com/30646692/34459687-8801a9aa-ee1d-11e7-9753-e1e128acf3f2.png)
+![screenshot_20180119_092548](https://user-images.githubusercontent.com/30646692/35134240-26d6c6f0-fcfb-11e7-9d12-a13c82e2a267.png)
 
-![screenshot_20171231_112502](https://user-images.githubusercontent.com/30646692/34459688-9577d85c-ee1d-11e7-965b-822f2992045b.png)
+![screenshot_20180119_092602](https://user-images.githubusercontent.com/30646692/35134256-370cef86-fcfb-11e7-9bff-39ef453ae21e.png)
 
-![screenshot_20171231_112533](https://user-images.githubusercontent.com/30646692/34459695-a526d79e-ee1d-11e7-8109-2187105e2558.png)
+![screenshot_20180119_092616](https://user-images.githubusercontent.com/30646692/35134270-442165bc-fcfb-11e7-989a-db44bb4b3621.png)
 
-![screenshot_20171231_112601](https://user-images.githubusercontent.com/30646692/34459696-b014fad2-ee1d-11e7-97b3-7c9fd7c6a8b1.png)
+![screenshot_20180119_092624](https://user-images.githubusercontent.com/30646692/35134283-54546b28-fcfb-11e7-9b54-9f0e1efe35ea.png)
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Flat-Plat and Adapta
 
