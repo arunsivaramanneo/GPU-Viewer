@@ -1,6 +1,8 @@
 -----------------------------------------------------------------------Jan-2018-----------------------------------------------------------------------------------------------------------------
 
-20/01   - Set default screen size for Monitors greater than 1080P resolution
+20/01   - Inital Support for Css Styling.
+        - Set default screen size for Monitors greater than 1080P resolution
+        - removed theme check, now no longer looks for FlatPlat,Adapta and Numix. Modified FlatPlat theme is now default.
 18/01   - Increased the default border width for FrameBuffer window from 10 to 15
         - Removed unwanted icons to reduce the overall Application Size
 13/01   - v1.5 released with all the below mentioned Features and fixes
