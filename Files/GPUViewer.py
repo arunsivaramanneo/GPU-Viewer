@@ -11,21 +11,13 @@ import gi
 import time
 
 gi.require_version("Gtk","3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk,Gio
 
 
 
 def main():
 
 #    T1 = time.time()
-    setting = Gtk.Settings.get_default()
-
-    if Const.THEME1:
-        setting.set_property("gtk-theme-name","FlatPlat")
-    elif Const.THEME2:
-        setting.set_property("gtk-theme-name","Adapta")
-    elif Const.THEME3:
-        setting.set_property("gtk-theme-name","Numix")
 
     gtk = MyGtk("GPU-Viewer v1.5")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
