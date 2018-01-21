@@ -15,11 +15,13 @@ class MyGtk(Gtk.Window):
         self.add(self.notebook)
         setting = Gtk.Settings.get_default()
 
-        theme = Gtk.CssProvider()
-        theme.load_from_path("gtk.css")
-        screen = Gdk.Screen.get_default()
-        style_context = self.get_style_context()
-        style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        if Gtk.get_minor_version() >= 22:
+
+            theme = Gtk.CssProvider()
+            theme.load_from_path("gtk.css")
+            screen = Gdk.Screen.get_default()
+            style_context = self.get_style_context()
+            style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
         tab = Gtk.VBox(spacing=10)
