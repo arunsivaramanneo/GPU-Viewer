@@ -8,9 +8,9 @@ from gi.repository import Gtk
 
 from Common import copyContentsFromFile, createSubTab, createScrollbar, setColumns, setBackgroundColor
 
-platformDetailsHeader = [" "," "]
-deviceDetailsHeader = [" "," "]
-deviceMemoryImageHeader = [" "," "]
+platformDetailsHeader = ["Platform Information ","Details "]
+deviceDetailsHeader = ["Device Information ","Details "]
+deviceMemoryImageHeader = ["Device Information ","Details "]
 
 def openCL(tab):
 
@@ -324,7 +324,7 @@ def openCL(tab):
     platformDetailsTreeView = Gtk.TreeView(model=platformDetails_Store,expand=True)
     platformDetailsTreeView.set_property("enable-tree-lines",True)
 
-    setColumns(platformDetailsTreeView,platformDetailsHeader,Const.MWIDTH,0.5)
+    setColumns(platformDetailsTreeView,platformDetailsHeader,Const.MWIDTH,0.0)
 
     platformScrollbar = createScrollbar(platformDetailsTreeView)
     platformDetailsGrid.add(platformScrollbar)
