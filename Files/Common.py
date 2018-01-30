@@ -23,6 +23,11 @@ class MyGtk(Gtk.Window):
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+        elif Const.THEME1:
+            setting.set_property("gtk-theme-name","FlatPlat")
+        elif Const.THEME2:
+            setting.set_property("gtk-theme-name","Adapta")
+
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
         tab = Gtk.VBox(spacing=10)
         tab.set_border_width(20)
