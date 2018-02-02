@@ -26,7 +26,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     
     Please note all the dependencies python, vulkan-utils,clinfo will be installed, if not installed before.
     
-4. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer-stable-1.3.deb
+4. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer_1.6a2-1_amd64.deb
 5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies.
 6. For others please follow steps 6 to 9
 7. Download the file and Extract to a folder
