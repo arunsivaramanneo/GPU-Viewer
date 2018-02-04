@@ -1,8 +1,8 @@
 ﻿# GPU-Viewer
-A front-end to glxinfo, vulkaninfo and clinfo. 
+**A front-end to glxinfo, vulkaninfo and clinfo.** 
 
 
-This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
+This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 ![screenshot_20180119_092548](https://user-images.githubusercontent.com/30646692/35134240-26d6c6f0-fcfb-11e7-9d12-a13c82e2a267.png)
 
@@ -87,4 +87,4 @@ The installer should be able to take care of this dependency in Debian based dis
 4. Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
 5. 8 GB RAM
 
-If you like/use this Application and think i deserve a cup of chai, do a Paypal donation: https://www.paypal.me/ArunSivaraman
+**If you like/use this Application,consider supporing us by DONATING at PayPal https://www.paypal.me/ArunSivaraman.**
