@@ -57,7 +57,7 @@ def OpenGL(tab1):
         LimitsWin.set_title("OpenGL Hardware Limits")
         #    LimitsWin.set_size_request(1000, 500)
         setScreenSize(LimitsWin, Const.WIDTH_RATIO, Const.HEIGHT_RATIO2)
-        LimitsWin.set_border_width(20)
+        LimitsWin.set_border_width(10)
         LimitsFrame = Gtk.Frame()
         LimitsWin.add(LimitsFrame)
         Limits_Store = Gtk.TreeStore(str, str, str)
