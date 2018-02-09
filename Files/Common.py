@@ -30,7 +30,7 @@ class MyGtk(Gtk.Window):
 
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
         tab = Gtk.VBox(spacing=10)
-        tab.set_border_width(20)
+        tab.set_border_width(10)
         openGlIcon = fetchImageFromUrl(iconUrl, iconWidth, iconHeight, aspectRatio)
         self.notebook.append_page(tab, Gtk.Image.new_from_pixbuf(openGlIcon))
         return tab

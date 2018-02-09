@@ -1549,8 +1549,6 @@ treeview.view {
 
 * {
   -GtkTreeView-allow-rules: True;
-  -GtkTreeView-even-row-color: #FFFFFF; 
-  -GtkTreeView-odd-row-color: #EEEEEE;
   -GtkTreeView-horizontal-separator: 4;
   -GtkTreeView-grid-line-width: 1;
   -GtkTreeView-grid-line-pattern: '';
