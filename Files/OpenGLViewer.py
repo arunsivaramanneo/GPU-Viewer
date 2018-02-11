@@ -21,7 +21,7 @@ def OpenGL(tab1):
     grid.set_column_spacing(20)
     tab1.add(grid)
     grid4 = Gtk.Grid()
-    grid4.set_row_spacing(5)
+#    grid4.set_row_spacing(5)
     frame1 = Gtk.Frame(label="", expand=True)
     grid.attach(frame1, 0, 0, 12, 1)
     frame1.add(grid4)
