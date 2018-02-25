@@ -29,14 +29,16 @@ def OpenGL(tab1):
     os.system("glxinfo -s > /tmp/glxinfo.txt")
     os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
+    os.system("cat /tmp/glxinfo.txt | grep memory: | grep -o :.* | grep -o ' .*' >> /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
-
+    os.system("cat /tmp/glxinfo.txt | grep memory: | awk '{gsub(/:.*/,'True');print}' >> /tmp/OpenGLLHS.txt")
     value = copyContentsFromFile("/tmp/OpenGLRHS.txt")
 
     with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for i,line in enumerate(file1):
+            text = line.strip(" ")
             background_color = setBackgroundColor(i)
-            OpenGLInfo_list.append([line.strip('\n'), value[i].strip('\n'), background_color])
+            OpenGLInfo_list.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
 
     TreeGL = Gtk.TreeView(OpenGLInfo_list, expand=True)
