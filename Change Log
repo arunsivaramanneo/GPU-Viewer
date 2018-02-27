@@ -1,4 +1,5 @@
 -----------------------------------------------------------------------Feb-2018-----------------------------------------------------------------------------------------------------------------
+27/02   - Added Core and Compat profile details for OpenGL Limits Section
 26/02   - Added Memory information details to OpenGL Information Section, this may require new version of glxinfo
 11/02   - CSS code cleanup and updated GtK.CSS file to FlatPlat-Blue-Compact
 09/02   - Reduced row spacing and border width values

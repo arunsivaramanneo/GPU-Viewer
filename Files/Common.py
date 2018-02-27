@@ -194,3 +194,18 @@ def searchStore(TreeGLExt, grid3, refresh_filter):
 
 def refresh_filter(self,store_filter):
     store_filter.refilter()
+
+def appendLimitsRHS(filename,temp):
+    LimitsRHS = []
+    LimitRHSValue = []    
+    i = 0
+    with open(filename, "r") as file1:
+        for line in file1:
+            if "= " in line:
+                LimitsRHS.append(temp[i])
+                LimitRHSValue.append(True)
+                i = i + 1
+            else:
+                LimitsRHS.append("")
+                LimitRHSValue.append(False)
+    return LimitsRHS,LimitRHSValue

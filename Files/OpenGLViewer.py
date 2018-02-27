@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from FrameBuffer import FrameBuffer
 from Common import setScreenSize, fetchImageFromUrl, copyContentsFromFile, setBackgroundColor, setColumns, \
-    createScrollbar, refresh_filter
+    createScrollbar, refresh_filter, appendLimitsRHS
 
 WH = 70
 
@@ -52,9 +52,9 @@ def OpenGL(tab1):
 
         button.set_sensitive(False)
         os.system(
-            "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
-        os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
-        os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
+            "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Core_Limits.txt")
+        os.system("cat /tmp/OpenGL_Core_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLCoreLimitsLHS.txt")
+        os.system("cat /tmp/OpenGL_Core_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLCoreLimitsRHS.txt")
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
         #    LimitsWin.set_size_request(1000, 500)
@@ -62,60 +62,77 @@ def OpenGL(tab1):
         LimitsWin.set_border_width(10)
         LimitsNotebook = Gtk.Notebook()
         LimitsWin.add(LimitsNotebook)
+        LimitsCoreTab = Gtk.VBox("spacing=10")
+        LimitsNotebook.add(LimitsCoreTab)
+        LimitsNotebook.set_tab_label(LimitsCoreTab,Gtk.Label("Core"))
+        LimitsCoreFrame = Gtk.Frame()
+        LimitsCoreTab.add(LimitsCoreFrame)
+        LimitsCore_Store = Gtk.TreeStore(str, str, str)
+        TreeCoreLimits = Gtk.TreeView(LimitsCore_Store, expand=True)
+        TreeCoreLimits.set_property("enable-tree-lines",True)
+
+        temp = copyContentsFromFile("/tmp/OpenGLCoreLimitsRHS.txt")
+
+        LimitsRHS,LimitRHSValue = appendLimitsRHS("/tmp/OpenGL_Core_Limits.txt",temp)
+
+        showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/OpenGLCoreLimitsLHS.txt")
+
+        setColumns(TreeCoreLimits, LimitsTitle, Const.MWIDTH,0.0)
+        LimitsCoreScrollbar = createScrollbar(TreeCoreLimits)
+        LimitsCoreFrame.add(LimitsCoreScrollbar)
+
         LimitsCompatTab = Gtk.VBox("spacing=10")
-        LimitsNotebook.add(LimitsCompatTab)        
-        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Core"))
-        LimitsFrame = Gtk.Frame()
-        LimitsCompatTab.add(LimitsFrame)
-        Limits_Store = Gtk.TreeStore(str, str, str)
-        TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
-        TreeLimits.set_property("enable-tree-lines",True)
-    
-        LimitsRHS = []
-        LimitRHSValue = []
-        temp = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
+        LimitsNotebook.add(LimitsCompatTab)
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Compat"))
+        LimitsCompatFrame = Gtk.Frame()
+        LimitsCompatTab.add(LimitsCompatFrame)
+        LimitsCompat_Store = Gtk.TreeStore(str,str,str)
+        TreeCompatLimits = Gtk.TreeView(LimitsCompat_Store,expand=True)
 
-        i = 0
-        with open("/tmp/OpenGL_Limits.txt", "r") as file1:
-            for line in file1:
-                if "= " in line:
-                    LimitsRHS.append(temp[i])
-                    LimitRHSValue.append(True)
-                    i = i + 1
-                else:
-                    LimitsRHS.append("")
-                    LimitRHSValue.append(False)
+        os.system(
+            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
+        os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
+        os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
 
-        k = 0;count=0
-        with open("/tmp/OpenGLLimitsLHS.txt", "r") as file1:
-            for i,line in enumerate(file1):
-                background_color = setBackgroundColor(i)
-                TreeLimits.expand_all()
-                text = line.strip(' ')
-                if "TEXTURE_FORMATS" in line and LimitRHSValue[i] == True:
-                    iter2 = Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                elif ":" not in line and LimitRHSValue[i] == False:
-                    Limits_Store.append(iter2,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                    k += 1
-                else:
-                    if ":" in line:
-                        count += 1
-                        iter2 = Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                        continue
-                    if count > 0 :
-                        Limits_Store.append(iter2,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                    else:
-                        Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+        temp2 = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
 
-        setColumns(TreeLimits, LimitsTitle, Const.MWIDTH,0.0)
-        LimitsScrollbar = createScrollbar(TreeLimits)
-        LimitsFrame.add(LimitsScrollbar)
+        LimitsRHS2,LimitRHSValue2 = appendLimitsRHS("/tmp/OpenGL_Limits.txt",temp2)
+
+        showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/OpenGLLimitsLHS.txt")
+
+        setColumns(TreeCompatLimits, LimitsTitle, Const.MWIDTH,0.0)
+        LimitsCompatScrollbar = createScrollbar(TreeCompatLimits)
+        LimitsCompatFrame.add(LimitsCompatScrollbar)
 
         def button_enable(win,value):
             button.set_sensitive(True)
         LimitsWin.connect("delete-event",button_enable)
 
         LimitsWin.show_all()
+
+    def showLimits(LimitRHSValue, LimitsRHS, Limits_Store, TreeLimits,filename):
+        k = 0;
+        count = 0
+        with open(filename, "r") as file1:
+            for i, line in enumerate(file1):
+                background_color = setBackgroundColor(i)
+                TreeLimits.expand_all()
+                text = line.strip(' ')
+                if "TEXTURE_FORMATS" in line and LimitRHSValue[i] == True:
+                    iter2 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                elif ":" not in line and LimitRHSValue[i] == False:
+                    Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    k += 1
+                else:
+                    if ":" in line:
+                        count += 1
+                        iter2 = Limits_Store.append(None,
+                                                    [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        continue
+                    if count > 0:
+                        Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    else:
+                        Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
 
     LimitsFrame = Gtk.Frame()
     grid.attach(LimitsFrame, 0, 1, 2, 1)
