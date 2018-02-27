@@ -83,7 +83,7 @@ def OpenGL(tab1):
 
         LimitsCompatTab = Gtk.VBox("spacing=10")
         LimitsNotebook.add(LimitsCompatTab)
-        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Compat"))
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Compat."))
         LimitsCompatFrame = Gtk.Frame()
         LimitsCompatTab.add(LimitsCompatFrame)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
