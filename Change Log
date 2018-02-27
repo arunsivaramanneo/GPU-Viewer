@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------Feb-2018-----------------------------------------------------------------------------------------------------------------
-
+26/02   - Added Memory information details to OpenGL Information Section, this may require new version of glxinfo
 11/02   - CSS code cleanup and updated GtK.CSS file to FlatPlat-Blue-Compact
 09/02   - Reduced row spacing and border width values
 02/02   - v1.6 Release with all the updates mentioned below

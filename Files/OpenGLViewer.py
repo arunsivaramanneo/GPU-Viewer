@@ -52,7 +52,7 @@ def OpenGL(tab1):
 
         button.set_sensitive(False)
         os.system(
-            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
+            "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
         os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
         os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
         LimitsWin = Gtk.Window()
@@ -60,12 +60,17 @@ def OpenGL(tab1):
         #    LimitsWin.set_size_request(1000, 500)
         setScreenSize(LimitsWin, Const.WIDTH_RATIO, Const.HEIGHT_RATIO2)
         LimitsWin.set_border_width(10)
+        LimitsNotebook = Gtk.Notebook()
+        LimitsWin.add(LimitsNotebook)
+        LimitsCompatTab = Gtk.VBox("spacing=10")
+        LimitsNotebook.add(LimitsCompatTab)        
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Core"))
         LimitsFrame = Gtk.Frame()
-        LimitsWin.add(LimitsFrame)
+        LimitsCompatTab.add(LimitsFrame)
         Limits_Store = Gtk.TreeStore(str, str, str)
         TreeLimits = Gtk.TreeView(Limits_Store, expand=True)
         TreeLimits.set_property("enable-tree-lines",True)
-
+    
         LimitsRHS = []
         LimitRHSValue = []
         temp = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
