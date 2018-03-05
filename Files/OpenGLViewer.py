@@ -88,6 +88,7 @@ def OpenGL(tab1):
         LimitsCompatTab.add(LimitsCompatFrame)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
         TreeCompatLimits = Gtk.TreeView(LimitsCompat_Store,expand=True)
+        TreeCompatLimits.set_property("enable-tree-lines",True)
 
         os.system(
             "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
