@@ -119,10 +119,10 @@ def OpenGL(tab1):
                 background_color = setBackgroundColor(i)
                 TreeLimits.expand_all()
                 text = line.strip(' ')
-                if "TEXTURE_FORMATS" in line and LimitRHSValue[i] == True:
-                    iter2 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                elif ":" not in line and LimitRHSValue[i] == False:
-                    Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:
+                    iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                elif "      " in line and LimitRHSValue[i] == False and ":" not in line:
+                    Limits_Store.append(iter3, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                     k += 1
                 else:
                     if ":" in line:
@@ -130,7 +130,7 @@ def OpenGL(tab1):
                         iter2 = Limits_Store.append(None,
                                                     [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                         continue
-                    if count > 0:
+                    if count > 0 and "    " in line:
                         Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                     else:
                         Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
