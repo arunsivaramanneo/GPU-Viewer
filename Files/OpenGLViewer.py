@@ -64,7 +64,7 @@ def OpenGL(tab1):
         LimitsWin.add(LimitsNotebook)
         LimitsCoreTab = Gtk.VBox("spacing=10")
         LimitsNotebook.add(LimitsCoreTab)
-        LimitsNotebook.set_tab_label(LimitsCoreTab,Gtk.Label("Core"))
+        LimitsNotebook.set_tab_label(LimitsCoreTab,Gtk.Label("\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
         LimitsCoreTab.add(LimitsCoreFrame)
         LimitsCore_Store = Gtk.TreeStore(str, str, str)
@@ -83,7 +83,7 @@ def OpenGL(tab1):
 
         LimitsCompatTab = Gtk.VBox("spacing=10")
         LimitsNotebook.add(LimitsCompatTab)
-        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("Compat."))
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("\tCompat.\t"))
         LimitsCompatFrame = Gtk.Frame()
         LimitsCompatTab.add(LimitsCompatFrame)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
@@ -120,7 +120,12 @@ def OpenGL(tab1):
                 TreeLimits.expand_all()
                 text = line.strip(' ')
                 if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:
-                    iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    try:
+                        iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    except Exception:
+                        iter3 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    finally:
+                        pass
                 elif "      " in line and LimitRHSValue[i] == False and ":" not in line:
                     Limits_Store.append(iter3, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                     k += 1
