@@ -1,3 +1,6 @@
+-----------------------------------------------------------------------Mar-2018-----------------------------------------------------------------------------------------------------------------
+09/02   - Fixed Device Tab in Vulkan for the latest Vulkan 1.1 version
+
 -----------------------------------------------------------------------Feb-2018-----------------------------------------------------------------------------------------------------------------
 27/02   - Added Core and Compat profile details for OpenGL Limits Section
 26/02   - Added Memory information details to OpenGL Information Section, this may require new version of glxinfo

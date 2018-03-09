@@ -94,11 +94,26 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep = | sort > /tmp/VKDDevicesparseinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep '= ' | sort > /tmp/VKDDevicesparseinfo1.txt" % i)
 
         os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDevicesparseinfo.txt")
+        os.system("cat /tmp/VKDDevicesparseinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDevicesparseinfo2.txt")
 
-        fgColor, value = colorTrueFalse("/tmp/VKDDevicesparseinfo1.txt", "= 1")
+        #fgColor, value = colorTrueFalse("/tmp/VKDDevicesparseinfo1.txt", "= 1")
+        value = copyContentsFromFile("/tmp/VKDDevicesparseinfo2.txt")
+
+        value1 = []
+        fgColor = []
+        for i in value:
+            if "0" in i:
+                value1.append("false")
+                fgColor.append(Const.COLOR2)
+            elif "1" in i:
+                value1.append("true")
+                fgColor.append(Const.COLOR1)
+            else:
+                value1.append(i.strip(" "))
+                fgColor.append("BLACK")
 
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store)
@@ -106,7 +121,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
-                SparseTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+                SparseTab_Store.append([text.strip('\n'), value1[i].strip('\n'), background_color, fgColor[i]])
 
     def Features(GPUname):
 
@@ -119,7 +134,10 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/VKDFeatures.txt")
 
+
         fgColor, value = colorTrueFalse("/tmp/VKDFeatures1.txt", "= 1")
+
+
 
         FeaturesTab_Store.clear()
 
