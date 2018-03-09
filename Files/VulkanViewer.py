@@ -16,7 +16,7 @@ MWIDTH = 300
 RANGE1 = 100
 
 DeviceTitle = ["Device Information", "Details"]
-SparseTitle = ["Device Sparse Properties", "Value"]
+SparseTitle = ["Device Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
@@ -105,10 +105,10 @@ def Vulkan(tab2):
         value1 = []
         fgColor = []
         for i in value:
-            if "0" in i:
+            if int(i) == 0:
                 value1.append("false")
                 fgColor.append(Const.COLOR2)
-            elif "1" in i:
+            elif int(i) == 1:
                 value1.append("true")
                 fgColor.append(Const.COLOR1)
             else:

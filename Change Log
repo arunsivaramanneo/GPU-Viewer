@@ -1,5 +1,7 @@
 -----------------------------------------------------------------------Mar-2018-----------------------------------------------------------------------------------------------------------------
 09/02   - Fixed Device Tab in Vulkan for the latest Vulkan 1.1 version
+        - Device Sparse Properties header renamed to Device Properties, this section includes both VKPhysicalDeviceSparseProperties, VKPhysicalDevicePointClippingProperties and PushDescriptorProperties
+        - Features Tab also includes the new Vulkan 1.1 sub Feature i,e VkPhysicalDeviceSamplerYcbcrConversionFeatures, VkPhysicalDeviceVariablePointerFeatures along with Device Features
 
 -----------------------------------------------------------------------Feb-2018-----------------------------------------------------------------------------------------------------------------
 27/02   - Added Core and Compat profile details for OpenGL Limits Section
