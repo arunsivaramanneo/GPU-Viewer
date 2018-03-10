@@ -94,34 +94,55 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1;next}/Device Extensions.*/{flag=0}flag' | grep '= ' | sort > /tmp/VKDDevicesparseinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./'  > /tmp/VKDDevicesparseinfo1.txt" % i)
 
-        os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDevicesparseinfo.txt")
+        os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/VKDDevicesparseinfo.txt")
         os.system("cat /tmp/VKDDevicesparseinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDevicesparseinfo2.txt")
 
         #fgColor, value = colorTrueFalse("/tmp/VKDDevicesparseinfo1.txt", "= 1")
         value = copyContentsFromFile("/tmp/VKDDevicesparseinfo2.txt")
 
         value1 = []
+        value2 = []
         fgColor = []
-        for i in value:
-            if int(i) == 0:
-                value1.append("false")
+        i = 0
+        with open("/tmp/VKDDevicesparseinfo1.txt","r") as file1:
+            for line in file1:
+                if "= " in line:
+                    value1.append(value[i])
+                    i += 1
+                else:
+                    value1.append(" ")
+
+        for i in value1:
+            if i == " 0\n":
+                value2.append("false")
                 fgColor.append(Const.COLOR2)
-            elif int(i) == 1:
-                value1.append("true")
+            elif i == " 1\n":
+                value2.append("true")
                 fgColor.append(Const.COLOR1)
             else:
-                value1.append(i.strip(" "))
+                value2.append(i)
                 fgColor.append("BLACK")
+
 
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store)
+        k = 0
         with open("/tmp/VKDDevicesparseinfo.txt", "r") as file1:
             for i, line in enumerate(file1):
                 text = line.strip('\t')
-                background_color = setBackgroundColor(i)
-                SparseTab_Store.append([text.strip('\n'), value1[i].strip('\n'), background_color, fgColor[i]])
+                if "---" in line or "====" in line:
+                    continue
+                if ":" in line:
+                    k = 0
+                    background_color = Const.BGCOLOR3
+                    iter1 = SparseTab_Store.append(None,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                else:
+                    background_color = setBackgroundColor(k)
+                    SparseTab_Store.append(iter1,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                    k += 1
+                TreeSparse.expand_all()
 
     def Features(GPUname):
 
@@ -625,7 +646,7 @@ def Vulkan(tab2):
                 Surface(text)
             Instance()
 
-        os.system("rm /tmp/VKD*.txt")
+    #    os.system("rm /tmp/VKD*.txt")
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -650,11 +671,16 @@ def Vulkan(tab2):
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
 
-    SparseGrid = createSubFrame(DeviceTab)
+ #   SparseGrid = createSubFrame(DeviceTab)
 
-    SparseTab_Store = Gtk.ListStore(str, str, str, str)
+    propertiesTab = Gtk.VBox(spacing=10)
+    propertiesGrid = createSubTab(propertiesTab,notebook,"Properties")
+
+    SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
+    TreeSparse.set_property("enable-tree-lines", True)
     TreeSparse.set_enable_search(True)
+    TreeSparse.set_property("can-focus",False)
     for i, column_title in enumerate(SparseTitle):
         Sparserenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
@@ -667,8 +693,8 @@ def Vulkan(tab2):
         column.add_attribute(Sparserenderer, "background", 2)
         TreeSparse.append_column(column)
 
-    SparseScrollbar = createScrollbar(TreeSparse)
-    SparseGrid.add(SparseScrollbar)
+    propertiesScrollbar = createScrollbar(TreeSparse)
+    propertiesGrid.add(propertiesScrollbar)
 
     # -----------------Creating the Features Tab-----------------
 
