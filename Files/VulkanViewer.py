@@ -49,13 +49,14 @@ def Vulkan(tab2):
 
         os.system("cat /tmp/VKDDeviceinfo1.txt | sort | awk '{gsub(/=.*/,'True');}1' > /tmp/VKDDeviceinfo.txt")
         os.system("cat /tmp/VKDDeviceinfo1.txt | sort | grep -o =.* | grep -o ' .*' > /tmp/VKDDeviceinfo2.txt")
-
+        os.system("lscpu | awk '/name|^CPU/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/VKDDeviceinfo.txt")
+        os.system("lscpu | awk '/name|^CPU/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/VKDDeviceinfo2.txt")
         valueLHS = copyContentsFromFile("/tmp/VKDDeviceinfo.txt")
 
         try:
             os.system("lsb_release -d -r -c > /tmp/VKDLsbRelease.txt")
             os.system("cat /tmp/VKDLsbRelease.txt | grep -o :.* >> /tmp/VKDDeviceinfo2.txt")
-            os.system("cat /tmp/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' >> /tmp/VKDLsbReleaseLHS.txt")
+            os.system("cat /tmp/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' > /tmp/VKDLsbReleaseLHS.txt")
             os.system("uname -r >> /tmp/VKDDeviceinfo2.txt")
             valueLHS = valueLHS + copyContentsFromFile("/tmp/VKDLsbReleaseLHS.txt")
             valueLHS.append("Kernel")
@@ -109,7 +110,10 @@ def Vulkan(tab2):
         with open("/tmp/VKDDevicesparseinfo1.txt","r") as file1:
             for line in file1:
                 if "= " in line:
-                    value1.append(value[i])
+                    if "Max" in line or "Min" in line:
+                        value1.append(str(float(value[i])))
+                    else:
+                        value1.append(value[i])
                     i += 1
                 else:
                     value1.append(" ")
@@ -125,10 +129,10 @@ def Vulkan(tab2):
                 value2.append(i)
                 fgColor.append("BLACK")
 
-
         SparseTab_Store.clear()
+        propertiesStore.clear()
         TreeSparse.set_model(SparseTab_Store)
-        k = 0
+        k = 0;count = 0
         with open("/tmp/VKDDevicesparseinfo.txt", "r") as file1:
             for i, line in enumerate(file1):
                 text = line.strip('\t')
@@ -136,13 +140,18 @@ def Vulkan(tab2):
                     continue
                 if ":" in line:
                     k = 0
+                    count += 1
                     background_color = Const.BGCOLOR3
                     iter1 = SparseTab_Store.append(None,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                    propertiesStore.append([text.strip("\n")])
                 else:
                     background_color = setBackgroundColor(k)
                     SparseTab_Store.append(iter1,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
                     k += 1
                 TreeSparse.expand_all()
+        propertiesStore.insert(0,["Show All"])
+        label = "Properties (%d)"%count
+    #    notebook.set_tab_label(propertiesTab,Gtk.Label(label))
 
     def Features(GPUname):
 
@@ -646,7 +655,11 @@ def Vulkan(tab2):
                 Surface(text)
             Instance()
 
-    #    os.system("rm /tmp/VKD*.txt")
+        os.system("rm /tmp/VKD*.txt")
+
+    def selectProperties(Combo):
+        text = Combo.get_active()
+        print(text)
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -675,7 +688,14 @@ def Vulkan(tab2):
 
     propertiesTab = Gtk.VBox(spacing=10)
     propertiesGrid = createSubTab(propertiesTab,notebook,"Properties")
-
+    propertiesStore = Gtk.ListStore(str)
+   # propertiesCombo = Gtk.ComboBox.new_with_model(propertiesStore)
+   # propertiesCombo.connect("changed",selectProperties)
+   # propertiesRenderer = Gtk.CellRendererText(font="BOLD")
+   # propertiesCombo.pack_start(propertiesRenderer, True)
+   # propertiesCombo.add_attribute(propertiesRenderer,"text",0)
+   # propertiesCombo.set_active(0)
+   # propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
     TreeSparse.set_property("enable-tree-lines", True)
@@ -694,6 +714,7 @@ def Vulkan(tab2):
         TreeSparse.append_column(column)
 
     propertiesScrollbar = createScrollbar(TreeSparse)
+   # propertiesGrid.attach_next_to(propertiesScrollbar,propertiesCombo,Gtk.PositionType.BOTTOM,1,1)
     propertiesGrid.add(propertiesScrollbar)
 
     # -----------------Creating the Features Tab-----------------
@@ -719,9 +740,12 @@ def Vulkan(tab2):
         TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
+   # featureCombo = Gtk.ComboBox()
+   # FeaturesGrid.add(featureCombo)
     featureFrameSearch = Gtk.Frame()
     featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
     featureFrameSearch.add(featureSearchEntry)
+   # FeaturesGrid.attach_next_to(featureFrameSearch,featureCombo,Gtk.PositionType.BOTTOM,1,1)
     FeaturesGrid.add(featureFrameSearch)
     FeatureScrollbar = createScrollbar(TreeFeatures)
     FeaturesGrid.attach_next_to(FeatureScrollbar,featureFrameSearch,Gtk.PositionType.BOTTOM,1,1)

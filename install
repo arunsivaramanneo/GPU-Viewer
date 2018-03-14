@@ -8,7 +8,7 @@ file1="/usr/share/gpu-viewer"
 file4="/usr/bin/vulkaninfo"
 file5="/home/$user/Desktop/gpu-viewer.desktop"
 file6="/usr/bin/gpu-viewer"
-echo "************************GPU Viewer 1.7 - copyright (c) 2017-2018 - Arun Sivaraman****************************"
+echo "************************GPU Viewer 1.8 - copyright (c) 2017-2018 - Arun Sivaraman****************************"
 if [ ! -d "$file1" ]
 then
     
