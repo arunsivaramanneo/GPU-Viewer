@@ -320,6 +320,7 @@ def Vulkan(tab2):
                             k += 1
 
     def MemoryTypes(GPUname):
+   # propertiesGrid.add(propertiesCombo)ame):
 
         for i in range(len(list)):
             if GPUname == i:
