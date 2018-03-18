@@ -1,5 +1,8 @@
 -----------------------------------------------------------------------Mar-2018-----------------------------------------------------------------------------------------------------------------
-09/02   - Fixed Device Tab in Vulkan for the latest Vulkan 1.1 version
+18/03   - Added a new Tab Properties to Vulkan
+        - Increased the Default Application height to 90% of the Screen Resolution
+        - Other Vulkan 1.1 Fixes
+09/03   - Fixed Device Tab in Vulkan for the latest Vulkan 1.1 version
         - Device Sparse Properties header renamed to Device Properties, this section includes both VKPhysicalDeviceSparseProperties, VKPhysicalDevicePointClippingProperties and PushDescriptorProperties
         - Features Tab also includes the new Vulkan 1.1 sub Feature i,e VkPhysicalDeviceSamplerYcbcrConversionFeatures, VkPhysicalDeviceVariablePointerFeatures along with Device Features
 
