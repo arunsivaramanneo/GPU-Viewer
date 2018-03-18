@@ -277,7 +277,7 @@ def OpenGL(tab1):
         Radio(value)
         Vendor_Combo.set_active(0)
 
-    frame2 = Gtk.Frame(label="Extensions")
+    frame2 = Gtk.Frame(label="Extensions\t")
     grid.attach(frame2, 0, 2, 12, 1)
     grid1 = Gtk.Grid()
     grid1.set_row_spacing(5)

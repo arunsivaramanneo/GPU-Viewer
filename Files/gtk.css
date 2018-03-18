@@ -1471,7 +1471,7 @@ treeview.view header.button.dnd {
   border-width: 1px;
   border-color: rgba(0, 0, 0, 0.12);
   border-radius: 0;
-  box-shadow: none;
+  box-shadow: 5px 5px 5px 5px grey;
   background-color: #FFFFFF;
   background-clip: border-box;
   color: #42A5F5;
@@ -2172,9 +2172,9 @@ frame > border,
 .frame {
   margin: 0;
   padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 1;
-  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.20);
+  border-radius: 2;
+  box-shadow: -2px -2px 2px 2px grey;
 }
 
 frame > border.flat,
