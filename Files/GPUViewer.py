@@ -19,7 +19,7 @@ def main():
 
 #    T1 = time.time()
 
-    gtk = MyGtk("GPU-Viewer v1.8")
+    gtk = MyGtk("GPU-Viewer v1.9")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
@@ -62,6 +62,7 @@ def isVulkanSupported():
 
 def quit(instance, value):
     os.system("rm -rf *.pyc")
+    os.system("rm -rf /tmp/VKD*.txt ocl*.txt filter*.txt")
     instance.quit()
 
 
