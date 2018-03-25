@@ -97,60 +97,16 @@ def Vulkan(tab2):
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./'  > /tmp/VKDDevicesparseinfo1.txt" % i)
 
-        os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/VKDDevicesparseinfo.txt")
-        os.system("cat /tmp/VKDDevicesparseinfo1.txt | grep -o =.* | grep -o ' .*' > /tmp/VKDDevicesparseinfo2.txt")
-
-        #fgColor, value = colorTrueFalse("/tmp/VKDDevicesparseinfo1.txt", "= 1")
-        value = copyContentsFromFile("/tmp/VKDDevicesparseinfo2.txt")
-
-        value1 = []
-        value2 = []
-        fgColor = []
-        i = 0
-        with open("/tmp/VKDDevicesparseinfo1.txt","r") as file1:
-            for line in file1:
-                if "= " in line:
-                    if "Max" in line or "Min" in line:
-                        value1.append(str(float(value[i])))
-                    else:
-                        value1.append(value[i])
-                    i += 1
-                else:
-                    value1.append(" ")
-
-        for i in value1:
-            if i == " 0\n":
-                value2.append("false")
-                fgColor.append(Const.COLOR2)
-            elif i == " 1\n":
-                value2.append("true")
-                fgColor.append(Const.COLOR1)
-            else:
-                value2.append(i)
-                fgColor.append("BLACK")
-
-        SparseTab_Store.clear()
-        propertiesStore.clear()
-        TreeSparse.set_model(SparseTab_Store)
-        k = 0;count = 0
-        with open("/tmp/VKDDevicesparseinfo.txt", "r") as file1:
+        propertiesCombo.remove_all()
+        with open("/tmp/VKDDevicesparseinfo1.txt", "r") as file1:
             for i, line in enumerate(file1):
-                text = line.strip('\t')
-                if "---" in line or "====" in line:
-                    continue
                 if ":" in line:
-                    k = 0
-                    count += 1
-                    background_color = Const.BGCOLOR3
-                    iter1 = SparseTab_Store.append(None,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
-                    propertiesStore.append([text.strip("\n")])
-                else:
-                    background_color = setBackgroundColor(k)
-                    SparseTab_Store.append(iter1,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
-                    k += 1
-                TreeSparse.expand_all()
-        propertiesStore.insert(0,["Show All"])
-        label = "Properties (%d)"%count
+                    text = line.strip("\t")
+                    propertiesCombo.append_text(text.strip("\n"))
+
+        propertiesCombo.insert_text(0,"Show All Properties")
+        propertiesCombo.set_active(0)
+
     #    notebook.set_tab_label(propertiesTab,Gtk.Label(label))
 
     def Features(GPUname):
@@ -656,11 +612,82 @@ def Vulkan(tab2):
                 Surface(text)
             Instance()
 
-        os.system("rm /tmp/VKD*.txt")
+    #    os.system("rm /tmp/VKD*.txt")
 
     def selectProperties(Combo):
-        text = Combo.get_active()
-        print(text)
+        property = Combo.get_active_text()
+
+        if property is None:
+            property = " "
+        elif "Show All Properties" in property:
+            os.system("cp /tmp/VKDDevicesparseinfo1.txt  /tmp/filterProperties.txt")
+        else:
+            os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '/%s/{flag=1;next}/Vk*/{flag=0}flag' > /tmp/filterProperties.txt"%property)
+
+        os.system("cat /tmp/filterProperties.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/filterPropertiesLHS.txt")
+        os.system("cat /tmp/filterProperties.txt | grep -o =.* | grep -o ' .*' > /tmp/filterPropertiesRHS.txt")
+
+        #fgColor, value = colorTrueFalse("/tmp/VKDDevicesparseinfo1.txt", "= 1")
+        value = copyContentsFromFile("/tmp/filterPropertiesRHS.txt")
+
+        value1 = []
+        value2 = []
+        fgColor = []
+        i = 0
+        with open("/tmp/filterProperties.txt","r") as file1:
+            for line in file1:
+                if "= " in line:
+                    if "Max" in line or "Min" in line:
+                        value1.append(str(float(value[i])))
+                    else:
+                        value1.append(value[i])
+                    i += 1
+                else:
+                    value1.append(" ")
+
+        for i in value1:
+            if i == " 0\n":
+                value2.append("false")
+                fgColor.append(Const.COLOR2)
+            elif i == " 1\n":
+                value2.append("true")
+                fgColor.append(Const.COLOR1)
+            else:
+                value2.append(i)
+                fgColor.append("BLACK")
+
+        SparseTab_Store.clear()
+        TreeSparse.set_model(SparseTab_Store)
+
+        if "Show All Properties" in property:
+            k = 0;count = 0
+            with open("/tmp/filterPropertiesLHS.txt", "r") as file1:
+                for i, line in enumerate(file1):
+                    text = line.strip('\t')
+                    if "---" in line or "====" in line:
+                        continue
+                    if ":" in line:
+                        k = 0
+                        count += 1
+                        background_color = Const.BGCOLOR3
+                        iter1 = SparseTab_Store.append(None,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                    else:
+                        background_color = setBackgroundColor(k)
+                        SparseTab_Store.append(iter1,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                        k += 1
+                    TreeSparse.expand_all()
+        else:
+            k = 0;count = 0
+            with open("/tmp/filterPropertiesLHS.txt", "r") as file1:
+                for i, line in enumerate(file1):
+                    text = line.strip('\t')
+                    if "---" in line or "====" in line:
+                        continue
+                    else:
+                        background_color = setBackgroundColor(k)
+                        SparseTab_Store.append(None,[text.strip('\n'), value2[i].strip('\n'), background_color,fgColor[i]])
+                        k += 1
+                    TreeSparse.expand_all()
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -690,13 +717,13 @@ def Vulkan(tab2):
     propertiesTab = Gtk.VBox(spacing=10)
     propertiesGrid = createSubTab(propertiesTab,notebook,"Properties")
     propertiesStore = Gtk.ListStore(str)
-   # propertiesCombo = Gtk.ComboBox.new_with_model(propertiesStore)
-   # propertiesCombo.connect("changed",selectProperties)
+    propertiesCombo = Gtk.ComboBoxText()
+    propertiesCombo.connect("changed",selectProperties)
    # propertiesRenderer = Gtk.CellRendererText(font="BOLD")
    # propertiesCombo.pack_start(propertiesRenderer, True)
    # propertiesCombo.add_attribute(propertiesRenderer,"text",0)
    # propertiesCombo.set_active(0)
-   # propertiesGrid.add(propertiesCombo)
+    propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
     TreeSparse.set_property("enable-tree-lines", True)
@@ -715,8 +742,8 @@ def Vulkan(tab2):
         TreeSparse.append_column(column)
 
     propertiesScrollbar = createScrollbar(TreeSparse)
-   # propertiesGrid.attach_next_to(propertiesScrollbar,propertiesCombo,Gtk.PositionType.BOTTOM,1,1)
-    propertiesGrid.add(propertiesScrollbar)
+    propertiesGrid.attach_next_to(propertiesScrollbar,propertiesCombo,Gtk.PositionType.BOTTOM,1,1)
+    #propertiesGrid.add(propertiesScrollbar)
 
     # -----------------Creating the Features Tab-----------------
 
