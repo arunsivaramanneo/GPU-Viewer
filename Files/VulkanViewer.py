@@ -115,23 +115,16 @@ def Vulkan(tab2):
             if GPUname == i:
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/VKDFeatures1.txt" % i)
+                os.system("cat /tmp/vulkaninfo.txt |  awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1}/Format Properties:/{flag=0}flag' > /tmp/VKDeviceFeatures.txt"%i)
                 break
+        featureCombo.remove_all()
+        with open("/tmp/VKDeviceFeatures.txt","r") as file:
+            for line in file:
+                if ":" in line:
+                    featureCombo.append_text(line.strip("\n"))
 
-        os.system(
-            "cat /tmp/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/VKDFeatures.txt")
-
-
-        fgColor, value = colorTrueFalse("/tmp/VKDFeatures1.txt", "= 1")
-
-
-
-        FeaturesTab_Store.clear()
-
-        with open("/tmp/VKDFeatures.txt", "r") as file1:
-            for i, line in enumerate(file1):
-                text = line.strip('\t')
-                background_color = setBackgroundColor(i)
-                FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+        featureCombo.insert_text(0,"Show All Features")
+        featureCombo.set_active(0)
 
     def Limits(GPUname):
 
@@ -689,6 +682,31 @@ def Vulkan(tab2):
                         k += 1
                     TreeSparse.expand_all()
 
+    def selectFeature(Combo):
+        feature = Combo.get_active_text()
+        if feature is None:
+            feature = " "
+        elif "Show All Features" in feature:
+            os.system(
+                "cat /tmp/VKDeviceFeatures.txt | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/VKDFeatures1.txt")
+
+        else :
+            os.system("cat /tmp/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Features*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = > /tmp/VKDFeatures1.txt"%feature)
+
+        os.system(
+            "cat /tmp/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/VKDFeatures.txt")
+
+        FeaturesTab_Store.clear()
+        TreeFeatures.set_model(FeaturesTab_Store_filter)
+        fgColor, value = colorTrueFalse("/tmp/VKDFeatures1.txt", "= 1")
+
+        with open("/tmp/VKDFeatures.txt", "r") as file1:
+            for i, line in enumerate(file1):
+                text = line.strip('\t')
+                background_color = setBackgroundColor(i)
+                FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+
+
     grid = Gtk.Grid()
     tab2.add(grid)
     DevicesFrame = Gtk.Frame()
@@ -712,17 +730,11 @@ def Vulkan(tab2):
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
 
- #   SparseGrid = createSubFrame(DeviceTab)
-
     propertiesTab = Gtk.VBox(spacing=10)
     propertiesGrid = createSubTab(propertiesTab,notebook,"Properties")
     propertiesStore = Gtk.ListStore(str)
     propertiesCombo = Gtk.ComboBoxText()
     propertiesCombo.connect("changed",selectProperties)
-   # propertiesRenderer = Gtk.CellRendererText(font="BOLD")
-   # propertiesCombo.pack_start(propertiesRenderer, True)
-   # propertiesCombo.add_attribute(propertiesRenderer,"text",0)
-   # propertiesCombo.set_active(0)
     propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
@@ -743,7 +755,6 @@ def Vulkan(tab2):
 
     propertiesScrollbar = createScrollbar(TreeSparse)
     propertiesGrid.attach_next_to(propertiesScrollbar,propertiesCombo,Gtk.PositionType.BOTTOM,1,1)
-    #propertiesGrid.add(propertiesScrollbar)
 
     # -----------------Creating the Features Tab-----------------
 
@@ -768,13 +779,14 @@ def Vulkan(tab2):
         TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
-   # featureCombo = Gtk.ComboBox()
-   # FeaturesGrid.add(featureCombo)
+    featureCombo = Gtk.ComboBoxText()
+    featureCombo.connect("changed",selectFeature)
+    FeaturesGrid.add(featureCombo)
     featureFrameSearch = Gtk.Frame()
     featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
     featureFrameSearch.add(featureSearchEntry)
-   # FeaturesGrid.attach_next_to(featureFrameSearch,featureCombo,Gtk.PositionType.BOTTOM,1,1)
-    FeaturesGrid.add(featureFrameSearch)
+    FeaturesGrid.attach_next_to(featureFrameSearch,featureCombo,Gtk.PositionType.BOTTOM,1,1)
+    #FeaturesGrid.add(featureFrameSearch)
     FeatureScrollbar = createScrollbar(TreeFeatures)
     FeaturesGrid.attach_next_to(FeatureScrollbar,featureFrameSearch,Gtk.PositionType.BOTTOM,1,1)
 

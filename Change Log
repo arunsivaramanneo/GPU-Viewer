@@ -1,5 +1,6 @@
 -----------------------------------------------------------------------Mar-2018-----------------------------------------------------------------------------------------------------------------
 25/03   - Added a drop down value to Properties Tab to filter as per the Property Name
+        - Added a drop down value to Features Tab to filter as per the Sub Features
 18/03   - Added a new Tab Properties to Vulkan
         - Increased the Default Application height to 90% of the Screen Resolution
         - Other Vulkan 1.1 Fixes
