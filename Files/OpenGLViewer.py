@@ -18,7 +18,7 @@ LimitsTitle = ["OpenGL Hardware Limits", "Value"]
 def OpenGL(tab1):
     grid = Gtk.Grid()
     grid.set_row_spacing(10)
-    grid.set_column_spacing(20)
+    grid.set_column_spacing(10)
     tab1.add(grid)
     grid4 = Gtk.Grid()
 #    grid4.set_row_spacing(5)

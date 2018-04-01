@@ -57,7 +57,7 @@ def isVulkanSupported():
     os.system("vulkaninfo > /tmp/vulkaninfo.txt")
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         count = len(file1.readlines())
-    return count
+    return count > 20
 
 
 def quit(instance, value):
