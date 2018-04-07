@@ -760,7 +760,7 @@ def Vulkan(tab2):
 
     FeatureTab = Gtk.VBox(spacing=10)
     FeaturesGrid = createSubTab(FeatureTab, notebook, "Features")
-    FeaturesGrid.set_row_spacing(3)
+ #   FeaturesGrid.set_row_spacing(3)
 
     FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
     FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
