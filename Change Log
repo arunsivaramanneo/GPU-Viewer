@@ -1,3 +1,8 @@
+-----------------------------------------------------------------------Apr-2018-----------------------------------------------------------------------------------------------------------------
+08/04   - Updated Nvidia and Intel Logo's
+        - Reduced the logo size from 150 to 120%
+        - Improved Vulkaninfo Detection, Now no longer shows Vulkan Tab if the System doesn't support Vulkan
+        - Tested on Vulkan loader 1.1.72
 -----------------------------------------------------------------------Mar-2018-----------------------------------------------------------------------------------------------------------------
 25/03   - Added a drop down value to Properties Tab to filter as per the Property Name
         - Added a drop down value to Features Tab to filter as per the Sub Features
