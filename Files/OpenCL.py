@@ -317,7 +317,7 @@ def openCL(tab):
     oclNotebook = Gtk.Notebook()
     mainGrid.attach(oclNotebook,0,2,1,1)
 
-    platformDetailsTab = Gtk.VBox(spacing=10)
+    platformDetailsTab = Gtk.Box(spacing=10)
     platformDetailsGrid = createSubTab(platformDetailsTab,oclNotebook,"Platform Details")
 
     platformDetails_Store = Gtk.TreeStore(str,str,str)
@@ -329,7 +329,7 @@ def openCL(tab):
     platformScrollbar = createScrollbar(platformDetailsTreeView)
     platformDetailsGrid.add(platformScrollbar)
 
-    DeviceDetailsTab = Gtk.VBox(spacing=10)
+    DeviceDetailsTab = Gtk.Box(spacing=10)
     DeviceDetailsGrid = createSubTab(DeviceDetailsTab,oclNotebook,"Device Details")
 
 
@@ -345,7 +345,7 @@ def openCL(tab):
 
 # Device Memory Details ...
 
-    DeviceMemoryImageTab = Gtk.VBox(spacing=10)
+    DeviceMemoryImageTab = Gtk.Box(spacing=10)
     DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab,oclNotebook,"Device Memory & Image Details")
 
     DeviceMemoryImage_store = Gtk.TreeStore(str,str,str,str)
@@ -360,7 +360,7 @@ def openCL(tab):
 
 # Device Queue & Execution capabilities
 
-    DeviceQueueExecutionTab = Gtk.VBox(spacing=10)
+    DeviceQueueExecutionTab = Gtk.Box(spacing=10)
     DeviceQueueExecutionGrid = createSubTab(DeviceQueueExecutionTab,oclNotebook,"Device Queue & Execution Capabilities")
 
     DeviceQueueExecution_store = Gtk.TreeStore(str,str,str,str)
@@ -374,7 +374,7 @@ def openCL(tab):
 
 # Device Vector Details
 
-    DeviceVectorTab = Gtk.VBox(spacing=10)
+    DeviceVectorTab = Gtk.Box(spacing=10)
     DeviceVectorGrid = createSubTab(DeviceVectorTab,oclNotebook,"Device Vector Details")
 
     DeviceVector_store = Gtk.TreeStore(str,str,str,str)

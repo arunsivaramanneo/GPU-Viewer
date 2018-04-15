@@ -63,7 +63,7 @@ def OpenGL(tab1):
         LimitsWin.set_border_width(10)
         LimitsNotebook = Gtk.Notebook()
         LimitsWin.add(LimitsNotebook)
-        LimitsCoreTab = Gtk.VBox("spacing=10")
+        LimitsCoreTab = Gtk.Box("spacing=10")
         LimitsNotebook.add(LimitsCoreTab)
         LimitsNotebook.set_tab_label(LimitsCoreTab,Gtk.Label("\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
@@ -82,7 +82,7 @@ def OpenGL(tab1):
         LimitsCoreScrollbar = createScrollbar(TreeCoreLimits)
         LimitsCoreFrame.add(LimitsCoreScrollbar)
 
-        LimitsCompatTab = Gtk.VBox("spacing=10")
+        LimitsCompatTab = Gtk.Box("spacing=10")
         LimitsNotebook.add(LimitsCompatTab)
         LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("\tCompat.\t"))
         LimitsCompatFrame = Gtk.Frame()

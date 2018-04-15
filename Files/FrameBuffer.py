@@ -27,9 +27,9 @@ def FrameBuffer(button):
     TreeFBGLX.set_enable_search(True)
     TreeFBGLX.set_property("enable-grid-lines", 3)
 
-    FBGLXTab = Gtk.VBox(spacing=10)
+    FBGLXTab = Gtk.Box(spacing=10)
     FBGLXGrid = createSubTab(FBGLXTab,FBNotebook,"GLX Visuals")
-    FBConfigTab = Gtk.VBox(spacing=10)
+    FBConfigTab = Gtk.Box(spacing=10)
     FBConfigGrid = createSubTab(FBConfigTab,FBNotebook,"GLX FBConfigs")
 
     button.set_sensitive(False)

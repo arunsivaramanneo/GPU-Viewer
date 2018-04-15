@@ -29,7 +29,7 @@ class MyGtk(Gtk.Window):
             setting.set_property("gtk-theme-name","Adapta")
 
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
-        tab = Gtk.VBox(spacing=5)
+        tab = Gtk.Box(spacing=5)
         tab.set_border_width(2)
         openGlIcon = fetchImageFromUrl(iconUrl, iconWidth, iconHeight, aspectRatio)
         self.notebook.append_page(tab, Gtk.Image.new_from_pixbuf(openGlIcon))

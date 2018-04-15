@@ -719,7 +719,7 @@ def Vulkan(tab2):
 
     # ----------------Creating the Device Info Tab ------------
 
-    DeviceTab = Gtk.VBox(spacing=10)
+    DeviceTab = Gtk.Box(spacing=10)
     DeviceGrid = createSubTab(DeviceTab, notebook, "Device")
 
     DeviceTab_Store = Gtk.ListStore(str, str, str)
@@ -730,7 +730,7 @@ def Vulkan(tab2):
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
 
-    propertiesTab = Gtk.VBox(spacing=10)
+    propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab,notebook,"Properties")
     propertiesStore = Gtk.ListStore(str)
     propertiesCombo = Gtk.ComboBoxText()
@@ -758,7 +758,7 @@ def Vulkan(tab2):
 
     # -----------------Creating the Features Tab-----------------
 
-    FeatureTab = Gtk.VBox(spacing=10)
+    FeatureTab = Gtk.Box(spacing=10)
     FeaturesGrid = createSubTab(FeatureTab, notebook, "Features")
  #   FeaturesGrid.set_row_spacing(3)
 
@@ -793,7 +793,7 @@ def Vulkan(tab2):
     FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree,data=TreeFeatures)
 
     # ------------ Creating the Limits Tab -------------------------------------------
-    LimitsTab = Gtk.VBox(spacing=10)
+    LimitsTab = Gtk.Box(spacing=10)
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
     LimitsGrid.set_row_spacing(3)
 
@@ -815,7 +815,7 @@ def Vulkan(tab2):
 
     # ------------ Creating the Extensions Tab-------------------------------------------
 
-    ExtensionTab = Gtk.VBox(spacing=10)
+    ExtensionTab = Gtk.Box(spacing=10)
     ExtensionGrid = createSubTab(ExtensionTab, notebook, "Extensions")
     ExtensionGrid.set_row_spacing(2)
 
@@ -835,7 +835,7 @@ def Vulkan(tab2):
 
     # ------------Creating the Formats Tab --------------------------------------------------
 
-    FormatsTab = Gtk.VBox(spacing=10)
+    FormatsTab = Gtk.Box(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
 
@@ -868,7 +868,8 @@ def Vulkan(tab2):
 
     # ------------------------Memory Types & Heaps----------------------------------------------
 
-    MemoryTab = Gtk.VBox(spacing=10)
+    MemoryTab = Gtk.Box(spacing=10)
+    MemoryTab.set_orientation(1)
     MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
 
     MemoryTab_Store = Gtk.ListStore(int, int, str, str, str, str, str, str, str, str, str, str, str)
@@ -914,7 +915,7 @@ def Vulkan(tab2):
     HeapGrid.add(HeapScrollbar)
     # -------------------------Creating the Queues Tab -----------------------------------------------------
 
-    QueueTab = Gtk.VBox(spacing=10)
+    QueueTab = Gtk.Box(spacing=10)
     QueueGrid = createSubTab(QueueTab, notebook, "Queue")
 
     QueueTab_Store = Gtk.ListStore(int, int, int, str, str, str, str, str, str, str, str, str, str, str, str)
@@ -940,11 +941,11 @@ def Vulkan(tab2):
 
     # -------------------------Creating the Instances & Layers ---------------------------------------------
 
-    InstanceTab = Gtk.VBox(spacing=10)
+    InstanceTab = Gtk.Box(spacing=10)
     InstanceGrid = createSubTab(InstanceTab, notebook, "Instances & layers")
     InstanceNotebook = Gtk.Notebook()
     InstanceGrid.add(InstanceNotebook)
-    InstanceExtTab = Gtk.VBox(spacing=10)
+    InstanceExtTab = Gtk.Box(spacing=10)
     InstanceExtGrid = createSubTab(InstanceExtTab,InstanceNotebook,"Instance Extensions")
     InstanceExtGrid.set_row_spacing(3)
 
@@ -964,7 +965,7 @@ def Vulkan(tab2):
 
     InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree,data=TreeInstance)
 
-    InstanceLayersTab = Gtk.VBox(spacing=10)
+    InstanceLayersTab = Gtk.Box(spacing=10)
     InstanceLayersGrid = createSubTab(InstanceLayersTab,InstanceNotebook,"Instance Layers")
     InstanceLayersGrid.set_row_spacing(3)
 
@@ -991,7 +992,7 @@ def Vulkan(tab2):
     with open("/tmp/vulkaninfo.txt", "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
-                SurfaceTab = Gtk.VBox(spacing=10)
+                SurfaceTab = Gtk.Box(spacing=10)
                 SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
 
                 for i, column_title in enumerate(SurfaceTitle):
