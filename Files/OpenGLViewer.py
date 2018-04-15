@@ -28,9 +28,10 @@ def OpenGL(tab1):
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
     os.system("glxinfo -s > /tmp/glxinfo.txt")
     os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
+    os.system("es2_info | grep EGL_VERSION >> /tmp/OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/glxinfo.txt | grep memory: | grep -o :.* | grep -o ' .*' >> /tmp/OpenGLRHS.txt")
-    os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string.*/,'True');print}' > /tmp/OpenGLLHS.txt")
+    os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string|:.*/,'True');print}' > /tmp/OpenGLLHS.txt")
     os.system("cat /tmp/glxinfo.txt | grep memory: | awk '{gsub(/:.*/,'True');print}' >> /tmp/OpenGLLHS.txt")
     value = copyContentsFromFile("/tmp/OpenGLRHS.txt")
 
@@ -284,10 +285,14 @@ def OpenGL(tab1):
     grid1.set_border_width(5)
     frame2.add(grid1)
 
-    OpenGLRad = Gtk.RadioButton("OpenGL")
+    OpenGLRad = Gtk.RadioButton()
+    RadioImg1 = fetchImageFromUrl(Const.OPEN_GL_PNG, 90,70, True)
+    OpenGLRad.set_image(Gtk.Image.new_from_pixbuf(RadioImg1))
     OpenGLRad.connect("clicked", radcall, 1)
     grid1.add(OpenGLRad)
-    OpenGLRadES = Gtk.RadioButton.new_with_label_from_widget(OpenGLRad, "OpenGL ES")
+    OpenGLRadES = Gtk.RadioButton.new_from_widget(OpenGLRad)
+    RadioImg2 = fetchImageFromUrl(Const.OPEN_GL_ES_PNG, 100,70, True)
+    OpenGLRadES.set_image(Gtk.Image.new_from_pixbuf(RadioImg2))
     OpenGLRadES.connect("clicked", radcall, 2)
     with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
@@ -298,6 +303,7 @@ def OpenGL(tab1):
                 OpenGLRadES.set_visible(False)
 
     OpenGLRad.set_active(False)
+   # OpenGLRadES.set_active(True)
     # os.system("rm /tmp/OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3

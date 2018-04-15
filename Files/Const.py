@@ -6,6 +6,8 @@ VULKAN_PNG = "../Images/Vulkan.png"
 
 OPEN_GL_PNG = "../Images/OpenGL.png"
 
+OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
+
 OPEN_CL_PNG = "../Images/opencl_logo.png"
 
 NVIDIA_LOGO_PNG = "../Images/nvidia-logo.png"
