@@ -1,4 +1,8 @@
 -----------------------------------------------------------------------Apr-2018-----------------------------------------------------------------------------------------------------------------
+15/04   - Initial es2_info support added in OpenGL Tab
+        - Replaced radiobutton labels in OpenGL tab with Images
+        - Added new Radiobutton to view EGL extensions in OpenGL Tab
+        - reduced VBOX border width from 10 to 2
 08/04   - Updated Nvidia and Intel Logo's
         - Reduced the logo size from 150 to 120%
         - Improved Vulkaninfo Detection, Now no longer shows Vulkan Tab if the System doesn't support Vulkan

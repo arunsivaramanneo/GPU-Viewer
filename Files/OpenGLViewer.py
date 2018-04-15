@@ -28,7 +28,7 @@ def OpenGL(tab1):
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
     os.system("glxinfo -s > /tmp/glxinfo.txt")
     os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
-    os.system("es2_info | grep EGL_VERSION >> /tmp/OpenGL_Information.txt")
+    os.system("es2_info | awk '/EGL_VERSION|VENDOR/' >> /tmp/OpenGL_Information.txt")
     os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/glxinfo.txt | grep memory: | grep -o :.* | grep -o ' .*' >> /tmp/OpenGLRHS.txt")
     os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string|:.*/,'True');print}' > /tmp/OpenGLLHS.txt")
@@ -221,9 +221,13 @@ def OpenGL(tab1):
 
     def Radio(value):
 
-        os.system("cat /tmp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/Vendor.txt")
-        os.system("cat /tmp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/Vendor.txt")
-        os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/Vendor1.txt")
+        if 1 <= value <= 2:
+            os.system("cat /tmp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/Vendor.txt")
+            os.system("cat /tmp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/Vendor.txt")
+            os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/Vendor1.txt")
+
+        if value == 3:
+            os.system("cat /tmp/extensions.txt | awk 'gsub(/EGL_|_.*/,'true')'| sort | uniq > /tmp/Vendor1.txt")
 
         vCount = []
         vendorList = []
@@ -275,6 +279,9 @@ def OpenGL(tab1):
             os.system(
                 "cat /tmp/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
 
+        elif value == 3:
+            os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/extensions.txt")
+
         Radio(value)
         Vendor_Combo.set_active(0)
 
@@ -294,13 +301,21 @@ def OpenGL(tab1):
     RadioImg2 = fetchImageFromUrl(Const.OPEN_GL_ES_PNG, 100,70, True)
     OpenGLRadES.set_image(Gtk.Image.new_from_pixbuf(RadioImg2))
     OpenGLRadES.connect("clicked", radcall, 2)
+    eglRad = Gtk.RadioButton.new_from_widget(OpenGLRadES)
+    eglRad.connect("clicked",radcall, 3)
+    RadioImg3 = fetchImageFromUrl(Const.EGL_PNG,70,70,True)
+    eglRad.set_image(Gtk.Image.new_from_pixbuf(RadioImg3))
     with open("/tmp/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
+                continue
+            if "EGL_VERSION" in line:
+                grid1.attach_next_to(eglRad,OpenGLRadES,Gtk.PositionType.RIGHT,1,1)
                 break
             else:
                 OpenGLRadES.set_visible(False)
+                eglRad.set_visible(False)
 
     OpenGLRad.set_active(False)
    # OpenGLRadES.set_active(True)
