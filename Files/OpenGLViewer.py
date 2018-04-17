@@ -141,38 +141,39 @@ def OpenGL(tab1):
                     else:
                         Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
 
-    LimitsFrame = Gtk.Frame()
-    grid.attach(LimitsFrame, 0, 1, 2, 1)
+  #  LimitsFrame = Gtk.Frame()
+  #  grid.attach(LimitsFrame, 0, 1, 2, 1)
     Button_Limits = Gtk.Button("Show OpenGL Limits")
     Button_Limits.connect("clicked", clickme)
-    LimitsFrame.add(Button_Limits)
+    grid.attach(Button_Limits,0,1,2,1)
+  #  LimitsFrame.add(Button_Limits)
     # grid4.attach(Button_Limits, 0, 1, 2, 1)
 
     # vendorFrame = Gtk.Frame()
     # grid.attach_next_to(vendorFrame,LimitsFrame,Gtk.PositionType.RIGHT,1,1)
 
-    FBFrame = Gtk.Frame()
+  #  FBFrame = Gtk.Frame()
     Button_FB = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     Button_FB.connect("clicked", FrameBuffer)
-    FBFrame.add(Button_FB)
+  #  FBFrame.add(Button_FB)
 
     with open("/tmp/OpenGLRHS.txt", "r") as file1:
         for line in file1:
             if "Intel" in line:
                 vendorImg = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "NVIDIA" in line:
                 vendorImg = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "AMD" in line or "ATI" in line:
                 vendorImg = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), LimitsFrame, Gtk.PositionType.RIGHT, 1, 1)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
 
         # vendorFrame.add(Gtk.Image.new_from_pixbuf(vendorImg))
-        grid.attach(FBFrame, 3, 1, 2, 1)
+        grid.attach(Button_FB, 3, 1, 2, 1)
 
     # End of Frame 1
     OpenGLExt_list = Gtk.ListStore(str, str)

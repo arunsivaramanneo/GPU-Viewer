@@ -493,7 +493,7 @@ def Vulkan(tab2):
         for GPU in range(len(list)):
             if GPUname == GPU:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag' | awk '/./'> /tmp/VKDsurface.txt" % (
+                    "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Groups :.*/{flag=0}flag'  | awk '/./'> /tmp/VKDsurface.txt" % (
                         GPU, GPU + 1))
                 os.system(
                     "cat /tmp/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type | awk '/./'  >> /tmp/VKDsurface.txt" % GPU)
