@@ -95,7 +95,7 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./'  > /tmp/VKDDevicesparseinfo1.txt" % i)
+                    "cat /tmp/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/VKDDevicesparseinfo1.txt" % i)
 
         propertiesCombo.remove_all()
         with open("/tmp/VKDDevicesparseinfo1.txt", "r") as file1:
@@ -613,9 +613,9 @@ def Vulkan(tab2):
         if property is None:
             property = " "
         elif "Show All Properties" in property:
-            os.system("cp /tmp/VKDDevicesparseinfo1.txt  /tmp/filterProperties.txt")
+            os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '/./' > /tmp/filterProperties.txt")
         else:
-            os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '/%s/{flag=1;next}/Vk*/{flag=0}flag' > /tmp/filterProperties.txt"%property)
+            os.system("cat /tmp/VKDDevicesparseinfo1.txt | awk '/%s/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/filterProperties.txt"%property)
 
         os.system("cat /tmp/filterProperties.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/filterPropertiesLHS.txt")
         os.system("cat /tmp/filterProperties.txt | grep -o =.* | grep -o ' .*' > /tmp/filterPropertiesRHS.txt")
@@ -674,6 +674,7 @@ def Vulkan(tab2):
             with open("/tmp/filterPropertiesLHS.txt", "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
+                    print text
                     if "---" in line or "====" in line:
                         continue
                     else:
