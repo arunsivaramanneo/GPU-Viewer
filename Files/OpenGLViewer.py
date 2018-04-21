@@ -26,16 +26,16 @@ def OpenGL(tab1):
     grid.attach(frame1, 0, 0, 12, 1)
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
-    os.system("glxinfo -s > /tmp/glxinfo.txt")
-    os.system("cat /tmp/glxinfo.txt | grep string | grep -v glx > /tmp/OpenGL_Information.txt")
-    os.system("es2_info | awk '/EGL_VERSION|VENDOR/' >> /tmp/OpenGL_Information.txt")
-    os.system("cat /tmp/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/OpenGLRHS.txt")
-    os.system("cat /tmp/glxinfo.txt | grep memory: | grep -o :.* | grep -o ' .*' >> /tmp/OpenGLRHS.txt")
-    os.system("cat /tmp/OpenGL_Information.txt | awk '{gsub(/string|:.*/,'True');print}' > /tmp/OpenGLLHS.txt")
-    os.system("cat /tmp/glxinfo.txt | grep memory: | awk '{gsub(/:.*/,'True');print}' >> /tmp/OpenGLLHS.txt")
-    value = copyContentsFromFile("/tmp/OpenGLRHS.txt")
+    os.system("glxinfo -s > /tmp/gpu-viewer/glxinfo.txt")
+    os.system("cat /tmp/gpu-viewer/glxinfo.txt | grep string | grep -v glx > /tmp/gpu-viewer/OpenGL_Information.txt")
+    os.system("es2_info | awk '/EGL_VERSION|VENDOR/' >> /tmp/gpu-viewer/OpenGL_Information.txt")
+    os.system("cat /tmp/gpu-viewer/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLRHS.txt")
+    os.system("cat /tmp/gpu-viewer/glxinfo.txt | grep memory: | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/OpenGLRHS.txt")
+    os.system("cat /tmp/gpu-viewer/OpenGL_Information.txt | awk '{gsub(/string|:.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLHS.txt")
+    os.system("cat /tmp/gpu-viewer/glxinfo.txt | grep memory: | awk '{gsub(/:.*/,'True');print}' >> /tmp/gpu-viewer/OpenGLLHS.txt")
+    value = copyContentsFromFile("/tmp/gpu-viewer/OpenGLRHS.txt")
 
-    with open("/tmp/OpenGLLHS.txt", "r") as file1:
+    with open("/tmp/gpu-viewer/OpenGLLHS.txt", "r") as file1:
         for i,line in enumerate(file1):
             text = line.strip(" ")
             background_color = setBackgroundColor(i)
@@ -53,9 +53,9 @@ def OpenGL(tab1):
 
         button.set_sensitive(False)
         os.system(
-            "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Core_Limits.txt")
-        os.system("cat /tmp/OpenGL_Core_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLCoreLimitsLHS.txt")
-        os.system("cat /tmp/OpenGL_Core_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLCoreLimitsRHS.txt")
+            "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/gpu-viewer/OpenGL_Core_Limits.txt")
+        os.system("cat /tmp/gpu-viewer/OpenGL_Core_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
+        os.system("cat /tmp/gpu-viewer/OpenGL_Core_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLCoreLimitsRHS.txt")
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
         #    LimitsWin.set_size_request(1000, 500)
@@ -72,11 +72,11 @@ def OpenGL(tab1):
         TreeCoreLimits = Gtk.TreeView(LimitsCore_Store, expand=True)
         TreeCoreLimits.set_property("enable-tree-lines",True)
 
-        temp = copyContentsFromFile("/tmp/OpenGLCoreLimitsRHS.txt")
+        temp = copyContentsFromFile("/tmp/gpu-viewer/OpenGLCoreLimitsRHS.txt")
 
-        LimitsRHS,LimitRHSValue = appendLimitsRHS("/tmp/OpenGL_Core_Limits.txt",temp)
+        LimitsRHS,LimitRHSValue = appendLimitsRHS("/tmp/gpu-viewer/OpenGL_Core_Limits.txt",temp)
 
-        showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/OpenGLCoreLimitsLHS.txt")
+        showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
 
         setColumns(TreeCoreLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsCoreScrollbar = createScrollbar(TreeCoreLimits)
@@ -92,15 +92,15 @@ def OpenGL(tab1):
         TreeCompatLimits.set_property("enable-tree-lines",True)
 
         os.system(
-            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/OpenGL_Limits.txt")
-        os.system("cat /tmp/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/OpenGLLimitsLHS.txt")
-        os.system("cat /tmp/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/OpenGLLimitsRHS.txt")
+            "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/gpu-viewer/OpenGL_Limits.txt")
+        os.system("cat /tmp/gpu-viewer/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLimitsLHS.txt")
+        os.system("cat /tmp/gpu-viewer/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLLimitsRHS.txt")
 
-        temp2 = copyContentsFromFile("/tmp/OpenGLLimitsRHS.txt")
+        temp2 = copyContentsFromFile("/tmp/gpu-viewer/OpenGLLimitsRHS.txt")
 
-        LimitsRHS2,LimitRHSValue2 = appendLimitsRHS("/tmp/OpenGL_Limits.txt",temp2)
+        LimitsRHS2,LimitRHSValue2 = appendLimitsRHS("/tmp/gpu-viewer/OpenGL_Limits.txt",temp2)
 
-        showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/OpenGLLimitsLHS.txt")
+        showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGLLimitsLHS.txt")
 
         setColumns(TreeCompatLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsCompatScrollbar = createScrollbar(TreeCompatLimits)
@@ -157,7 +157,7 @@ def OpenGL(tab1):
     Button_FB.connect("clicked", FrameBuffer)
   #  FBFrame.add(Button_FB)
 
-    with open("/tmp/OpenGLRHS.txt", "r") as file1:
+    with open("/tmp/gpu-viewer/OpenGLRHS.txt", "r") as file1:
         for line in file1:
             if "Intel" in line:
                 vendorImg = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
@@ -187,13 +187,13 @@ def OpenGL(tab1):
 
         GL_All = []
 
-        List = copyContentsFromFile("/tmp/Vendor1.txt")
+        List = copyContentsFromFile("/tmp/gpu-viewer/Vendor1.txt")
 
         List = [i.strip(' ') for i in List]
         List = [i.strip('\n ') for i in List]
         List.insert(0, " ALL")
 
-        with open("/tmp/extensions.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/extensions.txt", "r") as file1:
             for line in file1:
                 if List[int(value)] == " ALL":
                     GL_All.append(line)
@@ -223,16 +223,16 @@ def OpenGL(tab1):
     def Radio(value):
 
         if 1 <= value <= 2:
-            os.system("cat /tmp/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/Vendor.txt")
-            os.system("cat /tmp/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/Vendor.txt")
-            os.system("cat /tmp/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/Vendor1.txt")
+            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/gpu-viewer/Vendor.txt")
+            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/gpu-viewer/Vendor.txt")
+            os.system("cat /tmp/gpu-viewer/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/gpu-viewer/Vendor1.txt")
 
         if value == 3:
-            os.system("cat /tmp/extensions.txt | awk 'gsub(/EGL_|_.*/,'true')'| sort | uniq > /tmp/Vendor1.txt")
+            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/EGL_|_.*/,'true')'| sort | uniq > /tmp/gpu-viewer/Vendor1.txt")
 
         vCount = []
         vendorList = []
-        with open("/tmp/Vendor1.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/Vendor1.txt", "r") as file1:
             for line in file1:
                 vendorList.append(line)
 
@@ -240,7 +240,7 @@ def OpenGL(tab1):
         vendorList = [i.strip('\n ') for i in vendorList]
         vendorList.insert(0, "Total")
 
-        with open("/tmp/extensions.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/extensions.txt", "r") as file1:
             for i in range(len(vendorList)):
                 file1.seek(0, 0)
                 GL_All = []
@@ -272,16 +272,16 @@ def OpenGL(tab1):
     def radcall(button, value):
         if value == 1:
             os.system(
-                "cat /tmp/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
+                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
             os.system(
-                "cat /tmp/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/extensions.txt")
+                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
 
         elif value == 2:
             os.system(
-                "cat /tmp/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/extensions.txt")
+                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
 
         elif value == 3:
-            os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/extensions.txt")
+            os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/gpu-viewer/extensions.txt")
 
         Radio(value)
         Vendor_Combo.set_active(0)
@@ -306,7 +306,7 @@ def OpenGL(tab1):
     eglRad.connect("clicked",radcall, 3)
     RadioImg3 = fetchImageFromUrl(Const.EGL_PNG,70,70,True)
     eglRad.set_image(Gtk.Image.new_from_pixbuf(RadioImg3))
-    with open("/tmp/OpenGLLHS.txt", "r") as file1:
+    with open("/tmp/gpu-viewer/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
@@ -320,7 +320,7 @@ def OpenGL(tab1):
 
     OpenGLRad.set_active(False)
    # OpenGLRadES.set_active(True)
-    # os.system("rm /tmp/OpenGL*.txt")
+    # os.system("rm /tmp/gpu-viewer/OpenGL*.txt")
     # End of Frame 2 and grid 1
     # Start of Frame 3
 

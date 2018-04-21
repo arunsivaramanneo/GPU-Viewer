@@ -1,4 +1,6 @@
 -----------------------------------------------------------------------Apr-2018-----------------------------------------------------------------------------------------------------------------
+
+21/04   - Better handling of Temporary files
 15/04   - Initial es2_info support added in OpenGL Tab
         - Replaced radiobutton labels in OpenGL tab with Images
         - Added new Radiobutton to view EGL extensions in OpenGL Tab

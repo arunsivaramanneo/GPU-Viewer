@@ -19,6 +19,7 @@ def main():
 
 #    T1 = time.time()
 
+    os.system("mkdir /tmp/gpu-viewer")
     gtk = MyGtk("GPU-Viewer v1.10")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
@@ -48,21 +49,20 @@ def main():
     gtk.mainLoop()
 
 def isOpenclSupported():
-    os.system("clinfo | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/clinfo.txt")
-    with open("/tmp/clinfo.txt","r") as file:
+    os.system("clinfo | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/gpu-viewer/clinfo.txt")
+    with open("/tmp/gpu-viewer/clinfo.txt","r") as file:
         count = len(file.readlines())
     return count > 2
 
 def isVulkanSupported():
-    os.system("vulkaninfo > /tmp/vulkaninfo.txt")
-    with open("/tmp/vulkaninfo.txt", "r") as file1:
+    os.system("vulkaninfo > /tmp/gpu-viewer/vulkaninfo.txt")
+    with open("/tmp/gpu-viewer/vulkaninfo.txt", "r") as file1:
         count = len(file1.readlines())
     return count > 20
 
 
 def quit(instance, value):
-    os.system("rm -rf *.pyc")
-    os.system("rm -rf /tmp/VKD*.txt ocl*.txt filter*.txt")
+    os.system("rm /tmp/gpu-viewer -r")
     instance.quit()
 
 

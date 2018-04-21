@@ -35,10 +35,10 @@ def FrameBuffer(button):
     button.set_sensitive(False)
 
     os.system(
-        "cat /tmp/glxinfo.txt  | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXVisual.txt")
+        "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/gpu-viewer/FrameBufferGLXVisual.txt")
 
     list = []
-    with open("/tmp/FrameBufferGLXVisual.txt", "r") as file1:
+    with open("/tmp/gpu-viewer/FrameBufferGLXVisual.txt", "r") as file1:
         for line in file1:
             list.append(line.split())
 
@@ -55,10 +55,10 @@ def FrameBuffer(button):
     TreeFBConfig.set_property("enable-grid-lines", 3)
 
     os.system(
-        "cat /tmp/glxinfo.txt | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/FrameBufferGLXFBconfigs.txt")
+        "cat /tmp/gpu-viewer/glxinfo.txt | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' > /tmp/gpu-viewer/FrameBufferGLXFBconfigs.txt")
 
     list = []
-    with open("/tmp/FrameBufferGLXFBconfigs.txt", "r") as file1:
+    with open("/tmp/gpu-viewer/FrameBufferGLXFBconfigs.txt", "r") as file1:
         for line in file1:
             list.append(line.split())
 
