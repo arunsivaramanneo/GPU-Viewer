@@ -674,7 +674,6 @@ def Vulkan(tab2):
             with open("/tmp/filterPropertiesLHS.txt", "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
-                    print text
                     if "---" in line or "====" in line:
                         continue
                     else:
