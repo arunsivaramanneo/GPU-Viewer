@@ -20,7 +20,7 @@ def main():
 #    T1 = time.time()
 
     os.system("mkdir /tmp/gpu-viewer")
-    gtk = MyGtk("GPU-Viewer v1.10")
+    gtk = MyGtk("GPU-Viewer v1.11")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)

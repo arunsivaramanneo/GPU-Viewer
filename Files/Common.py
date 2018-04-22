@@ -39,8 +39,6 @@ class MyGtk(Gtk.Window):
         Gtk.main()
 
     def quit(self):
-        os.system("rm /tmp/gpu-viewer/ocl*.txt")
-        os.system("rm /tmp/gpu-viewer/OpenGL*.txt")
         Gtk.main_quit()
 
 
