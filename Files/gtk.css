@@ -2173,7 +2173,7 @@ frame > border,
   margin: 0;
   padding: 0;
   border: 1px solid rgba(0, 0, 0, 0.20);
-  border-radius: 2;
+  border-radius: 2px;
   box-shadow: -2px -2px 2px 1px grey;
 }
 

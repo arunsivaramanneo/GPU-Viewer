@@ -7,6 +7,7 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gdk, Gtk, GdkPixbuf
 
+
 class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
@@ -24,9 +25,9 @@ class MyGtk(Gtk.Window):
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         elif Const.THEME1:
-            setting.set_property("gtk-theme-name","FlatPlat")
+            setting.set_property("gtk-theme-name", "FlatPlat")
         elif Const.THEME2:
-            setting.set_property("gtk-theme-name","Adapta")
+            setting.set_property("gtk-theme-name", "Adapta")
 
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
         tab = Gtk.Box(spacing=5)
@@ -46,10 +47,10 @@ class MyGtk(Gtk.Window):
 def setScreenSize(self, widthRatio, heightRatio):
     Screen = Gdk.Screen.get_default()
     if Screen.get_height() >= 1440:
-        self.set_default_size(1200,1080)
+        self.set_default_size(1200, 1080)
     else:
         self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
-        
+
     self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
 
@@ -90,14 +91,14 @@ def createSubTab(Tab, notebook, label):
 
 
 # Setting Columns in TreeView
-def setColumns(Treeview, Title, MWIDTH,align):
+def setColumns(Treeview, Title, MWIDTH, align):
     for i, column_title in enumerate(Title):
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, renderer, text=i)
         column.set_alignment(align)
         column.add_attribute(renderer, "background", len(Title))
         column.set_property("min-width", MWIDTH)
-        Treeview.set_property("can-focus",False)
+        Treeview.set_property("can-focus", False)
         Treeview.append_column(column)
 
 
@@ -120,6 +121,7 @@ def createSubFrame(Tab):
     Frame.add(grid)
     return grid
 
+
 def colorTrueFalse(filename, text):
     with open(filename, "r") as file1:
         value = []
@@ -133,11 +135,13 @@ def colorTrueFalse(filename, text):
                 fgColor.append(Const.COLOR2)
     return fgColor, value
 
-def getLinkButtonImg(img,link,toolTip):
+
+def getLinkButtonImg(img, link, toolTip):
     Logbutton = Gtk.LinkButton(link)
     Logbutton.add(Gtk.Image.new_from_pixbuf(img))
     Logbutton.set_tooltip_text(toolTip)
     return Logbutton
+
 
 def getVulkanVersion(value):
     majorVersion = int(value) >> 22
@@ -159,7 +163,8 @@ def getDriverVersion(value):
         microVersion = int(value[4]) & 4095
         return "%d.%d.%d" % (majorVersion, minorVersion, microVersion)
 
-def setColumnFrameBuffer(TreeFB,Title):
+
+def setColumnFrameBuffer(TreeFB, Title):
     for i, column_title in enumerate(Title):
 
         FBrenderer = Gtk.CellRendererText()
@@ -172,13 +177,15 @@ def setColumnFrameBuffer(TreeFB,Title):
         TreeFB.set_property("can-focus", False)
         TreeFB.append_column(column)
 
+
 def getDeviceSize(size):
-    sizeMB = float(size)/(1024*1024*1024)
+    sizeMB = float(size) / (1024 * 1024 * 1024)
     if sizeMB <= 1.0:
-        sizeMB = str(format((sizeMB*1024),'.2f')) + " MB"
+        sizeMB = str(format((sizeMB * 1024), '.2f')) + " MB"
     else:
-        sizeMB = str(format(sizeMB,'.2f')) + " GB"
+        sizeMB = str(format(sizeMB, '.2f')) + " GB"
     return sizeMB
+
 
 def searchStore(TreeGLExt, grid3, refresh_filter):
     frameSearch = Gtk.Frame()
@@ -190,12 +197,14 @@ def searchStore(TreeGLExt, grid3, refresh_filter):
     grid3.attach(frameSearch, 0, 0, 1, 1)
     grid3.attach_next_to(scrollable_treelist2, frameSearch, Gtk.PositionType.BOTTOM, 1, 1)
 
-def refresh_filter(self,store_filter):
+
+def refresh_filter(self, store_filter):
     store_filter.refilter()
 
-def appendLimitsRHS(filename,temp):
+
+def appendLimitsRHS(filename, temp):
     LimitsRHS = []
-    LimitRHSValue = []    
+    LimitRHSValue = []
     i = 0
     with open(filename, "r") as file1:
         for line in file1:
@@ -206,4 +215,4 @@ def appendLimitsRHS(filename,temp):
             else:
                 LimitsRHS.append("")
                 LimitRHSValue.append(False)
-    return LimitsRHS,LimitRHSValue
+    return LimitsRHS, LimitRHSValue
