@@ -311,7 +311,7 @@ def OpenGL(tab1):
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
                 continue
-            if "EGL_VERSION" in line:
+            elif "EGL_VERSION" in line:
                 grid1.attach_next_to(eglRad,OpenGLRadES,Gtk.PositionType.RIGHT,1,1)
                 break
             else:

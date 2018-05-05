@@ -11,7 +11,7 @@ The latest source code of this program can be found at
 https://github.com/arunsivaramanneo/GPU-Viewer
 
 This program uses:
-    -  python 2.7 or higher
+    -  python 3 or higher
     -  GTK3+ for the graphical user interface
     -  glxinfo, vulkaninfo and clinfo for fetching the report
 

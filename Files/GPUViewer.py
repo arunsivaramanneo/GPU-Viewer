@@ -24,6 +24,7 @@ def main():
     openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
     t1 = threading.Thread(target=OpenGL, args=(openGlTab,))
     t1.start()
+    t1.join()
 
     if isVulkanSupported():
         vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
@@ -35,6 +36,7 @@ def main():
         openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const.ICON_HEIGHT, False)
         t4 = threading.Thread(target=openCL, args=(openclTab,))
         t4.start()
+        t4.join()
 
     aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
     t3 = threading.Thread(target=about, args=(aboutTab,))
