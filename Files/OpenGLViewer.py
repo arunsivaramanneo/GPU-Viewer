@@ -311,7 +311,7 @@ def OpenGL(tab1):
             if "OpenGL ES" in line:
                 grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
                 continue
-            if "EGL_VERSION" in line:
+            elif "EGL_VERSION" in line:
                 grid1.attach_next_to(eglRad,OpenGLRadES,Gtk.PositionType.RIGHT,1,1)
                 break
             else:
@@ -340,7 +340,7 @@ def OpenGL(tab1):
    # Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
 
-    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 5, 1)
+    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
     TreeGLExt.set_enable_search(True)
     TreeGLExt.set_headers_visible(True)
     setColumns(TreeGLExt, Title1, Const.MWIDTH,0.0)
