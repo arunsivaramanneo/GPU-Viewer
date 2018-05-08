@@ -741,7 +741,7 @@ def Vulkan(tab2):
 
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Features*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Features*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
 
         os.system(
             "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/gpu-viewer/VKDFeatures.txt")
