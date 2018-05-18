@@ -113,11 +113,12 @@ def OpenGL(tab1):
         LimitsWin.show_all()
 
     def showLimits(LimitRHSValue, LimitsRHS, Limits_Store, TreeLimits,filename):
-        k = 0;
+        k = 0
         count = 0
         with open(filename, "r") as file1:
             for i, line in enumerate(file1):
-                background_color = setBackgroundColor(i)
+                background_color = setBackgroundColor(k)
+                k += 1
                 TreeLimits.expand_all()
                 text = line.strip(' ')
                 if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:
@@ -129,12 +130,13 @@ def OpenGL(tab1):
                         pass
                 elif "      " in line and LimitRHSValue[i] == False and ":" not in line:
                     Limits_Store.append(iter3, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-                    k += 1
                 else:
                     if ":" in line:
+                        k = 0
+                        text = line[:-2]
                         count += 1
                         iter2 = Limits_Store.append(None,
-                                                    [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                                                    [text.strip('\n'), LimitsRHS[i].strip('\n'), Const.BGCOLOR3])
                         continue
                     if count > 0 and "    " in line:
                         Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])

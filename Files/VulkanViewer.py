@@ -112,7 +112,8 @@ def Vulkan(tab2):
         with open("/tmp/gpu-viewer/VKDDevicesparseinfo1.txt", "r") as file1:
             for i, line in enumerate(file1):
                 if ":" in line:
-                    text = line.strip("\t")
+                    text1 = line.strip("\t")
+                    text = text1[:-2]
                     propertiesCombo.append_text(text.strip("\n"))
 
         propertiesCombo.insert_text(0, "Show All Properties")
@@ -135,7 +136,8 @@ def Vulkan(tab2):
         with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
             for line in file:
                 if ":" in line:
-                    featureCombo.append_text(line.strip("\n"))
+                    text = line[:-2]
+                    featureCombo.append_text(text.strip("\n"))
 
         featureCombo.insert_text(0, "Show All Features")
         featureCombo.set_active(0)
@@ -279,8 +281,9 @@ def Vulkan(tab2):
                             value = value + 1
                         if value <= 1:
                             if ":" in line:
+                                text1 = line[:-2]
                                 background_color = setBackgroundColor(z)
-                                text = line.strip('\t')
+                                text = text1.strip('\t')
                                 iter2 = FormatsTab_Store.append(iter,
                                                                 [text.strip('\n'), " ", " ", " ", background_color,
                                                                  Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
@@ -707,10 +710,11 @@ def Vulkan(tab2):
                     if "---" in line or "====" in line:
                         continue
                     if ":" in line:
+                        text1 = text[:-2]
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
-                        iter1 = SparseTab_Store.append(None, [text.strip('\n'), value2[i].strip('\n'), background_color,
+                        iter1 = SparseTab_Store.append(None, [text1.strip('\n'), value2[i].strip('\n'), background_color,
                                                               fgColor[i]])
                     else:
                         background_color = setBackgroundColor(k)
