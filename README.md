@@ -1,5 +1,5 @@
 ﻿# GPU-Viewer
-**A front-end to glxinfo, vulkaninfo and clinfo.** 
+**A front-end to glxinfo, vulkaninfo, clinfo and es2_info.** 
 
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
@@ -13,13 +13,13 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 ![screenshot from 2018-04-21 08-32-52](https://user-images.githubusercontent.com/30646692/39079760-b41509f6-453e-11e8-9e67-eb704e57e662.png)
 
 
-* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Flat-Plat and Adapta
+* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
 
 ## INSTALLATION STEPS 
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 17.04 (Zesty)/Ubuntu 16.04 (Xenial)/Linux Mint 18.x** users should be able to install this application using the below PPA
+3. **Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 16.04 (Xenial)/Linux Mint 18.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -28,7 +28,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     Please note all the dependencies python, vulkan-utils,clinfo will be installed, if not installed before.
     
 4. **Debian based distro** users should be able to install the application by just running the .deb file https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/gpu-viewer_1.9b1-1_amd64.deb
-5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to Dan Johnson (strit)for maintaining the AUR Package
+5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. For others please follow steps 6 to 9
 7. Download the file and Extract to a folder
 8. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
@@ -46,7 +46,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## What's developed and available?
 
-1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration and EGL information
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
 3. OpenCL Tab - Platform Details, Device Details , Device Memory & Image Details, Device Queue and Execution capabilities, Device Vector Details, Total No. of Platforms, No. of Devices for the platform.
 4. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
@@ -62,7 +62,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## IMPORTANT
 
-1. Requires Python to run this Application, works only on linux Operating system
+1. Requires Python3 to run this Application, works only on linux Operating system
 2. For Vulkan Tab to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 3. For OpenCL Tab to work, install clinfo along with OpenCL drivers for your respective GPU's
 
@@ -74,7 +74,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Linux Mint 18.2 (Sonya)/Solus 3/Ubuntu Budgie
+1. Operating System : Linux Mint 18.2 (Sonya)/Solus 3/Ubuntu 18.04
 2. Desktop : Cinnamon 3.6/Budgie 10.4
 3. Kernel : 4.14.8
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
@@ -82,10 +82,10 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## SYSTEM SETUP
 
-1. ASUS G551JK ROG Laptop
-2. Quad Core Intel Core i7-4710HQ
-3. Nvidia Geforce GTX 850m (Discrete GPU) , Drivers - Nvidia (proprietary)
-4. Intel Haswel Mobile (Integrated GPU) , Drivers - MESA (Open Source)
+1. ASUS G551JK ROG Laptop/MSI PE62 Laptopr
+2. Quad Core Intel Core i7-4710HQ/
+3. Nvidia Geforce GTX 850m/1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)
+4. Intel Haswel Mobile (Integrated GPU)/Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
 5. 8 GB RAM
 
 **If you like/use this Application,consider supporing us by DONATING at PayPal https://www.paypal.me/ArunSivaraman.**

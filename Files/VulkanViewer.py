@@ -571,13 +571,15 @@ def Vulkan(tab2):
             background_color = setBackgroundColor(i)
             if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i]:
                 background_color = Const.BGCOLOR3
-                text = Surface[i].strip('\t')
+                text1 = Surface[i].strip('\t')
+                text = text1.strip(":")
                 count = 0
                 iter1 = SurfaceTab_Store.append(None, [text, SurfaceRHS[i].strip('\n'), background_color])
             else:
                 if ":" in Surface[i] or "ArrayLayers" in Surface[i]:
                     count += 1
-                    text = Surface[i].strip('\t')
+                    text1 = Surface[i].strip('\t')
+                    text = text1.strip(":")
                     iter2 = SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
                     continue
                 if count > 0:
