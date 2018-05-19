@@ -1,5 +1,6 @@
 -----------------------------------------------------------------------May-2018-----------------------------------------------------------------------------------------------------------------
-18/04	- Fixed Vendor dropdown length in OpenGL Tab
+20/05   - Added Filter Option to OpenGL Limits Section
+18/05	- Fixed Vendor dropdown length in OpenGL Tab
 	- improved stability of the application , the application should no longer crash when launching
 	- Minor UI fixes
 	- OpenGL Limits section UI has been updated
