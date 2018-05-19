@@ -49,13 +49,13 @@ def OpenGL(tab1):
     scrollable_treelist = createScrollbar(TreeGL)
     grid4.add(scrollable_treelist)
 
+
     def clickme(button):
 
         button.set_sensitive(False)
         os.system(
             "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./'  > /tmp/gpu-viewer/OpenGL_Core_Limits.txt")
         os.system("cat /tmp/gpu-viewer/OpenGL_Core_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
-        os.system("cat /tmp/gpu-viewer/OpenGL_Core_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLCoreLimitsRHS.txt")
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
         #    LimitsWin.set_size_request(1000, 500)
@@ -67,44 +67,75 @@ def OpenGL(tab1):
         LimitsNotebook.add(LimitsCoreTab)
         LimitsNotebook.set_tab_label(LimitsCoreTab,Gtk.Label("\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
+        limitsCombo = Gtk.ComboBoxText()
+
+
+        # get Combo box value
+
+        limitsCombo.remove_all()
+        with open("/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt","r") as file1:
+            for line in file1:
+                if ":" in line:
+                    text = line[:-2]
+                    limitsCombo.append_text(text.strip(" "))
+
+        limitsCombo.insert_text(0,"Show All OpenGL Hardware Limits")
+
+
+
         LimitsCoreTab.add(LimitsCoreFrame)
+        LimitsGrid = Gtk.Grid()
+        LimitsCoreFrame.add(LimitsGrid)
+        LimitsGrid.add(limitsCombo)
         LimitsCore_Store = Gtk.TreeStore(str, str, str)
         TreeCoreLimits = Gtk.TreeView(LimitsCore_Store, expand=True)
         TreeCoreLimits.set_property("enable-tree-lines",True)
 
-        temp = copyContentsFromFile("/tmp/gpu-viewer/OpenGLCoreLimitsRHS.txt")
 
-        LimitsRHS,LimitRHSValue = appendLimitsRHS("/tmp/gpu-viewer/OpenGL_Core_Limits.txt",temp)
+        limitsCombo.connect("changed",showLimits, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGL_Core_Limits.txt")
+        limitsCombo.set_active(0)
 
-        showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
+    #    showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
 
         setColumns(TreeCoreLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsCoreScrollbar = createScrollbar(TreeCoreLimits)
-        LimitsCoreFrame.add(LimitsCoreScrollbar)
-
-        LimitsCompatTab = Gtk.Box("spacing=10")
-        LimitsNotebook.add(LimitsCompatTab)
-        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("\tCompat.\t"))
-        LimitsCompatFrame = Gtk.Frame()
-        LimitsCompatTab.add(LimitsCompatFrame)
-        LimitsCompat_Store = Gtk.TreeStore(str,str,str)
-        TreeCompatLimits = Gtk.TreeView(LimitsCompat_Store,expand=True)
-        TreeCompatLimits.set_property("enable-tree-lines",True)
+        LimitsGrid.attach_next_to(LimitsCoreScrollbar,limitsCombo,Gtk.PositionType.BOTTOM,1,1)
 
         os.system(
             "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./'  > /tmp/gpu-viewer/OpenGL_Limits.txt")
         os.system("cat /tmp/gpu-viewer/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLimitsLHS.txt")
-        os.system("cat /tmp/gpu-viewer/OpenGL_Limits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLLimitsRHS.txt")
+        LimitsCompatTab = Gtk.Box("spacing=10")
+        LimitsNotebook.add(LimitsCompatTab)
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("\tCompat.\t"))
+        LimitsCompatFrame = Gtk.Frame()
+        limitsCompatCombo = Gtk.ComboBoxText()
 
-        temp2 = copyContentsFromFile("/tmp/gpu-viewer/OpenGLLimitsRHS.txt")
+        limitsCompatCombo.remove_all()
+        with open("/tmp/gpu-viewer/OpenGLLimitsLHS.txt","r") as file1:
+            for line in file1:
+                if ":" in line:
+                    text = line[:-2]
+                    limitsCompatCombo.append_text(text.strip(" "))
 
-        LimitsRHS2,LimitRHSValue2 = appendLimitsRHS("/tmp/gpu-viewer/OpenGL_Limits.txt",temp2)
+        limitsCompatCombo.insert_text(0,"Show All OpenGL Hardware Limits")
 
-        showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGLLimitsLHS.txt")
+        LimitsCompatTab.add(LimitsCompatFrame)
+        limitsCompatGrid = Gtk.Grid()
+        LimitsCompatFrame.add(limitsCompatGrid)
+        limitsCompatGrid.add(limitsCompatCombo)
+        LimitsCompat_Store = Gtk.TreeStore(str,str,str)
+        TreeCompatLimits = Gtk.TreeView(LimitsCompat_Store,expand=True)
+        TreeCompatLimits.set_property("enable-tree-lines",True)
+
+        limitsCompatCombo.connect("changed",showLimits, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGL_Limits.txt")
+        limitsCompatCombo.set_active(0)
+
+
+     #   showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGLLimitsLHS.txt")
 
         setColumns(TreeCompatLimits, LimitsTitle, Const.MWIDTH,0.0)
         LimitsCompatScrollbar = createScrollbar(TreeCompatLimits)
-        LimitsCompatFrame.add(LimitsCompatScrollbar)
+        limitsCompatGrid.attach_next_to(LimitsCompatScrollbar,limitsCompatCombo,Gtk.PositionType.BOTTOM,1,1)
 
         def button_enable(win,value):
             button.set_sensitive(True)
@@ -112,10 +143,32 @@ def OpenGL(tab1):
 
         LimitsWin.show_all()
 
-    def showLimits(LimitRHSValue, LimitsRHS, Limits_Store, TreeLimits,filename):
+    def showLimits(Combo, Limits_Store, TreeLimits,openGLLimits):
         k = 0
         count = 0
-        with open(filename, "r") as file1:
+        limitValue = Combo.get_active_text()
+        if "Show All OpenGL Hardware Limits" in limitValue:
+            os.system(
+                "cat %s > /tmp/gpu-viewer/selectOpenglLimits.txt"%openGLLimits)
+
+            os.system("cat /tmp/gpu-viewer/selectOpenglLimits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLimitsLHS.txt")
+            os.system("cat /tmp/gpu-viewer/selectOpenglLimits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLLimitsRHS.txt")
+
+        else:
+            with open(openGLLimits,"r") as file1:
+                for line in file1:
+                    if limitValue in line:
+                        os.system("cat %s | awk '/%s:/{flag=1;next}/:.*/{flag=0}flag' > /tmp/gpu-viewer/selectOpenglLimits.txt"%(openGLLimits,limitValue))
+                        os.system("cat /tmp/gpu-viewer/selectOpenglLimits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLimitsLHS.txt")
+                        os.system("cat /tmp/gpu-viewer/selectOpenglLimits.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLLimitsRHS.txt")
+
+
+        with open("/tmp/gpu-viewer/OpenGLLimitsLHS.txt", "r") as file1:
+            temp = copyContentsFromFile("/tmp/gpu-viewer/OpenGLLimitsRHS.txt")
+            LimitsRHS,LimitRHSValue = appendLimitsRHS("/tmp/gpu-viewer/selectOpenglLimits.txt",temp)
+
+            Limits_Store.clear()
+            TreeLimits.set_model(Limits_Store)
             for i, line in enumerate(file1):
                 background_color = setBackgroundColor(k)
                 k += 1
