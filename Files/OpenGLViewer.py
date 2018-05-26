@@ -79,7 +79,7 @@ def OpenGL(tab1):
                     text = line[:-2]
                     limitsCombo.append_text(text.strip(" "))
 
-        limitsCombo.insert_text(0,"Show All OpenGL Hardware Limits")
+        limitsCombo.insert_text(0,"Show All OpenGL Hardware Core Limits")
 
 
 
@@ -117,7 +117,7 @@ def OpenGL(tab1):
                     text = line[:-2]
                     limitsCompatCombo.append_text(text.strip(" "))
 
-        limitsCompatCombo.insert_text(0,"Show All OpenGL Hardware Limits")
+        limitsCompatCombo.insert_text(0,"Show All OpenGL Hardware Compatible Limits")
 
         LimitsCompatTab.add(LimitsCompatFrame)
         limitsCompatGrid = Gtk.Grid()
@@ -147,7 +147,7 @@ def OpenGL(tab1):
         k = 0
         count = 0
         limitValue = Combo.get_active_text()
-        if "Show All OpenGL Hardware Limits" in limitValue:
+        if "Show All OpenGL Hardware Core Limits" in limitValue or "Show All OpenGL Hardware Compatible Limits" in limitValue:
             os.system(
                 "cat %s > /tmp/gpu-viewer/selectOpenglLimits.txt"%openGLLimits)
 
