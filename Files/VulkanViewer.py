@@ -541,18 +541,18 @@ def Vulkan(tab2):
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Groups :.*/{flag=0}flag'  | awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
                         GPU, GPU + 1))
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count =.*/,'True');print}' | grep -v type | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/= .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
-        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
+            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[:,=] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
+        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
         with open("/tmp/gpu-viewer/VKDsurface.txt", "r") as file1:
             for line in file1:
-                if "= " in line:
+                if "= " in line or "type" in line:
                     SurfaceRHS.append(temp[i])
                     i = i + 1
                 else:
@@ -565,17 +565,17 @@ def Vulkan(tab2):
 
         Surface = [i.strip('\n ') for i in Surface]
         SurfaceTab_Store.clear()
-        TreeSurface.set_model(SurfaceTab_Store)
         count = 0
+        TreeSurface.set_model(SurfaceTab_Store)
         for i in range(len(Surface)):
             TreeSurface.expand_all()
             if "====" in Surface[i]:
                 continue
-            if "type" in Surface[i]:
-                continue
             background_color = setBackgroundColor(i)
-            if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i]:
+            if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i] or "type" in Surface[i]:
                 background_color = Const.BGCOLOR3
+                if "type" in Surface[i]:
+                    background_color = Const.BGCOLOR1
                 text1 = Surface[i].strip('\t')
                 text = text1.strip(":")
                 count = 0
