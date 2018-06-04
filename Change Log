@@ -1,3 +1,10 @@
+-----------------------------------------------------------------------June-2018-----------------------------------------------------------------------------------------------------------------
+04/06	- Included all the required details for Surface Tab
+	- Added RAM details to the device tab in Vulkan
+	- New About Tab Icon
+	- Minor UI changes added to gtk.CSS
+		- Button Color changed
+		- Increased the expander size from 16 to 19
 -----------------------------------------------------------------------May-2018-----------------------------------------------------------------------------------------------------------------
 20/05   - Added Filter Option to OpenGL Limits Section
 18/05	- Fixed Vendor dropdown length in OpenGL Tab

@@ -575,7 +575,7 @@ def Vulkan(tab2):
             if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i] or "type" in Surface[i]:
                 background_color = Const.BGCOLOR3
                 if "type" in Surface[i]:
-                    background_color = Const.BGCOLOR1
+                    background_color = setBackgroundColor(i)
                 text1 = Surface[i].strip('\t')
                 text = text1.strip(":")
                 count = 0
