@@ -1,17 +1,17 @@
 -----------------------------------------------------------------------June-2018-----------------------------------------------------------------------------------------------------------------
 04/06	- Included all the required details for Surface Tab
-	- Added RAM details to the device tab in Vulkan
-	- New About Tab Icon
-	- Minor UI changes added to gtk.CSS
-		- Button Color changed
-		- Increased the expander size from 16 to 19
+	    - Added RAM details to the device tab in Vulkan
+	    - New About Tab Icon
+	    - Minor UI changes added to gtk.CSS
+	    - Button Color changed
+	    - Increased the expander size from 16 to 19
 -----------------------------------------------------------------------May-2018-----------------------------------------------------------------------------------------------------------------
 20/05   - Added Filter Option to OpenGL Limits Section
 18/05	- Fixed Vendor dropdown length in OpenGL Tab
-	- improved stability of the application , the application should no longer crash when launching
-	- Minor UI fixes
-	- OpenGL Limits section UI has been updated
-	- launcher updated with Python3
+	    - improved stability of the application , the application should no longer crash when launching
+	    - Minor UI fixes
+	    - OpenGL Limits section UI has been updated
+	    - launcher updated with Python3
 -----------------------------------------------------------------------Apr-2018-----------------------------------------------------------------------------------------------------------------
 21/04   - Better handling of Temporary files
 15/04   - Initial es2_info support added in OpenGL Tab
