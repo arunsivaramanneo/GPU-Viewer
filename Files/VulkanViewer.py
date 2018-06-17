@@ -789,7 +789,7 @@ def Vulkan(tab2):
 
     propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
-    propertiesGrid.set_row_spacing(3)
+    propertiesGrid.set_row_spacing(5)
     propertiesStore = Gtk.ListStore(str)
     propertiesCombo = Gtk.ComboBoxText()
     propertiesCombo.connect("changed", selectProperties)

@@ -85,6 +85,7 @@ def OpenGL(tab1):
 
         LimitsCoreTab.add(LimitsCoreFrame)
         LimitsGrid = Gtk.Grid()
+        LimitsGrid.set_row_spacing(5)
         LimitsCoreFrame.add(LimitsGrid)
         LimitsGrid.add(limitsCombo)
         LimitsCore_Store = Gtk.TreeStore(str, str, str)
@@ -121,6 +122,7 @@ def OpenGL(tab1):
 
         LimitsCompatTab.add(LimitsCompatFrame)
         limitsCompatGrid = Gtk.Grid()
+        limitsCompatGrid.set_row_spacing(5)
         LimitsCompatFrame.add(limitsCompatGrid)
         limitsCompatGrid.add(limitsCompatCombo)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
