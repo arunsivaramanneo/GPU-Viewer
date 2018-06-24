@@ -93,7 +93,7 @@ HEIGHT_RATIO2 = 0.65
 MWIDTH = 350
 
 
-THEME1 = Path.isdir("/usr/share/themes/FlatPlat")
+THEME1 = Path.isdir("/usr/share/themes/Adwaita")
 
 THEME2 = Path.isdir("/usr/share/themes/Adapta")
 
