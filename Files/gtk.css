@@ -42,7 +42,7 @@ notebook:backdrop label, notebook:backdrop image {
 notebook > header {
   border-width: 0;
   border-color: rgba(0, 0, 0, 0.15);
-  background-color: #E1E1E1;
+  background-color: #fffffa;
   background-clip: border-box;
 }
 

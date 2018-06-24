@@ -107,7 +107,7 @@ def OpenGL(tab1):
         os.system("cat /tmp/gpu-viewer/OpenGL_Limits.txt | awk '{gsub(/=.*/,'True');print}' > /tmp/gpu-viewer/OpenGLLimitsLHS.txt")
         LimitsCompatTab = Gtk.Box("spacing=10")
         LimitsNotebook.add(LimitsCompatTab)
-        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("\tCompat.\t"))
+        LimitsNotebook.set_tab_label(LimitsCompatTab,Gtk.Label("    Compat.\t"))
         LimitsCompatFrame = Gtk.Frame()
         limitsCompatCombo = Gtk.ComboBoxText()
 
