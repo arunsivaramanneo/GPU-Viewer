@@ -21,16 +21,16 @@ def main():
     gtk = MyGtk("GPU-Viewer v1.13")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
-    openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-    t1 = threading.Thread(target=OpenGL, args=(openGlTab,))
-    t1.start()
-    t1.join()
-
     if isVulkanSupported():
         vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
         t2 = threading.Thread(target=Vulkan, args=(vulkanTab,))
         t2.start()
         t2.join()
+
+    openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+    t1 = threading.Thread(target=OpenGL, args=(openGlTab,))
+    t1.start()
+    t1.join()
 
     if isOpenclSupported():
         openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const.ICON_HEIGHT, False)
