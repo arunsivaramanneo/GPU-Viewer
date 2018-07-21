@@ -97,6 +97,8 @@ def Vulkan(tab2):
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
+        deviceHardwareInfo = ["GPU","CPU","MEMORY","OS INFO."]
+
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
             if "Description" in valueLHS[i]:
@@ -696,6 +698,9 @@ def Vulkan(tab2):
             elif i == " 1\n":
                 value2.append("true")
                 fgColor.append(Const.COLOR1)
+            elif i == " false\n":
+                value2.append(i)
+                fgColor.append(Const.COLOR2)
             else:
                 value2.append(i)
                 fgColor.append("BLACK")
