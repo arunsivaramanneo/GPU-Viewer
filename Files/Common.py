@@ -156,7 +156,7 @@ def getDriverVersion(value):
         minorVersion = int(value[4]) >> 14 & 255
         microVersion = int(value[4]) >> 6 & 255
         nanoVersion = int(value[4]) & 63
-        return "%d.%d.%d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
+        return "%d.%.2d.%.2d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
     else:
         majorVersion = int(value[4]) >> 22
         minorVersion = int(value[4]) >> 12 & 1023
