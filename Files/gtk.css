@@ -848,3 +848,72 @@ frame > border.flat,
 frame.flat > border {
   border-style: none;
 }
+/***********************************************************************/
+/*              SWITCH                                                 */
+/***********************************************************************/
+
+switch {
+
+  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
+  min-width: 16px;
+  min-height: 16px;
+  border-radius:100px;
+  background-color: alpha(currentColor, 0.3);
+  background-clip: padding-box;
+  font-size: 0; }
+
+headerbar switch {
+
+  margin: 5px 0;
+  border: 4px solid transparent;}
+
+switch:disabled {
+
+
+  color: alpha(currentColor, 0.4); }
+
+switch:checked {
+
+
+  background-color: #4a85cb; }
+
+switch:checked:disabled {
+
+
+  background-color: rgba(12, 170, 240, 0.2);
+  color: rgba(0, 0, 0, 0.32); }
+
+switch slider {
+
+  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
+  border-image: none;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  background-color: #fcfcfc;
+  color: rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1), margin 0;
+  min-width: 16px;
+  min-height: 16px;
+  margin: 2px 0 2px 3px;
+  border-radius: 100px;
+   }
+
+switch:hover slider {
+
+  border-image: none;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.16), 0 3px 3px rgba(0, 0, 0, 0.23); }
+
+switch:checked slider {
+
+  animation: needs_attention 0.3s cubic-bezier(0, 0, 0.2, 1);
+  margin: 2px 3px 2px 0;
+  background-color: #FFFFFF;
+  color: #71c837;}
+
+switch:disabled slider {
+
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  background-color: #ffffff;}
+
+  switch:checked:disabled slider {
+
+  animation: none; }
