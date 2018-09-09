@@ -396,8 +396,20 @@ def OpenGL(tab1):
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
    # Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
-
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
+
+    switch = Gtk.Switch()
+    switch.connect("notify::active", radcall2)
+    switch.set_active(True)
+
+    coreLabel = Gtk.Label("Core")
+    comptLabel = Gtk.Label("\t\tCompat.")
+
+
+    grid1.attach_next_to(coreLabel, Vendor_Combo, Gtk.PositionType.RIGHT, 1, 1)
+
+    grid1.attach_next_to(switch, coreLabel, Gtk.PositionType.RIGHT,1,1)
+    grid1.attach_next_to(comptLabel, switch, Gtk.PositionType.RIGHT, 4, 1)
     TreeGLExt.set_enable_search(True)
     TreeGLExt.set_headers_visible(True)
     setColumns(TreeGLExt, Title1, Const.MWIDTH,0.0)
