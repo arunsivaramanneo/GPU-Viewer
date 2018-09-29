@@ -855,8 +855,8 @@ frame.flat > border {
 switch {
 
   transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
-  min-width: 16px;
-  min-height: 16px;
+  min-width: 12px;
+  min-height: 12px;
   border-radius:100px;
   background-color: alpha(currentColor, 0.3);
   background-clip: padding-box;
@@ -864,7 +864,7 @@ switch {
 
 headerbar switch {
 
-  margin: 5px 0;
+  margin: 2px 0;
   border: 4px solid transparent;}
 
 switch:disabled {
@@ -880,7 +880,7 @@ switch:checked {
 switch:checked:disabled {
 
 
-  background-color: rgba(12, 170, 240, 0.2);
+  background-color: rgba(92, 170, 240, 0.2);
   color: rgba(0, 0, 0, 0.32); }
 
 switch slider {
