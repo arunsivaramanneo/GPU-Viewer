@@ -9,6 +9,7 @@ from Common import setScreenSize, fetchImageFromUrl, copyContentsFromFile, setBa
     createScrollbar, refresh_filter, appendLimitsRHS
 
 WH = 70
+switchCount = 0
 
 Title1 = [" "]
 Title2 = ["OpenGL Information ", " Details"]
@@ -328,16 +329,24 @@ def OpenGL(tab1):
 
     def radcall(button, value):
         if value == 1:
+            try:
+                switch.set_sensitive(True)
+            except:
+                pass
             os.system(
                 "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
             os.system(
                 "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
 
         elif value == 2:
+            switch.set_active(True)
+            switch.set_sensitive(False)
             os.system(
                 "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
 
         elif value == 3:
+            switch.set_active(True)
+            switch.set_sensitive(False)
             os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/gpu-viewer/extensions.txt")
 
         Radio(value)
@@ -388,6 +397,19 @@ def OpenGL(tab1):
             if search_query in value:
                 return True
 
+    def switchCall(self, value):
+        if switch.get_active():
+            os.system(
+                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
+            os.system(
+                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
+        else:
+            os.system(
+                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL core profile extensions:/{flag=1;next}/OpenGL version*/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
+            os.system(
+                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
+        Radio(1)
+        Vendor_Combo.set_active(0)
 
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
     Vendor_Combo.connect("changed", radcall2)
@@ -399,7 +421,7 @@ def OpenGL(tab1):
     grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
 
     switch = Gtk.Switch()
-    switch.connect("notify::active", radcall2)
+    switch.connect("notify::active",switchCall)
     switch.set_active(True)
 
     coreLabel = Gtk.Label("Core")
