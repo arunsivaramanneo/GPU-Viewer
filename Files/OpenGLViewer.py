@@ -330,6 +330,7 @@ def OpenGL(tab1):
     def radcall(button, value):
         if value == 1:
             try:
+                switch.set_active(True)
                 switch.set_sensitive(True)
             except:
                 pass
