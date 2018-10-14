@@ -21,7 +21,7 @@ class MyGtk(Gtk.Window):
             theme = Gtk.CssProvider()
             theme.load_from_path("gtk.css")
             screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "Adwaita")
+            setting.set_property("gtk-theme-name", "Mint-Y")
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
@@ -42,6 +42,11 @@ class MyGtk(Gtk.Window):
     def quit(self):
         Gtk.main_quit()
 
+#getting Ram Details in GB
+
+def getRamInGb(ram):
+    ram1 = ram.split()
+    return str("%.3f" %(float(ram1[0])/(1024*1024))) + " GB"
 
 # Setting the Minimum Screen Size
 def setScreenSize(self, widthRatio, heightRatio):

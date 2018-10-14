@@ -10,7 +10,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 # noinspection PyPep8
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb
 
 MWIDTH = 300
 
@@ -63,6 +63,8 @@ def Vulkan(tab2):
         os.system("cat /proc/meminfo | grep Mem | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
         os.system("cat /proc/meminfo | grep Mem | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo.txt")
+        headValues = ['GPU','CPU','MEMORY']
+
 
         try:
             os.system("lsb_release -d -r -c > /tmp/gpu-viewer/VKDLsbRelease.txt")
@@ -73,6 +75,7 @@ def Vulkan(tab2):
             os.system("uname -r >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             valueLHS = valueLHS + copyContentsFromFile("/tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
             valueLHS.append("Kernel")
+            headValues.append("DISTRIBUTION")
         except Exception as e:
             raise e
 
@@ -87,6 +90,7 @@ def Vulkan(tab2):
 
         valueRHS[0] = getVulkanVersion(valueRHS[0])
         valueRHS[4] = getDriverVersion(valueRHS)
+
 
         valueLHS = [i.strip('\t') for i in valueLHS]
         valueRHS = [i.strip(':') for i in valueRHS]
@@ -103,6 +107,8 @@ def Vulkan(tab2):
             background_color = setBackgroundColor(i)
             if "Description" in valueLHS[i]:
                 DeviceTab_Store.append(["operatingSystem", valueRHS[i].strip('\n'), background_color])
+            elif "Mem" in valueLHS[i]:
+                DeviceTab_Store.append([valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
             else:
                 DeviceTab_Store.append([valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
 
