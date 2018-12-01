@@ -5,13 +5,14 @@
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 
-![screenshot from 2018-07-15 11-26-37](https://user-images.githubusercontent.com/30646692/42731013-13f37576-8822-11e8-96c8-04ab062f690f.png)
 
-![screenshot from 2018-07-15 11-26-55](https://user-images.githubusercontent.com/30646692/42731014-157f0b26-8822-11e8-95a8-695852d1d7c1.png)
+![screenshot from 2018-12-01 18-40-29](https://user-images.githubusercontent.com/30646692/49328570-14a59f00-f599-11e8-9591-11c1fcdaaa2e.png)
 
-![screenshot from 2018-07-15 11-27-06](https://user-images.githubusercontent.com/30646692/42731015-174af686-8822-11e8-8dfb-5baad1cface1.png)
+![screenshot from 2018-12-01 18-40-47](https://user-images.githubusercontent.com/30646692/49328576-271fd880-f599-11e8-95d3-d9db4b03e91b.png)
 
-![screenshot from 2018-07-15 11-27-15](https://user-images.githubusercontent.com/30646692/42731016-18ca0628-8822-11e8-90c1-def21ee5d0bb.png)
+![screenshot from 2018-12-01 18-41-04](https://user-images.githubusercontent.com/30646692/49328577-2a1ac900-f599-11e8-845d-26ac299915d9.png)
+
+![screenshot from 2018-12-01 18-41-21](https://user-images.githubusercontent.com/30646692/49328578-2be48c80-f599-11e8-9220-f6eae0e93274.png)
 
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
@@ -20,7 +21,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 18.10(Cosmic)/Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 16.04 (Xenial)/Linux Mint 18.x** users should be able to install this application using the below PPA
+3. **Ubuntu 18.10(Cosmic)/Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 16.04 (Xenial)/Linux Mint 19Linux Mint 18.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -76,7 +77,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Linux Mint 18.2 (Sonya)/Solus 3/Ubuntu 18.04
+1. Operating System : Linux Mint 19 (Tara)/Solus 3/Ubuntu 18.04
 2. Desktop : Cinnamon 3.6/Budgie 10.4
 3. Kernel : 4.14.8
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
@@ -85,7 +86,7 @@ The installer should be able to take care of this dependency in Debian based dis
 ## SYSTEM SETUP
 
 1. ASUS G551JK ROG Laptop/MSI PE62 Laptop
-2. Quad Core Intel Core i7-4710HQ/
+2. Quad Core Intel Core i7-4710HQ
 3. Nvidia Geforce GTX 850m/1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)
 4. Intel Haswel Mobile (Integrated GPU)/Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
 5. 8 GB RAM
