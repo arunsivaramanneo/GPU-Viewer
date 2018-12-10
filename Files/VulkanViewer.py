@@ -7,10 +7,10 @@ import Const
 import threading
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk,GdkPixbuf
 # noinspection PyPep8
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, setGpuIcon
 
 MWIDTH = 300
 
@@ -647,6 +647,9 @@ def Vulkan(tab2):
     def radcall(combo):
 
         text = combo.get_active()
+        gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(self.Cover, 250, 250)
+        image_renderer = Gtk.Image.new_from_pixbuf(self.image)
+
         for i in range(len(list)):
             if text == i:
                 Devices(text)
@@ -659,7 +662,9 @@ def Vulkan(tab2):
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
+                gpu_image=setGpuIcon(self)
             Instance()
+        DevicesGrid.attach(gpu_image,50,1,1,1)
 
     #    os.system("rm /tmp/gpu-viewer/VKD*.txt")
 
@@ -1089,6 +1094,7 @@ def Vulkan(tab2):
     list = [i.strip('\n ') for i in list]
 
     DS = Gtk.Label()
+    gpu_image = Gtk.Image()
     DS.set_text("Available Device(s) :")
     DevicesGrid.attach(DS, 0, 1, 1, 1)
     gpu_store = Gtk.ListStore(str)
@@ -1103,6 +1109,9 @@ def Vulkan(tab2):
     gpu_combo.add_attribute(renderer_text, "text", 0)
     gpu_combo.set_entry_text_column(0)
     gpu_combo.set_active(0)
+
+
+
 
     DevicesGrid.attach_next_to(gpu_combo, DS, Gtk.PositionType.RIGHT, 20, 1)
 

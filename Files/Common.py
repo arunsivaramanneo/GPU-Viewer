@@ -64,6 +64,22 @@ def fetchImageFromUrl(imgUrl, iconWidth, iconHeight, aspectRatio):
     return GdkPixbuf.Pixbuf.new_from_file_at_scale(
         filename=imgUrl, width=iconWidth, height=iconHeight, preserve_aspect_ratio=aspectRatio)
 
+def setGpuIcon():
+
+    with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
+        for line in file1:
+            if "Intel" in line:
+                gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+
+                break
+            elif "NVIDIA" in line or "GeForce" in line :
+                gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "AMD" in line or "ATI" in line:
+                gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+        image_render = Gtk.Image.set_from_pixbuf(gpu_image)
+    return image_renderer
 
 # Copy the Contents of the file from a File to a List
 def copyContentsFromFile(fileName):
