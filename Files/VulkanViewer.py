@@ -7,7 +7,7 @@ import Const
 import threading
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk,GdkPixbuf
+from gi.repository import Gtk, Gdk
 # noinspection PyPep8
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
     colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, setGpuIcon
@@ -32,12 +32,10 @@ InstanceTitle = ["Extensions", "Version"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
 
-
 def Vulkan(tab2):
     # Creating Tabs for different Features
 
     # Creating Feature Tab
-
     def Devices(GPUname):
 
         for i in range(len(list)):
@@ -78,7 +76,7 @@ def Vulkan(tab2):
             headValues.append("DISTRIBUTION")
         except Exception as e:
             raise e
-
+        gpu_image.clear()
         # Storing the RHS values into a list
 
         valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo2.txt")
@@ -647,8 +645,7 @@ def Vulkan(tab2):
     def radcall(combo):
 
         text = combo.get_active()
-        gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(self.Cover, 250, 250)
-        image_renderer = Gtk.Image.new_from_pixbuf(self.image)
+        text1 = combo.get_child()
 
         for i in range(len(list)):
             if text == i:
@@ -662,9 +659,9 @@ def Vulkan(tab2):
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
-                gpu_image=setGpuIcon(self)
+                gpu_image=setGpuIcon()
             Instance()
-        DevicesGrid.attach(gpu_image,50,1,1,1)
+        DevicesGrid.attach(Gtk.Image.new_from_pixbuf(gpu_image),50,1,1,1)
 
     #    os.system("rm /tmp/gpu-viewer/VKD*.txt")
 
@@ -1118,7 +1115,6 @@ def Vulkan(tab2):
     # Logos
 
     tab2.show_all()
-
 
 def createSearchEntry(ExtensionTab_store_filter):
     Extensionentry = Gtk.SearchEntry()
