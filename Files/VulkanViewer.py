@@ -7,10 +7,10 @@ import Const
 import threading
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GdkPixbuf
 # noinspection PyPep8
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, setGpuIcon
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl
 
 MWIDTH = 300
 
@@ -76,7 +76,6 @@ def Vulkan(tab2):
             headValues.append("DISTRIBUTION")
         except Exception as e:
             raise e
-        gpu_image.clear()
         # Storing the RHS values into a list
 
         valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo2.txt")
@@ -645,7 +644,6 @@ def Vulkan(tab2):
     def radcall(combo):
 
         text = combo.get_active()
-        text1 = combo.get_child()
 
         for i in range(len(list)):
             if text == i:
@@ -659,10 +657,24 @@ def Vulkan(tab2):
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
-                gpu_image=setGpuIcon()
-            Instance()
-        DevicesGrid.attach(Gtk.Image.new_from_pixbuf(gpu_image),50,1,1,1)
 
+                with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
+
+                    for line in file1:
+                        if "Intel" in line:
+                            gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH + 5, Const.ICON_HEIGHT - 10, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+                        elif "NVIDIA" in line or "GeForce" in line:
+                            gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+                        elif "AMD" in line or "ATI" in line:
+                            gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+            Instance()
+        DevicesGrid.attach(image_renderer,50,1,1,1)
     #    os.system("rm /tmp/gpu-viewer/VKD*.txt")
 
     def selectProperties(Combo):
@@ -1094,6 +1106,8 @@ def Vulkan(tab2):
     gpu_image = Gtk.Image()
     DS.set_text("Available Device(s) :")
     DevicesGrid.attach(DS, 0, 1, 1, 1)
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.AMD_LOGO_PNG, 250, 250)
+    image_renderer = Gtk.Image.new_from_pixbuf(gpu_image)
     gpu_store = Gtk.ListStore(str)
     for i in list:
         gpu_store.append([i])
@@ -1121,3 +1135,24 @@ def createSearchEntry(ExtensionTab_store_filter):
     Extensionentry.set_placeholder_text("Type here to filter.....")
     Extensionentry.connect("search-changed", refresh_filter, ExtensionTab_store_filter)
     return Extensionentry
+
+def setGpuIcon(self,gpu_image,image_renderer):
+
+    with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
+
+        self.gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT, True)
+        self.image_renderer = Gtk.Image.new_from_pixbuf(gpu_image)
+        for line in file1:
+            if "Intel" in line:
+                self.gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.INTEL_LOGO_PNG, 70, 70)
+                self.image_renderer.set_from_pixbuf(gpu_image)
+                break
+            elif "NVIDIA" in line or "GeForce" in line :
+                image_renderer.clear()
+                gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.NVIDIA_LOGO_PNG,50,50)
+                image_renderer.set_from_pixbuf(gpu_image)
+                break
+            elif "AMD" in line or "ATI" in line:
+                gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                image_renderer.set_from_pixbuf(gpu_image)
+                break
