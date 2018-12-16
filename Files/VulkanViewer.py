@@ -662,7 +662,7 @@ def Vulkan(tab2):
 
                     for line in file1:
                         if "Intel" in line:
-                            gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH + 5, Const.ICON_HEIGHT - 10, True)
+                            gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
                         elif "NVIDIA" in line or "GeForce" in line:
@@ -1106,7 +1106,7 @@ def Vulkan(tab2):
     gpu_image = Gtk.Image()
     DS.set_text("Available Device(s) :")
     DevicesGrid.attach(DS, 0, 1, 1, 1)
-    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.AMD_LOGO_PNG, 250, 250)
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.APP_LOGO_PNG, 50, 50)
     image_renderer = Gtk.Image.new_from_pixbuf(gpu_image)
     gpu_store = Gtk.ListStore(str)
     for i in list:
