@@ -118,7 +118,7 @@ def Vulkan(tab2):
         propertiesCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDDevicesparseinfo1.txt", "r") as file1:
             for i, line in enumerate(file1):
-                if ":" in line:
+                if "Vk" in line:
                     text1 = line.strip("\t")
                     text = text1[:-2]
                     propertiesCombo.append_text(text.strip("\n"))
@@ -142,7 +142,7 @@ def Vulkan(tab2):
         featureCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
             for line in file:
-                if ":" in line:
+                if "Vk" in line:
                     text = line[:-2]
                     featureCombo.append_text(text.strip("\n"))
 
@@ -543,10 +543,10 @@ def Vulkan(tab2):
         for GPU in range(len(list)):
             if GPUname == GPU:
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id       : %d.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Device Properties.*/{flag=0}flag' | awk '/VkSurfaceCapabilities.*/{flag=1}/Groups :.*/{flag=0}flag'  | awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
-                        GPU, GPU + 1))
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id */{flag=0}flag'| awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
+                        GPU))
+            #    os.system(
+            #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
 
         os.system(
             "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[:,=] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
