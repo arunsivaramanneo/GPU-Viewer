@@ -1,4 +1,3 @@
 #!/bin/bash
 cd /usr/share/gpu-viewer/Files/
 python3 GPUViewer.py
-

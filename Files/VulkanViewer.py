@@ -703,7 +703,7 @@ def Vulkan(tab2):
         with open("/tmp/gpu-viewer/filterProperties.txt", "r") as file1:
             for line in file1:
                 if "= " in line:
-                    if "Max" in line or "Min" in line:
+                    if "Max" in line or "Min" in line or "major" in line or "minor" in line or "patch" in line:
                         value1.append(str(float(value[i])))
                     else:
                         value1.append(value[i])
@@ -736,13 +736,14 @@ def Vulkan(tab2):
                     text = line.strip('\t')
                     if "---" in line or "====" in line:
                         continue
-                    if ":" in line:
+                    if "Vk" in line and "conformanceVersion" not in line:
                         text1 = text[:-2]
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
                         iter1 = SparseTab_Store.append(None, [text1.strip('\n'), value2[i].strip('\n'), background_color,
                                                               fgColor[i]])
+
                     else:
                         background_color = setBackgroundColor(k)
                         SparseTab_Store.append(iter1,
@@ -1096,7 +1097,7 @@ def Vulkan(tab2):
     DevicesFrame.add(DevicesGrid)
 
     #    grid.set_row_spacing(10)
-    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | grep Name | grep -o  =.* | grep -o ' .*' > /tmp/gpu-viewer/GPU.txt")
+    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | grep deviceName | grep -o  =.* | grep -o ' .*' > /tmp/gpu-viewer/GPU.txt")
 
     list = copyContentsFromFile("/tmp/gpu-viewer/GPU.txt")
 
