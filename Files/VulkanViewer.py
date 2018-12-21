@@ -543,13 +543,13 @@ def Vulkan(tab2):
         for GPU in range(len(list)):
             if GPUname == GPU:
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/GPU id */{flag=0}flag'| awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id       : %d.*/{flag=1;next}/GPU id */{flag=0}flag'| awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
                         GPU))
             #    os.system(
             #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[:,=] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
+            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
         os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
@@ -598,6 +598,7 @@ def Vulkan(tab2):
                 else:
                     text = Surface[i].strip('\t')
                     SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
+            TreeSurface.expand_all()
 
     def searchFeaturesTree(model, iter, Tree):
         search_query = featureSearchEntry.get_text().lower()
