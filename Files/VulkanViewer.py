@@ -436,6 +436,7 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueFlags.txt")
 
+
         width = []
         height = []
         depth = []
@@ -555,14 +556,18 @@ def Vulkan(tab2):
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
+        surfaceTypeCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDsurface.txt", "r") as file1:
             for line in file1:
                 if "= " in line or "type" in line:
+                    if "type" in line:
+                        surfaceTypeCombo.append_text(temp[i].strip('\n'))
                     SurfaceRHS.append(temp[i])
                     i = i + 1
                 else:
                     SurfaceRHS.append(" ")
-
+        surfaceTypeCombo.insert_text(0,"Show All Surface Types")
+        surfaceTypeCombo.set_active(0)
         Surface = []
         with open("/tmp/gpu-viewer/VKDsurface1.txt", "r") as file1:
             for line in file1:
@@ -1071,14 +1076,20 @@ def Vulkan(tab2):
     LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree, data=TreeLayer)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
+    surfaceTypeListStore = Gtk.ListStore(str)
+    surfaceTypeRendererText = Gtk.CellRendererText(font="BOLD")
+
+    SurfaceTab = Gtk.Box(spacing=10)
+    SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
+    surfaceTypeCombo = Gtk.ComboBoxText()
+
+    SurfaceGrid.add(surfaceTypeCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
     TreeSurface.set_property("enable-tree-lines", True)
     with open("/tmp/gpu-viewer/vulkaninfo.txt", "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
-                SurfaceTab = Gtk.Box(spacing=10)
-                SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
 
                 for i, column_title in enumerate(SurfaceTitle):
                     Surfacerenderer = Gtk.CellRendererText()
@@ -1089,7 +1100,7 @@ def Vulkan(tab2):
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)
-                SurfaceGrid.add(SurfaceScrollbar)
+                SurfaceGrid.attach_next_to(SurfaceScrollbar,surfaceTypeCombo,Gtk.PositionType.BOTTOM,1,1)
                 break
 
     DevicesGrid = Gtk.Grid()
