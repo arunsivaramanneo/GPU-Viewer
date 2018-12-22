@@ -548,26 +548,25 @@ def Vulkan(tab2):
                         GPU))
             #    os.system(
             #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
+        os.system(
+                "cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
         os.system(
             "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
-        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
+
 
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
-        surfaceTypeCombo.remove_all()
+
         with open("/tmp/gpu-viewer/VKDsurface.txt", "r") as file1:
             for line in file1:
                 if "= " in line or "type" in line:
-                    if "type" in line:
-                        surfaceTypeCombo.append_text(temp[i].strip('\n'))
                     SurfaceRHS.append(temp[i])
                     i = i + 1
                 else:
                     SurfaceRHS.append(" ")
-        surfaceTypeCombo.insert_text(0,"Show All Surface Types")
-        surfaceTypeCombo.set_active(0)
+
         Surface = []
         with open("/tmp/gpu-viewer/VKDsurface1.txt", "r") as file1:
             for line in file1:
@@ -1076,14 +1075,9 @@ def Vulkan(tab2):
     LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree, data=TreeLayer)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
-    surfaceTypeListStore = Gtk.ListStore(str)
-    surfaceTypeRendererText = Gtk.CellRendererText(font="BOLD")
 
     SurfaceTab = Gtk.Box(spacing=10)
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
-    surfaceTypeCombo = Gtk.ComboBoxText()
-
-    SurfaceGrid.add(surfaceTypeCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
     TreeSurface.set_property("enable-tree-lines", True)
@@ -1100,7 +1094,7 @@ def Vulkan(tab2):
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)
-                SurfaceGrid.attach_next_to(SurfaceScrollbar,surfaceTypeCombo,Gtk.PositionType.BOTTOM,1,1)
+                SurfaceGrid.add(SurfaceScrollbar)
                 break
 
     DevicesGrid = Gtk.Grid()
