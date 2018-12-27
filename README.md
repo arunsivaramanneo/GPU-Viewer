@@ -6,7 +6,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 
 
-![screenshot from 2018-12-01 18-40-29](https://user-images.githubusercontent.com/30646692/49328570-14a59f00-f599-11e8-9591-11c1fcdaaa2e.png)
+![screenshot from 2018-12-22 19-29-31](https://user-images.githubusercontent.com/30646692/50467615-e82f4800-09c9-11e9-98d5-99daa6859403.png)
 
 ![screenshot from 2018-12-01 18-40-47](https://user-images.githubusercontent.com/30646692/49328576-271fd880-f599-11e8-95d3-d9db4b03e91b.png)
 
