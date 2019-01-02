@@ -78,9 +78,9 @@
 			"buildsystem": "simple",
 			"build-commands": [
 				"CFLAGS=\"-I${FLATPAK_DEST}/include\" make",
-				"mkdir /app/share/man",
+				"mkdir ${FLATPAK_DEST}/share/man",
 				"install -m755 clinfo ${FLATPAK_DEST}/bin/clinfo",
-				"make PREFIX=/app MANDIR=${FLATPAK_DEST}/share/man install"
+				"make PREFIX=${FLATPAK_DEST} MANDIR=${FLATPAK_DEST}/share/man install"
 			],
 			"sources": [
 				{
@@ -116,7 +116,7 @@
 				"sed -i \"s/sudo//g\" install",
 				"sed -i \"s/\\/usr\\/bin/\\/app\\/bin/g\" install",
 				"sed -i \"s/\\/usr\\/share/\\/app\\/share/g\" install",
-				"mkdir -p /app/share/applications/",
+				"mkdir -p ${FLATPAK_DEST}/share/applications/",
 				"sed -i \"s/\\/usr\\/share/\\/app\\/share/g\" gpu-viewer.desktop",
 				"sed \"s/Icon/Icon=GPU_Viewer.png/g\"",
 				"sh -c ./install",
