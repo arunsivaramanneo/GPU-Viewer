@@ -8,7 +8,9 @@
 		<p>A front-end to glxinfo, vulkaninfo, clinfo and es2_info</p>
 	</description>
 	<categories>
-		<category>Graphics</category>
+		<category>GTK</category>
+		<category>GNOME</category>
+		<category>System</category>
 	</categories>
 	<url type="homepage">https://github.com/arunsivaramanneo/GPU-Viewer</url>
 	<url type="help">https://github.com/arunsivaramanneo/GPU-Viewer</url>
