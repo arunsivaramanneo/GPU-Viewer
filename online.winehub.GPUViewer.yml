@@ -2,12 +2,14 @@ app-id: online.winehub.GPUViewer
 runtime: org.freedesktop.Platform
 runtime-version: '18.08'
 sdk: org.freedesktop.Sdk
+
 finish-args:
   - --share=ipc
   - --socket=wayland
   - --socket=x11
   - --device=dri
   - --require-version=0.9.0
+
 cleanup:
   - /include
   - /share/gtk-doc
@@ -16,7 +18,9 @@ cleanup:
   - /bin/cairo-trace
   - '*.a'
   - '*.la'
+
 command: gpu-viewer
+
 modules:
   - name: pycairo
     buildsystem: meson
@@ -24,18 +28,21 @@ modules:
       - type: archive
         url: https://github.com/pygobject/pycairo/releases/download/v1.18.0/pycairo-1.18.0.tar.gz
         sha256: abd42a4c9c2069febb4c38fe74bfc4b4a9d3a89fea3bc2e4ba7baff7a20f783f
+
   - name: cairo
     buildsystem: autotools
     sources:
       - type: archive
         url: https://cairographics.org/releases/cairo-1.16.0.tar.xz
         sha256: 5e7b29b3f113ef870d1e3ecf8adf21f923396401604bda16d44be45e66052331
+
   - name: pygobject
     buildsystem: meson
     sources:
       - type: archive
         url: https://download.gnome.org/sources/pygobject/3.30/pygobject-3.30.4.tar.xz
         sha256: 2dc1a1a444b82955e65b81c2a2511ecf8032404beba4ef1d48144168f2f64c43
+
   - name: mesa-demos
     buildsystem: simple
     build-commands:
@@ -51,6 +58,7 @@ modules:
       - type: archive
         url: ftp://ftp.freedesktop.org/pub/mesa/demos/mesa-demos-8.4.0.tar.bz2
         sha256: 01e99c94a0184e63e796728af89bfac559795fb2a0d6f506fa900455ca5fff7d
+
   - name: khronos-headers
     buildsystem: simple
     build-commands:
@@ -58,6 +66,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/KhronosGroup/OpenCL-Headers
+
   - name: clinfo
     buildsystem: simple
     build-commands:
@@ -69,10 +78,10 @@ modules:
       - type: archive
         url: https://github.com/Oblomov/clinfo/archive/2.2.18.04.06.tar.gz
         sha256: f77021a57b3afcdebc73107e2254b95780026a9df9aa4f8db6aff11c03f0ec6c
+
   - name: vulkan-tools
     buildsystem: simple
     build-commands:
-      - ls
       - cmake -DCMAKE_INSTALL_PREFIX:PATH=${FLATPAK_DEST} -DCMAKE_INSTALL_LIBDIR=%{libdir}
         -DCMAKE_INSTALL_SYSCONFDIR:PATH=/app/etc -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_RPATH:BOOL=yes
         -DBUILD_VKJSON=OFF -DBUILD_WSI_MIR_SUPPORT=OFF -DBUILD_WSI_XCB_SUPPORT=ON
@@ -84,6 +93,7 @@ modules:
       - type: archive
         url: https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/archive/sdk-1.1.73.0.tar.gz
         sha256: ab6bd8162b246bc5d73dcfb3b69ed7a35b12b739735493f47304b0fc852463e1
+
   - name: gpuviewer-tools
     buildsystem: simple
     build-commands:
