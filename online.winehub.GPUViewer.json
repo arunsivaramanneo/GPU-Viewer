@@ -1,0 +1,132 @@
+{
+	"app-id": "online.winehub.GPUViewer",
+	"runtime": "org.freedesktop.Platform",
+	"runtime-version": "18.08",
+	"sdk": "org.freedesktop.Sdk",
+	"finish-args": [
+		"--share=ipc",
+		"--socket=wayland",
+		"--socket=x11",
+		"--device=dri",
+		"--require-version=0.9.0"
+	],
+	"command": "gpu-viewer",
+	"modules": [
+		{
+			"name": "pycairo",
+			"buildsystem": "meson",
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://github.com/pygobject/pycairo/releases/download/v1.18.0/pycairo-1.18.0.tar.gz",
+					"sha256": "abd42a4c9c2069febb4c38fe74bfc4b4a9d3a89fea3bc2e4ba7baff7a20f783f"
+				}
+			]
+		},
+		{
+			"name": "cairo",
+			"buildsystem": "autotools",
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://cairographics.org/releases/cairo-1.16.0.tar.xz",
+					"sha256": "5e7b29b3f113ef870d1e3ecf8adf21f923396401604bda16d44be45e66052331"
+				}
+			]
+		},
+		{
+			"name": "pygobject",
+			"buildsystem": "meson",
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://download.gnome.org/sources/pygobject/3.30/pygobject-3.30.4.tar.xz",
+					"sha256": "2dc1a1a444b82955e65b81c2a2511ecf8032404beba4ef1d48144168f2f64c43"
+				}
+			]
+		},
+		{
+			"name": "mesa-demos",
+			"buildsystem": "simple",
+			"build-commands": [
+				"cd src/xdemos;gcc -o glxinfo glxinfo.c glinfo_common.c -O2 -lX11 -lXext -lGLX -lGL -lpthread -DPACKAGE_VERSION=\"8.4.0\" -DPACKAGE_STRING=\"mesa-demos\ 8.4.0\" -DPACKAGE_BUGREPORT=\"https://bugs.freedesktop.org/enter_bug.cgi\?product=Mesa\&component=Demos\" -DPACKAGE_URL=\"\" -DPACKAGE=\"mesa-demos\" -DVERSION=\"8.4.0\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1",
+				"install -m755 src/xdemos/glxinfo /app/bin"
+			],
+			"sources": [
+				{
+					"type": "archive",
+					"url": "ftp://ftp.freedesktop.org/pub/mesa/demos/mesa-demos-8.4.0.tar.bz2",
+					"sha256": "01e99c94a0184e63e796728af89bfac559795fb2a0d6f506fa900455ca5fff7d"
+				}
+			]
+		},
+		{
+			"name": "khronos-headers",
+			"buildsystem": "simple",
+			"build-commands": [
+				"cp -r CL/ /app/include/"
+			],
+			"sources": [
+				{
+					"type": "git",
+					"url": "https://github.com/KhronosGroup/OpenCL-Headers"
+				}
+			]
+		},
+		{
+			"name": "clinfo",
+			"buildsystem": "simple",
+			"build-commands": [
+				"CFLAGS=\"-I/app/include\" make",
+				"mkdir /app/share/man",
+				"install -m755 clinfo /app/bin/clinfo",
+				"make PREFIX=/app MANDIR=/app/share/man install"
+			],
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://github.com/Oblomov/clinfo/archive/2.2.18.04.06.tar.gz",
+					"sha256": "f77021a57b3afcdebc73107e2254b95780026a9df9aa4f8db6aff11c03f0ec6c"
+				}
+			]
+		},
+		{
+			"name": "vulkan-tools",
+			"buildsystem": "simple",
+			"build-commands": [
+				"ls",
+				"cmake -DCMAKE_INSTALL_PREFIX:PATH=/app -DCMAKE_INSTALL_LIBDIR=%{libdir} -DCMAKE_INSTALL_SYSCONFDIR:PATH=/app/etc -DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_RPATH:BOOL=yes -DBUILD_VKJSON=OFF -DBUILD_WSI_MIR_SUPPORT=OFF -DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DGLSLANG_SPIRV_INCLUDE_DIR=./ -DBUILD_TESTS=OFF -DBUILD_LAYERS=OFF -DBUILD_DEMOS=ON",
+				"make vulkaninfo",
+				"install -m755 demos/vulkaninfo /app/bin/vulkaninfo"
+			],
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/archive/sdk-1.1.73.0.tar.gz",
+					"sha256": "ab6bd8162b246bc5d73dcfb3b69ed7a35b12b739735493f47304b0fc852463e1"
+				}
+			]
+		},
+		{
+			"name": "gpuviewer-tools",
+			"buildsystem": "simple",
+			"build-commands": [
+			    "sed -i \"s/sudo//g\" install",
+			    "sed -i \"s/\\/usr\\/bin/\\/app\\/bin/g\" install",
+			    "sed -i \"s/\\/usr\\/share/\\/app\\/share/g\" install",
+				"mkdir -p /app/share/applications/",
+				"sed -i \"s/\\/usr\\/share/\\/app\\/share/g\" gpu-viewer.desktop",
+				"sh -c ./install",
+				"echo -e \"#!/bin/sh\ncd /app/share/gpu-viewer/Files/\npython3 GPUViewer.py\" >/app/bin/gpu-viewer",
+				"chmod 755 /app/bin/gpu-viewer"
+			],
+			"sources": [
+				{
+					"type": "archive",
+					"url": "https://github.com/arunsivaramanneo/GPU-Viewer/archive/v1.15.tar.gz",
+					"sha256": "366abf2322b6c4dd9852b3352cfbe397b4481bf2fc8f210813cede98bc19fcf5"
+				}
+			]
+		}
+	]
+}

@@ -1,2 +1,4 @@
 *.txt
 Files/__pycache__/*
+.flatpak-builder/
+build/
