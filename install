@@ -62,14 +62,14 @@ then
 fi
 if [ -f "$file4" ]
 then
-	echo "vulkan-utils already installed"
+	echo "vulkan-tools already installed"
     	echo " "
 else
 	echo "Installing Vulkan...."
     	echo " "
-	sudo apt install vulkan-utils
+	sudo apt install vulkan-tools
 	sudo eopkg install vulkan
-	echo "vulkan-utils successfully Installed..."
+	echo "vulkan-tools successfully Installed..."
     	echo " "
 fi
 echo Installation complete...
