@@ -109,14 +109,14 @@ modules:
   - name: gpuviewer-tools
     buildsystem: simple
     build-commands:
-      - mkdir -p ${FLATPAK_DEST}/share/icons/hicolor/512x512/
-      - install -m644 Images/GPU_Viewer.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/
+      - mkdir -p ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps
+      - install -m644 Images/GPU_Viewer.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps
       - sed -i "s/sudo//g" install
       - sed -i "s/\/usr\/bin/\/app\/bin/g" install
       - sed -i "s/\/usr\/share/\/app\/share/g" install
       - mkdir -p ${FLATPAK_DEST}/share/applications/
-      - sed -i "s/\/usr\/share/\/app\/share/g" gpu-viewer.desktop
-      - sed "s/Icon/Icon=GPU_Viewer.png/g"
+      - sed  -i "/Icon=/c\Icon=GPU_Viewer" gpu-viewer.desktop
+      - sed  -i "/Exec=/c\Exec=gpu-viewer" gpu-viewer.desktop
       - sh -c ./install
       - "echo -e \"#!/bin/sh\ncd /app/share/gpu-viewer/Files/\npython3 GPUViewer.py\"\
         \ >/app/bin/gpu-viewer"
