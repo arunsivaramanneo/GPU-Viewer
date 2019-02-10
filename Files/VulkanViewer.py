@@ -120,7 +120,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 if "Vk" in line:
                     text1 = line.strip("\t")
-                    text = text1[:-2]
+                    text = text1[:-1]
                     propertiesCombo.append_text(text.strip("\n"))
 
         propertiesCombo.insert_text(0, "Show All Properties")
@@ -742,7 +742,7 @@ def Vulkan(tab2):
                     if "---" in line or "====" in line:
                         continue
                     if "Vk" in line and "conformanceVersion" not in line:
-                        text1 = text[:-1]
+                        text1 = text
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
@@ -948,7 +948,7 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
     #    column.set_property("min-width", MWIDTH)
-        column.set_property("min-width", 250)
+        column.set_property("min-width", 150)
         if 1 <= i < 5:
             column.add_attribute(Formatsrenderer, "foreground", i + 4)
         TreeFormats.set_property("can-focus", False)
