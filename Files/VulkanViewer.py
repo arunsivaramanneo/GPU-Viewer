@@ -748,11 +748,15 @@ def Vulkan(tab2):
                         background_color = Const.BGCOLOR3
                         iter1 = SparseTab_Store.append(None, [text1.strip('\n'), value2[i].strip('\n'), background_color,
                                                               fgColor[i]])
-
                     else:
                         background_color = setBackgroundColor(k)
-                        SparseTab_Store.append(iter1,
+
+                        if "major" not in line and "minor" not in line and "patch" not in line:
+                            iter2 = SparseTab_Store.append(iter1,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
+                        if "major" in line or "minor" in line or "patch" in line:
+                            SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
+                                                           fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
         else:
@@ -765,8 +769,12 @@ def Vulkan(tab2):
                         continue
                     else:
                         background_color = setBackgroundColor(k)
-                        SparseTab_Store.append(None,
+                        if "major" not in line and "minor" not in line and "patch" not in line:
+                            iter2 = SparseTab_Store.append(None,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
+                        if "major" in line or "minor" in line or "patch" in line:
+                            SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
+                                                           fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
 
