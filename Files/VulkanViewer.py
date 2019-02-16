@@ -234,7 +234,7 @@ def Vulkan(tab2):
 
         # Linear values
 
-        linearfg, linear = colorTrueFalse("/tmp/gpu-viewer/VKDFORMATSlinear.txt", "VK")
+     #   linearfg, linear = colorTrueFalse("/tmp/gpu-viewer/VKDFORMATSlinear.txt", "VK")
 
         # Optimal Values
         optimalfg, optimal = colorTrueFalse("/tmp/gpu-viewer/VKDFORMATSoptimal.txt", "VK")
@@ -242,16 +242,16 @@ def Vulkan(tab2):
         # Buffer Values
         Bufferfg, Buffer = colorTrueFalse("/tmp/gpu-viewer/VKDFORMATSBuffer.txt", "VK")
 
-        count = len(linear)
+    #    count = len(linear)
         trueFormats = []
         # counting the number of formats supported
         Formats = 0
-        for i in range(count):
-            if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
-                Formats = Formats + 1
-                trueFormats.append(True)
-            else:
-                trueFormats.append(False)
+    #    for i in range(count):
+    #        if linear[i] == "true" or optimal[i] == "true" or Buffer[i] == "true":
+    #            Formats = Formats + 1
+    #            trueFormats.append(True)
+    #        else:
+    #            trueFormats.append(False)
 
         label = "Formats (%d)" % Formats
         notebook.set_tab_label(FormatsTab, Gtk.Label(label))
@@ -262,7 +262,23 @@ def Vulkan(tab2):
                 Format.append(line.strip('\n'))
 
         Format.append("BLANK")
+        print(len(Format))
+        linearfg = []
+        for i in range(len(Format) - 1):
+            os.system(
+                "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDTiling2.txt" % (
+                    GPUname, Format[i], Format[i + 1]))
+            with open("/tmp/gpu-viewer/VKDTiling2.txt","r") as file1:
+                for line in file1:
+                    print(line)
+                    if "linear" in line or "optimal" in line or "buffer" in line:
+                        Formats = Formats + 1
+                        trueFormats.append(True)
+                        break
+                    else:
+                        trueFormats.append(False)
 
+        print(Formats)
         FormatsTab_Store.clear()
 
         for i in range(len(Format) - 1):
@@ -509,7 +525,7 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o Vulkan.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDVulkanVersion.txt")
         os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o layer.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDLayerVersion.txt")
+            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDLayerVersion.txt")
 
         Vversion = copyContentsFromFile("/tmp/gpu-viewer/VKDVulkanVersion.txt")
 
