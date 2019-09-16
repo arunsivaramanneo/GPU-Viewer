@@ -21,7 +21,7 @@ SparseTitle = ["Device Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
-FormatsTitle = ["Device Formats", "Linear", "Optimal", "Buffer"]
+FormatsTitle = ["Device Formats","Linear","Optimal","Buffer"]
 MemoryTitle = ["Memory Types", "Heap Index", "Device Local", "Host Visible", "Host Coherent", "Host Cached",
                "Lazily Allocated"]
 HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
@@ -103,7 +103,7 @@ def Vulkan(tab2):
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
             if "Description" in valueLHS[i]:
-                DeviceTab_Store.append(["operatingSystem", valueRHS[i].strip('\n'), background_color])
+                DeviceTab_Store.append(["OperatingSystem", valueRHS[i].strip('\n'), background_color])
             elif "Mem" in valueLHS[i]:
                 DeviceTab_Store.append([valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
             else:
@@ -220,7 +220,7 @@ def Vulkan(tab2):
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDFORMATS.txt" % i)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].*  > /tmp/gpu-viewer/VKDFORMATS.txt" % i)
                 # noinspection PyPep8
                 os.system(
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> /tmp/gpu-viewer/VKDFORMATSlinear.txt" % i)
@@ -284,41 +284,39 @@ def Vulkan(tab2):
         for i in range(len(Format) - 1):
             background_color = setBackgroundColor(i)
             iter = FormatsTab_Store.append(None,
-                                           [Format[i], linear[i].strip('\n'), optimal[i].strip('\n'),
-                                            Buffer[i].strip('\n'), background_color, linearfg[i], optimalfg[i],
-                                            Bufferfg[i]])
-            j = i
-            if trueFormats[i]:
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/FORMAT_%s*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDTiling.txt" % (
-                        GPUname, Format[j], Format[j + 1]))
-                with open("/tmp/gpu-viewer/VKDTiling.txt", "r") as file1:
-                    k = 0
-                    z = 0
-                    j = 1
-                    value = 0
-                    for line in file1:
-                        background_color = setBackgroundColor(k)
-                        if "linear" in line:
-                            value = value + 1
-                        if value <= 1:
-                            if ":" in line:
-                                text1 = line[:-2]
-                                background_color = setBackgroundColor(z)
-                                text = text1.strip('\t')
-                                iter2 = FormatsTab_Store.append(iter,
-                                                                [text.strip('\n'), " ", " ", " ", background_color,
-                                                                 Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
-                                k = 1
-                                z += 1
-                            else:
-                                background_color = setBackgroundColor(j)
-                                text = line.strip('\t')
-                                FormatsTab_Store.append(iter2, [text.strip('\n'), " ", " ", " ", background_color,
-                                                                Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
-                                j += 1
-                            k += 1
+                                           [Format[i]," "," "," ",background_color])
+    #        j = i
+    #        if trueFormats[i]:
+    #            # noinspection PyPep8
+    #            os.system(
+    #                "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/buffer%s*/{flag=0} flag' > /tmp/gpu-viewer/VKDTiling.txt" % (
+    #                    GPUname, Format[j], Format[j + 1]))
+    #            with open("/tmp/gpu-viewer/VKDTiling.txt", "r") as file1:
+    #                k = 0
+    #                z = 0
+    #                j = 1
+    #                value = 0
+    #                for line in file1:
+    #                    background_color = setBackgroundColor(k)
+    #                    if "linear" in line:
+    #                        value = value + 1
+    #                    if value <= 1:
+    #                        if ":" in line:
+    #                            text1 = line[:-2]
+    #                            background_color = setBackgroundColor(z)
+    #                            text = text1.strip('\t')
+    #                            iter2 = FormatsTab_Store.append(iter,
+    #                                                            [text.strip('\n'), " ", " ", " ", background_color,
+    #                                                             Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
+    #                            k = 1
+    #                            z += 1
+    #                        else:
+    #                            background_color = setBackgroundColor(j)
+    #                            text = line.strip('\t')
+    #                            FormatsTab_Store.append(iter2, [text.strip('\n'), " ", " ", " ", background_color,
+    #                                                            Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
+    #                            j += 1
+    #                        k += 1
 
     def MemoryTypes(GPUname):
         # propertiesGrid.add(propertiesCombo)ame):
@@ -952,7 +950,7 @@ def Vulkan(tab2):
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
 
-    FormatsTab_Store = Gtk.TreeStore(str, str, str, str, str, str, str, str)
+    FormatsTab_Store = Gtk.TreeStore(str,str, str, str ,str)
     FormatsTab_Store_filter = FormatsTab_Store.filter_new()
     TreeFormats = Gtk.TreeView(FormatsTab_Store_filter, expand=True)
     TreeFormats.set_property("enable-tree-lines", True)
