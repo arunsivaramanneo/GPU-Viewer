@@ -230,10 +230,19 @@ def Vulkan(tab2):
                 # noinspection PyPep8
                 os.system(
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> /tmp/gpu-viewer/VKDFORMATSBuffer.txt" % i)
+                os.system(
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/===.*/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS2.txt" % i)
                 break
 
         # Linear values
+        Linear_Formats = []
+        with open("/tmp/gpu-viewer/VKDFORMATS2.txt", "r") as file1:
+            for i,line in enumerate(file1):
+                if "linear" or "vk" in line:
+                    #print(i)
+                    break
 
+        #print(Linear_Formats)
         linearfg, linear = colorTrueFalse("/tmp/gpu-viewer/VKDFORMATSlinear.txt", "VK")
 
         # Optimal Values
@@ -765,10 +774,10 @@ def Vulkan(tab2):
                     else:
                         background_color = setBackgroundColor(k)
 
-                        if "major" not in line and "minor" not in line and "patch" not in line:
+                        if "major" not in line and "minor" not in line and "patch" not in line and "RESOLVE" not in line:
                             iter2 = SparseTab_Store.append(iter1,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
-                        if "major" in line or "minor" in line or "patch" in line:
+                        if "major" in line or "minor" in line or "patch" in line or "RESOLVE" in line:
                             SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
                                                            fgColor[i]])
                         k += 1
@@ -783,10 +792,10 @@ def Vulkan(tab2):
                         continue
                     else:
                         background_color = setBackgroundColor(k)
-                        if "major" not in line and "minor" not in line and "patch" not in line:
+                        if "major" not in line and "minor" not in line and "patch" not in line and "RESOLVE" not in line:
                             iter2 = SparseTab_Store.append(None,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
-                        if "major" in line or "minor" in line or "patch" in line:
+                        if "major" in line or "minor" in line or "patch" in line or "RESOLVE" in line:
                             SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
                                                            fgColor[i]])
                         k += 1

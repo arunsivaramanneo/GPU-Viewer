@@ -17,16 +17,16 @@ class MyGtk(Gtk.Window):
         setting = Gtk.Settings.get_default()
 
         if Gtk.get_minor_version() >= 22:
-
+            #print(Gtk.get_minor_version())
             theme = Gtk.CssProvider()
             theme.load_from_path("gtk.css")
             screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "CBlack")
+            setting.set_property("gtk-theme-name", "Pop-light")
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         elif Const.THEME1:
-            setting.set_property("gtk-theme-name", "Adwaita")
+            setting.set_property("gtk-theme-name", "Pop-light")
         elif Const.THEME2:
             setting.set_property("gtk-theme-name", "Adapta")
 
