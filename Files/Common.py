@@ -139,12 +139,35 @@ def colorTrueFalse(filename, text):
                 fgColor.append(Const.COLOR2)
     return fgColor, value
 
+def getFormatValue(filename,Format):
+    loop = 0
+    value = []
+    fgColor = []
+    with open(filename,"r") as file:
+        for line in file:
+            for i,f in enumerate(Format):
+                if "VK" in line and i >= loop:
+                    value.append("true")
+                    fgColor.append(Const.COLOR1)
+                    loop = loop + 1
+                    if ":" in f:
+                        break
+                if "None" in line and i >= loop:
+                    value.append("false")
+                    fgColor.append(Const.COLOR2)
+                    loop = loop + 1
+                    if ":" in f:
+                        break
+    return fgColor, value
+
+
+
 
 def getLinkButtonImg(img, link, toolTip):
     Logbutton = Gtk.LinkButton(link)
     Logbutton.add(Gtk.Image.new_from_pixbuf(img))
     Logbutton.set_tooltip_text(toolTip)
-    return Logbutton
+    return Logbutton    
 
 
 def getVulkanVersion(value):
