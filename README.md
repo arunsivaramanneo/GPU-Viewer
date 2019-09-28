@@ -21,13 +21,13 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 18.10(Cosmic)/Ubuntu 18.04 (Bionic)/Ubuntu 17.10 (Artful)/Ubuntu 16.04 (Xenial)/Linux Mint 19Linux Mint 18.x** users should be able to install this application using the below PPA
+3. **Ubuntu 19.04/Ubuntu 18.04 (Bionic)/Linux Mint 19** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
     * sudo apt-get install gpu-viewer
     
-    Please note all the dependencies python, vulkan-utils,clinfo, es2_info will be installed, if not installed before.
+    Please note all the dependencies python, vulkan-tools,clinfo, es2_info will be installed, if not installed before.
     
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
 5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
@@ -77,9 +77,9 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Linux Mint 19 (Tara)/Solus 3/Ubuntu 18.04
-2. Desktop : Cinnamon 3.6/Budgie 10.4
-3. Kernel : 4.14.8
+1. Operating System : POP OS 19.04
+2. Desktop : Gnome 3.32
+3. Kernel : 5.0.0.29
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
 
 
