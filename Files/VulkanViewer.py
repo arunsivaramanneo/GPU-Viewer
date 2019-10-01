@@ -430,6 +430,8 @@ def Vulkan(tab2):
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuebits.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueFlags.txt")
+        os.system(
+            "cat /tmp/gpu-viewer/VKDQueues.txt | grep present | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuePresent.txt")
 
 
         width = []
@@ -444,7 +446,7 @@ def Vulkan(tab2):
                             if "(%d, %d, %d)" % (i, j, k) in line:
                                 width.append("%d" % i)
                                 height.append("%d" % j)
-                                depth.append("%d" % k)
+                                depth.append("%d" % k)  
                                 break
 
         # finding and storing the value for Flags
