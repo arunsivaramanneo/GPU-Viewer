@@ -549,9 +549,13 @@ def Vulkan(tab2):
                 "cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print} ' > /tmp/gpu-viewer/VKDsurface1.txt")
+            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
+        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
 
-
+        with open("/tmp/gpu-viewer/VKDsurfaceType.txt",'r') as file:
+            for line in file:
+                SurfaceCombo.append_text(line.strip('\n'))
+        SurfaceCombo.set_active(0)
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
@@ -774,7 +778,8 @@ def Vulkan(tab2):
                                                            fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
-
+    def selectSurfaceType(Combo):
+        pass
     def selectFeature(Combo):
         feature = Combo.get_active_text()
         if feature is None:
@@ -1083,6 +1088,10 @@ def Vulkan(tab2):
 
     SurfaceTab = Gtk.Box(spacing=10)
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
+    SurfaceCombo = Gtk.ComboBoxText()
+    SurfaceTypeList = Gtk.ListStore(str)
+    SurfaceCombo.connect("changed", selectSurfaceType)
+    SurfaceGrid.add(SurfaceCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
     TreeSurface.set_property("enable-tree-lines", True)
@@ -1099,7 +1108,7 @@ def Vulkan(tab2):
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)
-                SurfaceGrid.add(SurfaceScrollbar)
+                SurfaceGrid.attach_next_to(SurfaceScrollbar, SurfaceCombo,Gtk.PositionType.BOTTOM,1,1)
                 break
 
     DevicesGrid = Gtk.Grid()

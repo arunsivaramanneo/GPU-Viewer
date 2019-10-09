@@ -33,7 +33,7 @@ def main():
     t1.join()
 
     if isOpenclSupported():
-        openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const.ICON_HEIGHT, False)
+        openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const. ICON_HEIGHT, False)
         t4 = threading.Thread(target=openCL, args=(openclTab,))
         t4.start()
         t4.join()
