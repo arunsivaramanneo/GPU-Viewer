@@ -25,9 +25,10 @@ FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"
 MemoryTitle = ["Memory Types", "Heap Index", "Device Local", "Host Visible", "Host Coherent", "Host Cached",
                "Lazily Allocated"]
 HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
-QueueTitle = ["Queue Family", "Queue Count", "timestampValidBits", "GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
+QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
               "minImageTransferGranularity.depth"]
+QueueTitle = ["Queue Family","Value"]
 InstanceTitle = ["Extensions", "Version"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
@@ -421,7 +422,7 @@ def Vulkan(tab2):
         for i in range(len(list)):
             if GPUname == i:
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' > /tmp/gpu-viewer/VKDQueues.txt" % i)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1; next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag'> /tmp/gpu-viewer/VKDQueues.txt" % i)
                 break
 
         os.system(
@@ -455,17 +456,59 @@ def Vulkan(tab2):
         Tfg, TBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "TRANSFER")
         Sfg, SBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "SPARSE")
 
+
         qCount = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuecount.txt")
 
         qBits = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuebits.txt")
 
         QueueTab_Store.clear()
         TreeQueue.set_model(QueueTab_Store)
-        for i in range(len(qCount)):
-            background_color = setBackgroundColor(i)
-            QueueTab_Store.append(
-                [i, int(qCount[i]), int(qBits[i]), GBit[i], CBit[i], TBit[i], SBit[i], width[i], height[i], depth[i],
-                 background_color, Gfg[i], Cfg[i], Tfg[i], Sfg[i]])
+        for j in range(len(qCount)):
+            for i in range(len(QueuesLHS)):
+                background_color = setBackgroundColor(i)
+                if "Family" in QueuesLHS[i]:
+                    iter1 = QueueTab_Store.append(None,["VkQueueFamilyProperties[%d]"%j," ",Const.BGCOLOR3,"BLACK"])
+                    continue
+    #        QueueTab_Store.append(
+    #            [i, int(qCount[i]), int(qBits[i]), GBit[i], CBit[i], TBit[i], SBit[i], width[i], height[i], depth[i],
+    #             background_color, Gfg[i], Cfg[i], Tfg[i], Sfg[i]])
+                if "BIT" in QueuesLHS[i]:
+                    if "GRAPHICS" in QueuesLHS[i]:
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],GBit[j],background_color,Gfg[j]])
+                        continue
+                    if "COMPUTE" in QueuesLHS[i]:
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],CBit[j],background_color,Cfg[j]])
+                        continue
+                    if "TRANSFER" in QueuesLHS[i]:
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],TBit[j],background_color,Tfg[j]])
+                        continue
+                    if "SPARSE" in QueuesLHS[i]:
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],SBit[j],background_color,Sfg[j]])
+                        continue
+                    else:
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],"K",background_color,"BLACK"]) 
+                else:
+                    if "Count" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],qCount[j].strip('\n'),background_color,"BLACK"])
+                        continue
+                    if "timestampValidBits" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],qBits[j].strip('\n'),background_color,"BLACK"])
+                        continue
+                    if "Flags" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i]," ",background_color,"BLACK"])
+                        continue
+                    if "width" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],width[j],background_color,"BLACK"])
+                        continue
+                    if "height" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],height[j],background_color,"BLACK"])
+                        continue
+                    if "depth" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],depth[j],background_color,"BLACK"])
+                        continue
+                    else:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],"K",background_color,"BLACK"])
+            TreeQueue.expand_all()
         label = "Queues (%d)" % len(qCount)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
 
@@ -545,22 +588,31 @@ def Vulkan(tab2):
                         GPU))
             #    os.system(
             #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
-        os.system(
-                "cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
         os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
-
+        
+        SurfaceCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDsurfaceType.txt",'r') as file:
             for line in file:
                 SurfaceCombo.append_text(line.strip('\n'))
         SurfaceCombo.set_active(0)
+
+    def selectSurfaceType(Combo):
+        surfaceTypeText = Combo.get_active_text()
+
+        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | awk '/%s.*/{flag=1;next}/type.*/{flag=0}flag' > /tmp/gpu-viewer/VKDsurfaceType1.txt" %surfaceTypeText)
+
+        os.system(
+                "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
+
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
 
-        with open("/tmp/gpu-viewer/VKDsurface.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/VKDsurfaceType1.txt", "r") as file1:
             for line in file1:
                 if "= " in line or "type" in line:
                     SurfaceRHS.append(temp[i])
@@ -778,8 +830,7 @@ def Vulkan(tab2):
                                                            fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
-    def selectSurfaceType(Combo):
-        pass
+
     def selectFeature(Combo):
         feature = Combo.get_active_text()
         if feature is None:
@@ -1017,21 +1068,21 @@ def Vulkan(tab2):
     QueueTab = Gtk.Box(spacing=10)
     QueueGrid = createSubTab(QueueTab, notebook, "Queue")
 
-    QueueTab_Store = Gtk.ListStore(int, int, int, str, str, str, str, str, str, str, str, str, str, str, str)
+    QueueTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeQueue = Gtk.TreeView(QueueTab_Store, expand=True)
     TreeQueue.set_enable_search(True)
-
+    TreeQueue.set_property("enable-tree-lines", True)
     for i, column_title in enumerate(QueueTitle):
         Queuerenderer = Gtk.CellRendererText()
-        Queuerenderer.set_alignment(0.5, 0.5)
+#        Queuerenderer.set_alignment(0.5, 0.5)
         column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
-        column.set_alignment(0.5)
-        column.add_attribute(Queuerenderer, "background", 10)
+#        column.set_alignment(0.5)
+        column.add_attribute(Queuerenderer, "background", 2)
         column.set_sort_column_id(i)
         column.set_resizable(True)
         column.set_reorderable(True)
-        if 2 < i < 7:
-            column.add_attribute(Queuerenderer, "foreground", i + 8)
+        if i > 0:
+            column.add_attribute(Queuerenderer, "foreground", 3)
         TreeQueue.set_property("can-focus", False)
         TreeQueue.append_column(column)
 
