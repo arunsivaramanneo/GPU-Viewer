@@ -545,22 +545,31 @@ def Vulkan(tab2):
                         GPU))
             #    os.system(
             #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
-        os.system(
-                "cat /tmp/gpu-viewer/VKDsurface.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDsurface.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
         os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
-
+        
+        SurfaceCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDsurfaceType.txt",'r') as file:
             for line in file:
                 SurfaceCombo.append_text(line.strip('\n'))
         SurfaceCombo.set_active(0)
+
+    def selectSurfaceType(Combo):
+        surfaceTypeText = Combo.get_active_text()
+
+        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | awk '/%s.*/{flag=1;next}/type.*/{flag=0}flag' > /tmp/gpu-viewer/VKDsurfaceType1.txt" %surfaceTypeText)
+
+        os.system(
+                "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
+
         temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
         SurfaceRHS = []
         i = 0
 
-        with open("/tmp/gpu-viewer/VKDsurface.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/VKDsurfaceType1.txt", "r") as file1:
             for line in file1:
                 if "= " in line or "type" in line:
                     SurfaceRHS.append(temp[i])
@@ -778,8 +787,7 @@ def Vulkan(tab2):
                                                            fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
-    def selectSurfaceType(Combo):
-        pass
+
     def selectFeature(Combo):
         feature = Combo.get_active_text()
         if feature is None:
