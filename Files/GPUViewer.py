@@ -18,7 +18,7 @@ def main():
     #    T1 = time.time()
 
     os.system("mkdir /tmp/gpu-viewer")
-    gtk = MyGtk("GPU-Viewer v1.18")
+    gtk = MyGtk("GPU-Viewer v1.20")
     setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
 
     if isVulkanSupported():
