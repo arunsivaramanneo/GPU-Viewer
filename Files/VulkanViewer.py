@@ -21,13 +21,13 @@ SparseTitle = ["Device Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
-FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"]
+FormatsTitle = ["Device Formats"]
 MemoryTitle = ["Memory Types", "Heap Index", "Device Local", "Host Visible", "Host Coherent", "Host Cached",
                "Lazily Allocated"]
 HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
-              "minImageTransferGranularity.depth"]
+              "minImageTransferGranularity.depth", "present support"]
 QueueTitle = ["Queue Family","Value"]
 InstanceTitle = ["Extensions", "Version"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
@@ -38,15 +38,15 @@ def Vulkan(tab2):
 
     # Creating Feature Tab
     def Devices(GPUname):
-
+        print(GPUname)
         for i in range(len(list)):
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep -v Version > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep '=' | grep -v Version > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/==.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/--.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
                 break
 
         # noinspection PyPep8
@@ -132,13 +132,14 @@ def Vulkan(tab2):
     def Features(GPUname):
 
         for i in range(len(list)):
+            print(GPUname)
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1; next}/Format Properties:/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % i)
+                    "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt |  awk '/GPU%d/{flag=1;next}/Format Properties:/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1}/Format Properties:/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" % i)
+                    "vulkaninfo |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
                 break
         featureCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
@@ -221,52 +222,32 @@ def Vulkan(tab2):
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Unsupported formats:*/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].*  > /tmp/gpu-viewer/VKDFORMATS.txt" % i)
+                    "vulkaninfo --show-formats | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS.txt" % (i,i+1))
                 # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /linearTiling.*/{f=1}'> /tmp/gpu-viewer/VKDFORMATSlinear.txt" % i)
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /optimalTiling.*/{f=1}'> /tmp/gpu-viewer/VKDFORMATSoptimal.txt" % i)
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk 'f{print;f=0} /bufferFeatures.*/{f=1}'> /tmp/gpu-viewer/VKDFORMATSBuffer.txt" % i)
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/Unsupported formats:*/{flag=1; next}/Device Properties/{flag=0} flag' | grep ^FORMAT_ | grep -o _.* | grep -o [a-zA-Z].* > /tmp/gpu-viewer/VKDFORMATS2.txt" % i)
                 break
 
 
-        Format = []
-        with open("/tmp/gpu-viewer/VKDFORMATS.txt", "r") as file1:
-            for line in file1:
-                Format.append(line.strip('\n'))
-
-        Formats = len(Format)
-        label = "Formats (%d)" % Formats
-        notebook.set_tab_label(FormatsTab, Gtk.Label(label))
-
-        #Format.append("BLANK")
-        linearfg, linear = getFormatValue("/tmp/gpu-viewer/VKDFORMATSlinear.txt",Format)
-        optimalfg, optimal = getFormatValue("/tmp/gpu-viewer/VKDFORMATSoptimal.txt",Format)
-        bufferfg, Buffer = getFormatValue("/tmp/gpu-viewer/VKDFORMATSBuffer.txt",Format)
-
-        with open("/tmp/gpu-viewer/VKDFORMATS2.txt","r") as file1:
-            for line in file1:
-                Format.append(line.strip('\n'))
-                linearfg.append(Const.COLOR2)
-                optimalfg.append(Const.COLOR2)
-                bufferfg.append(Const.COLOR2)
-                linear.append("false")
-                optimal.append("false")
-                Buffer.append("false")
 
     #    print(Formats)
         FormatsTab_Store.clear()
 
-        for i in range(len(Format) - 1):
-            background_color = setBackgroundColor(i)
-            iter = FormatsTab_Store.append(None,
-                                           [Format[i].strip(","),linear[i],optimal[i],Buffer[i],background_color,linearfg[i],optimalfg[i],bufferfg[i]])
+        with open("/tmp/gpu-viewer/VKDFORMATS.txt","r") as file1:
+            for i,line in enumerate(file1):
+                text = line.strip('\n')
+                background_color = setBackgroundColor(i)
+                if "===" in line:
+                    continue
+                if "\t" in line and "\t\t" not in line:
+                    iter3 = FormatsTab_Store.append(iter2,
+                                               [text.strip("\t"),background_color])
+                if "\t\t" in line:
+                    FormatsTab_Store.append(iter3,[text.strip('\t'),background_color])
+                if "Common" in line:    
+                    iter = FormatsTab_Store.append(None,
+                                               [text.strip("\t"),Const.BGCOLOR3])
+                if "Formats:" in line or "Properties:" in line:
+                    iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
+            TreeFormats.expand_all()
     #        j = i
     #        if trueFormats[i]:
     #            # noinspection PyPep8
@@ -408,13 +389,12 @@ def Vulkan(tab2):
 
         HeapTab_Store.clear()
         TreeHeap.set_model(HeapTab_Store)
-
-        for i in range(HCount):
+        for i in range(HCount-1):
             background_color = setBackgroundColor(i)
             HeapTab_Store.append(
                 [i, getDeviceSize(size[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
-        label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount)
+        label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
         notebook.set_tab_label(MemoryTab, Gtk.Label(label))
 
     def Queues(GPUname):
@@ -433,6 +413,8 @@ def Vulkan(tab2):
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueFlags.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep present | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuePresent.txt")
+
+        os.system("cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
 
 
         width = []
@@ -460,6 +442,7 @@ def Vulkan(tab2):
         qCount = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuecount.txt")
 
         qBits = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuebits.txt")
+        pSupport = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuePresent.txt")
 
         QueueTab_Store.clear()
         TreeQueue.set_model(QueueTab_Store)
@@ -506,6 +489,8 @@ def Vulkan(tab2):
                     if "depth" in QueuesLHS[i]:
                         iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],depth[j],background_color,"BLACK"])
                         continue
+                    if "support" in QueuesLHS[i]:
+                        iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],"false",background_color,"BLACK"])
                     else:
                         iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],"K",background_color,"BLACK"])
             TreeQueue.expand_all()
@@ -515,7 +500,7 @@ def Vulkan(tab2):
     def Instance():
 
         os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Instance Extensions	count.*/{flag=1;next}/Layers: count.*/{flag=0}flag'| grep VK_ | sort > /tmp/gpu-viewer/VKDInstanceExtensions1.txt")
+            "vulkaninfo | awk '/Instance Extensions.*/{flag=1;next}/Layers:.*/{flag=0}flag'| grep VK_ | sort > /tmp/gpu-viewer/VKDInstanceExtensions1.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDInstanceExtensions.txt")
         os.system(
@@ -541,25 +526,26 @@ def Vulkan(tab2):
                 InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
         os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Layers: count.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/gpu-viewer/VKDLayer1.txt")
+            "vulkaninfo | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/gpu-viewer/VKDLayer1.txt")
         os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/gpu-viewer/VKDLayer.txt")
+            "vulkaninfo | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/gpu-viewer/VKDLayer.txt")
         os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/gpu-viewer/VKDLayerDescription.txt")
+            "vulkaninfo | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/gpu-viewer/VKDLayerDescription.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o Vulkan.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDVulkanVersion.txt")
         os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDLayerVersion.txt")
+            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDLayerVersion.txt")
 
         Vversion = copyContentsFromFile("/tmp/gpu-viewer/VKDVulkanVersion.txt")
 
         LVersion = copyContentsFromFile("/tmp/gpu-viewer/VKDLayerVersion.txt")
 
+
         ECount = []
         with open("/tmp/gpu-viewer/VKDLayer1.txt", "r") as file1:
             for line in file1:
                 for j in range(RANGE1):
-                    if "Layer Extensions	count = %d" % j in line:
+                    if "Layer Extensions: count = %d" % j in line:
                         ECount.append("%d" % j)
                         break
 
@@ -583,24 +569,15 @@ def Vulkan(tab2):
 
         for GPU in range(len(list)):
             if GPUname == GPU:
+                print(GPU)
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id       : %d.*/{flag=1;next}/GPU id */{flag=0}flag'| awk '/./'> /tmp/gpu-viewer/VKDsurface.txt" % (
+                    "vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d*/{flag=1;next}/GPU id.*/{flag=0}flag'| awk '/./' > /tmp/gpu-viewer/VKDsurface1.txt" % (
                         GPU))
             #    os.system(
             #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
 
-        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
+            os.system("cat /tmp/gpu-viewer/VKDsurface1.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
         
-        SurfaceCombo.remove_all()
-        with open("/tmp/gpu-viewer/VKDsurfaceType.txt",'r') as file:
-            for line in file:
-                SurfaceCombo.append_text(line.strip('\n'))
-        SurfaceCombo.set_active(0)
-
-    def selectSurfaceType(Combo):
-        surfaceTypeText = Combo.get_active_text()
-
-        os.system("cat /tmp/gpu-viewer/VKDsurface.txt | awk '/%s.*/{flag=1;next}/type.*/{flag=0}flag' > /tmp/gpu-viewer/VKDsurfaceType1.txt" %surfaceTypeText)
 
         os.system(
                 "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
@@ -612,7 +589,7 @@ def Vulkan(tab2):
         SurfaceRHS = []
         i = 0
 
-        with open("/tmp/gpu-viewer/VKDsurfaceType1.txt", "r") as file1:
+        with open("cat /tmp/gpu-viewer/VKDsurfaceType.txt", "r") as file1:
             for line in file1:
                 if "= " in line or "type" in line:
                     SurfaceRHS.append(temp[i])
@@ -707,14 +684,14 @@ def Vulkan(tab2):
             if text == i:
                 Devices(text)
                 Features(text)
-                Limits(text)
+            #    Limits(text)
                 Extensions(text)
                 t5 = threading.Thread(target=Formats, args=(text,))
                 t5.start()
                 t5.join()
                 MemoryTypes(text)
                 Queues(text)
-                Surface(text)
+            #    Surface(text)
 
                 with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
 
@@ -762,7 +739,7 @@ def Vulkan(tab2):
             for line in file1:
                 if "= " in line:
                     if "Max" in line or "Min" in line or "major" in line or "minor" in line or "patch" in line:
-                        value1.append(str(float(value[i])))
+                        value1.append(str(value[i]))
                     else:
                         value1.append(value[i])
                     i += 1
@@ -770,10 +747,10 @@ def Vulkan(tab2):
                     value1.append(" ")
 
         for i in value1:
-            if i == " 0\n":
+            if i == " false\n":
                 value2.append("false")
                 fgColor.append(Const.COLOR2)
-            elif i == " 1\n":
+            elif i == " true\n":
                 value2.append("true")
                 fgColor.append(Const.COLOR1)
             elif i == " false\n":
@@ -804,10 +781,12 @@ def Vulkan(tab2):
                     else:
                         background_color = setBackgroundColor(k)
 
-                        if "major" not in line and "minor" not in line and "patch" not in line and "RESOLVE" not in line:
+                        #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line and "SAMPLE_COUNT" not in line and "\t\t" not in line:
+                        if "\t\t" not in line:
                             iter2 = SparseTab_Store.append(iter1,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
-                        if "major" in line or "minor" in line or "patch" in line or "RESOLVE" in line:
+                        #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line or "SAMPLE_COUNT" in line or "\t\t" in line:
+                        if "\t\t" in line:
                             SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
                                                            fgColor[i]])
                         k += 1
@@ -822,10 +801,12 @@ def Vulkan(tab2):
                         continue
                     else:
                         background_color = setBackgroundColor(k)
-                        if "major" not in line and "minor" not in line and "patch" not in line and "RESOLVE" not in line:
+                        #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line:
+                        if "\t\t" not in line:
                             iter2 = SparseTab_Store.append(None,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
-                        if "major" in line or "minor" in line or "patch" in line or "RESOLVE" in line:
+                        #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line:
+                        if "\t\t" in line:
                             SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
                                                            fgColor[i]])
                         k += 1
@@ -837,18 +818,18 @@ def Vulkan(tab2):
             feature = " "
         elif "Show All Features" in feature:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt")
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt")
 
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Features*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{gsub(/= 1/,'True');print}' | awk '{gsub(/= 0/,'False');print}' > /tmp/gpu-viewer/VKDFeatures.txt")
+            "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' > /tmp/gpu-viewer/VKDFeatures.txt")
 
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store_filter)
-        fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= 1")
+        fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= true")
 
         with open("/tmp/gpu-viewer/VKDFeatures.txt", "r") as file1:
             for i, line in enumerate(file1):
@@ -989,7 +970,7 @@ def Vulkan(tab2):
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
 
-    FormatsTab_Store = Gtk.TreeStore(str,str, str, str ,str, str, str, str)
+    FormatsTab_Store = Gtk.TreeStore(str,str)
     FormatsTab_Store_filter = FormatsTab_Store.filter_new()
     TreeFormats = Gtk.TreeView(FormatsTab_Store_filter, expand=True)
     TreeFormats.set_property("enable-tree-lines", True)
@@ -997,14 +978,11 @@ def Vulkan(tab2):
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
-        column.add_attribute(Formatsrenderer, "background", 4)
+        column.add_attribute(Formatsrenderer, "background", 1)
         column.set_resizable(True)
         column.set_reorderable(True)
     #    column.set_property("min-width", MWIDTH)
         column.set_property("min-width", 150)
-        if 1 <= i < 5:
-            column.add_attribute(Formatsrenderer, "foreground", i + 4)
-        TreeFormats.set_property("can-focus", False)
         TreeFormats.append_column(column)
 
     formatSearchFrame = Gtk.Frame()
@@ -1141,8 +1119,8 @@ def Vulkan(tab2):
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
     SurfaceCombo = Gtk.ComboBoxText()
     SurfaceTypeList = Gtk.ListStore(str)
-    SurfaceCombo.connect("changed", selectSurfaceType)
-    SurfaceGrid.add(SurfaceCombo)
+    #SurfaceCombo.connect("changed", selectSurfaceType)
+    #SurfaceGrid.add(SurfaceCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView(SurfaceTab_Store, expand=True)
     TreeSurface.set_property("enable-tree-lines", True)

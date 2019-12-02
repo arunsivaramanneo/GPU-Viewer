@@ -146,7 +146,7 @@ def getFormatValue(filename,Format):
     with open(filename,"r") as file:
         for line in file:
             for i,f in enumerate(Format):
-                if "VK" in line and i >= loop:
+                if "FEATURE" in line and i >= loop:
                     value.append("true")
                     fgColor.append(Const.COLOR1)
                     loop = loop + 1
