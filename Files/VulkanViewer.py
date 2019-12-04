@@ -157,29 +157,36 @@ def Vulkan(tab2):
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag'| awk '/--/{flag=1 ; next} flag' | sort > /tmp/gpu-viewer/VKDlimits1.txt" % i)
+                    "vulkaninfo | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % i)
                 break
         os.system("cat /tmp/gpu-viewer/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDlimits.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/gpu-viewer/VKDlimits2.txt")
 
-        value = copyContentsFromFile("/tmp/gpu-viewer/VKDlimits2.txt")
+        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDlimits.txt")
+        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDlimits2.txt")
 
         # finding and converting any hexadecimal value to decimal
-
-        for i in range(len(value)):
-            if "0x" in value[i]:
-                value[i] = str(int(value[i], 16))
 
         LimitsTab_Store.clear()
         TreeLimits.set_model(LimitsTab_Store_filter)
 
-        value = [i.strip(' ') for i in value]
-        with open("/tmp/gpu-viewer/VKDlimits.txt", "r") as file1:
-            for i, line in enumerate(file1):
-                text = line.strip('\t')
+
+        with open("/tmp/gpu-viewer/VKDlimits1.txt", "r") as file1:
+            j = 0
+            for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
-                LimitsTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
+                if '=' in line:
+                    text = valueLHS[i].strip('\t')
+                    iter = LimitsTab_Store.append(None,[text.strip('\n'), valueRHS[j].strip('\n'), background_color])
+                    j = j + 1
+                else:
+                    text = valueLHS[i].strip('\t')
+                    if "\t" in line and "SAMPLE_" not in line:
+                        iter2 = LimitsTab_Store.append(iter,[text.strip('\n')," ", background_color])
+                    else:
+                        LimitsTab_Store.append(iter2,[text.strip('\n')," ", background_color])
+            TreeLimits.expand_all()
 
     def Extensions(GPUname):
 
@@ -684,7 +691,7 @@ def Vulkan(tab2):
             if text == i:
                 Devices(text)
                 Features(text)
-            #    Limits(text)
+                Limits(text)
                 Extensions(text)
                 t5 = threading.Thread(target=Formats, args=(text,))
                 t5.start()
@@ -928,9 +935,10 @@ def Vulkan(tab2):
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
     LimitsGrid.set_row_spacing(3)
 
-    LimitsTab_Store = Gtk.ListStore(str, str, str)
+    LimitsTab_Store = Gtk.TreeStore(str, str, str)
     LimitsTab_Store_filter = LimitsTab_Store.filter_new()
     TreeLimits = Gtk.TreeView(LimitsTab_Store_filter, expand=True)
+    TreeLimits.set_property("enable-tree-lines", True)
     TreeLimits.set_enable_search(True)
 
     setColumns(TreeLimits, LimitsTitle, Const.MWIDTH, 0.0)
