@@ -572,19 +572,15 @@ def Vulkan(tab2):
                      ECount[i].strip('\n'), layerDescription[i].strip('\n'),
                      background_color])
 
-    def Surface(GPUname):
+    def Surface(GPU):
 
-        for GPU in range(len(list)):
-            if GPUname == GPU:
-                print(GPU)
-                os.system(
-                    "vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d*/{flag=1;next}/GPU id.*/{flag=0}flag'| awk '/./' > /tmp/gpu-viewer/VKDsurface1.txt" % (
-                        GPU))
-            #    os.system(
-            #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
-
-            os.system("cat /tmp/gpu-viewer/VKDsurface1.txt | grep type | grep -o 'VK.*' > /tmp/gpu-viewer/VKDsurfaceType.txt")
-        
+        if GPU == 0:
+            print("bro")
+            os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
+        if GPU > 0:
+            os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
+        #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
+    
 
         os.system(
                 "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
@@ -592,53 +588,27 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | awk '{gsub(/[=,:] .*/,'True');print}' | awk '{gsub(/count.*/,'True');print}' > /tmp/gpu-viewer/VKDsurface1.txt")
 
-        temp = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
+        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface2.txt")
+        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDsurface1.txt")
         SurfaceRHS = []
         i = 0
 
-        with open("cat /tmp/gpu-viewer/VKDsurfaceType.txt", "r") as file1:
-            for line in file1:
-                if "= " in line or "type" in line:
-                    SurfaceRHS.append(temp[i])
-                    i = i + 1
-                else:
-                    SurfaceRHS.append(" ")
-
         Surface = []
-        with open("/tmp/gpu-viewer/VKDsurface1.txt", "r") as file1:
-            for line in file1:
-                Surface.append(line)
-
-        Surface = [i.strip('\n ') for i in Surface]
         SurfaceTab_Store.clear()
-        count = 0
-        TreeSurface.set_model(SurfaceTab_Store)
-        for i in range(len(Surface)):
-            TreeSurface.expand_all()
-            if "====" in Surface[i]:
-                continue
-            background_color = setBackgroundColor(i)
-            if "VkSurfaceCapabilities" in Surface[i] or "Formats" in Surface[i] or "Present" in Surface[i] or "type" in Surface[i]:
-                background_color = Const.BGCOLOR3
-                if "type" in Surface[i]:
-                    background_color = setBackgroundColor(i)
-                text1 = Surface[i].strip('\t')
-                text = text1.strip(":")
-                count = 0
-                iter1 = SurfaceTab_Store.append(None, [text, SurfaceRHS[i].strip('\n'), background_color])
-            else:
-                if ":" in Surface[i] or "ArrayLayers" in Surface[i]:
-                    count += 1
-                    text1 = Surface[i].strip('\t')
-                    text = text1.strip(":")
-                    iter2 = SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
+        with open("/tmp/gpu-viewer/VKDsurfaceType1.txt", "r") as file1:
+            j=0
+            for i,line in enumerate(file1):
+                background_color = setBackgroundColor(i)
+                if '---' in line:
                     continue
-                if count > 0:
-                    text = Surface[i].strip('\t')
-                    SurfaceTab_Store.append(iter2, [text, SurfaceRHS[i].strip('\n'), background_color])
+                if "types" in line or "Formats" in line or "Modes" in line or "VkSurface" in line:
+                    background_color = Const.BGCOLOR3
+                if '=' in line :
+                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),valueRHS[j].strip('\n'),background_color])
+                    j = j+1
                 else:
-                    text = Surface[i].strip('\t')
-                    SurfaceTab_Store.append(iter1, [text, SurfaceRHS[i].strip('\n'), background_color])
+                    SurfaceTab_Store.append(None,[valueLHS[i].strip('\n')," ",background_color])
+
             TreeSurface.expand_all()
 
     def searchFeaturesTree(model, iter, Tree):
@@ -698,7 +668,7 @@ def Vulkan(tab2):
                 t5.join()
                 MemoryTypes(text)
                 Queues(text)
-            #    Surface(text)
+                Surface(text)
 
                 with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
 
@@ -1125,7 +1095,7 @@ def Vulkan(tab2):
 
     SurfaceTab = Gtk.Box(spacing=10)
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
-    SurfaceCombo = Gtk.ComboBoxText()
+    #SurfaceCombo = Gtk.ComboBoxText()
     SurfaceTypeList = Gtk.ListStore(str)
     #SurfaceCombo.connect("changed", selectSurfaceType)
     #SurfaceGrid.add(SurfaceCombo)
@@ -1145,7 +1115,7 @@ def Vulkan(tab2):
                     TreeSurface.append_column(column)
 
                 SurfaceScrollbar = createScrollbar(TreeSurface)
-                SurfaceGrid.attach_next_to(SurfaceScrollbar, SurfaceCombo,Gtk.PositionType.BOTTOM,1,1)
+                SurfaceGrid.add(SurfaceScrollbar)
                 break
 
     DevicesGrid = Gtk.Grid()
