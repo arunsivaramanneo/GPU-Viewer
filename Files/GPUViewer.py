@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3b
 import os
 import Const
 from Common import MyGtk, setScreenSize

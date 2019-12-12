@@ -38,16 +38,12 @@ def Vulkan(tab2):
 
     # Creating Feature Tab
     def Devices(GPUname):
-        print(GPUname)
-        for i in range(len(list)):
-            if GPUname == i:
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep '=' | grep -v Version > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/--.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" % i)
-                break
+        # noinspection PyPep8
+        os.system(
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep '=' | grep -v Version > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % GPUname)
+        # noinspection PyPep8
+        os.system(
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/--.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" % GPUname)
 
         # noinspection PyPep8
         os.system(
@@ -110,11 +106,7 @@ def Vulkan(tab2):
             else:
                 DeviceTab_Store.append([valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
 
-        for i in range(len(list)):
-            if GPUname == i:
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % i)
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
 
         propertiesCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDDevicesparseinfo1.txt", "r") as file1:
@@ -131,16 +123,16 @@ def Vulkan(tab2):
 
     def Features(GPUname):
 
-        for i in range(len(list)):
-            print(GPUname)
-            if GPUname == i:
+    #    for i in range(len(list)):
+    #        if 
+        i = GPUname
                 # noinspection PyPep8
-                os.system(
-                    "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
-                # noinspection PyPep8
-                os.system(
-                    "vulkaninfo |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
-                break
+        os.system(
+            "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
+        # noinspection PyPep8
+        os.system(
+            "vulkaninfo |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
+    #    break
         featureCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
             for line in file:
@@ -153,12 +145,9 @@ def Vulkan(tab2):
 
     def Limits(GPUname):
 
-        for i in range(len(list)):
-            if GPUname == i:
-                # noinspection PyPep8
-                os.system(
-                    "vulkaninfo | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % i)
-                break
+        
+        os.system(
+            "vulkaninfo | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % GPUname)
         os.system("cat /tmp/gpu-viewer/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDlimits.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/gpu-viewer/VKDlimits2.txt")

@@ -6,13 +6,15 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 
 
-![screenshot from 2018-12-22 19-29-31](https://user-images.githubusercontent.com/30646692/50467615-e82f4800-09c9-11e9-98d5-99daa6859403.png)
 
-![screenshot from 2018-12-01 18-40-47](https://user-images.githubusercontent.com/30646692/49328576-271fd880-f599-11e8-95d3-d9db4b03e91b.png)
+![Vulkan Tab](https://user-images.githubusercontent.com/30646692/70743849-82da8100-1d18-11ea-89d3-ffeb155d722f.png)
 
-![screenshot from 2018-12-01 18-41-04](https://user-images.githubusercontent.com/30646692/49328577-2a1ac900-f599-11e8-845d-26ac299915d9.png)
+![OpenGL Tab](https://user-images.githubusercontent.com/30646692/70743878-8e2dac80-1d18-11ea-867f-7af3ebf3d0ff.png)
 
-![screenshot from 2018-12-01 18-41-21](https://user-images.githubusercontent.com/30646692/49328578-2be48c80-f599-11e8-9220-f6eae0e93274.png)
+![OpenCL Tab](https://user-images.githubusercontent.com/30646692/70743887-91c13380-1d18-11ea-8b02-444a39024563.png)
+
+![About Tab](https://user-images.githubusercontent.com/30646692/70743894-95ed5100-1d18-11ea-836e-6850ce9d5e5b.png)
+
 
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
