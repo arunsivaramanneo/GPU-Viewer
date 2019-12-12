@@ -27,7 +27,7 @@ MemoryTitle = ["Memory Types", "Heap Index", "Device Local", "Host Visible", "Ho
 HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
-              "minImageTransferGranularity.depth", "present support"]
+              "minImageTransferGranularity.depth"]
 QueueTitle = ["Queue Family","Value"]
 InstanceTitle = ["Extensions", "Version"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
@@ -82,8 +82,8 @@ def Vulkan(tab2):
                 valueRHS[i] = int(valueRHS[i], 16)
                 valueRHS[i] = str("%d" % valueRHS[i])
 
-        valueRHS[0] = getVulkanVersion(valueRHS[0])
-        valueRHS[4] = getDriverVersion(valueRHS)
+        #valueRHS[0] = getVulkanVersion(valueRHS[0])
+        #valueRHS[4] = getDriverVersion(valueRHS)
 
 
         valueLHS = [i.strip('\t') for i in valueLHS]
@@ -99,6 +99,10 @@ def Vulkan(tab2):
 
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
+            if "apiVersion" in valueLHS[i]:
+                valueRHS[i] = getVulkanVersion(valueRHS[i])
+            if "driverVersion" in valueLHS[i]:
+                valueRHS[i] = getDriverVersion(valueRHS)
             if "Description" in valueLHS[i]:
                 DeviceTab_Store.append(["OperatingSystem", valueRHS[i].strip('\n'), background_color])
             elif "Mem" in valueLHS[i]:
@@ -128,10 +132,10 @@ def Vulkan(tab2):
         i = GPUname
                 # noinspection PyPep8
         os.system(
-            "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
         # noinspection PyPep8
         os.system(
-            "vulkaninfo |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
+            "cat /tmp/gpu-viewer/vulkaninfo.txt |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
     #    break
         featureCombo.remove_all()
         with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
@@ -147,7 +151,7 @@ def Vulkan(tab2):
 
         
         os.system(
-            "vulkaninfo | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % GPUname)
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % GPUname)
         os.system("cat /tmp/gpu-viewer/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDlimits.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/gpu-viewer/VKDlimits2.txt")
@@ -564,7 +568,6 @@ def Vulkan(tab2):
     def Surface(GPU):
 
         if GPU == 0:
-            print("bro")
             os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
         if GPU > 0:
             os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
