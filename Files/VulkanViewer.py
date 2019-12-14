@@ -58,8 +58,6 @@ def Vulkan(tab2):
         os.system("cat /proc/meminfo | grep Mem | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
         os.system("cat /proc/meminfo | grep Mem | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo.txt")
-        headValues = ['GPU','CPU','MEMORY']
-
 
         try:
             os.system("lsb_release -d -r -c > /tmp/gpu-viewer/VKDLsbRelease.txt")
@@ -67,10 +65,11 @@ def Vulkan(tab2):
             # noinspection PyPep8
             os.system(
                 "cat /tmp/gpu-viewer/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' > /tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
+            os.system("echo $DESKTOP_SESSION >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             os.system("uname -r >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             valueLHS = valueLHS + copyContentsFromFile("/tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
+            valueLHS.append("Desktop")
             valueLHS.append("Kernel")
-            headValues.append("DISTRIBUTION")
         except Exception as e:
             raise e
         # Storing the RHS values into a list

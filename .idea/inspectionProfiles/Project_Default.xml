@@ -5,6 +5,7 @@
       <option name="ignoredPackages">
         <list>
           <option value="PyGObject" />
+          <option value="PyGObject-stubs==0.0.2" />
         </list>
       </option>
     </inspection_tool>
