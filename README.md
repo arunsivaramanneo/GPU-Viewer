@@ -7,13 +7,13 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 
 
-![Vulkan Tab](https://user-images.githubusercontent.com/30646692/70743849-82da8100-1d18-11ea-89d3-ffeb155d722f.png)
+![Vulkan Tab](https://user-images.githubusercontent.com/30646692/70848074-49af2780-1e64-11ea-9394-1aaa8a308153.png)
 
-![OpenGL Tab](https://user-images.githubusercontent.com/30646692/70743878-8e2dac80-1d18-11ea-867f-7af3ebf3d0ff.png)
+![OpenGL Tab](https://user-images.githubusercontent.com/30646692/70848083-56338000-1e64-11ea-934a-e23dd7cb2c3d.png)
 
-![OpenCL Tab](https://user-images.githubusercontent.com/30646692/70743887-91c13380-1d18-11ea-8b02-444a39024563.png)
+![OpenCL Tab](https://user-images.githubusercontent.com/30646692/70848086-5c296100-1e64-11ea-8867-3e3d2cd403a6.png)
 
-![About Tab](https://user-images.githubusercontent.com/30646692/70743894-95ed5100-1d18-11ea-836e-6850ce9d5e5b.png)
+![About Tab](https://user-images.githubusercontent.com/30646692/70848087-5e8bbb00-1e64-11ea-9e8b-5594869e2617.png)
 
 
 
