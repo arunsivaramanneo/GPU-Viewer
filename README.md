@@ -5,8 +5,6 @@
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 
-
-
 ![Vulkan Tab](https://user-images.githubusercontent.com/30646692/70848074-49af2780-1e64-11ea-9394-1aaa8a308153.png)
 
 ![OpenGL Tab](https://user-images.githubusercontent.com/30646692/70848083-56338000-1e64-11ea-934a-e23dd7cb2c3d.png)
@@ -23,7 +21,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 19.10 (Eoan)/Ubuntu 19.04 (Disco)/Ubuntu 18.04 (Bionic)/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 19.10 (Eoan)/Ubuntu 18.04 (Bionic)/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
