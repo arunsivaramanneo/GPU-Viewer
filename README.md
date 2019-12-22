@@ -4,15 +4,13 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
+![Vulkan Tab](https://user-images.githubusercontent.com/30646692/71320126-fad64300-249e-11ea-92d3-9def326e30f3.png)
 
-![Vulkan Tab](https://user-images.githubusercontent.com/30646692/70848074-49af2780-1e64-11ea-9394-1aaa8a308153.png)
+![OpenGL Tab](https://user-images.githubusercontent.com/30646692/71320127-ff026080-249e-11ea-9f72-92a5ebafcd84.png)
 
-![OpenGL Tab](https://user-images.githubusercontent.com/30646692/70848083-56338000-1e64-11ea-934a-e23dd7cb2c3d.png)
+![OpenCL Tab](https://user-images.githubusercontent.com/30646692/71320130-0295e780-249f-11ea-800b-19bd2871fc69.png)
 
-![OpenCL Tab](https://user-images.githubusercontent.com/30646692/70848086-5c296100-1e64-11ea-8867-3e3d2cd403a6.png)
-
-![About Tab](https://user-images.githubusercontent.com/30646692/70848087-5e8bbb00-1e64-11ea-9e8b-5594869e2617.png)
-
+![About Tab](https://user-images.githubusercontent.com/30646692/71320133-075a9b80-249f-11ea-8cb9-8d03955ce0d5.png)
 
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
@@ -77,18 +75,18 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : POP OS 19.04
-2. Desktop : Gnome 3.32
-3. Kernel : 5.0.0.29
+1. Operating System : Ubuntu Cinnamon Remix
+2. Desktop : Cinnamon 4.0.10
+3. Kernel : 5.3.0-26
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
 
 
 ## SYSTEM SETUP
 
-1. ASUS G551JK ROG Laptop/MSI PE62 Laptop
+1. MSI PE62 Laptop
 2. Quad Core Intel Core i7-4710HQ
-3. Nvidia Geforce GTX 850m/1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)
-4. Intel Haswel Mobile (Integrated GPU)/Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
+3. Nvidia Gefore GTX 1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)
+4. Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
 5. 8 GB RAM
 
 **If you like/use this Application,consider supporing us by DONATING at PayPal https://www.paypal.me/ArunSivaraman.**

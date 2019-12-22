@@ -499,7 +499,7 @@ def Vulkan(tab2):
     def Instance():
 
         os.system(
-            "vulkaninfo | awk '/Instance Extensions.*/{flag=1;next}/Layers:.*/{flag=0}flag'| grep VK_ | sort > /tmp/gpu-viewer/VKDInstanceExtensions1.txt")
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Instance Extensions.*/{flag=1;next}/Layers:.*/{flag=0}flag'| grep VK_ | sort > /tmp/gpu-viewer/VKDInstanceExtensions1.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDInstanceExtensions.txt")
         os.system(
