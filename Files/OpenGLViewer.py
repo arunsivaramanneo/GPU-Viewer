@@ -222,7 +222,7 @@ def OpenGL(tab1):
                 grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "NVIDIA" in line:
-                vendorImg = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                vendorImg = fetchImageFromUrl(Const.GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "AMD" in line or "ATI" in line:

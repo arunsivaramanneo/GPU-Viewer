@@ -14,6 +14,8 @@ EGL_PNG  = "../Images/Egl_logo.png"
 
 NVIDIA_LOGO_PNG = "../Images/nvidia-logo.png"
 
+GTX_LOGO_PNG = "../Images/GeForce.png"
+
 INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"

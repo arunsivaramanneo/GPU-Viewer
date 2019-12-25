@@ -127,7 +127,7 @@ def Vulkan(tab2):
     def Features(GPUname):
 
     #    for i in range(len(list)):
-    #        if 
+    #        if
         i = GPUname
                 # noinspection PyPep8
         os.system(
@@ -148,7 +148,7 @@ def Vulkan(tab2):
 
     def Limits(GPUname):
 
-        
+
         os.system(
             "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % GPUname)
         os.system("cat /tmp/gpu-viewer/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDlimits.txt")
@@ -241,7 +241,7 @@ def Vulkan(tab2):
                                                [text.strip("\t"),background_color])
                 if "\t\t" in line:
                     FormatsTab_Store.append(iter3,[text.strip('\t'),background_color])
-                if "Common" in line:    
+                if "Common" in line:
                     iter = FormatsTab_Store.append(None,
                                                [text.strip("\t"),Const.BGCOLOR3])
                 if "Formats:" in line or "Properties:" in line:
@@ -428,7 +428,7 @@ def Vulkan(tab2):
                             if "(%d, %d, %d)" % (i, j, k) in line:
                                 width.append("%d" % i)
                                 height.append("%d" % j)
-                                depth.append("%d" % k)  
+                                depth.append("%d" % k)
                                 break
 
         # finding and storing the value for Flags
@@ -468,7 +468,7 @@ def Vulkan(tab2):
                         QueueTab_Store.append(iter2,[QueuesLHS[i],SBit[j],background_color,Sfg[j]])
                         continue
                     else:
-                        QueueTab_Store.append(iter2,[QueuesLHS[i],"K",background_color,"BLACK"]) 
+                        QueueTab_Store.append(iter2,[QueuesLHS[i],"K",background_color,"BLACK"])
                 else:
                     if "Count" in QueuesLHS[i]:
                         iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],qCount[j].strip('\n'),background_color,"BLACK"])
@@ -571,7 +571,7 @@ def Vulkan(tab2):
         if GPU > 0:
             os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
         #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
-    
+
 
         os.system(
                 "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
@@ -669,7 +669,7 @@ def Vulkan(tab2):
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
                         elif "NVIDIA" in line or "GeForce" in line:
-                            gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            gpu_image = fetchImageFromUrl(Const.GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
                         elif "AMD" in line or "ATI" in line:
