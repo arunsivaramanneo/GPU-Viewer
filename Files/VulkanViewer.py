@@ -216,14 +216,10 @@ def Vulkan(tab2):
                 ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
     def Formats(GPUname):
-
-        for i in range(len(list)):
-            if GPUname == i:
                 # noinspection PyPep8
-                os.system(
-                    "vulkaninfo --show-formats | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS.txt" % (i,i+1))
-                # noinspection PyPep8
-                break
+        os.system(
+            "vulkaninfo --show-formats | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS.txt" % (GPUname,GPUname+1))
+        # noinspection PyPep8
 
 
 
@@ -525,11 +521,11 @@ def Vulkan(tab2):
                 InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
         os.system(
-            "vulkaninfo | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/gpu-viewer/VKDLayer1.txt")
+            "cat /tmp/gpu-viewer/vulkaninfo.txt  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/gpu-viewer/VKDLayer1.txt")
         os.system(
-            "vulkaninfo | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/gpu-viewer/VKDLayer.txt")
+            "cat /tmp/gpu-viewer/vulkaninfo.txt  | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/gpu-viewer/VKDLayer.txt")
         os.system(
-            "vulkaninfo | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/gpu-viewer/VKDLayerDescription.txt")
+            "cat /tmp/gpu-viewer/vulkaninfo.txt  | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/gpu-viewer/VKDLayerDescription.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o Vulkan.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDVulkanVersion.txt")
         os.system(
@@ -567,9 +563,9 @@ def Vulkan(tab2):
     def Surface(GPU):
 
         if GPU == 0:
-            os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
+            os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
         if GPU > 0:
-            os.system("vulkaninfo | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
+            os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
         #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
 
 
