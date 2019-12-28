@@ -21,7 +21,7 @@ class MyGtk(Gtk.Window):
             theme = Gtk.CssProvider()
             theme.load_from_path("gtk.css")
             screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "Kimmo-Light")
+            setting.set_property("gtk-theme-name", "adwaita")
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
@@ -167,7 +167,7 @@ def getLinkButtonImg(img, link, toolTip):
     Logbutton = Gtk.LinkButton(link)
     Logbutton.add(Gtk.Image.new_from_pixbuf(img))
     Logbutton.set_tooltip_text(toolTip)
-    return Logbutton    
+    return Logbutton
 
 
 def getVulkanVersion(value):
