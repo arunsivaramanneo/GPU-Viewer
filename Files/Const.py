@@ -1,6 +1,6 @@
 import os.path as Path
 
-ABOUT_US_PNG = "../Images/info_icon.png"
+ABOUT_US_PNG = "../Images/about-us.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
 
