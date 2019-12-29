@@ -1,5 +1,5 @@
 ﻿# GPU-Viewer
-**A front-end to glxinfo, vulkaninfo, clinfo and es2_info.** 
+## A front-end to glxinfo, vulkaninfo, clinfo and es2_info.
 
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
@@ -15,7 +15,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 * Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
 
-## INSTALLATION STEPS 
+## INSTALLATION STEPS
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
@@ -24,9 +24,9 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
     * sudo apt-get install gpu-viewer
-    
+
     Please note all the dependencies python, vulkan-tools,clinfo, es2_info will be installed, if not installed before.
-    
+
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
 5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. For others please follow steps 6 to 9
@@ -34,7 +34,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 8. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
 9. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
 10. For **Vulkan Tab** to work Install Vulkan-Utils (sudo apt install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
-The installer should be able to take care of this dependency in Debian based distro and Solus. 
+The installer should be able to take care of this dependency in Debian based distro and Solus.
 11. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
 12. For **EGL** information to be displayed in OpenGL tab, users should install mesa-utils-extra package in Debian based systems. On Arch, Please install latest version of mesa-demos
 12. Some distro's don't come with glxinfo installed by default, so you will need to install mesa-utils to get the OpenGL Tab displayed properly.
