@@ -458,65 +458,35 @@ def Vulkan(tab2):
                 if ":" in line:
                     qRHS.append(" ")
 
-        print(qRHS)
         for i in range(len(qLhs)):
             background_color = setBackgroundColor(i)
             if "Family" in qLhs[i]:
                 iter1 = QueueTab_Store.append(None,[qLhs[i].strip('\n'),qRHS[i],Const.BGCOLOR3,"BLACK"])
                 continue
             if "\t\t" in qLhs[i] and "Family" not in qLhs[i]:
-                QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color," "])
+                QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,"BLACK"])
             else :
-                iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color," "])
+                if "queueFlags" in qLhs[i]:
+                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t')," ",background_color," "])
+                    if "GRAPHICS" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(i+1),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","false",setBackgroundColor(i+1),Const.COLOR2])
+                    if "COMPUTE" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["COMPUTE_BIT","true",setBackgroundColor(i+2),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["COMPUTE_BIT","false",setBackgroundColor(i+2),Const.COLOR2])
+                    if "TRANSFER" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["TRANSFER_BIT","true",setBackgroundColor(i+3),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["TRANSFER_BIT","false",setBackgroundColor(i+3),Const.COLOR2])
+                    if "SPARSE" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["SPARSE_BIT","true",setBackgroundColor(i+4),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["SPARSE_BIT","false",setBackgroundColor(i+4),Const.COLOR2])
+                else:
+                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,"BLACK"])
             TreeQueue.expand_all()
-    #    for j in range(len(qCount)):
-    #        for i in range(len(QueuesLHS)):
-    #            background_color = setBackgroundColor(i)
-    #            if "Family" in QueuesLHS[i]:
-    #                iter1 = QueueTab_Store.append(None,["VkQueueFamilyProperties[%d]"%j," ",Const.BGCOLOR3,"BLACK"])
-    #                continue
-    #        QueueTab_Store.append(
-    #            [i, int(qCount[i]), int(qBits[i]), GBit[i], CBit[i], TBit[i], SBit[i], width[i], height[i], depth[i],
-    #             background_color, Gfg[i], Cfg[i], Tfg[i], Sfg[i]])
-    #            if "BIT" in QueuesLHS[i]:
-    #                if "GRAPHICS" in QueuesLHS[i]:
-    #                    QueueTab_Store.append(iter2,[QueuesLHS[i],GBit[j],background_color,Gfg[j]])
-    #                    continue
-    #                if "COMPUTE" in QueuesLHS[i]:
-    #                    QueueTab_Store.append(iter2,[QueuesLHS[i],CBit[j],background_color,Cfg[j]])
-    #                    continue
-    #                if "TRANSFER" in QueuesLHS[i]:
-    #                    QueueTab_Store.append(iter2,[QueuesLHS[i],TBit[j],background_color,Tfg[j]])
-    #                    continue
-    #                if "SPARSE" in QueuesLHS[i]:
-    #                    QueueTab_Store.append(iter2,[QueuesLHS[i],SBit[j],background_color,Sfg[j]])
-    #                    continue
-    #                else:
-    #                    QueueTab_Store.append(iter2,[QueuesLHS[i],"K",background_color,"BLACK"])
-    #            else:
-    #                if "Count" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],qCount[j].strip('\n'),background_color,"BLACK"])
-    #                    continue
-    #                if "timestampValidBits" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],qBits[j].strip('\n'),background_color,"BLACK"])
-    #                    continue
-    #                if "Flags" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i]," ",background_color,"BLACK"])
-    #                    continue
-    #                if "width" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],width[j],background_color,"BLACK"])
-    #                    continue
-    #                if "height" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],height[j],background_color,"BLACK"])
-    #                    continue
-    #                if "depth" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],depth[j],background_color,"BLACK"])
-    #                    continue
-    #                if "support" in QueuesLHS[i]:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],"false",background_color,"BLACK"])
-    #                else:
-    #                    iter2 = QueueTab_Store.append(iter1,[QueuesLHS[i],"K",background_color,"BLACK"])
-    #        TreeQueue.expand_all()
         label = "Queues (%d)" % len(qCount)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
 

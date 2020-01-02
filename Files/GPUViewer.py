@@ -57,7 +57,7 @@ def isOpenclSupported():
 
 
 def isVulkanSupported():
-    os.system("vulkaninfo > /tmp/gpu-viewer/vulkaninfo.txt")
+    #os.system("vulkaninfo > /tmp/gpu-viewer/vulkaninfo.txt")
     with open("/tmp/gpu-viewer/vulkaninfo.txt", "r") as file1:
         count = len(file1.readlines())
     return count > 20
