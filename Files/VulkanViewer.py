@@ -405,14 +405,7 @@ def Vulkan(tab2):
             "cat /tmp/gpu-viewer/VKDQueues.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDQueueLHS.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuecount.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep times | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuebits.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep Flags | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueFlags.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep present | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuePresent.txt")
 
-        os.system("cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
 
 
         width = []
@@ -431,16 +424,9 @@ def Vulkan(tab2):
                                 break
 
         # finding and storing the value for Flags
-        Gfg, GBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "GRAPHICS")
-        Cfg, CBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "COMPUTE")
-        Tfg, TBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "TRANSFER")
-        Sfg, SBit = colorTrueFalse("/tmp/gpu-viewer/VKDQueueFlags.txt", "SPARSE")
 
 
         qCount = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuecount.txt")
-
-        qBits = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuebits.txt")
-        pSupport = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuePresent.txt")
 
         qLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueLHS.txt")
         qRhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueRHS.txt")
