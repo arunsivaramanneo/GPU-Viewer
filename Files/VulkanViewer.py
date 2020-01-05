@@ -473,9 +473,9 @@ def Vulkan(tab2):
                     else:
                         QueueTab_Store.append(iter2,["TRANSFER_BIT","false",setBackgroundColor(i+3),Const.COLOR2])
                     if "SPARSE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["SPARSE_BIT","true",setBackgroundColor(i+4),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","true",setBackgroundColor(i+4),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["SPARSE_BIT","false",setBackgroundColor(i+4),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","false",setBackgroundColor(i+4),Const.COLOR2])
                 else:
                     iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
             TreeQueue.expand_all()
