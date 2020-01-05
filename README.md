@@ -11,10 +11,10 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 ![OpenCL](https://user-images.githubusercontent.com/30646692/71560035-926a0180-2a5c-11ea-9c0a-202c37d9114a.png)
 
-![About](https://user-images.githubusercontent.com/30646692/71560032-8aaa5d00-2a5c-11ea-889b-8f3da46ec3c6.png)
+![About](https://user-images.githubusercontent.com/30646692/71560032-8aaa5d00-2a5c-11ea-889b-8f3da46ec3c6.png)s
 
 
-* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are materia, adapta, FlatPlat, adwaita
+* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Qogir, Layan
 
 ## INSTALLATION STEPS
 
@@ -77,9 +77,9 @@ The installer should be able to take care of this dependency in Debian based dis
 ## DEVELOPMENT ENVIRONMENT
 
 1. Operating System : Ubuntu Cinnamon Remix
-2. Desktop : Cinnamon 4.0.10
-3. Kernel : 5.3.0-26
-4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition
+2. Desktop : Cinnamon 4.2.4
+3. Kernel : 5.4.x-xx
+4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition,Atom
 
 
 ## SYSTEM SETUP

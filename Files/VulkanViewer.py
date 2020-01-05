@@ -278,13 +278,7 @@ def Vulkan(tab2):
 
     def MemoryTypes(GPUname):
         # propertiesGrid.add(propertiesCombo)ame):
-
-        for i in range(len(list)):
-            if GPUname == i:
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % i)
-                break
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
 
         with open("/tmp/gpu-viewer/VKDMemoryType.txt", "r") as file1:
             heapIndex = []
@@ -394,11 +388,8 @@ def Vulkan(tab2):
 
     def Queues(GPUname):
 
-        for i in range(len(list)):
-            if GPUname == i:
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag'> /tmp/gpu-viewer/VKDQueues.txt" % i)
-                break
+        os.system(
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
         os.system(
@@ -406,28 +397,10 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuecount.txt")
 
-
-
-        width = []
-        height = []
-        depth = []
-
-        with open("/tmp/gpu-viewer/VKDQueues.txt", "r") as file1:
-            for line in file1:
-                for i in range(10):
-                    for j in range(10):
-                        for k in range(10):
-                            if "(%d, %d, %d)" % (i, j, k) in line:
-                                width.append("%d" % i)
-                                height.append("%d" % j)
-                                depth.append("%d" % k)
-                                break
-
         # finding and storing the value for Flags
 
 
         qCount = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuecount.txt")
-
         qLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueLHS.txt")
         qRhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueRHS.txt")
 
