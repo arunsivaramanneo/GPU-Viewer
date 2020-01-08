@@ -170,7 +170,7 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 if '=' in line:
                     text = valueLHS[i].strip('\t')
-                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).strip(' count'), valueRHS[j].strip('\n'), background_color])
+                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).replace(' count',''), valueRHS[j].strip('\n'), background_color])
                     j = j + 1
                 else:
                     text = valueLHS[i].strip('\t')
@@ -243,38 +243,7 @@ def Vulkan(tab2):
                 if "Formats:" in line or "Properties:" in line:
                     iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
             TreeFormats.expand_all()
-    #        j = i
-    #        if trueFormats[i]:
-    #            # noinspection PyPep8
-    #            os.system(
-    #                "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Properties/{flag=0}flag'|awk '/Format Properties/{flag=1; next}/Device Properties/{flag=0} flag' | awk '/FORMAT_%s*/{flag=1; next}/buffer%s*/{flag=0} flag' > /tmp/gpu-viewer/VKDTiling.txt" % (
-    #                    GPUname, Format[j], Format[j + 1]))
-    #            with open("/tmp/gpu-viewer/VKDTiling.txt", "r") as file1:
-    #                k = 0
-    #                z = 0
-    #                j = 1
-    #                value = 0
-    #                for line in file1:
-    #                    background_color = setBackgroundColor(k)
-    #                    if "linear" in line:
-    #                        value = value + 1
-    #                    if value <= 1:
-    #                        if ":" in line:
-    #                            text1 = line[:-2]
-    #                            background_color = setBackgroundColor(z)
-    #                            text = text1.strip('\t')
-    #                            iter2 = FormatsTab_Store.append(iter,
-    #                                                            [text.strip('\n'), " ", " ", " ", background_color,
-    #                                                             Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
-    #                            k = 1
-    #                            z += 1
-    #                        else:
-    #                            background_color = setBackgroundColor(j)
-    #                            text = line.strip('\t')
-    #                            FormatsTab_Store.append(iter2, [text.strip('\n'), " ", " ", " ", background_color,
-    #                                                            Const.BGCOLOR1, Const.BGCOLOR1, Const.BGCOLOR1])
-    #                            j += 1
-    #                        k += 1
+
 
     def MemoryTypes(GPUname):
         # propertiesGrid.add(propertiesCombo)ame):
@@ -554,7 +523,7 @@ def Vulkan(tab2):
                 if "types" in line or "Formats" in line or "Modes" in line or "VkSurface" in line:
                     background_color = Const.BGCOLOR3
                 if '=' in line :
-                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),(valueRHS[j].strip('\n')).strip('count '),background_color])
+                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),(valueRHS[j].strip('\n')).replace('count ',''),background_color])
                     j = j+1
                 else:
                     SurfaceTab_Store.append(None,[valueLHS[i].strip('\n')," ",background_color])
