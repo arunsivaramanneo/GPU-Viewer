@@ -48,7 +48,7 @@ TOOLTIP_CHANGE_LOG = "View Change Log"
 
 LICENSE_HTML_LINK = "https://www.gnu.org/licenses/gpl-3.0-standalone.html"
 
-CHANGE_LOG_LINK = "https://raw.githubusercontent.com/arunsivaramanneo/GPU-Viewer/master/Change%20Log"
+CHANGE_LOG_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer/blob/master/Change%20Log.md"
 
 TOOLTIP_FAQ = "View Frequently Asked Questions"
 

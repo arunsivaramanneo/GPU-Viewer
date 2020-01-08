@@ -170,7 +170,7 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 if '=' in line:
                     text = valueLHS[i].strip('\t')
-                    iter = LimitsTab_Store.append(None,[text.strip('\n'), valueRHS[j].strip('\n'), background_color])
+                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).strip(' count'), valueRHS[j].strip('\n'), background_color])
                     j = j + 1
                 else:
                     text = valueLHS[i].strip('\t')
@@ -554,7 +554,7 @@ def Vulkan(tab2):
                 if "types" in line or "Formats" in line or "Modes" in line or "VkSurface" in line:
                     background_color = Const.BGCOLOR3
                 if '=' in line :
-                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),valueRHS[j].strip('\n'),background_color])
+                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),(valueRHS[j].strip('\n')).strip('count '),background_color])
                     j = j+1
                 else:
                     SurfaceTab_Store.append(None,[valueLHS[i].strip('\n')," ",background_color])
