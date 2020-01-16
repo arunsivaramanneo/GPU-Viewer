@@ -358,7 +358,7 @@ def Vulkan(tab2):
     def Queues(GPUname):
 
         os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
         os.system(
@@ -383,7 +383,7 @@ def Vulkan(tab2):
                 if " = " in line:
                     qRHS.append(qRhs[j])
                     j = j + 1
-                if ":" in line:
+                if ":" in line or "---" in line:
                     qRHS.append(" ")
 
         for i in range(len(qLhs)):
@@ -394,10 +394,12 @@ def Vulkan(tab2):
                 fColor = "RED"
             else:
                 fColor = "BLACK"
-            if "Family" in qLhs[i]:
-                iter1 = QueueTab_Store.append(None,[qLhs[i].strip('\n'),qRHS[i],Const.BGCOLOR3,fColor])
+            if "queueProperties" in qLhs[i]:
+                iter1 = QueueTab_Store.append(None,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
                 continue
-            if "\t\t" in qLhs[i] and "Family" not in qLhs[i]:
+            if "---" in qLhs[i]:
+                continue
+            if "VK_" in qLhs[i] and "queueProperties" not in qLhs[i]:
                 QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
             else :
                 if "queueFlags" in qLhs[i]:

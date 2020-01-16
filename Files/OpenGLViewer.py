@@ -356,7 +356,7 @@ def OpenGL(tab1):
     frame2 = Gtk.Frame(label="Extensions\t")
     grid.attach(frame2, 0, 2, 12, 1)
     grid1 = Gtk.Grid()
-    grid1.set_row_spacing(5)
+    #grid1.set_row_spacing(5)
     grid1.set_border_width(5)
     frame2.add(grid1)
 
@@ -439,7 +439,7 @@ def OpenGL(tab1):
 
     grid.attach(frame4, 0, 3, 12, 1)
     grid3 = Gtk.Grid()
-    grid3.set_row_spacing(2)
+    #grid3.set_row_spacing(2)
     frame4.add(grid3)
     frameSearch = Gtk.Frame()
     entry = Gtk.SearchEntry()
