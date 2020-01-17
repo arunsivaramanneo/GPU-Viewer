@@ -357,8 +357,16 @@ def Vulkan(tab2):
 
     def Queues(GPUname):
 
-        os.system(
+        with open("/tmp/gpu-viewer/vulkaninfo.txt") as file1:
+            for line in file1:
+                if "VkQueueFamilyProperties[" in line:
+                    os.system(
+                            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+                    break
+                else:
+                    os.system(
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
         os.system(
@@ -394,12 +402,12 @@ def Vulkan(tab2):
                 fColor = "RED"
             else:
                 fColor = "BLACK"
-            if "queueProperties" in qLhs[i]:
+            if "Properties" in qLhs[i]:
                 iter1 = QueueTab_Store.append(None,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
                 continue
             if "---" in qLhs[i]:
                 continue
-            if "VK_" in qLhs[i] and "queueProperties" not in qLhs[i]:
+            if "VK_" in qLhs[i] and "Properties" not in qLhs[i]:
                 QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
             else :
                 if "queueFlags" in qLhs[i]:
