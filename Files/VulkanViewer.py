@@ -929,10 +929,16 @@ def Vulkan(tab2):
     MemoryTab = Gtk.Box(spacing=10)
     MemoryTab.set_orientation(1)
     MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
+    MemoryNotebook = Gtk.Notebook()
+    MemoryGrid.add(MemoryNotebook)
+    MemoryTypeTab = Gtk.Box(spacing=10)
+    MemoryTypeGrid = createSubTab(MemoryTypeTab, MemoryNotebook, "Memory Types")
+    MemoryTypeGrid.set_row_spacing(3)
 
     MemoryTab_Store = Gtk.TreeStore(str, str, str)
     TreeMemory = Gtk.TreeView(MemoryTab_Store, expand=True)
     TreeMemory.set_enable_search(True)
+    TreeMemory.set_property("enable-tree-lines",True)
 
     for i, column_title in enumerate(MemoryTitle):
         Memoryrenderer = Gtk.CellRendererText()
@@ -948,9 +954,12 @@ def Vulkan(tab2):
         TreeMemory.append_column(column)
 
     MemoryScrollbar = createScrollbar(TreeMemory)
-    MemoryGrid.add(MemoryScrollbar)
+    MemoryTypeGrid.add(MemoryScrollbar)
 
-    HeapGrid = createSubFrame(MemoryTab)
+    MemoryHeapTab = Gtk.Box(spacing=10)
+    MemoryHeapGrid = createSubTab(MemoryHeapTab, MemoryNotebook, "Memory Heap")
+    MemoryHeapGrid.set_row_spacing(3)
+    #HeapGrid = Gtk.Box(spacing=10)
 
     HeapTab_Store = Gtk.ListStore(int, str, str, str, str)
     TreeHeap = Gtk.TreeView(HeapTab_Store, expand=True)
@@ -970,7 +979,8 @@ def Vulkan(tab2):
         TreeHeap.append_column(column)
 
     HeapScrollbar = createScrollbar(TreeHeap)
-    HeapGrid.add(HeapScrollbar)
+    MemoryHeapGrid.add(HeapScrollbar)
+
     # -------------------------Creating the Queues Tab -----------------------------------------------------
 
     QueueTab = Gtk.Box(spacing=10)
