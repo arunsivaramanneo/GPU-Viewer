@@ -22,8 +22,7 @@ FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
 FormatsTitle = ["Device Formats"]
-MemoryTitle = ["Memory Types", "Heap Index", "Device Local", "Host Visible", "Host Coherent", "Host Cached",
-               "Lazily Allocated"]
+MemoryTitle = ["Memory Types", "Value"]
 HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
@@ -249,14 +248,28 @@ def Vulkan(tab2):
         # propertiesGrid.add(propertiesCombo)ame):
         os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
 
-        with open("/tmp/gpu-viewer/VKDMemoryType.txt", "r") as file1:
-            heapIndex = []
+        # New One
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/memoryTypes: */{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryTypes.txt" %GPUname)
+
+
+        # MemoryType LHS
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
+
+        #MemoryType qRHS
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+
+        mLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
+        mRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+        #Copying Values to RHS as per LHS
+        j = 0
+        mRhs = []
+        with open("/tmp/gpu-viewer/VKDMemoryTypes.txt") as file1:
             for line in file1:
-                for j in range(RANGE1):
-                    if "heapIndex" in line:
-                        if "= %d" % j in line:
-                            heapIndex.append(j)
-                            break
+                if " = " in line or ":" in line and "usable" not in line and "Types" not in line:
+                    mRhs.append(mRHS[j])
+                    j = j + 1
+                else:
+                    mRhs.append(" ")
 
         Device_Local = []
         Host_Visible = []
@@ -319,12 +332,22 @@ def Vulkan(tab2):
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
-        for i in range(len(propertyFlags)):
+        for i in range(len(mLhs)):
             background_color = setBackgroundColor(i)
-            MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
-                                    Host_Coherent[i].strip('\n'), Host_Cached[i].strip('\n'),
-                                    Lazily_Allocated[i].strip('\n'), background_color, DLfg[i], HVfg[i], HCOfg[i],
-                                    HCAfg[i], LAfg[i]])
+            if "memoryTypes" in mLhs[i]:
+                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),Const.BGCOLOR3])
+                continue
+            if "None" in mLhs[i] or "MEMORY" in mLhs[i] or "IMAGE" in mLhs[i]:
+                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color])
+            else:
+                iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color])
+        TreeMemory.expand_all()
+        #for i in range(len(propertyFlags)):
+        #    background_color = setBackgroundColor(i)
+        #    MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
+        #                            Host_Coherent[i].strip('\n'), Host_Cached[i].strip('\n'),
+        #                            Lazily_Allocated[i].strip('\n'), background_color, DLfg[i], HVfg[i], HCOfg[i],
+        #                            HCAfg[i], LAfg[i]])
 
         HCount = 0
         HEAP_DEVICE_LOCAL = []
@@ -907,14 +930,14 @@ def Vulkan(tab2):
     MemoryTab.set_orientation(1)
     MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
 
-    MemoryTab_Store = Gtk.ListStore(int, int, str, str, str, str, str, str, str, str, str, str, str)
+    MemoryTab_Store = Gtk.TreeStore(str, str, str)
     TreeMemory = Gtk.TreeView(MemoryTab_Store, expand=True)
     TreeMemory.set_enable_search(True)
 
     for i, column_title in enumerate(MemoryTitle):
         Memoryrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
-        column.add_attribute(Memoryrenderer, "background", 7)
+        column.add_attribute(Memoryrenderer, "background", 2)
         column.set_sort_column_id(i)
         column.set_resizable(True)
         column.set_reorderable(True)
