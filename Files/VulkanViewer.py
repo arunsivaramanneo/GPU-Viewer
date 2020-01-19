@@ -271,76 +271,50 @@ def Vulkan(tab2):
                 else:
                     mRhs.append(" ")
 
-        Device_Local = []
-        Host_Visible = []
-        Host_Coherent = []
-        Host_Cached = []
-        Lazily_Allocated = []
-        Flags = []
-        LAfg = []
-        HCAfg = []
-        HCOfg = []
-        HVfg = []
-        DLfg = []
+        propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT"]
 
         # noinspection PyPep8
         os.system(
             "cat /tmp/gpu-viewer/VKDMemoryType.txt | grep propertyFlags | grep -o  =.* | grep -o ' .*' | awk '{gsub(/:.*/,'True');print}' > /tmp/gpu-viewer/VKDMemoryPropertyFlags.txt")
         propertyFlags = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryPropertyFlags.txt")
 
-        for i in propertyFlags:
-            dec = int(i, 16)
-            binary = bin(dec)[2:]
-            for j in range(len(binary)):
-                if binary[j] == '0':
-                    Flags.insert(j, "false")
-                if binary[j] == '1':
-                    Flags.insert(j, "true")
-            for j in range(5 - len(binary)):
-                Flags.insert(0, "false")
-            for k in range(len(Flags)):
-                if k == 0:
-                    Lazily_Allocated.append(Flags[k])
-                    if Flags[k] == "false":
-                        LAfg.append(Const.COLOR2)
-                    else:
-                        LAfg.append(Const.COLOR1)
-                elif k == 1:
-                    Host_Cached.append(Flags[k])
-                    if Flags[k] == "false":
-                        HCAfg.append(Const.COLOR2)
-                    else:
-                        HCAfg.append(Const.COLOR1)
-                elif k == 2:
-                    Host_Coherent.append(Flags[k])
-                    if Flags[k] == "false":
-                        HCOfg.append(Const.COLOR2)
-                    else:
-                        HCOfg.append(Const.COLOR1)
-                elif k == 3:
-                    Host_Visible.append(Flags[k])
-                    if Flags[k] == "false":
-                        HVfg.append(Const.COLOR2)
-                    else:
-                        HVfg.append(Const.COLOR1)
-                elif k == 4:
-                    Device_Local.append(Flags[k])
-                    if Flags[k] == "false":
-                        DLfg.append(Const.COLOR2)
-                    else:
-                        DLfg.append(Const.COLOR1)
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
         for i in range(len(mLhs)):
             background_color = setBackgroundColor(i)
             if "memoryTypes" in mLhs[i]:
-                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),Const.BGCOLOR3])
+                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),Const.BGCOLOR3,"BLACK"])
                 continue
-            if "None" in mLhs[i] or "MEMORY" in mLhs[i] or "IMAGE" in mLhs[i]:
-                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color])
+            if "None" in mLhs[i] or "MEMORY" in mLhs[i]:
+                continue
+            if  "IMAGE" in mLhs[i]:
+                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
             else:
-                iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color])
+                Flag = []
+                if "propertyFlags" in mLhs[i]:
+                        text = (mRhs[i].strip('\n')).strip(":")
+                        iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                        dec = int(text, 16)
+                        binary = bin(dec)[2:]
+                        for j in range(len(binary)):
+                            if binary[j] == '0':
+                                Flag.insert(j, "false")
+                            if binary[j] == '1':
+                                Flag.insert(j, "true")
+                        for j in range(5 - len(binary)):
+                            Flag.insert(0, "false")
+                        Flag.reverse()
+                        for k in range(len(Flag)):
+                            if "true" in Flag[k]:
+                                fColor = "GREEN"
+                            elif "false" in Flag[k]:
+                                fColor = "RED"
+                            else:
+                                fColor = "BLACK"
+                            MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
+                else:
+                    iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
         TreeMemory.expand_all()
         #for i in range(len(propertyFlags)):
         #    background_color = setBackgroundColor(i)
@@ -935,7 +909,7 @@ def Vulkan(tab2):
     MemoryTypeGrid = createSubTab(MemoryTypeTab, MemoryNotebook, "Memory Types")
     MemoryTypeGrid.set_row_spacing(3)
 
-    MemoryTab_Store = Gtk.TreeStore(str, str, str)
+    MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
     TreeMemory = Gtk.TreeView(MemoryTab_Store, expand=True)
     TreeMemory.set_enable_search(True)
     TreeMemory.set_property("enable-tree-lines",True)
@@ -944,12 +918,11 @@ def Vulkan(tab2):
         Memoryrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
         column.add_attribute(Memoryrenderer, "background", 2)
+        if i > 0:
+            column.add_attribute(Memoryrenderer,"foreground",3)
         column.set_sort_column_id(i)
         column.set_resizable(True)
         column.set_reorderable(True)
-        if 2 <= i < 7:
-            column.set_property("min-width", 100)
-            column.add_attribute(Memoryrenderer, "foreground", i + 6)
         TreeMemory.set_property("can-focus", False)
         TreeMemory.append_column(column)
 
