@@ -130,7 +130,7 @@ def Vulkan(tab2):
         i = GPUname
                 # noinspection PyPep8
         os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
         # noinspection PyPep8
         os.system(
             "cat /tmp/gpu-viewer/vulkaninfo.txt |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
@@ -316,6 +316,7 @@ def Vulkan(tab2):
                 else:
                     iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
         TreeMemory.expand_all()
+
         #for i in range(len(propertyFlags)):
         #    background_color = setBackgroundColor(i)
         #    MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
@@ -721,7 +722,7 @@ def Vulkan(tab2):
             feature = " "
         elif "Show All Features" in feature:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt")
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt")
 
         else:
             os.system(
