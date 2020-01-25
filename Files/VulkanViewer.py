@@ -352,7 +352,10 @@ def Vulkan(tab2):
 
         label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
         notebook.set_tab_label(MemoryTab, Gtk.Label(label))
-
+        labe12 = "Memory Types (%d)" % len(propertyFlags)
+        MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
+        labe13 = "Memory Heaps (%d)" %(HCount-1)
+        MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
 
     def Queues(GPUname):
 
