@@ -353,6 +353,7 @@ def Vulkan(tab2):
         label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
         notebook.set_tab_label(MemoryTab, Gtk.Label(label))
 
+
     def Queues(GPUname):
 
         with open("/tmp/gpu-viewer/vulkaninfo.txt") as file1:
