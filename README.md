@@ -20,7 +20,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 19.10 (Eoan)/Ubuntu 18.04 (Bionic)/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 20.04(Focal)/Ubuntu 19.10 (Eoan)/Ubuntu 18.04 (Bionic)/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
