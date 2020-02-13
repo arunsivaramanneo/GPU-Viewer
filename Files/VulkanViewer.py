@@ -256,7 +256,7 @@ def Vulkan(tab2):
         os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
 
         #MemoryType qRHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' | awk '{gsub(/[=,:].*/,'True')l}1' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
 
         mLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
         mRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesRHS.txt")

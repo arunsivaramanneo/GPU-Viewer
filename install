@@ -34,9 +34,6 @@ sudo cp -vrf GPUViewer /usr/share/gpu-viewer
 sudo cp -vrf Change\ Log /usr/share/gpu-viewer
 sudo cp -vrf LICENSE /usr/share/gpu-viewer
 sudo cp -vrf README.md /usr/share/gpu-viewer
-sudo cp -vrf bin/vkcube /usr/bin
-sudo cp -vrf bin/vulkaninfo /usr/bin
-sudo cp -vrf bin/vkcubepp /usr/bin
 echo " "
 echo "Supporting documents Successfully Installed...."
 echo " "
