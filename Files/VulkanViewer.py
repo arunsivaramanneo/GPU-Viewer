@@ -256,7 +256,7 @@ def Vulkan(tab2):
         os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
 
         #MemoryType qRHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' | awk '{gsub(/[=,:].*/,'True')l}1' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
 
         mLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
         mRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
@@ -281,6 +281,7 @@ def Vulkan(tab2):
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
+        p = 0
         for i in range(len(mLhs)):
             background_color = setBackgroundColor(i)
             if "memoryTypes" in mLhs[i]:
@@ -293,9 +294,10 @@ def Vulkan(tab2):
             else:
                 Flag = []
                 if "propertyFlags" in mLhs[i]:
-                        text = (mRhs[i].strip('\n')).strip(":")
+                        propertyFlags[p]
+                        #text = (mRhs[i].strip('\n')).strip(": ")
                         iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
-                        dec = int(text, 16)
+                        dec = int(propertyFlags[p], 16)
                         binary = bin(dec)[2:]
                         for j in range(len(binary)):
                             if binary[j] == '0':
@@ -313,6 +315,7 @@ def Vulkan(tab2):
                             else:
                                 fColor = "BLACK"
                             MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
+                        p = p + 1
                 else:
                     iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
         TreeMemory.expand_all()
@@ -359,14 +362,14 @@ def Vulkan(tab2):
 
     def Queues(GPUname):
 
-        with open("/tmp/gpu-viewer/vulkaninfo.txt") as file1:
-            for line in file1:
-                if "VkQueueFamilyProperties[" in line:
-                    os.system(
-                            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
-                    break
-                else:
-                    os.system(
+        #with open("/tmp/gpu-viewer/vulkaninfo.txt") as file1:
+        #    for line in file1:
+        #        if "VkQueueFamilyProperties[" in line:
+        #            os.system(
+        #                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+        #            break
+        #        else:
+        os.system(
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
 
         os.system(
