@@ -687,7 +687,7 @@ def Vulkan(tab2):
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
-                        iter1 = SparseTab_Store.append(None, [text1.strip('\n'), value2[i].strip('\n'), background_color,
+                        iter1 = SparseTab_Store.append(None, [(text1.strip('\n')).strip(' count'), value2[i].strip('\n'), background_color,
                                                               fgColor[i]])
                     else:
                         background_color = setBackgroundColor(k)
@@ -695,10 +695,10 @@ def Vulkan(tab2):
                         #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line and "SAMPLE_COUNT" not in line and "\t\t" not in line:
                         if "\t\t" not in line:
                             iter2 = SparseTab_Store.append(iter1,
-                                               [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
+                                               [(text.strip('\n')).strip(' count'), value2[i].strip('\n'), background_color, fgColor[i]])
                         #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line or "SAMPLE_COUNT" in line or "\t\t" in line:
                         if "\t\t" in line:
-                            SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
+                            SparseTab_Store.append(iter2, [(text.strip('\n')).strip(' count'), value2[i].strip('\n'), background_color,
                                                            fgColor[i]])
                         k += 1
                     TreeSparse.expand_all()
@@ -744,7 +744,7 @@ def Vulkan(tab2):
 
         with open("/tmp/gpu-viewer/VKDFeatures.txt", "r") as file1:
             for i, line in enumerate(file1):
-                text = line.strip('\t')
+                text = (line.strip('\t')).strip(": count")
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
 
