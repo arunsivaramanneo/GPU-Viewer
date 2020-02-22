@@ -173,7 +173,7 @@ def Vulkan(tab2):
                     j = j + 1
                 else:
                     text = valueLHS[i].strip('\t')
-                    if "\t" in line and "SAMPLE_" not in line:
+                    if "\t" in line :
                         iter2 = LimitsTab_Store.append(iter,[text.strip('\n')," ", background_color])
                     else:
                         LimitsTab_Store.append(iter2,[text.strip('\n')," ", background_color])
