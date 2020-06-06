@@ -265,8 +265,9 @@ def Vulkan(tab2):
         mRhs = []
         with open("/tmp/gpu-viewer/VKDMemoryTypes.txt") as file1:
             for line in file1:
-                if " = " in line or ":" in line and "usable" not in line and "Types" not in line:
-                    mRhs.append(mRHS[j])
+                if " = " in line or ":" in line or "IMAGE_" in line and "usable" not in line and "Types" not in line:
+                    print(line)
+                    #mRhs.append(mRHS[j])
                     j = j + 1
                 else:
                     mRhs.append(" ")
@@ -285,12 +286,12 @@ def Vulkan(tab2):
         for i in range(len(mLhs)):
             background_color = setBackgroundColor(i)
             if "memoryTypes" in mLhs[i]:
-                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),Const.BGCOLOR3,"BLACK"])
+                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t")," ",Const.BGCOLOR3,"BLACK"])
                 continue
             if "None" in mLhs[i] or "MEMORY" in mLhs[i]:
                 continue
             if  "IMAGE" in mLhs[i]:
-                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
+                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
             else:
                 Flag = []
                 if "propertyFlags" in mLhs[i]:
@@ -317,7 +318,7 @@ def Vulkan(tab2):
                             MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
                         p = p + 1
                 else:
-                    iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
+                    iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
         TreeMemory.expand_all()
 
         #for i in range(len(propertyFlags)):
@@ -327,10 +328,13 @@ def Vulkan(tab2):
         #                            Lazily_Allocated[i].strip('\n'), background_color, DLfg[i], HVfg[i], HCOfg[i],
         #                            HCAfg[i], LAfg[i]])
 
+    def Heap(GPUname):
+
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryHeap.txt" % GPUname)
         HCount = 0
         HEAP_DEVICE_LOCAL = []
 
-        with open("/tmp/gpu-viewer/VKDMemoryType.txt", "r") as file1:
+        with open("/tmp/gpu-viewer/VKDMemoryHeap.txt", "r") as file1:
             Heapfg = []
             for line in file1:
                 if "memoryHeaps" in line:
@@ -343,7 +347,7 @@ def Vulkan(tab2):
                     Heapfg.append(Const.COLOR2)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryType.txt | grep size | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
+            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep size | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
         size = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceSize.txt")
 
         HeapTab_Store.clear()
@@ -353,10 +357,10 @@ def Vulkan(tab2):
             HeapTab_Store.append(
                 [i, getDeviceSize(size[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
-        label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
-        notebook.set_tab_label(MemoryTab, Gtk.Label(label))
-        labe12 = "Memory Types (%d)" % len(propertyFlags)
-        MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
+    #    label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
+    #    notebook.set_tab_label(MemoryTab, Gtk.Label(label))
+    #    labe12 = "Memory Types (%d)" % len(propertyFlags)
+    #    MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
         labe13 = "Memory Heaps (%d)" %(HCount-1)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
 
@@ -600,7 +604,8 @@ def Vulkan(tab2):
                 t5 = threading.Thread(target=Formats, args=(text,))
                 t5.start()
                 t5.join()
-                MemoryTypes(text)
+        #        MemoryTypes(text)
+                Heap(text)
                 Queues(text)
                 Surface(text)
 

@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
 from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl, getLinkButtonImg
 
-Title1 = ["About GPU-Viewer v1.23"]
+Title1 = ["About GPU-Viewer v1.24"]
 Title2 = ["Change Log"]
 
 
