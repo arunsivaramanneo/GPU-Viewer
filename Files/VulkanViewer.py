@@ -23,7 +23,7 @@ LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
 FormatsTitle = ["Device Formats"]
 MemoryTitle = ["Memory Types", "Value"]
-HeapTitle = ["Memory Heaps", "Device Size", "HEAP DEVICE LOCAL"]
+HeapTitle = ["Memory Heaps", "Device Size","Budget", "Usage", "HEAP DEVICE LOCAL"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
               "minImageTransferGranularity.depth"]
@@ -369,12 +369,20 @@ def Vulkan(tab2):
             "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep size | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
         size = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceSize.txt")
 
+        os.system(
+            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep budget | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceBudgetSize.txt")
+        budget = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceBudgetSize.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep usage | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceUsageSize.txt")
+        usage = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceUsageSize.txt")
+
         HeapTab_Store.clear()
         TreeHeap.set_model(HeapTab_Store)
         for i in range(HCount-1):
             background_color = setBackgroundColor(i)
             HeapTab_Store.append(
-                [i, getDeviceSize(size[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
+                [i, getDeviceSize(size[i]),getDeviceSize(budget[i]),getDeviceSize(usage[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
         labe13 = "Memory Heaps (%d)" %(HCount-1)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
@@ -965,7 +973,7 @@ def Vulkan(tab2):
     MemoryHeapGrid.set_row_spacing(3)
     #HeapGrid = Gtk.Box(spacing=10)
 
-    HeapTab_Store = Gtk.ListStore(int, str, str, str, str)
+    HeapTab_Store = Gtk.ListStore(int, str, str, str, str,str,str)
     TreeHeap = Gtk.TreeView(HeapTab_Store, expand=True)
     TreeHeap.set_enable_search(True)
     for i, column_title in enumerate(HeapTitle):
@@ -974,11 +982,11 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         column.set_sort_column_id(i)
-        if i == 1:
-            column.set_property("min-width", 200)
-        column.add_attribute(Heaprenderer, "background", 3)
-        if i == 2:
-            column.add_attribute(Heaprenderer, "foreground", 4)
+        if i > 0 and i < 4:
+            column.set_property("min-width", 150)
+        column.add_attribute(Heaprenderer, "background", 5)
+        if i == 4:
+            column.add_attribute(Heaprenderer, "foreground", 6)
         TreeHeap.set_property("can-focus", False)
         TreeHeap.append_column(column)
 
