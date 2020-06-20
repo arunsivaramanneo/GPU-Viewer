@@ -50,7 +50,7 @@ def main():
 
 
 def isOpenclSupported():
-    os.system("clinfo | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/gpu-viewer/clinfo.txt")
+    os.system("clinfo | awk '/Number of pladtforms/{flag=1;print}/NULL.*/{flag=0}flag' > /tmp/gpu-viewer/clinfo.txt")
     with open("/tmp/gpu-viewer/clinfo.txt", "r") as file:
         count = len(file.readlines())
     return count > 2

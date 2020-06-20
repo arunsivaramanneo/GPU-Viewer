@@ -243,7 +243,6 @@ def Vulkan(tab2):
                     iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
             TreeFormats.expand_all()
 
-
     def MemoryTypes(GPUname):
         # propertiesGrid.add(propertiesCombo)ame):
         os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
@@ -253,10 +252,10 @@ def Vulkan(tab2):
 
 
         # MemoryType LHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
 
         #MemoryType qRHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o heapIndex.* | grep -o '= .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
 
         mLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
         mRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
@@ -265,9 +264,8 @@ def Vulkan(tab2):
         mRhs = []
         with open("/tmp/gpu-viewer/VKDMemoryTypes.txt") as file1:
             for line in file1:
-                if " = " in line or ":" in line or "IMAGE_" in line and "usable" not in line and "Types" not in line:
-                    print(line)
-                    #mRhs.append(mRHS[j])
+                if "heapIndex" in line:
+                    mRhs.append(mRHS[j].strip('= '))
                     j = j + 1
                 else:
                     mRhs.append(" ")
@@ -283,15 +281,32 @@ def Vulkan(tab2):
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
         p = 0
+        n = 0
         for i in range(len(mLhs)):
             background_color = setBackgroundColor(i)
             if "memoryTypes" in mLhs[i]:
                 iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t")," ",Const.BGCOLOR3,"BLACK"])
                 continue
-            if "None" in mLhs[i] or "MEMORY" in mLhs[i]:
+            if "MEMORY" in mLhs[i]:
                 continue
-            if  "IMAGE" in mLhs[i]:
-                MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+            if "None" in mLhs[i] and n == 0:
+                n = n + 1
+                continue
+            if "heapIndex" in mLhs[i]:
+                iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
+                continue
+            if  "IMAGE" in mLhs[i] and ("FORMAT" not in mLhs[i] or "color" not in mLhs[i] or "sparse" not in mLhs[i]):
+                iter3 = MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                continue
+            if "\t\t\t" in mLhs[i] and "IMAGE" not in mLhs[i]:
+                MemoryTab_Store.append(iter3,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                continue
+            if  "IMAGE" in mLhs[i] and ("FORMAT" not in mLhs[i] or "color" not in mLhs[i] or "sparse" not in mLhs[i]):
+                iter3 = MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                continue
+            if "\t\t\t" in mLhs[i] and "IMAGE" not in mLhs[i]:
+                MemoryTab_Store.append(iter3,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                continue
             else:
                 Flag = []
                 if "propertyFlags" in mLhs[i]:
@@ -299,6 +314,8 @@ def Vulkan(tab2):
                         #text = (mRhs[i].strip('\n')).strip(": ")
                         iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                         dec = int(propertyFlags[p], 16)
+                        if  dec == 0:
+                            n = 0
                         binary = bin(dec)[2:]
                         for j in range(len(binary)):
                             if binary[j] == '0':
@@ -319,14 +336,12 @@ def Vulkan(tab2):
                         p = p + 1
                 else:
                     iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
-        TreeMemory.expand_all()
+                    continue
 
-        #for i in range(len(propertyFlags)):
-        #    background_color = setBackgroundColor(i)
-        #    MemoryTab_Store.append([i, heapIndex[i], Device_Local[i].strip('\n'), Host_Visible[i].strip('\n'),
-        #                            Host_Coherent[i].strip('\n'), Host_Cached[i].strip('\n'),
-        #                            Lazily_Allocated[i].strip('\n'), background_color, DLfg[i], HVfg[i], HCOfg[i],
-        #                            HCAfg[i], LAfg[i]])
+        labe12 = "Memory Types (%d)" %len(propertyFlags)
+        MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
+
+        TreeMemory.expand_all()
 
     def Heap(GPUname):
 
@@ -357,10 +372,6 @@ def Vulkan(tab2):
             HeapTab_Store.append(
                 [i, getDeviceSize(size[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
 
-    #    label = "Memory Types (%d) & Heaps (%d)" % (len(propertyFlags), HCount-1)
-    #    notebook.set_tab_label(MemoryTab, Gtk.Label(label))
-    #    labe12 = "Memory Types (%d)" % len(propertyFlags)
-    #    MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
         labe13 = "Memory Heaps (%d)" %(HCount-1)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
 
@@ -604,7 +615,7 @@ def Vulkan(tab2):
                 t5 = threading.Thread(target=Formats, args=(text,))
                 t5.start()
                 t5.join()
-        #        MemoryTypes(text)
+                MemoryTypes(text)
                 Heap(text)
                 Queues(text)
                 Surface(text)
