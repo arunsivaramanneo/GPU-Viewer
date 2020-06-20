@@ -224,11 +224,14 @@ def Vulkan(tab2):
 
     #    print(Formats)
         FormatsTab_Store.clear()
-
+        Count = 0
         with open("/tmp/gpu-viewer/VKDFORMATS.txt","r") as file1:
+
             for i,line in enumerate(file1):
                 text = line.strip('\n')
                 background_color = setBackgroundColor(i)
+                if "FORMAT_" in line and "FORMAT_FEATURE" not in line:
+                    Count = Count + 1
                 if "===" in line:
                     continue
                 if "\t" in line and "\t\t" not in line:
@@ -242,6 +245,9 @@ def Vulkan(tab2):
                 if "Formats:" in line or "Properties:" in line:
                     iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
             TreeFormats.expand_all()
+       
+        labe1Format = "Formats(%d)" %Count
+        notebook.set_tab_label(FormatsTab,Gtk.Label(labe1Format))
 
     def MemoryTypes(GPUname):
         # propertiesGrid.add(propertiesCombo)ame):
@@ -343,8 +349,6 @@ def Vulkan(tab2):
 
         TreeMemory.expand_all()
 
-    def Heap(GPUname):
-
         os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryHeap.txt" % GPUname)
         HCount = 0
         HEAP_DEVICE_LOCAL = []
@@ -374,6 +378,9 @@ def Vulkan(tab2):
 
         labe13 = "Memory Heaps (%d)" %(HCount-1)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
+        label2 = "Memory Types (%d) & Memory Heaps (%d)" %(len(propertyFlags),(HCount-1))
+        notebook.set_tab_label(MemoryTab,Gtk.Label(label2))
+
 
     def Queues(GPUname):
 
@@ -616,7 +623,7 @@ def Vulkan(tab2):
                 t5.start()
                 t5.join()
                 MemoryTypes(text)
-                Heap(text)
+            #    Heap(text)
                 Queues(text)
                 Surface(text)
 
