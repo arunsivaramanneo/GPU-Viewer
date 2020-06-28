@@ -21,7 +21,7 @@ SparseTitle = ["Device Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
-FormatsTitle = ["Device Formats"]
+FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"]
 MemoryTitle = ["Memory Types", "Value"]
 HeapTitle = ["Memory Heaps", "Device Size","Budget", "Usage", "HEAP DEVICE LOCAL"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
@@ -216,37 +216,114 @@ def Vulkan(tab2):
 
     def Formats(GPUname):
                 # noinspection PyPep8
+
         os.system(
             "vulkaninfo --show-formats | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS.txt" % (GPUname,GPUname+1))
         # noinspection PyPep8
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep FORMAT_  | grep -v FORMAT_FEATURE > /tmp/gpu-viewer/VKFORMATS.txt" )
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKFORMATSCount.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep linear | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKLinearCount.txt")
+        
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/linearTiling*/{flag=1; next}/optimalTiling*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep optimal | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKOptimalCount.txt")
+        
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/optimalTiling*/{flag=1; next}/bufferFeatures*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt")
+
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep buffer | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKBufferCount.txt")
+        
+        os.system(
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/bufferFeatures*/{flag=1; next}/Common*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKBuffer.txt")
 
 
+        valueFormats = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATS.txt")
+        valueFormatsCount = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATSCount.txt")
+        valueLinearCount = copyContentsFromFile("/tmp/gpu-viewer/VKLinearCount.txt")
+        valueLinear = copyContentsFromFile("/tmp/gpu-viewer/VKLinear.txt")
+        valueOptimalCount = copyContentsFromFile("/tmp/gpu-viewer/VKOptimalCount.txt")
+        valueOptimal = copyContentsFromFile("/tmp/gpu-viewer/VKOptimal.txt")
+        valueBufferCount = copyContentsFromFile("/tmp/gpu-viewer/VKBufferCount.txt")
+        valueBuffer = copyContentsFromFile("/tmp/gpu-viewer/VKBuffer.txt")
 
     #    print(Formats)
+    #    FormatsTab_Store.clear()
+    #    Count = 0
+    #    with open("/tmp/gpu-viewer/VKDFORMATS.txt","r") as file1:
+    #
+    #        for i,line in enumerate(file1):
+    #            text = line.strip('\n')
+    #            background_color = setBackgroundColor(i)
+    #            if "FORMAT_" in line and "FORMAT_FEATURE" not in line:
+    #                Count = Count + 1
+    #            if "===" in line:
+    #                continue
+    #            if "\t" in line and "\t\t" not in line:
+    #                iter3 = FormatsTab_Store.append(iter2,
+    #                                           [text.strip("\t"),background_color])
+    #            if "\t\t" in line:
+    #                FormatsTab_Store.append(iter3,[text.strip('\t'),background_color])
+    #            if "Common" in line:
+    #                iter = FormatsTab_Store.append(None,
+    #                                           [text.strip("\t"),Const.BGCOLOR3])
+    #            if "Formats:" in line or "Properties:" in line:
+    #                iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
+    #        TreeFormats.expand_all()
         FormatsTab_Store.clear()
-        Count = 0
-        with open("/tmp/gpu-viewer/VKDFORMATS.txt","r") as file1:
+        TreeFormats.set_model(FormatsTab_Store_filter)
+        n = 0;p = 0; t = 0;s = 0
+        for i in range(len(valueFormatsCount)):
+            for j in range(int(valueFormatsCount[i])):
+                if int(valueLinearCount[i]) != 0:
+                    linearStatus = "true"
+                    linearColor = Const.COLOR1
+                else:
+                    linearStatus = "false"
+                    linearColor = Const.COLOR2
+                if int(valueOptimalCount[i]) != 0:
+                    optimalStatus = "true"
+                    optimalColor = Const.COLOR1
+                else:
+                    optimalStatus = "false"
+                    optimalColor = Const.COLOR2
+                if int(valueBufferCount[i]) != 0:
+                    bufferStatus = "true"
+                    bufferColor = Const.COLOR1
+                else:
+                    bufferStatus = "false"
+                    bufferColor = Const.COLOR2
+                iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
+                if int(valueLinearCount[i]) != 0 or int(valueOptimalCount[i]) != 0 or int(valueBufferCount[i]) != 0:
+                    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(j+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt " %(valueFormats[n].strip('\n')))
+                    with open("/tmp/gpu-viewer/VKLinear.txt") as file1:
+                        for k,line in enumerate(file1):
+                            FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
+                    with open("/tmp/gpu-viewer/VKOptimal.txt") as file1:
+                        for k,line in enumerate(file1):
+                            FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
+                    with open("/tmp/gpu-viewer/VKBuffer.txt") as file1:
+                        for k,line in enumerate(file1):
+                            FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
-            for i,line in enumerate(file1):
-                text = line.strip('\n')
-                background_color = setBackgroundColor(i)
-                if "FORMAT_" in line and "FORMAT_FEATURE" not in line:
-                    Count = Count + 1
-                if "===" in line:
-                    continue
-                if "\t" in line and "\t\t" not in line:
-                    iter3 = FormatsTab_Store.append(iter2,
-                                               [text.strip("\t"),background_color])
-                if "\t\t" in line:
-                    FormatsTab_Store.append(iter3,[text.strip('\t'),background_color])
-                if "Common" in line:
-                    iter = FormatsTab_Store.append(None,
-                                               [text.strip("\t"),Const.BGCOLOR3])
-                if "Formats:" in line or "Properties:" in line:
-                    iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
-            TreeFormats.expand_all()
-       
-        labe1Format = "Formats(%d)" %Count
+                n +=1
+
+
+
+                
+        labe1Format = "Formats(%d)" %len(valueFormats)
         notebook.set_tab_label(FormatsTab,Gtk.Label(labe1Format))
 
     def MemoryTypes(GPUname):
@@ -913,7 +990,7 @@ def Vulkan(tab2):
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
 
-    FormatsTab_Store = Gtk.TreeStore(str,str)
+    FormatsTab_Store = Gtk.TreeStore(str,str,str,str,str,str,str,str)
     FormatsTab_Store_filter = FormatsTab_Store.filter_new()
     TreeFormats = Gtk.TreeView(FormatsTab_Store_filter, expand=True)
     TreeFormats.set_property("enable-tree-lines", True)
@@ -921,11 +998,17 @@ def Vulkan(tab2):
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
-        column.add_attribute(Formatsrenderer, "background", 1)
+        column.add_attribute(Formatsrenderer, "background", 4)
         column.set_resizable(True)
         column.set_reorderable(True)
     #    column.set_property("min-width", MWIDTH)
-        column.set_property("min-width", 150)
+        if i == 0:
+            column.set_property("min-width", 400)
+        if i > 0 :
+            column.set_property("min-width", 200)
+        if i > 0 and i < 4:
+            column.add_attribute(Formatsrenderer,"foreground",i+4)
+
         TreeFormats.append_column(column)
 
     formatSearchFrame = Gtk.Frame()
