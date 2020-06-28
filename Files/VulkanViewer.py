@@ -229,54 +229,23 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep linear | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKLinearCount.txt")
         
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/linearTiling*/{flag=1; next}/optimalTiling*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt")
 
         os.system(
             "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep optimal | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKOptimalCount.txt")
         
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/optimalTiling*/{flag=1; next}/bufferFeatures*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt")
 
         os.system(
             "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep buffer | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKBufferCount.txt")
         
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/bufferFeatures*/{flag=1; next}/Common*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKBuffer.txt")
-
 
         valueFormats = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATS.txt")
         valueFormatsCount = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATSCount.txt")
         valueLinearCount = copyContentsFromFile("/tmp/gpu-viewer/VKLinearCount.txt")
-        valueLinear = copyContentsFromFile("/tmp/gpu-viewer/VKLinear.txt")
         valueOptimalCount = copyContentsFromFile("/tmp/gpu-viewer/VKOptimalCount.txt")
-        valueOptimal = copyContentsFromFile("/tmp/gpu-viewer/VKOptimal.txt")
         valueBufferCount = copyContentsFromFile("/tmp/gpu-viewer/VKBufferCount.txt")
-        valueBuffer = copyContentsFromFile("/tmp/gpu-viewer/VKBuffer.txt")
+        
 
-    #    print(Formats)
-    #    FormatsTab_Store.clear()
-    #    Count = 0
-    #    with open("/tmp/gpu-viewer/VKDFORMATS.txt","r") as file1:
-    #
-    #        for i,line in enumerate(file1):
-    #            text = line.strip('\n')
-    #            background_color = setBackgroundColor(i)
-    #            if "FORMAT_" in line and "FORMAT_FEATURE" not in line:
-    #                Count = Count + 1
-    #            if "===" in line:
-    #                continue
-    #            if "\t" in line and "\t\t" not in line:
-    #                iter3 = FormatsTab_Store.append(iter2,
-    #                                           [text.strip("\t"),background_color])
-    #            if "\t\t" in line:
-    #                FormatsTab_Store.append(iter3,[text.strip('\t'),background_color])
-    #            if "Common" in line:
-    #                iter = FormatsTab_Store.append(None,
-    #                                           [text.strip("\t"),Const.BGCOLOR3])
-    #            if "Formats:" in line or "Properties:" in line:
-    #                iter2 = FormatsTab_Store.append(iter,[text.strip('\t'),background_color])
-    #        TreeFormats.expand_all()
+   
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store_filter)
         n = 0;p = 0; t = 0;s = 0
