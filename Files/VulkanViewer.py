@@ -99,14 +99,24 @@ def Vulkan(tab2):
             background_color = setBackgroundColor(i)
             if "apiVersion" in valueLHS[i]:
                 valueRHS[i] = getVulkanVersion(valueRHS[i])
+                iter1 = DeviceTab_Store.append(None,["Vulkan Details..."," ",Const.BGCOLOR3])
             if "driverVersion" in valueLHS[i]:
                 valueRHS[i] = getDriverVersion(valueRHS)
+            if "Model" in valueLHS[i]:
+                iter1 = DeviceTab_Store.append(None,["Processor Details..."," ",Const.BGCOLOR3])
             if "Description" in valueLHS[i]:
-                DeviceTab_Store.append(["OperatingSystem", valueRHS[i].strip('\n'), background_color])
+                iter1 = DeviceTab_Store.append(None,["Operating System Details..."," ",Const.BGCOLOR3])
+                DeviceTab_Store.append(iter1,["Distribution", valueRHS[i].strip('\n'), background_color])
+                continue
+            if "Total" in valueLHS[i]:
+                iter1 = DeviceTab_Store.append(None,["Memory Details..."," ",Const.BGCOLOR3])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
             elif "Mem" in valueLHS[i]:
-                DeviceTab_Store.append([valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
             else:
-                DeviceTab_Store.append([valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
+
+        TreeDevice.expand_all()
 
         os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
 
@@ -841,7 +851,7 @@ def Vulkan(tab2):
     DeviceTab = Gtk.Box(spacing=10)
     DeviceGrid = createSubTab(DeviceTab, notebook, "Device")
 
-    DeviceTab_Store = Gtk.ListStore(str, str, str)
+    DeviceTab_Store = Gtk.TreeStore(str, str, str)
     TreeDevice = Gtk.TreeView(DeviceTab_Store, expand=True)
 
     setColumns(TreeDevice, DeviceTitle, Const.MWIDTH, 0.0)

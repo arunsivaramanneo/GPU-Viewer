@@ -1,3 +1,20 @@
+# Release 1.24
+
+1. Updated MemoryTypes and Memory Heaps as per the latest Vulkan version 1.2.145
+2. Formats Tab has re-designed to show all the Formats in a Tree view
+3. Improved App Performance
+4. Tested with Latest version of Vulkan-Headers,Vulkan-Loader and Vulkan-Tools
+
+# Release 1.23
+
+1. Fixed Minor UI issues in Properties and Features Tab in Vulkan
+2. Updated Application as per Vulkan 1.2.133
+
+# Release 1.22
+
+1. Memory Tab and Queue Tab has been reworked as per Vulkan 1.2
+2. Minor Fixes to Features Tab
+3. Tested with Vulkan Version 1.2.132
 
 # Release 1.21
 
