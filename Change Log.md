@@ -1,7 +1,8 @@
 # Release 1.24
 
-1. Updated MemoryTypes and Memory Heaps as per the latest Vulkan version 1.2.145
+1. Updated MemoryTypes and Memory Heaps as per the latest Vulkan version 1.2.147
 2. Formats Tab has re-designed to show all the Formats in a Tree view
+3. Updated Device Tab look by separating
 3. Improved App Performance
 4. Tested with Latest version of Vulkan-Headers,Vulkan-Loader and Vulkan-Tools
 
