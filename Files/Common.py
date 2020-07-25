@@ -51,10 +51,7 @@ def getRamInGb(ram):
 # Setting the Minimum Screen Size
 def setScreenSize(self, widthRatio, heightRatio):
     Screen = Gdk.Screen.get_default()
-    if Screen.get_height() >= 1440:
-        self.set_default_size(1200, 1080)
-    else:
-        self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
+    self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
 
     self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
