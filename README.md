@@ -21,7 +21,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 20.04(Focal)/Ubuntu 19.10 (Eoan)/Ubuntu 18.04 (Bionic)/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -35,11 +35,10 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 7. Download the file and Extract to a folder
 8. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
 9. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-10. For **Vulkan Tab** to work Install Vulkan-Utils (sudo apt install vulkan-utils) in Ubuntu, Vulkan-extra-layers in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+10. For **Vulkan Tab** to work Install Vulkan-Utils (sudo apt install vulkan-utils) in Ubuntu, vulkan-tools in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
 11. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
 12. For **EGL** information to be displayed in OpenGL tab, users should install mesa-utils-extra package in Debian based systems. On Arch, Please install latest version of mesa-demos
-12. Some distro's don't come with glxinfo installed by default, so you will need to install mesa-utils to get the OpenGL Tab displayed properly.
 13. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
@@ -49,7 +48,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## What's developed and available?
 
-1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration and EGL information
+1. OpenGL Tab - OpenGL Information, OpenGL ES Information, OpenGL hardware limits and Extensions displayed as per different Vendors, View GLX Frame Buffer Configuration and EGL information, EGL Information
 2. Vulkan Tab - Device Features, Device Limits, Device Extensions,Formats,Memory Types & Heaps, Partial Queue Families implemented, Instance and Layers,Surface Tab
 3. OpenCL Tab - Platform Details, Device Details , Device Memory & Image Details, Device Queue and Execution capabilities, Device Vector Details, Total No. of Platforms, No. of Devices for the platform.
 4. About Tab - About GPU Viewer Application, ability to report a bug,view license,view change log, Donate via paypal, GPU Viewer Github main page.
@@ -77,17 +76,17 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Ubuntu Cinnamon Remix
-2. Desktop : Cinnamon 4.2.4
+1. Operating System : Ubuntu 20.04
+2. Desktop : Gnome 3.36
 3. Kernel : 5.4.x-xx
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition,Atom
 
 
 ## SYSTEM SETUP
 
-1. MSI PE62 Laptop
-2. Quad Core Intel Core i7-4710HQ
-3. Nvidia Gefore GTX 1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)
+1. MSI PE62 Laptop, Huawei Matebook 13 AMD
+2. Quad Core Intel Core i7-4710HQ, AMD Ryzen 3500 U
+3. Nvidia Gefore GTX 1050Ti (Discrete GPU) , Drivers - Nvidia (proprietary)/Mesa drivers
 4. Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
 5. 8 GB RAM
 
