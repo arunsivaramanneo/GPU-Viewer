@@ -204,7 +204,7 @@ def setColumnFrameBuffer(TreeFB, Title):
 
 def getDeviceSize(size):
     sizeMB = float(size) / (1024 * 1024 * 1024)
-    if sizeMB <= 1.0:
+    if sizeMB < 1.0:
         sizeMB = str(format((sizeMB * 1024), '.2f')) + " MB"
     else:
         sizeMB = str(format(sizeMB, '.2f')) + " GB"
