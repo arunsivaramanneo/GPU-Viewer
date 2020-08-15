@@ -26,7 +26,7 @@ NVIDIA_BANNER = "../Images/nvidia-banner.jpg"
 
 TWITTER_LOGO_PNG = "../Images/twitter-icon.png"
 
-DONATE_LOGO_PNG = "../Images/paypal_donate.png"
+DONATE_LOGO_PNG = "../Images/donate.svg"
 
 GITHUB_LOGO_PNG = "../Images/github.png"
 
@@ -60,9 +60,9 @@ ISSUE_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer/issues"
 
 EMAIL_LINK = "mailto:arunsivaramanneo@gmail.com?Subject=GPU Viewer - <Enter Description here>"
 
-TOOLTIP_DONATE = "click here to Donate"
+TOOLTIP_DONATE = "Donate using Liberapay"
 
-PAYPAL_LINK = "https://www.paypal.me/ArunSivaraman"
+PAYPAL_LINK = "https://liberapay.com/arunsivaraman/donate"
 
 TOOLTIP_TWITTER = "Follow me on Twitter"
 
