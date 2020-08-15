@@ -485,9 +485,9 @@ def Vulkan(tab2):
                     j = j + 1
                 if ":" in line or "---" in line:
                     qRHS.append(" ")
-
+        k = 0
         for i in range(len(qLhs)):
-            background_color = setBackgroundColor(i)
+            background_color = setBackgroundColor(k)
             if "true" in qRHS[i]:
                 fColor = "GREEN"
             elif "false" in qRHS[i]:
@@ -496,32 +496,41 @@ def Vulkan(tab2):
                 fColor = "BLACK"
             if "Properties" in qLhs[i]:
                 iter1 = QueueTab_Store.append(None,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
+                k = 0
                 continue
             if "---" in qLhs[i]:
                 continue
             if "VK_" in qLhs[i] and "Properties" not in qLhs[i]:
                 QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+
             else :
                 if "queueFlags" in qLhs[i]:
-                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
+                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t')," ",setBackgroundColor(2),fColor])
+
                     if "GRAPHICS" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(i+1),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(1),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","false",setBackgroundColor(i+1),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","false",setBackgroundColor(1),Const.COLOR2])
                     if "COMPUTE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["COMPUTE_BIT","true",setBackgroundColor(i+2),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["COMPUTE_BIT","true",setBackgroundColor(2),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["COMPUTE_BIT","false",setBackgroundColor(i+2),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["COMPUTE_BIT","false",setBackgroundColor(2),Const.COLOR2])
                     if "TRANSFER" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["TRANSFER_BIT","true",setBackgroundColor(i+3),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["TRANSFER_BIT","true",setBackgroundColor(1),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["TRANSFER_BIT","false",setBackgroundColor(i+3),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["TRANSFER_BIT","false",setBackgroundColor(1),Const.COLOR2])
                     if "SPARSE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","true",setBackgroundColor(i+4),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","true",setBackgroundColor(2),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","false",setBackgroundColor(i+4),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","false",setBackgroundColor(2),Const.COLOR2])
+                    if "PROTECTED" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["PROTECTED_BIT","true",setBackgroundColor(1),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["PROTECTED_BIT","false",setBackgroundColor(1),Const.COLOR2])
                 else:
+                    k = k + 1
                     iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+                    
             TreeQueue.expand_all()
         label = "Queues (%d)" % len(qCount)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
