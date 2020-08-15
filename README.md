@@ -16,6 +16,8 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 ## INSTALLATION STEPS
 
+**Those who are cloning and installing the application through install file, please note the application will work with vulkan tools 1.2.141 or higher, for anything below please use the PPA to install the latest stable version. Working on Integrating the latest vulkan tools to the installation**
+
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
 3. **Ubuntu 20.10(Groovy)/Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
