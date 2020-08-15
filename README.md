@@ -5,23 +5,20 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![VulkanTab](https://user-images.githubusercontent.com/30646692/86054227-afa27b80-ba51-11ea-8622-86568ffdff70.png)
+![Vulkan Tab](https://user-images.githubusercontent.com/30646692/90306238-f1349c00-dec2-11ea-9cf5-da9eb23dc5e0.png)
 
-![OpenGLTab](https://user-images.githubusercontent.com/30646692/86054249-baf5a700-ba51-11ea-901a-3c7d0d4dadf9.png)
+![OpenGL Tab](https://user-images.githubusercontent.com/30646692/90306240-f560b980-dec2-11ea-9fb6-0477f18676b3.png)
 
 ![OpenCLTab](https://user-images.githubusercontent.com/30646692/86054263-be892e00-ba51-11ea-8bb9-b9bd6b45fd96.png)
 
 ![AboutTab](https://user-images.githubusercontent.com/30646692/86054272-c47f0f00-ba51-11ea-9545-f4f68743414f.png)
 
 
-
-* Please note that the above images solely depends on the Theme being used on the system. Recommended themes are Qogir, Layan
-
 ## INSTALLATION STEPS
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 20.10(Groovy)/Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -76,7 +73,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT ENVIRONMENT
 
-1. Operating System : Ubuntu 20.04
+1. Operating System : Ubuntu 20.10
 2. Desktop : Gnome 3.36
 3. Kernel : 5.4.x-xx
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition,Atom
