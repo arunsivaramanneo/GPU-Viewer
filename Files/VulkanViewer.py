@@ -717,6 +717,14 @@ def Vulkan(tab2):
                             gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
+                        elif "LLVM" in line:
+                            print("true")
+                            image_renderer.clear()
+                            gpu_image = fetchImageFromUrl(Const.LLVM_LOGO_SVG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+
+
             Instance()
         DevicesGrid.attach(image_renderer,50,1,1,1)
     #    os.system("rm /tmp/gpu-viewer/VKD*.txt")
@@ -1211,23 +1219,3 @@ def createSearchEntry(ExtensionTab_store_filter):
     Extensionentry.connect("search-changed", refresh_filter, ExtensionTab_store_filter)
     return Extensionentry
 
-def setGpuIcon(self,gpu_image,image_renderer):
-
-    with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
-
-        self.gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT, True)
-        self.image_renderer = Gtk.Image.new_from_pixbuf(gpu_image)
-        for line in file1:
-            if "Intel" in line:
-                self.gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.INTEL_LOGO_PNG, 70, 70)
-                self.image_renderer.set_from_pixbuf(gpu_image)
-                break
-            elif "NVIDIA" in line or "GeForce" in line :
-                image_renderer.clear()
-                gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.NVIDIA_LOGO_PNG,50,50)
-                image_renderer.set_from_pixbuf(gpu_image)
-                break
-            elif "AMD" in line or "ATI" in line:
-                gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                image_renderer.set_from_pixbuf(gpu_image)
-                break

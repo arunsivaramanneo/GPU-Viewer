@@ -20,6 +20,8 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
+LLVM_LOGO_SVG = "../Images/LLVM_Logo.svg"
+
 INTEL_BANNER = "../Images/Intel_Banner.png"
 
 NVIDIA_BANNER = "../Images/nvidia-banner.jpg"
