@@ -283,17 +283,17 @@ def Vulkan(tab2):
                 iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
                 if int(valueLinearCount[i]) != 0 or int(valueOptimalCount[i]) != 0 or int(valueBufferCount[i]) != 0:
                     iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt " %(valueFormats[n].strip('\n')))
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt " %(valueFormats[n].strip('\n')))
                     with open("/tmp/gpu-viewer/VKLinear.txt") as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                     with open("/tmp/gpu-viewer/VKOptimal.txt") as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/%s/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
+                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                     with open("/tmp/gpu-viewer/VKBuffer.txt") as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
