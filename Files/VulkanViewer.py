@@ -718,7 +718,6 @@ def Vulkan(tab2):
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
                         elif "LLVM" in line:
-                            print("true")
                             image_renderer.clear()
                             gpu_image = fetchImageFromUrl(Const.LLVM_LOGO_SVG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
@@ -738,7 +737,7 @@ def Vulkan(tab2):
             os.system("cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/./' > /tmp/gpu-viewer/filterProperties.txt")
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/%s/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
+                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/^%s$/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
 
         os.system(
             "cat /tmp/gpu-viewer/filterProperties.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/gpu-viewer/filterPropertiesLHS.txt")

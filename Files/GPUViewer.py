@@ -19,7 +19,7 @@ if path.exists("/tmp/gpu-viewer") == True:
     pass
 else:
     def main():
-        T1 = time.time()
+    #    T1 = time.time()
 
         os.system("mkdir /tmp/gpu-viewer")
         gtk = MyGtk("GPU-VIEWER")
@@ -47,7 +47,7 @@ else:
         t3.start()
         t3.join()
 
-        print(time.time()-T1)
+    #    print(time.time()-T1)
         gtk.connect("delete-event", quit)
         gtk.show_all()
         gtk.mainLoop()
