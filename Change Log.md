@@ -1,3 +1,24 @@
+# Release 1.26
+
+
+1. Minor Fixes to Formats section in Vulkan
+2. Added LLVM logo for the new Vallium/LLVM Vulkan support for CPU
+3. Replace Paypal donation to Librepay donation in about tab
+4. Minor fix to Memory Heaps section in Vulkan
+5. Added Protected Bit Check on Queues section in Vulkan Tab
+6. Updated AMD Logo
+7. Minor UI Fixes
+8. Tested with Vulkan 1.2.151
+
+![Screenshot from 2020-08-23 08-13-37](https://user-images.githubusercontent.com/30646692/90973292-aa752080-e518-11ea-940f-e3a6f1c7ad0b.png)
+
+
+# Release 1.25
+
+1. AMD device should display Protected Bit,  Device Coherent Bit_AMD, Device Uncached Bit_AMD
+
+![Screenshot from 2020-07-26 01-05-18](https://user-images.githubusercontent.com/30646692/88468475-50167f00-cedc-11ea-844b-1599b62c593c.png)
+
 # Release 1.24
 
 1. Updated MemoryTypes and Memory Heaps as per the latest Vulkan version 1.2.147
