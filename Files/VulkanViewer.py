@@ -605,12 +605,8 @@ def Vulkan(tab2):
 
     def Surface(GPU):
 
-        if GPU == 0:
-            os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
-        if GPU > 0:
-            os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU-1))
-        #        "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces.*/{flag=1;next}/Device Properties and Extensions.*/{flag=0}flag' | awk '/GPU id       : %d.*/{flag=1;next}/VkSurfaceCapabilities.*/{flag=0}flag' | awk '{gsub(/count/,'True');print}' | awk '/./'  >> /tmp/gpu-viewer/VKDsurface.txt" % GPU)
-
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
+        
 
         os.system(
                 "cat /tmp/gpu-viewer/VKDsurfaceType1.txt | grep -o [:,=].* | awk '{gsub(/=/,'True');print}' | grep -o ' .*' > /tmp/gpu-viewer/VKDsurface2.txt")
@@ -629,15 +625,25 @@ def Vulkan(tab2):
             j=0
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
-                if '---' in line:
-                    continue
-                if "types" in line or "Formats" in line or "Modes" in line or "VkSurface" in line:
-                    background_color = Const.BGCOLOR3
-                if '=' in line :
-                    iter1 = SurfaceTab_Store.append(None,[valueLHS[i].strip('\n'),(valueRHS[j].strip('\n')).replace('count ',''),background_color])
+                if "=" in line:
+                    SurfaceRHS = valueRHS[j].strip('\n')
                     j = j+1
                 else:
-                    SurfaceTab_Store.append(None,[valueLHS[i].strip('\n')," ",background_color])
+                    SurfaceRHS = " "
+                if '---' in line:
+                    continue
+                if "types" in line or "Formats" in line or "Modes" in line or "VkSurface" in line :
+                    background_color = Const.BGCOLOR3
+                    iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                    continue
+                if ':' in line and ("types" not in line or "Formats" not in line or "Modes" not in line or "VkSurface" not in line) :
+                    iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                    continue
+                if "VK_KHR" in line or "PRESENT_MODE" in line or "min" in line or "max" in line or "Transform" in line or "Protected" in line:
+                    SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                    continue
+                else:
+                    SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
 
             TreeSurface.expand_all()
 

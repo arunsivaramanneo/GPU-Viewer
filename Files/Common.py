@@ -46,7 +46,7 @@ class MyGtk(Gtk.Window):
 
 def getRamInGb(ram):
     ram1 = ram.split()
-    return str("%.3f" %(float(ram1[0])/(1024*1024))) + " GB"
+    return str("%.2f" %(float(ram1[0])/(1024*1024))) + " GB"
 
 # Setting the Minimum Screen Size
 def setScreenSize(self, widthRatio, heightRatio):
