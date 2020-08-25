@@ -1,3 +1,9 @@
+# Release 1.27
+
+1. Fixed Surface Tab in Vulkan to show correctly 
+
+
+
 # Release 1.26
 
 
