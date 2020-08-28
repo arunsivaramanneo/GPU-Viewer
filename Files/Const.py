@@ -8,7 +8,7 @@ OPEN_GL_PNG = "../Images/OpenGL.png"
 
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
-OPEN_CL_PNG = "../Images/opencl_logo.png"
+OPEN_CL_PNG = "../Images/OpenCL.png"
 
 EGL_PNG  = "../Images/Egl_logo.png"
 
