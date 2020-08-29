@@ -840,22 +840,35 @@ def Vulkan(tab2):
             feature = " "
         elif "Show All Features" in feature:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt")
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt")
 
         else:
             os.system(
                 "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' > /tmp/gpu-viewer/VKDFeatures.txt")
+            "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq > /tmp/gpu-viewer/VKDFeatures.txt")
 
+        value = []
+        fgColor = []
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store_filter)
-        fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= true")
+        #fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= true")
+        FeaturesLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDFeatures.txt",)
 
-        with open("/tmp/gpu-viewer/VKDFeatures.txt", "r") as file1:
-            for i, line in enumerate(file1):
-                text = (line.strip('\t')).replace(": count",'')
+        for i,LHS in enumerate(FeaturesLHS):
+            with open("/tmp/gpu-viewer/VKDFeatures1.txt", "r") as file1:
+                text = LHS.strip('\n')
+                for line in file1:
+                    if text in line:
+                        if "= true" in line:
+                            value.append('true')
+                            fgColor.append(Const.COLOR1)
+                            break
+                        else :
+                            value.append('false')
+                            fgColor.append(Const.COLOR2)
+                            break                        
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
 
