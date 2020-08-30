@@ -1,8 +1,9 @@
 # Release 1.27
 
 1. Fixed Surface Tab in Vulkan to show correctly 
-
-
+2. Fixed Features Tab not to display duplicate records
+3. Added new Vulkan, OpenGL, OpenCL Logo's
+4. 
 
 # Release 1.26
 
