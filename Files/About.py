@@ -15,8 +15,8 @@ def about(tab3):
     tab3.add(grid)
     frame1 = Gtk.Frame(label="")
     grid.attach(frame1, 0, 1, 12, 1)
-    grid.set_row_spacing(20)
-    grid.set_column_spacing(20)
+#    grid.set_row_spacing(20)
+#    grid.set_column_spacing(20)
     screen = Gdk.Screen.get_default()
     About_list = Gtk.ListStore(str, str)
 
