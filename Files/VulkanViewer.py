@@ -855,7 +855,7 @@ def Vulkan(tab2):
         TreeFeatures.set_model(FeaturesTab_Store_filter)
         #fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= true")
         FeaturesLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDFeatures.txt",)
-
+        count = 0
         for i,LHS in enumerate(FeaturesLHS):
             with open("/tmp/gpu-viewer/VKDFeatures1.txt", "r") as file1:
                 text = LHS.strip('\n')
@@ -863,6 +863,7 @@ def Vulkan(tab2):
                     if text in line:
                         if "= true" in line:
                             value.append('true')
+                            count = count + 1
                             fgColor.append(Const.COLOR1)
                             break
                         else :
@@ -871,6 +872,9 @@ def Vulkan(tab2):
                             break                        
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+
+        labe13 = "Features (%d)" %(count)
+        notebook.set_tab_label(FeatureTab,Gtk.Label(labe13))
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -894,6 +898,32 @@ def Vulkan(tab2):
 
     DeviceScrollbar = createScrollbar(TreeDevice)
     DeviceGrid.add(DeviceScrollbar)
+
+
+
+
+    # ------------ Creating the Limits Tab -------------------------------------------
+    LimitsTab = Gtk.Box(spacing=10)
+    LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
+    LimitsGrid.set_row_spacing(3)
+
+    LimitsTab_Store = Gtk.TreeStore(str, str, str)
+    LimitsTab_Store_filter = LimitsTab_Store.filter_new()
+    TreeLimits = Gtk.TreeView(LimitsTab_Store_filter, expand=True)
+    TreeLimits.set_property("enable-tree-lines", True)
+    TreeLimits.set_enable_search(True)
+
+    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH, 0.0)
+
+    limitsFrameSearch = Gtk.Frame()
+    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
+    limitsFrameSearch.add(limitsSearchEntry)
+    LimitsGrid.add(limitsFrameSearch)
+    LimitsScrollbar = createScrollbar(TreeLimits)
+    LimitsGrid.attach_next_to(LimitsScrollbar, limitsFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
+
+    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
+
 
     propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
@@ -921,7 +951,7 @@ def Vulkan(tab2):
 
     propertiesScrollbar = createScrollbar(TreeSparse)
     propertiesGrid.attach_next_to(propertiesScrollbar, propertiesCombo, Gtk.PositionType.BOTTOM, 1, 1)
-
+    
     # -----------------Creating the Features Tab-----------------
 
     FeatureTab = Gtk.Box(spacing=10)
@@ -957,28 +987,6 @@ def Vulkan(tab2):
     FeaturesGrid.attach_next_to(FeatureScrollbar, featureFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
 
     FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
-
-    # ------------ Creating the Limits Tab -------------------------------------------
-    LimitsTab = Gtk.Box(spacing=10)
-    LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
-    LimitsGrid.set_row_spacing(3)
-
-    LimitsTab_Store = Gtk.TreeStore(str, str, str)
-    LimitsTab_Store_filter = LimitsTab_Store.filter_new()
-    TreeLimits = Gtk.TreeView(LimitsTab_Store_filter, expand=True)
-    TreeLimits.set_property("enable-tree-lines", True)
-    TreeLimits.set_enable_search(True)
-
-    setColumns(TreeLimits, LimitsTitle, Const.MWIDTH, 0.0)
-
-    limitsFrameSearch = Gtk.Frame()
-    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
-    limitsFrameSearch.add(limitsSearchEntry)
-    LimitsGrid.add(limitsFrameSearch)
-    LimitsScrollbar = createScrollbar(TreeLimits)
-    LimitsGrid.attach_next_to(LimitsScrollbar, limitsFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
-
-    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
 
     # ------------ Creating the Extensions Tab-------------------------------------------
 
