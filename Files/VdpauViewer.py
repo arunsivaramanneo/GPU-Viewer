@@ -9,21 +9,46 @@ from Common import copyContentsFromFile, setBackgroundColor, setColumns, createS
     colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, getFormatValue
 
 
-decoderTitle = ["Name","Level","MACROBLOCKS","Width","height"]
+decoderTitle = ["Decoder name","Level","Macroblocks","Width","height"]
+videoMixerParameterTitle = ["Parameter name","supported","Min","Max"]
+videoMixerAttributeTitle = ["Attribute name","supported","Min","Max"]
+videoMixerFeatureTitle = ["Feature name","supported"]
+
 
 def vdpauinfo(tab2):
 
 	def decoderCapabilities():
 
-		os.system("vdpauinfo | awk '/Decoder capabilities:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./'> /tmp/gpu-viewer/vdpauinfo.txt")
-		with open("/tmp/gpu-viewer/vdpauinfo.txt","r") as file1:
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Decoder capabilities:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./'> /tmp/gpu-viewer/vdpauDecoder.txt")
+		with open("/tmp/gpu-viewer/vdpauDecoder.txt","r") as file1:
 			for i,line in  enumerate(file1):
-				print(line.split())
 				if "not" in line:
 					decoderStore.append([line.split()[0].strip('\n'),"not supported","not supported","not supported","not supported",setBackgroundColor(i)])
 				else:
 					decoderStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),line.split()[3].strip('\n'),line.split()[4].strip('\n'),setBackgroundColor(i)])
 	
+	def vdpauVideoMixerParameter():
+		
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video mixer:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/parameter name/{flag=1;next}/attribute name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerParameter.txt")
+		with open("/tmp/gpu-viewer/vdpauVideoMixerParameter.txt","r") as file2:
+			for i,line in enumerate(file2):
+				if line.split()[1].strip('\n') == 'y':
+					text = "True"
+				else:
+					text = "False"
+				videoMixerParameterStore.append([line.split()[0].strip('\n'),text,"","",setBackgroundColor(i)])
+
+	def vdpauVideoMixerAttribute():
+		
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video mixer:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/attribute name/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerAttribute.txt")
+		with open("/tmp/gpu-viewer/vdpauVideoMixerAttribute.txt","r") as file2:
+			for i,line in enumerate(file2):
+				if line.split()[1].strip('\n') == 'y':
+					text = "True"
+				else:
+					text = "False"
+				videoMixerAttributeStore.append([line.split()[0].strip('\n'),text,"","",setBackgroundColor(i)])
+
 	grid = Gtk.Grid()
 	tab2.add(grid)
 	DevicesFrame = Gtk.Frame()
@@ -63,11 +88,37 @@ def vdpauinfo(tab2):
 	videoMixerTab = Gtk.Box(spacing=20)
 	videoMixerGrid = createSubTab(videoMixerTab,notebook,"Video Mixer")
 
-	videoMixerStore = Gtk.TreeStore(str,str,str,str)
+	videoMixerFeatureStore = Gtk.ListStore(str,str,str)
+	treeVideoMixerFeature = Gtk.TreeView(videoMixerFeatureStore,expand=True)
 
-	treeVideoMixer = Gtk.TreeView(videoMixerStore,expand=True)
+	setColumns(treeVideoMixerFeature, videoMixerFeatureTitle, 300 ,0.0)
 
-	videoMixerScrollbar = createScrollbar(treeVideoMixer)
-	videoMixerGrid.add(videoMixerScrollbar)
+	videoMixerFeatureScrollbar = createScrollbar(treeVideoMixerFeature)
+	videoMixerGrid.add(videoMixerFeatureScrollbar)
+
+	videoMixerParameterStore = Gtk.ListStore(str,str,str,str,str)
+
+	treeVideoMixerParameter = Gtk.TreeView(videoMixerParameterStore,expand=True)
+
+	setColumns(treeVideoMixerParameter,videoMixerParameterTitle, 300, 0.0)
+
+	videoMixerParameterScrollbar = createScrollbar(treeVideoMixerParameter)
+	videoMixerGrid.attach_next_to(videoMixerParameterScrollbar,videoMixerFeatureScrollbar,Gtk.PositionType.BOTTOM, 1, 1)
+
+	videoMixerAttributeStore = Gtk.ListStore(str,str,str,str,str)
+	treeVideoMixerAttribute = Gtk.TreeView(videoMixerAttributeStore,expand=True)
+
+	setColumns(treeVideoMixerAttribute, videoMixerAttributeTitle, 300, 0.0)
+
+	videoMixerAttributeScrollbar = createScrollbar(treeVideoMixerAttribute)
+	videoMixerGrid.attach_next_to(videoMixerAttributeScrollbar,videoMixerParameterScrollbar,Gtk.PositionType.BOTTOM, 1, 1)
+
+
+
+
+
+
 
 	decoderCapabilities()
+	vdpauVideoMixerParameter()
+	vdpauVideoMixerAttribute()
