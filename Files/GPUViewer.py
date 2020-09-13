@@ -8,6 +8,7 @@ from OpenGLViewer import OpenGL
 from VulkanViewer import Vulkan
 from About import about
 from OpenCL import openCL
+from VdpauViewer import vdpauinfo
 import threading
 import gi
 import time
@@ -42,6 +43,10 @@ else:
             t4.start()
             t4.join()
 
+        if isVdpauinfoSupported():
+            vdpauTab = gtk.createTab(Const.VDPAU_CL_PNG, 130, Const. ICON_HEIGHT, False)
+            vdpauinfo(vdpauTab)
+
         aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
         t3 = threading.Thread(target=about, args=(aboutTab,))
         t3.start()
@@ -71,5 +76,10 @@ else:
         os.system("rm /tmp/gpu-viewer -r")
         instance.quit()
 
+    def isVdpauinfoSupported():
+        os.system("vdpauinfo > /tmp/gpu-viewer/vdpauinfo.txt")
+        with open("/tmp/gpu-viewer/vdpauinfo.txt", "r") as file1:
+            count = len(file1.readlines())
+        return count > 20
 
     main()  # Program starts here

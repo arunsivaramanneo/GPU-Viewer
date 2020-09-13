@@ -12,6 +12,8 @@ OPEN_CL_PNG = "../Images/OpenCL.png"
 
 EGL_PNG  = "../Images/Egl_logo.png"
 
+VDPAU_CL_PNG = "../Images/vdpauinfo.png"
+
 NVIDIA_LOGO_PNG = "../Images/nvidia-logo.png"
 
 GTX_LOGO_PNG = "../Images/GeForce.png"
