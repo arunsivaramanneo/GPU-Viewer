@@ -10,8 +10,8 @@ from Common import copyContentsFromFile, setBackgroundColor, setColumns, createS
 
 
 decoderTitle = ["Decoder name","Level","Macroblocks","Width","Height"]
-videoMixerParameterTitle = ["Parameter name","Supported","Min","Max"]
-videoMixerAttributeTitle = ["Attribute name","Supported","Min","Max"]
+videoMixerParameterTitle = ["Parameter name","Supported"]
+videoMixerAttributeTitle = ["Attribute name","Supported"]
 videoMixerFeatureTitle = ["Feature name","Supported"]
 surfaceVideoTitle = ["Video Surface","Width","Height"]
 surfaceOutputTitle = ["Output Surface","Width","Height"]
@@ -30,6 +30,12 @@ def vdpauinfo(tab2):
 				else:
 					decoderStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),line.split()[3].strip('\n'),line.split()[4].strip('\n'),setBackgroundColor(i)])
 	
+	def videoSurfaceLimits():
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video surface:/{flag=1;next}/Decoder capabilities:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt")
+		with open("/tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt","r") as file1:
+			for i,line in enumerate(file1):
+				surfaceVideoStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
+
 	def surfaceOutputLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Output surface:/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt")
 		with open("/tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt","r") as file:
@@ -42,18 +48,29 @@ def vdpauinfo(tab2):
 			for i,line in enumerate(file):
 				surfaceBitmapStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
 
-
+	def VideoMixerFeature():
+		
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/feature name/{flag=1;next}/parameter name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerFeature.txt")
+		with open("/tmp/gpu-viewer/vdpauVideoMixerFeature.txt","r") as file2:
+			for i,line in enumerate(file2):
+				if '-'in line:
+					text = "false"
+					fgcolor = Const.COLOR2
+				else:
+					text = "true"
+					fgcolor = Const.COLOR1
+				videoMixerFeatureStore.append([line.split()[0].strip('\n'),text,setBackgroundColor(i)])
 
 	def VideoMixerParameter():
 		
-		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video mixer:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/parameter name/{flag=1;next}/attribute name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerParameter.txt")
+		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/parameter name/{flag=1;next}/attribute name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerParameter.txt")
 		with open("/tmp/gpu-viewer/vdpauVideoMixerParameter.txt","r") as file2:
 			for i,line in enumerate(file2):
 				if line.split()[1].strip('\n') == 'y':
-					text = "True"
+					text = "true"
 				else:
-					text = "False"
-				videoMixerParameterStore.append([line.split()[0].strip('\n'),text,"","",setBackgroundColor(i)])
+					text = "false"
+				videoMixerParameterStore.append([line.split()[0].strip('\n'),text,setBackgroundColor(i)])
 
 	def VideoMixerAttribute():
 		
@@ -61,10 +78,10 @@ def vdpauinfo(tab2):
 		with open("/tmp/gpu-viewer/vdpauVideoMixerAttribute.txt","r") as file2:
 			for i,line in enumerate(file2):
 				if line.split()[1].strip('\n') == 'y':
-					text = "True"
+					text = "true"
 				else:
-					text = "False"
-				videoMixerAttributeStore.append([line.split()[0].strip('\n'),text,"","",setBackgroundColor(i)])
+					text = "false"
+				videoMixerAttributeStore.append([line.split()[0].strip('\n'),text,setBackgroundColor(i)])
 
 	grid = Gtk.Grid()
 	tab2.add(grid)
@@ -130,7 +147,7 @@ def vdpauinfo(tab2):
 	videoMixerFeatureScrollbar = createScrollbar(treeVideoMixerFeature)
 	videoMixerGrid.add(videoMixerFeatureScrollbar)
 
-	videoMixerParameterStore = Gtk.ListStore(str,str,str,str,str)
+	videoMixerParameterStore = Gtk.ListStore(str,str,str)
 
 	treeVideoMixerParameter = Gtk.TreeView(videoMixerParameterStore,expand=True)
 
@@ -139,7 +156,7 @@ def vdpauinfo(tab2):
 	videoMixerParameterScrollbar = createScrollbar(treeVideoMixerParameter)
 	videoMixerGrid.attach_next_to(videoMixerParameterScrollbar,videoMixerFeatureScrollbar,Gtk.PositionType.BOTTOM, 1, 1)
 
-	videoMixerAttributeStore = Gtk.ListStore(str,str,str,str,str)
+	videoMixerAttributeStore = Gtk.ListStore(str,str,str)
 	treeVideoMixerAttribute = Gtk.TreeView(videoMixerAttributeStore,expand=True)
 
 	setColumns(treeVideoMixerAttribute, videoMixerAttributeTitle, 300, 0.0)
@@ -154,7 +171,9 @@ def vdpauinfo(tab2):
 
 
 	decoderCapabilities()
+	videoSurfaceLimits()
 	surfaceOutputLimits()
 	surfaceBitmapLimits()
+	VideoMixerFeature()
 	VideoMixerParameter()
 	VideoMixerAttribute()
