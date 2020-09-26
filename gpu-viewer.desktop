@@ -1,7 +1,7 @@
 #!/usr/bin/env xdg-open
 [Desktop Entry]
 Encoding=UTF-8
-version=1.15
+version=1.30
 Name=GPU-Viewer
 Comment=A front-end to glxinfo, vulkaninfo, clinfo and es2_info
 Exec=/usr/share/gpu-viewer/GPUViewer
