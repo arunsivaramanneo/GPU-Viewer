@@ -13,8 +13,8 @@ decoderTitle = ["Decoder name","Level","Macroblocks","Width","Height"]
 videoMixerParameterTitle = ["Parameter name","Supported","Min","Max"]
 videoMixerAttributeTitle = ["Attribute name","Supported","Min","Max"]
 videoMixerFeatureTitle = ["Feature name","Supported"]
-surfaceVideoTitle = ["Video Surface","Width","Height","Types"]
-surfaceOutputTitle = ["Output Surface","Width","Height","Native","Types"]
+surfaceVideoTitle = ["Video Surface","Width","Height"]
+surfaceOutputTitle = ["Output Surface","Width","Height"]
 SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
 
 
@@ -34,7 +34,7 @@ def vdpauinfo(tab2):
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Output surface:/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt")
 		with open("/tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt","r") as file:
 			for i,line in enumerate(file):
-				surfaceOutputStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),line.split()[3].strip('\n'),line.split()[4].strip('\n')+" "+line.split()[5].strip('\n')+" "+line.split()[6].strip('\n')+" "+line.split()[7].strip('\n')+" "+line.split()[8].strip('\n')+" "+line.split()[9].strip('\n')+" "+line.split()[10].strip('\n')+" "+line.split()[11].strip('\n')+" "+line.split()[12].strip('\n')+" "+line.split()[13].strip('\n'),setBackgroundColor(i)])
+				surfaceOutputStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
 
 	def surfaceBitmapLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Bitmap surface:/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceBitmapLimits.txt")
@@ -94,7 +94,7 @@ def vdpauinfo(tab2):
 	surfaceTab = Gtk.Box(spacing=20)
 	surfaceGrid = createSubTab(surfaceTab,notebook,"Surface Limits")
 
-	surfaceVideoStore = Gtk.ListStore(str,str,str,str,str)
+	surfaceVideoStore = Gtk.ListStore(str,str,str,str)
 	treeSurfaceVideoLimits = Gtk.TreeView(surfaceVideoStore,expand=True)
 
 	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,200,0.0)
@@ -102,7 +102,7 @@ def vdpauinfo(tab2):
 	surfaceVideoScrollbar = createScrollbar(treeSurfaceVideoLimits)
 	surfaceGrid.add(surfaceVideoScrollbar)
 
-	surfaceOutputStore = Gtk.ListStore(str,str,str,str,str,str)
+	surfaceOutputStore = Gtk.ListStore(str,str,str,str)
 	treeSurfaceOutputLimits = Gtk.TreeView(surfaceOutputStore,expand=True)
 
 	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,200,0.0)
