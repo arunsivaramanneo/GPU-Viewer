@@ -715,8 +715,16 @@ def Vulkan(tab2):
                             gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
-                        elif "NVIDIA" in line or "GeForce" in line:
-                            gpu_image = fetchImageFromUrl(Const.GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                        elif "GTX" in line and "GeForce" in line:
+                            gpu_image = fetchImageFromUrl(Const.NVIDIA_GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+                        elif "RTX" in line and "GeForce" in line:
+                            gpu_image = fetchImageFromUrl(Const.NVIDIA_RTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                            image_renderer.set_from_pixbuf(gpu_image)
+                            break
+                        elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
+                            gpu_image = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                             image_renderer.set_from_pixbuf(gpu_image)
                             break
                         elif "AMD" in line or "ATI" in line:

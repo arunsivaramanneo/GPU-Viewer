@@ -221,8 +221,16 @@ def OpenGL(tab1):
                 vendorImg = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
-            elif "NVIDIA" in line:
-                vendorImg = fetchImageFromUrl(Const.GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+            elif "GTX" in line and "GeForce" in line:
+                vendorImg = fetchImageFromUrl(Const.NVIDIA_GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
+                break
+            elif "RTX" in line and "GeForce" in line:
+                vendorImg = fetchImageFromUrl(Const.NVIDIA_RTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
+                break
+            elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
+                vendorImg = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
                 break
             elif "AMD" in line or "ATI" in line:

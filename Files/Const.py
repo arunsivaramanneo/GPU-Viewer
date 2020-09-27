@@ -14,9 +14,11 @@ EGL_PNG  = "../Images/Egl_logo.png"
 
 VDPAU_CL_PNG = "../Images/vdpauinfo.png"
 
-NVIDIA_LOGO_PNG = "../Images/nvidia-logo.png"
+NVIDIA_GTX_LOGO_PNG = "../Images/nvidia-logo.png"
 
-GTX_LOGO_PNG = "../Images/GeForce.png"
+NVIDIA_RTX_LOGO_PNG = "../Images/nvidia-RTX-logo.png"
+
+GEFORCE_PNG = "../Images/GeForce.png"
 
 INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
