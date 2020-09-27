@@ -13,8 +13,8 @@ decoderTitle = ["Decoder name","Level","Macroblocks","Width","Height"]
 videoMixerParameterTitle = ["Parameter name","Supported"]
 videoMixerAttributeTitle = ["Attribute name","Supported"]
 videoMixerFeatureTitle = ["Feature name","Supported"]
-surfaceVideoTitle = ["Video Surface","Width","Height"]
-surfaceOutputTitle = ["Output Surface","Width","Height"]
+surfaceVideoTitle = ["Video Surface","Width","Height","Types"]
+surfaceOutputTitle = ["Output Surface","Width","Height","Types"]
 SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
 
 
@@ -34,13 +34,13 @@ def vdpauinfo(tab2):
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video surface:/{flag=1;next}/Decoder capabilities:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt")
 		with open("/tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt","r") as file1:
 			for i,line in enumerate(file1):
-				surfaceVideoStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
+				surfaceVideoStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),(' '.join(line.split()[3:]).strip('[]')),setBackgroundColor(i)])
 
 	def surfaceOutputLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Output surface:/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt")
 		with open("/tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt","r") as file:
 			for i,line in enumerate(file):
-				surfaceOutputStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
+				surfaceOutputStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2],(' '.join(line.split()[4:]).strip('[]')),setBackgroundColor(i)])
 
 	def surfaceBitmapLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Bitmap surface:/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceBitmapLimits.txt")
@@ -53,13 +53,16 @@ def vdpauinfo(tab2):
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/feature name/{flag=1;next}/parameter name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerFeature.txt")
 		with open("/tmp/gpu-viewer/vdpauVideoMixerFeature.txt","r") as file2:
 			for i,line in enumerate(file2):
-				if '-'in line:
-					text = "false"
+				if 'y'in line:
+					text = "true"
 					fgcolor = Const.COLOR2
 				else:
-					text = "true"
+					text = "false"
 					fgcolor = Const.COLOR1
-				videoMixerFeatureStore.append([line.split()[0].strip('\n'),text,setBackgroundColor(i)])
+				if "HIGH" in line:
+					videoMixerFeatureStore.append([(' '.join(line.split()[0:5])).strip('[]'),text,setBackgroundColor(i)])
+				else:
+					videoMixerFeatureStore.append([line.split()[0].strip('\n'),text,setBackgroundColor(i)])
 
 	def VideoMixerParameter():
 		
@@ -101,7 +104,7 @@ def vdpauinfo(tab2):
 	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
 	treeDecoder = Gtk.TreeView(decoderStore, expand=True)
 
-	setColumns(treeDecoder, decoderTitle, 300, 0.0)
+	setColumns(treeDecoder, decoderTitle, 350, 0.0)
 
 	decoderScrollbar = createScrollbar(treeDecoder)
 	decoderGrid.add(decoderScrollbar)
@@ -111,18 +114,18 @@ def vdpauinfo(tab2):
 	surfaceTab = Gtk.Box(spacing=20)
 	surfaceGrid = createSubTab(surfaceTab,notebook,"Surface Limits")
 
-	surfaceVideoStore = Gtk.ListStore(str,str,str,str)
+	surfaceVideoStore = Gtk.ListStore(str,str,str,str,str)
 	treeSurfaceVideoLimits = Gtk.TreeView(surfaceVideoStore,expand=True)
 
-	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,200,0.0)
+	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,350,0.0)
 
 	surfaceVideoScrollbar = createScrollbar(treeSurfaceVideoLimits)
 	surfaceGrid.add(surfaceVideoScrollbar)
 
-	surfaceOutputStore = Gtk.ListStore(str,str,str,str)
+	surfaceOutputStore = Gtk.ListStore(str,str,str,str,str)
 	treeSurfaceOutputLimits = Gtk.TreeView(surfaceOutputStore,expand=True)
 
-	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,200,0.0)
+	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,350,0.0)
 
 	surfaceOutputScrollbar = createScrollbar(treeSurfaceOutputLimits)
 	surfaceGrid.attach_next_to(surfaceOutputScrollbar,surfaceVideoScrollbar,Gtk.PositionType.BOTTOM,1,1)
@@ -130,7 +133,7 @@ def vdpauinfo(tab2):
 	surfaceBitmapStore = Gtk.ListStore(str,str,str,str)
 	treeSurfaceBitmapLimits = Gtk.TreeView(surfaceBitmapStore,expand=True)
 
-	setColumns(treeSurfaceBitmapLimits,SurfaceBitmapTitle,200,0.0)
+	setColumns(treeSurfaceBitmapLimits,SurfaceBitmapTitle,350,0.0)
 
 	surfaceBitmapScrollbar = createScrollbar(treeSurfaceBitmapLimits)
 	surfaceGrid.attach_next_to(surfaceBitmapScrollbar,surfaceOutputScrollbar,Gtk.PositionType.BOTTOM,1,1)
@@ -142,7 +145,7 @@ def vdpauinfo(tab2):
 	videoMixerFeatureStore = Gtk.ListStore(str,str,str)
 	treeVideoMixerFeature = Gtk.TreeView(videoMixerFeatureStore,expand=True)
 
-	setColumns(treeVideoMixerFeature, videoMixerFeatureTitle, 300 ,0.0)
+	setColumns(treeVideoMixerFeature, videoMixerFeatureTitle, 350 ,0.0)
 
 	videoMixerFeatureScrollbar = createScrollbar(treeVideoMixerFeature)
 	videoMixerGrid.add(videoMixerFeatureScrollbar)
@@ -151,7 +154,7 @@ def vdpauinfo(tab2):
 
 	treeVideoMixerParameter = Gtk.TreeView(videoMixerParameterStore,expand=True)
 
-	setColumns(treeVideoMixerParameter,videoMixerParameterTitle, 300, 0.0)
+	setColumns(treeVideoMixerParameter,videoMixerParameterTitle, 350, 0.0)
 
 	videoMixerParameterScrollbar = createScrollbar(treeVideoMixerParameter)
 	videoMixerGrid.attach_next_to(videoMixerParameterScrollbar,videoMixerFeatureScrollbar,Gtk.PositionType.BOTTOM, 1, 1)
@@ -159,7 +162,7 @@ def vdpauinfo(tab2):
 	videoMixerAttributeStore = Gtk.ListStore(str,str,str)
 	treeVideoMixerAttribute = Gtk.TreeView(videoMixerAttributeStore,expand=True)
 
-	setColumns(treeVideoMixerAttribute, videoMixerAttributeTitle, 300, 0.0)
+	setColumns(treeVideoMixerAttribute, videoMixerAttributeTitle, 350, 0.0)
 
 	videoMixerAttributeScrollbar = createScrollbar(treeVideoMixerAttribute)
 	videoMixerGrid.attach_next_to(videoMixerAttributeScrollbar,videoMixerParameterScrollbar,Gtk.PositionType.BOTTOM, 1, 1)
