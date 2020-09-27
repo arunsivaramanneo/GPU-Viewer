@@ -5,13 +5,16 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![Vulkan](https://user-images.githubusercontent.com/30646692/91887020-1e829780-ec82-11ea-8e02-24f3f210313c.png)
+![Vulkan Tab](https://user-images.githubusercontent.com/30646692/94362977-cab77280-00b6-11eb-8f14-369408a56b43.png)
 
-![OpenGL](https://user-images.githubusercontent.com/30646692/91887027-20e4f180-ec82-11ea-908f-217910e52592.png)
+![OpenGL](https://user-images.githubusercontent.com/30646692/94362979-d014bd00-00b6-11eb-8d79-766bcbabb296.png)
 
-![OpenCL](https://user-images.githubusercontent.com/30646692/91887035-24787880-ec82-11ea-87d5-f0d51ffe021b.png)
+![OpenCL](https://user-images.githubusercontent.com/30646692/94362980-d2771700-00b6-11eb-8e0f-6ae4721153c3.png)
 
-![About](https://user-images.githubusercontent.com/30646692/91887056-2e01e080-ec82-11ea-8e1d-e929d899e987.png)
+![VDPAU](https://user-images.githubusercontent.com/30646692/94362998-eb7fc800-00b6-11eb-9542-ce7d0d2c78ee.png)
+
+![About](https://user-images.githubusercontent.com/30646692/94362983-d6a33480-00b6-11eb-9376-078136db4699.png)
+
 
 
 
