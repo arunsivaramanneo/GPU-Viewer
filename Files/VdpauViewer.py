@@ -104,7 +104,7 @@ def vdpauinfo(tab2):
 	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
 	treeDecoder = Gtk.TreeView(decoderStore, expand=True)
 
-	setColumns(treeDecoder, decoderTitle, 350, 0.0)
+	setColumns(treeDecoder, decoderTitle, 300, 0.0)
 
 	decoderScrollbar = createScrollbar(treeDecoder)
 	decoderGrid.add(decoderScrollbar)
@@ -117,7 +117,7 @@ def vdpauinfo(tab2):
 	surfaceVideoStore = Gtk.ListStore(str,str,str,str,str)
 	treeSurfaceVideoLimits = Gtk.TreeView(surfaceVideoStore,expand=True)
 
-	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,350,0.0)
+	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
 
 	surfaceVideoScrollbar = createScrollbar(treeSurfaceVideoLimits)
 	surfaceGrid.add(surfaceVideoScrollbar)
@@ -125,7 +125,7 @@ def vdpauinfo(tab2):
 	surfaceOutputStore = Gtk.ListStore(str,str,str,str,str)
 	treeSurfaceOutputLimits = Gtk.TreeView(surfaceOutputStore,expand=True)
 
-	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,350,0.0)
+	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,300,0.0)
 
 	surfaceOutputScrollbar = createScrollbar(treeSurfaceOutputLimits)
 	surfaceGrid.attach_next_to(surfaceOutputScrollbar,surfaceVideoScrollbar,Gtk.PositionType.BOTTOM,1,1)
@@ -133,7 +133,7 @@ def vdpauinfo(tab2):
 	surfaceBitmapStore = Gtk.ListStore(str,str,str,str)
 	treeSurfaceBitmapLimits = Gtk.TreeView(surfaceBitmapStore,expand=True)
 
-	setColumns(treeSurfaceBitmapLimits,SurfaceBitmapTitle,350,0.0)
+	setColumns(treeSurfaceBitmapLimits,SurfaceBitmapTitle,300,0.0)
 
 	surfaceBitmapScrollbar = createScrollbar(treeSurfaceBitmapLimits)
 	surfaceGrid.attach_next_to(surfaceBitmapScrollbar,surfaceOutputScrollbar,Gtk.PositionType.BOTTOM,1,1)

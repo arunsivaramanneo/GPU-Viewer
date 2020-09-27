@@ -39,7 +39,8 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 The installer should be able to take care of this dependency in Debian based distro and Solus.
 11. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
 12. For **EGL** information to be displayed in OpenGL tab, users should install mesa-utils-extra package in Debian based systems. On Arch, Please install latest version of mesa-demos
-13. Incase of issues launching the application please see the FAQ in Wiki section
+13. For **VDPAU** information to be displayed, please install vdpauinfo.
+14. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
@@ -58,10 +59,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. General - Bug fixes, Code Optimizations (High Priority)
 
-## PLANNED DEVELOPMENT
-
-1. OpenGL SPIR Support (Provided glxinfo gets updated to show SPIRV details or any other Command line)
-
+	
 ## IMPORTANT
 
 1. Requires Python3 to run this Application, works only on linux Operating system
@@ -74,11 +72,11 @@ The installer should be able to take care of this dependency in Debian based dis
 2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
 3. The Application does not render well under dark themes.
 
-## DEVELOPMENT ENVIRONMENT
+## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 20.10
-2. Desktop : Gnome 3.36
-3. Kernel : 5.4.x-xx
+1. Operating System : Ubuntu 20.10/Manjaro 20.1
+2. Desktop : Gnome 3.38/336
+3. Kernel : 5.8.x-xx
 4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition,Atom
 
 

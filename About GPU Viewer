@@ -4,9 +4,9 @@ Copyright (C) 2017-2020 Arun Sivaraman <arunsivaramanneo@gmail.com>
 GPU Viewer is a free Software: This program comes with absolutely no WARRANTY. You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
 Click on the GPLv3 Icon below to view the License
 
-This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo and es2_info. The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL amd EGL Information in ease over command-line.
+This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo,es2_info and vdpauinfo. The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and VDPAU Information in ease over command-line.
 
-Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming lanuages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo and es2_info output.
+Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming lanuages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo, es2_info and vdpauinfo output.
 
 The latest source code of this program can be found at
 https://github.com/arunsivaramanneo/GPU-Viewer
@@ -14,7 +14,7 @@ https://github.com/arunsivaramanneo/GPU-Viewer
 This program uses:
     -  python 3 or higher
     -  GTK3+ for the graphical user interface
-    -  glxinfo(OpenGL), vulkaninfo(Vulkan), clinfo(OpenCL) and es2_info(EGL) for fetching the report
+    -  glxinfo(OpenGL), vulkaninfo(Vulkan), clinfo(OpenCL), es2_info(EGL) and vdpauinfo(VDPAU) for fetching the report
 
 If you like this application and the work we are doing, please consider supporting us by clicking on the DONATE button below. This will help us in keeping this project alive and bringing new features to the application
 
