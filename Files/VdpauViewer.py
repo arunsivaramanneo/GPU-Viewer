@@ -24,17 +24,18 @@ def vdpauinfo(tab2):
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | grep -E 'API|string' > /tmp/gpu-viewer/vdpauInformation.txt")
 		with open("/tmp/gpu-viewer/vdpauInformation.txt","r") as file:
 			for i,line in enumerate(file):
-				vdpauinfoStore.append([' '.join(line.split()[0:2]).strip('[]'),' '.join(line.split()[2:]).strip('[]'),setBackgroundColor(i)])
+				vdpauinfoStore.append(None,[' '.join(line.split()[0:2]).strip('[]'),' '.join(line.split()[2:]).strip('[]'),setBackgroundColor(i)])
 
-		vdpauinfoStore.append(["Supported Codecs:",' ',Const.BGCOLOR3])
+		iter = vdpauinfoStore.append(None,["Supported Codecs:",' ',Const.BGCOLOR3])
 
 		with open("/tmp/gpu-viewer/vdpauDecoder.txt","r") as file1:
 			i = 1
 			for line in  file1:
 				if "not" not in line:
-					vdpauinfoStore.append(["",line.split()[0].strip('\n'),setBackgroundColor(i)])
+					vdpauinfoStore.append(iter,["",line.split()[0].strip('\n'),setBackgroundColor(i)])
 					i = i+1
 
+		treeVdpauInfo.expand_all()
 
 	def decoderCapabilities():
 
@@ -129,7 +130,7 @@ def vdpauinfo(tab2):
 	vdpauinfoTab = Gtk.Box(spacing=20)
 	vdpauinfoGrid = createSubTab(vdpauinfoTab,notebook, "VDPAU Information")
 	
-	vdpauinfoStore = Gtk.ListStore(str,str,str)
+	vdpauinfoStore = Gtk.TreeStore(str,str,str)
 	treeVdpauInfo = Gtk.TreeView(vdpauinfoStore,expand=True)
 
 	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
