@@ -11,7 +11,7 @@ from Common import copyContentsFromFile, setBackgroundColor, setColumns, createS
 
 decoderTitle = ["Decoder Name","Level","Macroblocks","Width","Height"]
 videoMixerFeatureTitle = ["Name","Supported"]
-surfaceVideoTitle = ["Video Surface","Width","Height","Types"]
+surfaceVideoTitle = ["Surface","Width","Height","Types"]
 surfaceOutputTitle = ["Output Surface","Width","Height","Types"]
 SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
 vdpauinfoTitle = ["VDPAU Information","Details"]
@@ -49,22 +49,26 @@ def vdpauinfo(tab2):
 	
 	def videoSurfaceLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Video surface:/{flag=1;next}/Decoder capabilities:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt")
+		iter = surfaceVideoStore.append(None,["Video Surface","","","",Const.BGCOLOR3])
 		with open("/tmp/gpu-viewer/vdpauVideoSurfaceLimits.txt","r") as file1:
 			for i,line in enumerate(file1):
-				surfaceVideoStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),(' '.join(line.split()[3:]).strip('[]')),setBackgroundColor(i)])
+				surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),(' '.join(line.split()[3:]).strip('[]')),setBackgroundColor(i)])
 
-	def surfaceOutputLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Output surface:/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt")
+		iter = surfaceVideoStore.append(None,["Output Surface","","","",Const.BGCOLOR3])
 		with open("/tmp/gpu-viewer/vdpauSurfaceOutputLimits.txt","r") as file:
 			for i,line in enumerate(file):
-				surfaceOutputStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2],(' '.join(line.split()[4:]).strip('[]')),setBackgroundColor(i)])
+				surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2],(' '.join(line.split()[4:]).strip('[]')),setBackgroundColor(i)])
 
-	def surfaceBitmapLimits():
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/Bitmap surface:/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauSurfaceBitmapLimits.txt")
+		iter = surfaceVideoStore.append(None,["Bitmap Surface","","","",Const.BGCOLOR3])
 		with open("/tmp/gpu-viewer/vdpauSurfaceBitmapLimits.txt","r") as file:
 			for i,line in enumerate(file):
-				surfaceBitmapStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),setBackgroundColor(i)])
+				surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),"",setBackgroundColor(i)])
 
+		treeSurfaceVideoLimits.expand_all()
+
+		
 	def VideoMixerFeature():
 		
 		os.system("cat /tmp/gpu-viewer/vdpauinfo.txt | awk '/feature name/{flag=1;next}/parameter name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/vdpauVideoMixerFeature.txt")
@@ -156,29 +160,16 @@ def vdpauinfo(tab2):
 	surfaceTab = Gtk.Box(spacing=20)
 	surfaceGrid = createSubTab(surfaceTab,notebook,"Surface Limits")
 
-	surfaceVideoStore = Gtk.ListStore(str,str,str,str,str)
+	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
 	treeSurfaceVideoLimits = Gtk.TreeView(surfaceVideoStore,expand=True)
+	treeSurfaceVideoLimits.set_property("enable-tree-lines",True)
 
 	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
 
 	surfaceVideoScrollbar = createScrollbar(treeSurfaceVideoLimits)
 	surfaceGrid.add(surfaceVideoScrollbar)
 
-	surfaceOutputStore = Gtk.ListStore(str,str,str,str,str)
-	treeSurfaceOutputLimits = Gtk.TreeView(surfaceOutputStore,expand=True)
-
-	setColumns(treeSurfaceOutputLimits,surfaceOutputTitle,300,0.0)
-
-	surfaceOutputScrollbar = createScrollbar(treeSurfaceOutputLimits)
-	surfaceGrid.attach_next_to(surfaceOutputScrollbar,surfaceVideoScrollbar,Gtk.PositionType.BOTTOM,1,1)
-
-	surfaceBitmapStore = Gtk.ListStore(str,str,str,str)
-	treeSurfaceBitmapLimits = Gtk.TreeView(surfaceBitmapStore,expand=True)
-
-	setColumns(treeSurfaceBitmapLimits,SurfaceBitmapTitle,300,0.0)
-
-	surfaceBitmapScrollbar = createScrollbar(treeSurfaceBitmapLimits)
-	surfaceGrid.attach_next_to(surfaceBitmapScrollbar,surfaceOutputScrollbar,Gtk.PositionType.BOTTOM,1,1)
+	
 # -------- Video Mixer ---------------------------------------
 
 	videoMixerTab = Gtk.Box(spacing=20)
@@ -213,7 +204,5 @@ def vdpauinfo(tab2):
 
 	decoderCapabilities()
 	videoSurfaceLimits()
-	surfaceOutputLimits()
-	surfaceBitmapLimits()
 	VideoMixerFeature()
 	vdpauInformation()
