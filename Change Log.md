@@ -1,3 +1,26 @@
+# Release 1.30
+
+## New Features Added
+
+1. Vdpauinfo frontend added. please install vdpauinfo to get the tab displayed (Vainfo not supported).
+
+![VDPAU1](https://user-images.githubusercontent.com/30646692/94997772-357c1880-05a5-11eb-8e09-7d6c78dc3bc1.png)
+
+![VDPAU2](https://user-images.githubusercontent.com/30646692/94997773-3614af00-05a5-11eb-9d44-dbe627257127.png)
+
+![VDPAU3](https://user-images.githubusercontent.com/30646692/94997774-36ad4580-05a5-11eb-91da-f5fed5e563f2.png)
+
+![VDPAU4](https://user-images.githubusercontent.com/30646692/94997775-36ad4580-05a5-11eb-9d01-15ec56b64b37.png)
+
+## Fixes and changes
+
+1. Display number of Features Supported in Features Tab
+2. Updated Nvidia logo for Nvidia GTX and NVIDIA RTX users
+3. Updated Intel logo to New Intel Vector Logo
+4. Tested with latest Vulkan Tools Version 1.2.155
+5. Tested with Nvidia , AMD and Intel Hardware
+
+
 # Release 1.27
 
 1. Fixed Surface Tab in Vulkan to show correctly 
