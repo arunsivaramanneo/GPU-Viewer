@@ -9,12 +9,12 @@ from Common import copyContentsFromFile, setBackgroundColor, setColumns, createS
     colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, getFormatValue
 
 
-decoderTitle = ["Decoder name","Level","Macroblocks","Width","Height"]
-videoMixerFeatureTitle = ["name","Supported"]
+decoderTitle = ["Decoder Name","Level","Macroblocks","Width","Height"]
+videoMixerFeatureTitle = ["Name","Supported"]
 surfaceVideoTitle = ["Video Surface","Width","Height","Types"]
 surfaceOutputTitle = ["Output Surface","Width","Height","Types"]
 SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
-vdpauinfoTitle = ["",""]
+vdpauinfoTitle = ["VDPAU Information","Details"]
 
 
 def vdpauinfo(tab2):
