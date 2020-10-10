@@ -125,7 +125,7 @@ def Vulkan(tab2):
         with open("/tmp/gpu-viewer/VKDDevicesparseinfo1.txt", "r") as file1:
             for i, line in enumerate(file1):
                 if "Vk" in line:
-                    text1 = line.strip("\t")
+                    text1 = (line.strip("\t")).replace("VkPhysicalDevice",'')
                     text = text1[:-1]
                     propertiesCombo.append_text(text.strip("\n"))
 
@@ -151,7 +151,7 @@ def Vulkan(tab2):
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
-                    featureCombo.append_text(text.strip("\n"))
+                    featureCombo.append_text((text.strip("\n")).replace("VkPhysicalDevice",""))
 
         featureCombo.insert_text(0, "Show All Features")
         featureCombo.set_active(0)
@@ -751,7 +751,7 @@ def Vulkan(tab2):
             os.system("cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/./' > /tmp/gpu-viewer/filterProperties.txt")
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/^%s$/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
+                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/%s$/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
 
         os.system(
             "cat /tmp/gpu-viewer/filterProperties.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/gpu-viewer/filterPropertiesLHS.txt")
@@ -802,7 +802,7 @@ def Vulkan(tab2):
                     if "---" in line or "====" in line:
                         continue
                     if "Vk" in line and "conformanceVersion" not in line:
-                        text1 = text
+                        text1 = text.replace("VkPhysicalDevice",'')
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
