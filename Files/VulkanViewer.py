@@ -125,7 +125,7 @@ def Vulkan(tab2):
         with open("/tmp/gpu-viewer/VKDDevicesparseinfo1.txt", "r") as file1:
             for i, line in enumerate(file1):
                 if "Vk" in line:
-                    text1 = (line.strip("\t")).replace("VkPhysicalDevice",'')
+                    text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
                     text = text1[:-1]
                     propertiesCombo.append_text(text.strip("\n"))
 
@@ -151,7 +151,7 @@ def Vulkan(tab2):
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
-                    featureCombo.append_text((text.strip("\n")).replace("VkPhysicalDevice",""))
+                    featureCombo.append_text(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")))
 
         featureCombo.insert_text(0, "Show All Features")
         featureCombo.set_active(0)
@@ -802,7 +802,7 @@ def Vulkan(tab2):
                     if "---" in line or "====" in line:
                         continue
                     if "Vk" in line and "conformanceVersion" not in line:
-                        text1 = text.replace("VkPhysicalDevice",'')
+                        text1 = (text.replace("VkPhysicalDevice",'').replace(":",""))
                         k = 0
                         count += 1
                         background_color = Const.BGCOLOR3
