@@ -751,7 +751,7 @@ def Vulkan(tab2):
             os.system("cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/./' > /tmp/gpu-viewer/filterProperties.txt")
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/%s$/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
+                "cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/VkPhysicalDevice%s/{flag=1;next}/Properties.*/{flag=0}flag' > /tmp/gpu-viewer/filterProperties.txt" % property)
 
         os.system(
             "cat /tmp/gpu-viewer/filterProperties.txt | awk '{gsub(/ =.*/,'True');}1' > /tmp/gpu-viewer/filterPropertiesLHS.txt")
