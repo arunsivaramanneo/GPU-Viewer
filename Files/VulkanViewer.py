@@ -52,9 +52,9 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDDeviceinfo1.txt | sort | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         os.system(
-            "lscpu | awk '/name|^CPU/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
+            "lscpu | awk '/name|^CPU|cache/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
         os.system(
-            "lscpu | awk '/name|^CPU/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
+            "lscpu | awk '/name|^CPU|cache/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         os.system("cat /proc/meminfo | grep Mem | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
         os.system("cat /proc/meminfo | grep Mem | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo.txt")
