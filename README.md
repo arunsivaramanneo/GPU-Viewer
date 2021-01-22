@@ -36,16 +36,17 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
 5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
-6. For others please follow steps 6 to 9
-7. Download the file and Extract to a folder
-8. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
-9. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
-10. For **Vulkan Tab** to work Install vulkan-tools (sudo apt-get install vulkan-tools) in Ubuntu, vulkan-tools in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
+6. **Fedora (RPM) based distro** run the command **sudo dnf -y install clinfo egl-utils mesa-demos mesa-vulkan-drivers python3 vdpauinfo vulkan-tools** from the terminal, then complete steps 7 to 10.
+7. For others please follow steps 7 to 10
+8. Download the file and Extract to a folder
+9. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
+10. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
+11. For **Vulkan Tab** to work Install vulkan-tools (sudo apt-get install vulkan-tools) in Ubuntu, vulkan-tools in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
-11. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
-12. For **EGL** information to be displayed in OpenGL tab, users should install mesa-utils-extra package in Debian based systems. On Arch, Please install latest version of mesa-demos
-13. For **VDPAU** information to be displayed, please install vdpauinfo.
-14. Incase of issues launching the application please see the FAQ in Wiki section
+12. For **OpenCL Tab** to work install clinfo (sudo apt install clinfo) in ubuntu , clinfo in Solus (sudo eopkg install clinfo), clinfo in arch. Also, ensure you have OpenCL installed for your respective platforms, Ex. Nvidia CUDA for Nvidia hardware, beignet for Intel Graphics or pocpl for cpu or AMD openCL for AMD hardware.
+13. For **EGL** information to be displayed in OpenGL tab, users should install mesa-utils-extra package in Debian based systems. On Arch, Please install latest version of mesa-demos
+14. For **VDPAU** information to be displayed, please install vdpauinfo.
+15. Incase of issues launching the application please see the FAQ in Wiki section
 
 ## UNINSTALL STEPS
 
@@ -64,7 +65,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 1. General - Bug fixes, Code Optimizations (High Priority)
 
-	
+
 ## IMPORTANT
 
 1. Requires Python3 to run this Application, works only on linux Operating system
