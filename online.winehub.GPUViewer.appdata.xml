@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+	<id>online.winehub.GPUViewer</id>
+	<metadata_license>CC0-1.0</metadata_license>
+	<name>GPUViewer</name>
+	<summary>GPUViewer by Arun Sivaraman</summary>
+	<description>
+		<p>A front-end to glxinfo, vulkaninfo, clinfo and es2_info</p>
+	</description>
+	<categories>
+		<category>GTK</category>
+		<category>GNOME</category>
+		<category>System</category>
+	</categories>
+	<url type="homepage">https://github.com/arunsivaramanneo/GPU-Viewer</url>
+	<url type="help">https://github.com/arunsivaramanneo/GPU-Viewer</url>
+	<project_license>LicenseRef-proprietary</project_license>
+	<developer_name>Arun Sivaraman</developer_name>
+	<screenshots>
+		<screenshot type="default">
+			<caption>GPUViewer details</caption>
+			<image type="source" width="1382" height="1021">https://user-images.githubusercontent.com/30646692/49328576-271fd880-f599-11e8-95d3-d9db4b03e91b.png
+			</image>
+		</screenshot>
+	</screenshots>
+</component>
