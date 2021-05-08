@@ -527,6 +527,14 @@ def Vulkan(tab2):
                         QueueTab_Store.append(iter2,["PROTECTED_BIT","true",setBackgroundColor(1),Const.COLOR1])
                     else:
                         QueueTab_Store.append(iter2,["PROTECTED_BIT","false",setBackgroundColor(1),Const.COLOR2])
+                    if "VIDEO_DECODE" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","true",setBackgroundColor(1),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","false",setBackgroundColor(1),Const.COLOR2])
+                    if "VIDEO_ENCODE" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","true",setBackgroundColor(1),Const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","false",setBackgroundColor(1),Const.COLOR2])
                 else:
                     k = k + 1
                     iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
