@@ -234,19 +234,20 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep FORMAT_  | grep -v FORMAT_FEATURE > /tmp/gpu-viewer/VKFORMATS.txt" )
 
+
         os.system(
             "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKFORMATSCount.txt")
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep linear | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKLinearCount.txt")
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/linear*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKLinearCount.txt")
         
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep optimal | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKOptimalCount.txt")
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKOptimalCount.txt")
         
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep buffer | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKBufferCount.txt")
+            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKBufferCount.txt")
         
 
         valueFormats = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATS.txt")
@@ -262,26 +263,26 @@ def Vulkan(tab2):
         n = 0;p = 0; t = 0;s = 0
         for i in range(len(valueFormatsCount)):
             for j in range(int(valueFormatsCount[i])):
-                if int(valueLinearCount[i]) != 0:
+                if 'None' not in valueLinearCount[i]:
                     linearStatus = "true"
                     linearColor = Const.COLOR1
                 else:
                     linearStatus = "false"
                     linearColor = Const.COLOR2
-                if int(valueOptimalCount[i]) != 0:
+                if 'None' not in valueOptimalCount[i]:
                     optimalStatus = "true"
                     optimalColor = Const.COLOR1
                 else:
                     optimalStatus = "false"
                     optimalColor = Const.COLOR2
-                if int(valueBufferCount[i]) != 0:
+                if 'None' not in valueBufferCount[i]:
                     bufferStatus = "true"
                     bufferColor = Const.COLOR1
                 else:
                     bufferStatus = "false"
                     bufferColor = Const.COLOR2
                 iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
-                if int(valueLinearCount[i]) != 0 or int(valueOptimalCount[i]) != 0 or int(valueBufferCount[i]) != 0:
+                if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
                     iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt " %(valueFormats[n].strip('\n')))
                     with open("/tmp/gpu-viewer/VKLinear.txt") as file1:
@@ -528,9 +529,9 @@ def Vulkan(tab2):
                     else:
                         QueueTab_Store.append(iter2,["PROTECTED_BIT","false",setBackgroundColor(1),Const.COLOR2])
                     if "VIDEO_DECODE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","true",setBackgroundColor(1),Const.COLOR1])
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","true",setBackgroundColor(2),Const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","false",setBackgroundColor(1),Const.COLOR2])
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","false",setBackgroundColor(2),Const.COLOR2])
                     if "VIDEO_ENCODE" in qRHS[i]:
                         QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","true",setBackgroundColor(1),Const.COLOR1])
                     else:
