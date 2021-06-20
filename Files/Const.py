@@ -115,7 +115,8 @@ BGCOLOR1 = "#fff"
 
 BGCOLOR2 = "#eee"
 
-BGCOLOR3 = "#ccc"
+#BGCOLOR3 = "#ccc"
+BGCOLOR3 = "#838990"
 
 COLOR1 = "GREEN"
 
