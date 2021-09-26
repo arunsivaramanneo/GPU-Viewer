@@ -21,7 +21,7 @@ DeviceTitle = ["Device Information", "Details"]
 SparseTitle = ["Device Properties", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
-ExtensionsTitle = ["Device Extensions", "Version"]
+ExtensionsTitle = ["Device Extensions", "Extension Revision"]
 FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"]
 MemoryTitle = ["Memory Types", "Value"]
 HeapTitle = ["Memory Heaps", "Value"]
@@ -212,7 +212,7 @@ def Vulkan(tab2):
             value = []
             for line in file1:
                 text = line.strip('\n')
-                value.append(getVulkanVersion(text))
+                value.append(text)
 
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_store_filter)
@@ -225,7 +225,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
-                ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
+                ExtensionTab_Store.append([text.strip('\n'), f" {value[i]}", background_color])
 
     def Formats(GPUname):
                 # noinspection PyPep8
@@ -448,13 +448,6 @@ def Vulkan(tab2):
 
     def Queues(GPUname):
 
-        #with open("/tmp/gpu-viewer/vulkaninfo.txt") as file1:
-        #    for line in file1:
-        #        if "VkQueueFamilyProperties[" in line:
-        #            os.system(
-        #                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
-        #            break
-        #        else:
         os.system(
                     "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
 
@@ -888,8 +881,8 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
 
-        labe13 = "Features (%d)" %(count)
-        notebook.set_tab_label(FeatureTab,Gtk.Label(labe13))
+    #    labe13 = "Features (%d)" %(count)
+    #    notebook.set_tab_label(FeatureTab,Gtk.Label(labe13))
 
     grid = Gtk.Grid()
     tab2.add(grid)
