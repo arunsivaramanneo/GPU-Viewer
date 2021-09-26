@@ -24,7 +24,7 @@ LimitsTitle = ["Device Limits", "Value"]
 ExtensionsTitle = ["Device Extensions", "Version"]
 FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"]
 MemoryTitle = ["Memory Types", "Value"]
-HeapTitle = ["Memory Heaps", "Device Size","Budget", "Usage", "HEAP DEVICE LOCAL"]
+HeapTitle = ["Memory Heaps", "Value"]
 QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
               "minImageTransferGranularity.depth"]
@@ -409,44 +409,40 @@ def Vulkan(tab2):
 
         TreeMemory.expand_all()
 
-        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryHeap.txt" % GPUname)
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/memoryHeaps:/{flag=1; next}/memoryTypes:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryHeap.txt" % GPUname)
         HCount = 0
-        HEAP_DEVICE_LOCAL = []
-
-        with open("/tmp/gpu-viewer/VKDMemoryHeap.txt", "r") as file1:
-            Heapfg = []
-            for line in file1:
-                if "memoryHeaps" in line:
-                    HCount = HCount + 1
-                if "HEAP_DEVICE_LOCAL" in line:
-                    HEAP_DEVICE_LOCAL.append("true")
-                    Heapfg.append(Const.COLOR1)
-                if "None" in line:
-                    HEAP_DEVICE_LOCAL.append("false")
-                    Heapfg.append(Const.COLOR2)
 
         os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep size | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
+            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep = | grep -v count| grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
         size = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceSize.txt")
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep budget | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceBudgetSize.txt")
-        budget = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceBudgetSize.txt")
-
-        os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep usage | grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceUsageSize.txt")
-        usage = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceUsageSize.txt")
+        os.system("cat /tmp/gpu-viewer/VKDMemoryHeap.txt | awk '{gsub(/[=:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryHeapLHS.txt")
 
         HeapTab_Store.clear()
         TreeHeap.set_model(HeapTab_Store)
-        for i in range(HCount-1):
-            background_color = setBackgroundColor(i)
-            HeapTab_Store.append(
-                [i, getDeviceSize(size[i]),getDeviceSize(budget[i]),getDeviceSize(usage[i]), HEAP_DEVICE_LOCAL[i].strip('\n'), background_color, Heapfg[i]])
+    
+        i = 0
+        j = 0
+        with open("/tmp/gpu-viewer/VKDMemoryHeapLHS.txt","r") as file1:
+            for line in file1:
+                if "memoryHeaps" in line:
+                    iter = HeapTab_Store.append(None,[(line.strip('\n')).strip('\t'),"",Const.BGCOLOR3])
+                    HCount = HCount + 1
+                    continue
+                if "None" in line or "MEMORY_HEAP" in line and "memoryHeaps" not in line:
+                    HeapTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    continue
+                if "size" in line or "budget" in line or "usage" in line:
+                    iter2 = HeapTab_Store.append(iter,[(line.strip('\n')).strip('\t'),getDeviceSize(size[j]),setBackgroundColor(i)])
+                    j = j + 1
+                else:
+                    iter2 = HeapTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                i = i + 1
 
-        labe13 = "Memory Heaps (%d)" %(HCount-1)
+        TreeHeap.expand_all()
+        labe13 = "Memory Heaps (%d)" %(HCount)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
-        label2 = "Memory Types (%d) & Memory Heaps (%d)" %(len(propertyFlags),(HCount-1))
+        label2 = "Memory Types (%d) & Memory Heaps (%d)" %(len(propertyFlags),(HCount))
         notebook.set_tab_label(MemoryTab,Gtk.Label(label2))
 
 
@@ -1099,7 +1095,7 @@ def Vulkan(tab2):
     MemoryHeapGrid.set_row_spacing(3)
     #HeapGrid = Gtk.Box(spacing=10)
 
-    HeapTab_Store = Gtk.ListStore(int, str, str, str, str,str,str)
+    HeapTab_Store = Gtk.TreeStore(str, str, str)
     TreeHeap = Gtk.TreeView(HeapTab_Store, expand=True)
     TreeHeap.set_enable_search(True)
     for i, column_title in enumerate(HeapTitle):
@@ -1108,14 +1104,12 @@ def Vulkan(tab2):
         column.set_resizable(True)
         column.set_reorderable(True)
         column.set_sort_column_id(i)
-        if i > 0 and i < 4:
-            column.set_property("min-width", 150)
-        column.add_attribute(Heaprenderer, "background", 5)
-        if i == 4:
-            column.add_attribute(Heaprenderer, "foreground", 6)
+        column.set_property("min-width", 150)
+        column.add_attribute(Heaprenderer, "background", 2)
         TreeHeap.set_property("can-focus", False)
         TreeHeap.append_column(column)
-
+    
+    TreeHeap.set_property("enable-tree-lines",True)
     HeapScrollbar = createScrollbar(TreeHeap)
     MemoryHeapGrid.add(HeapScrollbar)
 
