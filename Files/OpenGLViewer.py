@@ -259,7 +259,7 @@ def OpenGL(tab1):
     TreeGLExtEGL.set_headers_visible(False)
 
 
-    def radcall2(button,List,filename,Store,tree):
+    def radcall2(button,List,filename,Store,tree,filter):
         value = button.get_active()
 
         GL_All = []
@@ -277,7 +277,7 @@ def OpenGL(tab1):
                         GL_All.append(line)
 
         Store.clear()
-        tree.set_model(Store)
+        tree.set_model(filter)
 
     #    for i in range(len(List)):
     #        if int(value) == i:
@@ -413,9 +413,23 @@ def OpenGL(tab1):
     # End of Frame 2 and grid 1
     # Start of Frame 3
 
-    def searchTree(model,iter,data=None):
+    def searchTreeExtGL(model,iter,data=None):
         search_query = entry.get_text().lower()
         for i in range(TreeGLExt.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
+    def searchTreeExtES(model,iter,data=None):
+        search_query = entry_es.get_text().lower()
+        for i in range(TreeGLExtES.get_n_columns()):
+            value = model.get_value(iter,i).lower()
+            if search_query in value:
+                return True
+
+    def searchTreeExtEGL(model,iter,data=None):
+        search_query = entry_egl.get_text().lower()
+        for i in range(TreeGLExtEGL.get_n_columns()):
             value = model.get_value(iter,i).lower()
             if search_query in value:
                 return True
@@ -435,7 +449,7 @@ def OpenGL(tab1):
         Vendor_Combo.set_active(0)
 
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
-    Vendor_Combo.connect("changed", radcall2,vList,"/tmp/gpu-viewer/extensions_GL.txt",OpenGLExt_list,TreeGLExt)
+    Vendor_Combo.connect("changed", radcall2,vList,"/tmp/gpu-viewer/extensions_GL.txt",OpenGLExt_list,TreeGLExt,OpenGLExt_list_filter)
     Vendor_renderer = Gtk.CellRendererText()
     Vendor_Combo.pack_start(Vendor_renderer, True)
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
@@ -444,14 +458,14 @@ def OpenGL(tab1):
 #    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
 
     Vendor_Combo_ES = Gtk.ComboBox.new_with_model(Vendor_Store_ES)
-    Vendor_Combo_ES.connect("changed",radcall2,vesList,"/tmp/gpu-viewer/extensions_ES.txt",OpenGLExtES_list,TreeGLExtES)
+    Vendor_Combo_ES.connect("changed",radcall2,vesList,"/tmp/gpu-viewer/extensions_ES.txt",OpenGLExtES_list,TreeGLExtES,OpenGLExtES_list_filter)
     Vendor_renderer_ES = Gtk.CellRendererText()
     Vendor_Combo_ES.pack_start(Vendor_renderer_ES,True)
     Vendor_Combo_ES.add_attribute(Vendor_renderer_ES,"text",0)
     Vendor_Combo_ES.set_active(0)
     
     Vendor_Combo_EGL = Gtk.ComboBox.new_with_model(Vendor_Store_EGL)
-    Vendor_Combo_EGL.connect("changed",radcall2,veglList,"/tmp/gpu-viewer/extensions_EGL.txt",OpenGLExtEGL_list,TreeGLExtEGL)
+    Vendor_Combo_EGL.connect("changed",radcall2,veglList,"/tmp/gpu-viewer/extensions_EGL.txt",OpenGLExtEGL_list,TreeGLExtEGL,OpenGLExtEGL_list_filter)
     Vendor_renderer_EGL = Gtk.CellRendererText()
     Vendor_Combo_EGL.pack_start(Vendor_renderer_EGL,True)
     Vendor_Combo_EGL.add_attribute(Vendor_renderer_EGL,"text",0)
@@ -504,7 +518,7 @@ def OpenGL(tab1):
     frameSearch_es = Gtk.Frame()
     entry_es = Gtk.SearchEntry()
     entry_es.set_placeholder_text("Type here to filter extensions.....")
-    entry_es.connect("search-changed",refresh_filter,OpenGLExt_list_filter)
+    entry_es.connect("search-changed",refresh_filter,OpenGLExtES_list_filter)
     entry_es.grab_focus()
     frameSearch_es.add(entry_es)
     scrollable_treelist3 = createScrollbar(TreeGLExtES)
@@ -515,13 +529,15 @@ def OpenGL(tab1):
     frameSearch_egl = Gtk.Frame()
     entry_egl = Gtk.SearchEntry()
     entry_egl.set_placeholder_text("Type here to filter extensions.....")
-    entry_egl.connect("search-changed",refresh_filter,OpenGLExt_list_filter)
+    entry_egl.connect("search-changed",refresh_filter,OpenGLExtEGL_list_filter)
     entry_egl.grab_focus()
     frameSearch_egl.add(entry_egl)
     scrollable_treelist4 = createScrollbar(TreeGLExtEGL)
     egl_grid.attach_next_to(frameSearch_egl,Vendor_Combo_EGL,Gtk.PositionType.LEFT,14,1)
     egl_grid.attach_next_to(scrollable_treelist4,frameSearch_egl,Gtk.PositionType.BOTTOM,15,1)
 
-    OpenGLExt_list_filter.set_visible_func(searchTree)
+    OpenGLExt_list_filter.set_visible_func(searchTreeExtGL)
+    OpenGLExtES_list_filter.set_visible_func(searchTreeExtES)
+    OpenGLExtEGL_list_filter.set_visible_func(searchTreeExtEGL)
 
     tab1.show_all()
