@@ -1,6 +1,7 @@
 import os
 import gi
 import Const
+import re
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -246,55 +247,67 @@ def OpenGL(tab1):
     OpenGLExt_list_filter = OpenGLExt_list.filter_new()
     TreeGLExt = Gtk.TreeView(OpenGLExt_list_filter, expand=True)
     TreeGLExt.set_headers_visible(False)
-    frame4 = Gtk.Frame(label=" ")
 
-    def radcall2(button):
+    OpenGLExtES_list = Gtk.ListStore(str, str)
+    OpenGLExtES_list_filter = OpenGLExtES_list.filter_new()
+    TreeGLExtES = Gtk.TreeView(OpenGLExtES_list_filter, expand=True)
+    TreeGLExtES.set_headers_visible(False)
+
+    OpenGLExtEGL_list = Gtk.ListStore(str, str)
+    OpenGLExtEGL_list_filter = OpenGLExtEGL_list.filter_new()
+    TreeGLExtEGL = Gtk.TreeView(OpenGLExtEGL_list_filter, expand=True)
+    TreeGLExtEGL.set_headers_visible(False)
+
+
+    def radcall2(button,List,filename,Store,tree):
         value = button.get_active()
 
         GL_All = []
 
-        List = copyContentsFromFile("/tmp/gpu-viewer/Vendor1.txt")
-
+    #    List = copyContentsFromFile("/tmp/gpu-viewer/Vendor1.txt")
         List = [i.strip(' ') for i in List]
         List = [i.strip('\n ') for i in List]
-        List.insert(0, " ALL")
-
-        with open("/tmp/gpu-viewer/extensions.txt", "r") as file1:
+    #    List.insert(0, " ALL")
+        with open(filename, "r") as file1:
             for line in file1:
-                if List[int(value)] == " ALL":
+                if List[int(value)] == "Total":
                     GL_All.append(line)
-                elif List[int(value)] != " ALL":
+                elif List[int(value)] != "Total":
                     if "_%s_" % List[int(value)] in line:
                         GL_All.append(line)
 
-        OpenGLExt_list.clear()
-        TreeGLExt.set_model(OpenGLExt_list_filter)
+        Store.clear()
+        tree.set_model(Store)
 
-        for i in range(len(List)):
-            if int(value) == i:
-                frame4.set_label(List[i])
+    #    for i in range(len(List)):
+    #        if int(value) == i:
+    #            frame4.set_label(List[i])
 
         count = len(GL_All)
         for i in range(count):
             background_color = setBackgroundColor(i)
             text = GL_All[i].strip(' ')
-            OpenGLExt_list.append([text.strip('\n'), background_color])
+            Store.append([text.strip('\n'), background_color])
 
-    VendorExt_list = Gtk.ListStore(str, bool, str)
-    TreeVendor = Gtk.TreeView(VendorExt_list, expand=True)
+#    VendorExt_list = Gtk.ListStore(str, bool, str)
+#    TreeVendor = Gtk.TreeView(VendorExt_list, expand=True)
 
     Vendor_Store = Gtk.ListStore(str)
+    Vendor_Store_ES = Gtk.ListStore(str)
+    Vendor_Store_EGL = Gtk.ListStore(str)
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
+    Vendor_Combo_ES = Gtk.ComboBox.new_with_model(Vendor_Store_ES)
+    Vendor_Combo_EGL = Gtk.ComboBox.new_with_model(Vendor_Store_EGL)
 
-    def Radio(value):
+    def getVendorList(filename):
 
-        if 1 <= value <= 2:
-            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/gpu-viewer/Vendor.txt")
-            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/gpu-viewer/Vendor.txt")
-            os.system("cat /tmp/gpu-viewer/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/gpu-viewer/Vendor1.txt")
 
-        if value == 3:
-            os.system("cat /tmp/gpu-viewer/extensions.txt | awk 'gsub(/EGL_|_.*/,'true')'| sort | uniq > /tmp/gpu-viewer/Vendor1.txt")
+        os.system("cat %s | awk 'gsub(/GL_|_.*/,'true')'| uniq > /tmp/gpu-viewer/Vendor.txt" %filename)
+        os.system("cat %s | awk 'gsub(/GLX_|_.*/,'true')'| uniq >> /tmp/gpu-viewer/Vendor.txt" %filename)
+        os.system("cat /tmp/gpu-viewer/Vendor.txt | sort | uniq | grep -v GLX | grep -v GL$  > /tmp/gpu-viewer/Vendor1.txt")
+
+        if 'EGL' in filename:
+            os.system("cat %s | awk 'gsub(/EGL_|_.*/,'true')'| sort | uniq > /tmp/gpu-viewer/Vendor1.txt"%filename)
 
         vCount = []
         vendorList = []
@@ -306,7 +319,7 @@ def OpenGL(tab1):
         vendorList = [i.strip('\n ') for i in vendorList]
         vendorList.insert(0, "Total")
 
-        with open("/tmp/gpu-viewer/extensions.txt", "r") as file1:
+        with open(filename, "r") as file1:
             for i in range(len(vendorList)):
                 file1.seek(0, 0)
                 GL_All = []
@@ -322,44 +335,8 @@ def OpenGL(tab1):
         for i in range(len(vendorList)):
             NewList.append("%s (%d)" % (vendorList[i], vCount[i]))
 
-        VendorExt_list.clear()
-        TreeVendor.set_model(VendorExt_list)
-        Toggle = []
-        for i in range(len(NewList) - 1):
-            Toggle.append(False)
-        Vendor_Store.clear()
-        Vendor_Combo.set_model(Vendor_Store)
-        Toggle.insert(True, 0)
-        for i in range(len(NewList)):
-            background_color = setBackgroundColor(i)
-            VendorExt_list.append([NewList[i], Toggle[i], background_color])
-            Vendor_Store.append([NewList[i]])
+        return NewList, vendorList
 
-    def radcall(button, value):
-        if value == 1:
-            try:
-                switch.set_active(True)
-                switch.set_sensitive(True)
-            except:
-                pass
-            os.system(
-                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
-            os.system(
-                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
-
-        elif value == 2:
-            switch.set_active(True)
-            switch.set_sensitive(False)
-            os.system(
-                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
-
-        elif value == 3:
-            switch.set_active(True)
-            switch.set_sensitive(False)
-            os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/gpu-viewer/extensions.txt")
-
-        Radio(value)
-        Vendor_Combo.set_active(0)
 
     frame2 = Gtk.Frame(label="Extensions\t")
     grid.attach(frame2, 0, 2, 12, 1)
@@ -368,32 +345,69 @@ def OpenGL(tab1):
     grid1.set_border_width(5)
     frame2.add(grid1)
 
-    OpenGLRad = Gtk.RadioButton()
+    OpenGLExtNotebook = Gtk.Notebook()
+    grid1.add(OpenGLExtNotebook)
     RadioImg1 = fetchImageFromUrl(Const.OPEN_GL_PNG, 90,70, True)
-    OpenGLRad.set_image(Gtk.Image.new_from_pixbuf(RadioImg1))
-    OpenGLRad.connect("clicked", radcall, 1)
-    grid1.add(OpenGLRad)
-    OpenGLRadES = Gtk.RadioButton.new_from_widget(OpenGLRad)
+    openGLPage1 = Gtk.Box(spacing=10)
+    OpenGLExtNotebook.append_page(openGLPage1,Gtk.Image.new_from_pixbuf(RadioImg1))
+
+    opengl_grid = Gtk.Grid()
+    openGLPage1.add(opengl_grid )
+    opengl_grid.set_row_spacing(5)
+
+    openGLESPage1 = Gtk.Box(spacing=10)
     RadioImg2 = fetchImageFromUrl(Const.OPEN_GL_ES_PNG, 100,70, True)
-    OpenGLRadES.set_image(Gtk.Image.new_from_pixbuf(RadioImg2))
-    OpenGLRadES.connect("clicked", radcall, 2)
-    eglRad = Gtk.RadioButton.new_from_widget(OpenGLRadES)
-    eglRad.connect("clicked",radcall, 3)
+#    OpenGLExtNotebook.append_page(openGLESPage1,Gtk.Image.new_from_pixbuf(RadioImg2))
+
+    EGLPage3 = Gtk.Box(spacing=10)
     RadioImg3 = fetchImageFromUrl(Const.EGL_PNG,70,70,True)
-    eglRad.set_image(Gtk.Image.new_from_pixbuf(RadioImg3))
+
+
+    os.system(
+        "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions_GL.txt")
+    os.system(
+        "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions_GL.txt")
+
+    Vendor_GL = []
+    vList = []
+
+    Vendor_GL, vList = getVendorList("/tmp/gpu-viewer/extensions_GL.txt")
+
+    Vendor_Store.clear()
+    Vendor_Combo.set_model(Vendor_Store)
+    for i in range(len(Vendor_GL)):
+        Vendor_Store.append([Vendor_GL[i]])
+
+
+    Vendor_ES = []
+    Vendor_EGL = []
     with open("/tmp/gpu-viewer/OpenGLLHS.txt", "r") as file1:
         for line in file1:
-            if "OpenGL ES" in line:
-                grid1.attach_next_to(OpenGLRadES, OpenGLRad, Gtk.PositionType.RIGHT, 1, 1)
+            if "OpenGL ES profile version" in line:
+                OpenGLExtNotebook.append_page(openGLESPage1,Gtk.Image.new_from_pixbuf(RadioImg2))
+                opengl_es_grid = Gtk.Grid()
+                openGLESPage1.add(opengl_es_grid)
+                os.system(
+                    "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions_ES.txt")
+                Vendor_ES,vesList = getVendorList("/tmp/gpu-viewer/extensions_ES.txt")
+                for i in range(len(Vendor_ES)):
+                    Vendor_Store_ES.append([Vendor_ES[i]])
                 continue
             elif "EGL_VERSION" in line:
-                grid1.attach_next_to(eglRad,OpenGLRadES,Gtk.PositionType.RIGHT,1,1)
+                OpenGLExtNotebook.append_page(EGLPage3,Gtk.Image.new_from_pixbuf(RadioImg3))
+                egl_grid = Gtk.Grid()
+                EGLPage3.add(egl_grid)
+                os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/gpu-viewer/extensions_EGL.txt")
+                Vendor_EGL,veglList = getVendorList("/tmp/gpu-viewer/extensions_EGL.txt")
+                for i in range(len(Vendor_EGL)):
+                    Vendor_Store_EGL.append([Vendor_EGL[i]])
                 break
             else:
-                OpenGLRadES.set_visible(False)
-                eglRad.set_visible(False)
+                pass
+#                OpenGLRadES.set_visible(False)
+#                eglRad.set_visible(False)
 
-    OpenGLRad.set_active(False)
+#    OpenGLRad.set_active(False)
    # OpenGLRadES.set_active(True)
     # os.system("rm /tmp/gpu-viewer/OpenGL*.txt")
     # End of Frame 2 and grid 1
@@ -421,34 +435,61 @@ def OpenGL(tab1):
         Vendor_Combo.set_active(0)
 
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
-    Vendor_Combo.connect("changed", radcall2)
+    Vendor_Combo.connect("changed", radcall2,vList,"/tmp/gpu-viewer/extensions_GL.txt",OpenGLExt_list,TreeGLExt)
     Vendor_renderer = Gtk.CellRendererText()
     Vendor_Combo.pack_start(Vendor_renderer, True)
     Vendor_Combo.add_attribute(Vendor_renderer, "text", 0)
    # Vendor_Combo.set_entry_text_column(0)
     Vendor_Combo.set_active(0)
-    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
+#    grid1.attach_next_to(Vendor_Combo, OpenGLRad, Gtk.PositionType.BOTTOM, 1, 1)
 
-    switch = Gtk.Switch()
-    switch.connect("notify::active",switchCall)
-    switch.set_active(True)
+    Vendor_Combo_ES = Gtk.ComboBox.new_with_model(Vendor_Store_ES)
+    Vendor_Combo_ES.connect("changed",radcall2,vesList,"/tmp/gpu-viewer/extensions_ES.txt",OpenGLExtES_list,TreeGLExtES)
+    Vendor_renderer_ES = Gtk.CellRendererText()
+    Vendor_Combo_ES.pack_start(Vendor_renderer_ES,True)
+    Vendor_Combo_ES.add_attribute(Vendor_renderer_ES,"text",0)
+    Vendor_Combo_ES.set_active(0)
+    
+    Vendor_Combo_EGL = Gtk.ComboBox.new_with_model(Vendor_Store_EGL)
+    Vendor_Combo_EGL.connect("changed",radcall2,veglList,"/tmp/gpu-viewer/extensions_EGL.txt",OpenGLExtEGL_list,TreeGLExtEGL)
+    Vendor_renderer_EGL = Gtk.CellRendererText()
+    Vendor_Combo_EGL.pack_start(Vendor_renderer_EGL,True)
+    Vendor_Combo_EGL.add_attribute(Vendor_renderer_EGL,"text",0)
+    Vendor_Combo_EGL.set_active(0)
+
+    opengl_grid.add(Vendor_Combo)
+    opengl_es_grid.add(Vendor_Combo_ES)
+    egl_grid.add(Vendor_Combo_EGL)
+
+#    switch = Gtk.Switch()
+#    switch.connect("notify::active",switchCall)
+#    switch.set_active(True)
 
     coreLabel = Gtk.Label("Core")
     comptLabel = Gtk.Label("\t\tCompat.")
 
 
-    grid1.attach_next_to(coreLabel, Vendor_Combo, Gtk.PositionType.RIGHT, 1, 1)
+#    opengl_grid.attach_next_to(coreLabel, Vendor_Combo, Gtk.PositionType.RIGHT, 1, 1)
 
-    grid1.attach_next_to(switch, coreLabel, Gtk.PositionType.RIGHT,1,1)
-    grid1.attach_next_to(comptLabel, switch, Gtk.PositionType.RIGHT, 4, 1)
+#    opengl_grid.attach_next_to(switch, Vendor_Combo, Gtk.PositionType.RIGHT,1,1)
+#    opengl_grid.attach_next_to(comptLabel, switch, Gtk.PositionType.RIGHT, 1, 1)
     TreeGLExt.set_enable_search(True)
     TreeGLExt.set_headers_visible(True)
     setColumns(TreeGLExt, Title1, Const.MWIDTH,0.0)
 
-    grid.attach(frame4, 0, 3, 12, 1)
-    grid3 = Gtk.Grid()
+    TreeGLExtES.set_enable_search(True)
+    TreeGLExtES.set_headers_visible(True)
+    setColumns(TreeGLExtES, Title1, Const.MWIDTH,0.0)
+
+    TreeGLExtEGL.set_enable_search(True)
+    TreeGLExtEGL.set_headers_visible(True)
+    setColumns(TreeGLExtEGL, Title1, Const.MWIDTH,0.0)
+
+#    grid.attach(frame4, 0, 3, 12, 1)
+#    grid3 = Gtk.Grid()
     #grid3.set_row_spacing(2)
-    frame4.add(grid3)
+#    frame4.add(grid3)
+
     frameSearch = Gtk.Frame()
     entry = Gtk.SearchEntry()
     entry.set_placeholder_text("Type here to filter extensions.....")
@@ -456,8 +497,30 @@ def OpenGL(tab1):
     entry.grab_focus()
     frameSearch.add(entry)
     scrollable_treelist2 = createScrollbar(TreeGLExt)
-    grid3.attach(frameSearch,0,0,1,1)
-    grid3.attach_next_to(scrollable_treelist2,frameSearch,Gtk.PositionType.BOTTOM, 1, 1)
+#    grid3.attach(frameSearch,0,0,1,1)
+    opengl_grid.attach_next_to(frameSearch,Vendor_Combo,Gtk.PositionType.LEFT,14,1)
+    opengl_grid.attach_next_to(scrollable_treelist2,frameSearch,Gtk.PositionType.BOTTOM, 15, 1)
+
+    frameSearch_es = Gtk.Frame()
+    entry_es = Gtk.SearchEntry()
+    entry_es.set_placeholder_text("Type here to filter extensions.....")
+    entry_es.connect("search-changed",refresh_filter,OpenGLExt_list_filter)
+    entry_es.grab_focus()
+    frameSearch_es.add(entry_es)
+    scrollable_treelist3 = createScrollbar(TreeGLExtES)
+    opengl_es_grid.attach_next_to(frameSearch_es,Vendor_Combo_ES,Gtk.PositionType.LEFT,14,1)
+    opengl_es_grid.attach_next_to(scrollable_treelist3,frameSearch_es,Gtk.PositionType.BOTTOM,15,1)
+
+
+    frameSearch_egl = Gtk.Frame()
+    entry_egl = Gtk.SearchEntry()
+    entry_egl.set_placeholder_text("Type here to filter extensions.....")
+    entry_egl.connect("search-changed",refresh_filter,OpenGLExt_list_filter)
+    entry_egl.grab_focus()
+    frameSearch_egl.add(entry_egl)
+    scrollable_treelist4 = createScrollbar(TreeGLExtEGL)
+    egl_grid.attach_next_to(frameSearch_egl,Vendor_Combo_EGL,Gtk.PositionType.LEFT,14,1)
+    egl_grid.attach_next_to(scrollable_treelist4,frameSearch_egl,Gtk.PositionType.BOTTOM,15,1)
 
     OpenGLExt_list_filter.set_visible_func(searchTree)
 
