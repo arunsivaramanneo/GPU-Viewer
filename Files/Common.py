@@ -52,7 +52,7 @@ def getRamInGb(ram):
 def setScreenSize(self, widthRatio, heightRatio):
     Screen = Gdk.Screen.get_default()
     if Screen.get_height() == 2160:
-        self.set_default_size(Screen.get_width() * 0.50, Screen.get_height() * 0.65)
+        self.set_default_size(Screen.get_width() * 0.40, Screen.get_height() * 0.65)
     else:
         self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
 
