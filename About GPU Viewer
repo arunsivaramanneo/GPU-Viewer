@@ -6,7 +6,7 @@ Click on the GPLv3 Icon below to view the License
 
 This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo,es2_info and vdpauinfo. The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and VDPAU Information in ease over command-line.
 
-Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming lanuages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo, es2_info and vdpauinfo output.
+Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming languages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo, es2_info and vdpauinfo output.
 
 The latest source code of this program can be found at
 https://github.com/arunsivaramanneo/GPU-Viewer

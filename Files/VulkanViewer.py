@@ -29,7 +29,7 @@ QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "que
               "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
               "minImageTransferGranularity.depth"]
 QueueTitle = ["Queue Family","Value"]
-InstanceTitle = ["Extensions", "Version"]
+InstanceTitle = ["Extensions", "Extension Revision"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
 
@@ -207,12 +207,7 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDExtensions.txt")
 
-        # This should take care of future versioning
-        with open("/tmp/gpu-viewer/VKDExtensionsRHS.txt", "r") as file1:
-            value = []
-            for line in file1:
-                text = line.strip('\n')
-                value.append(text)
+        value = copyContentsFromFile("/tmp/gpu-viewer/VKDExtensionsRHS.txt")
 
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_store_filter)
@@ -225,7 +220,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
-                ExtensionTab_Store.append([text.strip('\n'), f" {value[i]}", background_color])
+                ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
 
     def Formats(GPUname):
                 # noinspection PyPep8
@@ -442,7 +437,7 @@ def Vulkan(tab2):
         TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
-        label2 = "Memory Types (%d) & Memory Heaps (%d)" %(len(propertyFlags),(HCount))
+        label2 = "Memory Types (%d) & Heaps (%d)" %(len(propertyFlags),(HCount))
         notebook.set_tab_label(MemoryTab,Gtk.Label(label2))
 
 
@@ -544,13 +539,7 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDInstanceExtensions1.txt | grep -o 'revision.*' | grep -o ' .*' > /tmp/gpu-viewer/VKDInstanceExtensionsRHS.txt")
 
-        # This should take care of further versioning till RANGE1
-        with open("/tmp/gpu-viewer/VKDInstanceExtensionsRHS.txt", "r") as file1:
-            value = []
-            for line in file1:
-                text = line.strip('\n')
-                value.append(getVulkanVersion(text))
-
+        value = copyContentsFromFile("/tmp/gpu-viewer/VKDInstanceExtensionsRHS.txt")
         InstanceTab_Store.clear()
 
         with open("/tmp/gpu-viewer/VKDInstanceExtensions.txt", "r") as file1:
@@ -591,7 +580,7 @@ def Vulkan(tab2):
         LayerTab_Store.clear()
 
         count2 = len(LVersion)
-        label = "Instances (%d) & Layers (%d)" % (count1, count2)
+        label = "Instance Extensions (%d) & Layers (%d)" % (count1, count2)
         label2 = "Instance Layers (%d)" % count2
         notebook.set_tab_label(InstanceTab, Gtk.Label(label))
         InstanceNotebook.set_tab_label(InstanceLayersTab, Gtk.Label(label2))
@@ -599,7 +588,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 LayerTab_Store.append(
-                    [line.strip('\n'), Vversion[i].strip('\n'), getVulkanVersion(LVersion[i]).strip('\n'),
+                    [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'),
                      ECount[i].strip('\n'), layerDescription[i].strip('\n'),
                      background_color])
 
