@@ -21,7 +21,7 @@ class MyGtk(Gtk.Window):
             theme = Gtk.CssProvider()
             theme.load_from_path("gtk.css")
             screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "Qogir")
+            setting.set_property("gtk-theme-name", "Adwaita")
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
