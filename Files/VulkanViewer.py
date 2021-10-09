@@ -97,7 +97,7 @@ def Vulkan(tab2):
         TreeDevice.set_model(DeviceTab_Store)
 
         deviceHardwareInfo = ["GPU","CPU","MEMORY","OS INFO."]
-
+        
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
             if "apiVersion" in valueLHS[i]:
