@@ -381,6 +381,8 @@ def OpenGL(tab1):
 
     Vendor_ES = []
     Vendor_EGL = []
+    veglList = []
+    egl_grid = Gtk.Grid()
     with open("/tmp/gpu-viewer/OpenGLLHS.txt", "r") as file1:
         for line in file1:
             if "OpenGL ES profile version" in line:
@@ -395,7 +397,6 @@ def OpenGL(tab1):
                 continue
             elif "EGL_VERSION" in line:
                 OpenGLExtNotebook.append_page(EGLPage3,Gtk.Image.new_from_pixbuf(RadioImg3))
-                egl_grid = Gtk.Grid()
                 EGLPage3.add(egl_grid)
                 os.system("es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* > /tmp/gpu-viewer/extensions_EGL.txt")
                 Vendor_EGL,veglList = getVendorList("/tmp/gpu-viewer/extensions_EGL.txt")
