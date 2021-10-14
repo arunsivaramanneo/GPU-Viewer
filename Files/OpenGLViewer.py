@@ -2,6 +2,7 @@ import os
 import gi
 import Const
 import re
+import os.path
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -465,16 +466,19 @@ def OpenGL(tab1):
     Vendor_Combo_ES.add_attribute(Vendor_renderer_ES,"text",0)
     Vendor_Combo_ES.set_active(0)
     
-    Vendor_Combo_EGL = Gtk.ComboBox.new_with_model(Vendor_Store_EGL)
-    Vendor_Combo_EGL.connect("changed",radcall2,veglList,"/tmp/gpu-viewer/extensions_EGL.txt",OpenGLExtEGL_list,TreeGLExtEGL,OpenGLExtEGL_list_filter)
-    Vendor_renderer_EGL = Gtk.CellRendererText()
-    Vendor_Combo_EGL.pack_start(Vendor_renderer_EGL,True)
-    Vendor_Combo_EGL.add_attribute(Vendor_renderer_EGL,"text",0)
-    Vendor_Combo_EGL.set_active(0)
+    if os.path.exists("/tmp/gpu-viewer/extensions_EGL.txt") == True:
+
+        Vendor_Combo_EGL = Gtk.ComboBox.new_with_model(Vendor_Store_EGL)
+        Vendor_Combo_EGL.connect("changed",radcall2,veglList,"/tmp/gpu-viewer/extensions_EGL.txt",OpenGLExtEGL_list,TreeGLExtEGL,OpenGLExtEGL_list_filter)
+        Vendor_renderer_EGL = Gtk.CellRendererText()
+        Vendor_Combo_EGL.pack_start(Vendor_renderer_EGL,True)
+        Vendor_Combo_EGL.add_attribute(Vendor_renderer_EGL,"text",0)
+        Vendor_Combo_EGL.set_active(0)
+        egl_grid.add(Vendor_Combo_EGL)
 
     opengl_grid.add(Vendor_Combo)
     opengl_es_grid.add(Vendor_Combo_ES)
-    egl_grid.add(Vendor_Combo_EGL)
+    
 
 #    switch = Gtk.Switch()
 #    switch.connect("notify::active",switchCall)
@@ -525,7 +529,6 @@ def OpenGL(tab1):
     scrollable_treelist3 = createScrollbar(TreeGLExtES)
     opengl_es_grid.attach_next_to(frameSearch_es,Vendor_Combo_ES,Gtk.PositionType.LEFT,14,1)
     opengl_es_grid.attach_next_to(scrollable_treelist3,frameSearch_es,Gtk.PositionType.BOTTOM,15,1)
-
 
     frameSearch_egl = Gtk.Frame()
     entry_egl = Gtk.SearchEntry()
