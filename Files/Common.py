@@ -21,14 +21,13 @@ class MyGtk(Gtk.Window):
             theme = Gtk.CssProvider()
             theme.load_from_path("gtk.css")
             screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "Yaru-dark")
+            setting.set_property("gtk-theme-name", "Qogir")
             style_context = self.get_style_context()
             style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
         elif Const.THEME1:
-            setting.set_property("gtk-theme-name", "Adwaita")
+            setting.set_property("gtk-theme-name", "Yaru-dark")
         elif Const.THEME2:
-            setting.set_property("gtk-theme-name", "Adapta")
+            setting.set_property("gtk-theme-name", "Adwaita")
 
     def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
         tab = Gtk.Box(spacing=5)
