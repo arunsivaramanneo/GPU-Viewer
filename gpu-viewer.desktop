@@ -1,13 +1,11 @@
-#!/usr/bin/env xdg-open
-[Desktop Entry]	
-Encoding=UTF-8
-Type = Application
-version = 1.36
-Name=GPU-Viewer
-GenericName = Utility
-Comment=A front-end to glxinfo, vulkaninfo, clinfo and es2_info
-Exec=/usr/share/gpu-viewer/GPUViewer
-Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png
+[Desktop Entry]
 Type=Application
-Categories=GTK;GNOME;System
-Terminal=False
+Name=GPU-Viewer
+GenericName=Utility
+Comment=A front-end to glxinfo, vulkaninfo, clinfo and es2_info
+Icon=/usr/share/gpu-viewer/Images/GPU_Viewer.png
+Exec=gpu-viewer
+Terminal=false
+Categories=System;GTK;GNOME
+Keywords=GPU;Graphics;Vulkan;OpenGL;OpenCL;Mesa;AMD;Intel;NVIDIA:Radeon;Geforce
+StartupWMClass=GPUViewer.py
