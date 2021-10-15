@@ -1,5 +1,7 @@
 [Desktop Entry]
+Encoding=UTF-8
 Type=Application
+Version=1.5
 Name=GPU-Viewer
 GenericName=Utility
 Comment=A front-end to glxinfo, vulkaninfo, clinfo and es2_info
