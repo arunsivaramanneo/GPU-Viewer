@@ -301,7 +301,7 @@ def Vulkan(tab2):
 
 
                 
-        labe1Format = "Formats(%d)" %len(valueFormats)
+        labe1Format = "Formats (%d)" %len(valueFormats)
         notebook.set_tab_label(FormatsTab,Gtk.Label(labe1Format))
 
     def MemoryTypes(GPUname):

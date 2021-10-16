@@ -25,7 +25,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 21.10(Impish)/Ubuntu 21.04(Hirsute)/Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 22.04 (Jammy)/Ubuntu 21.10(Impish)/Ubuntu 21.04(Hirsute)/Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -34,7 +34,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     Please note all the dependencies python, vulkan-tools,clinfo, es2_info will be installed, if not installed before.
 
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
-5. **Arch based distro** - 	[![AUR package](https://repology.org/badge/version-for-repo/aur/gpu-viewer.svg)](https://repology.org/metapackage/gpu-viewer) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
+5. **Arch based distro** - 	[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. **Fedora (RPM) based distro** run the command **sudo dnf -y install clinfo egl-utils mesa-demos mesa-vulkan-drivers python3 vdpauinfo vulkan-tools** from the terminal, then complete steps 7 to 10.
 7. For others please follow steps 7 to 10
 8. Download the file and Extract to a folder
@@ -79,10 +79,10 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 20.10/Manjaro 20.1
-2. Desktop : Gnome 3.38/336
-3. Kernel : 5.8.x-xx
-4. IDE : SublimeText 3.0,IntelliJ IDEA Community Edition,Atom
+1. Operating System : Ubuntu 21.10
+2. Desktop : Gnome 40.4
+3. Kernel : 5.13.x-xx
+4. IDE : VSCode
 
 
 ## SYSTEM SETUP
