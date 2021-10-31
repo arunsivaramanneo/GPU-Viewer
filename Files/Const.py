@@ -48,6 +48,8 @@ LOG_LOGO_PNG = "../Images/Changelog.png"
 
 APP_LOGO_PNG = "../Images/GPU_Viewer.png"
 
+NVIDIA_LOGO_PNG = "../Images/Nvidia_logo.png"
+
 CONTACT_LOGO_PNG = "../Images/Contact.png"
 
 TOOLTIP_LICENSE = "View License"

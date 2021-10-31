@@ -4,7 +4,7 @@ import Const
 
 gi.require_version("Gtk", "3.0")
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 from Common import copyContentsFromFile, createSubTab, createScrollbar, getGpuImage, setColumns, setBackgroundColor
 
@@ -366,7 +366,9 @@ def openCL(tab):
         value = combo.get_active()
         getDeviceNames(value)
         getPlatfromDetails(value)
-
+        gpu_device_image = getGpuImage("/tmp/gpu-viewer/oclDeviceNames.txt")
+        image_renderer.set_from_pixbuf(gpu_device_image)
+        platformGrid.attach_next_to(image_renderer,Devices_combo,Gtk.PositionType.RIGHT,15,1)
     #    os.system("rm /tmp/gpu-viewer/ocl*.txt")
 
     mainGrid = Gtk.Grid()
@@ -462,6 +464,10 @@ def openCL(tab):
 
     oclPlatforms = getPlatformNames()
 
+    gpu_device_image = Gtk.Image()
+    gpu_device_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.APP_LOGO_PNG, 50, 50)
+    image_renderer = Gtk.Image.new_from_pixbuf(gpu_device_image)
+
     AvailableDevices = Gtk.Label()
     AvailableDevices.set_label("Available Device(s) :")
     platformGrid.attach_next_to(AvailableDevices, platformLabel, Gtk.PositionType.BOTTOM, 2, 1)
@@ -492,8 +498,8 @@ def openCL(tab):
     platform_image = getGpuImage("/tmp/gpu-viewer/oclPlatformDetailsRHS.txt")
     platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(platform_image),platform_combo,Gtk.PositionType.RIGHT,15,1)
 
-    gpu_device_image = getGpuImage("/tmp/gpu-viewer/oclDeviceDetailsRHS.txt")
-    platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(gpu_device_image),Devices_combo,Gtk.PositionType.RIGHT,15,1)
+    
+
 
 #    numberOfPlatforms = Gtk.Label()
 #    numberOfPlatforms.set_label("No. of Platforms :")

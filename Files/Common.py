@@ -258,6 +258,9 @@ def getGpuImage(filename):
             elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
                 gpu_image = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 break
+            elif "CUDA" in line and ("GTX" not in line or "RTX" not in line):
+                gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
             elif "AMD" in line or "ATI" in line:
                 gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 break
