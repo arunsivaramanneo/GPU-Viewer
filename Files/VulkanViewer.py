@@ -689,11 +689,7 @@ def Vulkan(tab2):
                 Limits(text)
                 Extensions(text)
                 Formats(text)
-            #    t5 = threading.Thread(target=Formats, args=(text,))
-            #    t5.start()
-            #    t5.join()
                 MemoryTypes(text)
-            #    Heap(text)
                 Queues(text)
                 Surface(text)
 
@@ -729,7 +725,7 @@ def Vulkan(tab2):
 
             Instance()
         DevicesGrid.attach(image_renderer,50,1,1,1)
-    #    os.system("rm /tmp/gpu-viewer/VKD*.txt")
+    #    DevicesGrid.attach_next_to(spinner,image_renderer,Gtk.PositionType.RIGHT,1,1)
 
     def selectProperties(Combo):
         property = Combo.get_active_text()
@@ -1224,11 +1220,11 @@ def Vulkan(tab2):
     gpu_combo.add_attribute(renderer_text, "text", 0)
     gpu_combo.set_entry_text_column(0)
     gpu_combo.set_active(0)
-
-
+    
 
 
     DevicesGrid.attach_next_to(gpu_combo, DS, Gtk.PositionType.RIGHT, 20, 1)
+#    DeviceGrid.attach_next_to(spinner,image_renderer,Gtk.PositionType.RIGHT,80,1)
 
     # Logos
 
