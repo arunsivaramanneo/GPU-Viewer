@@ -11,7 +11,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GdkPixbuf
 # noinspection PyPep8
 from Common import copyContentsFromFile, setBackgroundColor, setColumns, createSubTab, createScrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, getFormatValue
+    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, getGpuImage
 
 MWIDTH = 300
 
@@ -693,38 +693,12 @@ def Vulkan(tab2):
                 Queues(text)
                 Surface(text)
 
-                with open("/tmp/gpu-viewer/VKDDeviceinfo1.txt", "r") as file1:
-
-                    for line in file1:
-                        if "Intel" in line:
-                            gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-                        elif "GTX" in line and "GeForce" in line:
-                            gpu_image = fetchImageFromUrl(Const.NVIDIA_GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-                        elif "RTX" in line and "GeForce" in line:
-                            gpu_image = fetchImageFromUrl(Const.NVIDIA_RTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-                        elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
-                            gpu_image = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-                        elif "AMD" in line or "ATI" in line:
-                            gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-                        elif "LLVM" in line:
-                            image_renderer.clear()
-                            gpu_image = fetchImageFromUrl(Const.LLVM_LOGO_SVG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
-                            image_renderer.set_from_pixbuf(gpu_image)
-                            break
-
+                gpu_image = getGpuImage("/tmp/gpu-viewer/VKDDeviceinfo1.txt")
+                image_renderer.set_from_pixbuf(gpu_image)
 
             Instance()
         DevicesGrid.attach(image_renderer,50,1,1,1)
+
     #    DevicesGrid.attach_next_to(spinner,image_renderer,Gtk.PositionType.RIGHT,1,1)
 
     def selectProperties(Combo):

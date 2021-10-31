@@ -242,3 +242,29 @@ def appendLimitsRHS(filename, temp):
                 LimitsRHS.append("")
                 LimitRHSValue.append(False)
     return LimitsRHS, LimitRHSValue
+
+def getGpuImage(filename):
+    with open(filename, "r") as file1:
+        for line in file1:
+            if "Intel" in line:
+                gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "GTX" in line and "GeForce" in line:
+                gpu_image = fetchImageFromUrl(Const.NVIDIA_GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "RTX" in line and "GeForce" in line:
+                gpu_image = fetchImageFromUrl(Const.NVIDIA_RTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
+                gpu_image = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "AMD" in line or "ATI" in line:
+                gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "LLVM" in line:
+                gpu_image = fetchImageFromUrl(Const.LLVM_LOGO_SVG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+                break
+            elif "Mesa" in line:
+                gpu_image = fetchImageFromUrl(Const.MESA_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT, True)
+                break
+    return gpu_image

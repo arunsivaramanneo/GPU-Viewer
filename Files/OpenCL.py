@@ -6,7 +6,7 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-from Common import copyContentsFromFile, createSubTab, createScrollbar, setColumns, setBackgroundColor
+from Common import copyContentsFromFile, createSubTab, createScrollbar, getGpuImage, setColumns, setBackgroundColor
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -455,7 +455,7 @@ def openCL(tab):
     platformFrame.add(platformGrid)
 
     platformLabel = Gtk.Label()
-    platformLabel.set_text("Platform Name :")
+    platformLabel.set_text("Platform Name(s) :")
     platformGrid.attach(platformLabel, 0, 1, 1, 1)
 
     platform_store = Gtk.ListStore(str)
@@ -489,21 +489,27 @@ def openCL(tab):
 
     platformGrid.attach_next_to(platform_combo, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
-    numberOfPlatforms = Gtk.Label()
-    numberOfPlatforms.set_label("No. of Platforms :")
-    platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 10, 1)
+    platform_image = getGpuImage("/tmp/gpu-viewer/oclPlatformDetailsRHS.txt")
+    platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(platform_image),platform_combo,Gtk.PositionType.RIGHT,15,1)
 
-    numberOfPlatformsEntry = Gtk.Entry()
-    numberOfPlatformsEntry.set_text(str(len(oclPlatforms)))
-    numberOfPlatformsEntry.set_editable(False)
-    platformGrid.attach_next_to(numberOfPlatformsEntry, numberOfPlatforms, Gtk.PositionType.RIGHT, 1, 1)
+    gpu_device_image = getGpuImage("/tmp/gpu-viewer/oclDeviceDetailsRHS.txt")
+    platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(gpu_device_image),Devices_combo,Gtk.PositionType.RIGHT,15,1)
 
-    numberOfDevices = Gtk.Label()
-    numberOfDevices.set_label("No. Of Devices :")
-    platformGrid.attach_next_to(numberOfDevices, Devices_combo, Gtk.PositionType.RIGHT, 10, 1)
+#    numberOfPlatforms = Gtk.Label()
+#    numberOfPlatforms.set_label("No. of Platforms :")
+#    platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 10, 1)
 
-    numberOfDevicesEntry.set_max_length(2)
-    platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
+#    numberOfPlatformsEntry = Gtk.Entry()
+#    numberOfPlatformsEntry.set_text(str(len(oclPlatforms)))
+#    numberOfPlatformsEntry.set_editable(False)
+#    platformGrid.attach_next_to(numberOfPlatformsEntry, numberOfPlatforms, Gtk.PositionType.RIGHT, 1, 1)
+
+#    numberOfDevices = Gtk.Label()
+#    numberOfDevices.set_label("No. Of Devices :")
+#    platformGrid.attach_next_to(numberOfDevices, Devices_combo, Gtk.PositionType.RIGHT, 10, 1)
+
+#    numberOfDevicesEntry.set_max_length(2)
+#    platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
 
     tab.show_all()
 
