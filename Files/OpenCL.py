@@ -368,7 +368,7 @@ def openCL(tab):
         getPlatfromDetails(value)
         gpu_device_image = getGpuImage("/tmp/gpu-viewer/oclDeviceNames.txt")
         image_renderer.set_from_pixbuf(gpu_device_image)
-        platformGrid.attach_next_to(image_renderer,Devices_combo,Gtk.PositionType.RIGHT,15,1)
+        platformGrid.attach_next_to(image_renderer,Devices_combo,Gtk.PositionType.RIGHT,12,1)
     #    os.system("rm /tmp/gpu-viewer/ocl*.txt")
 
     mainGrid = Gtk.Grid()
@@ -496,7 +496,7 @@ def openCL(tab):
     platformGrid.attach_next_to(platform_combo, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
     platform_image = getGpuImage("/tmp/gpu-viewer/oclPlatformDetailsRHS.txt")
-    platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(platform_image),platform_combo,Gtk.PositionType.RIGHT,15,1)
+    platformGrid.attach_next_to(Gtk.Image.new_from_pixbuf(platform_image),platform_combo,Gtk.PositionType.RIGHT,12,1)
 
     
 

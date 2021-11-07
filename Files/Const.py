@@ -26,7 +26,7 @@ AMD_LOGO_PNG = "../Images/AMD.png"
 
 LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
 
-MESA_LOGO_PNG = "../Images/mesa-logo.png"
+MESA_LOGO_PNG = "../Images/Mesa.png"
 
 INTEL_BANNER = "../Images/Intel_Banner.png"
 

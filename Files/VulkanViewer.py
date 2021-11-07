@@ -944,14 +944,16 @@ def Vulkan(tab2):
 
     featureCombo = Gtk.ComboBoxText()
     featureCombo.connect("changed", selectFeature)
-    FeaturesGrid.add(featureCombo)
-    featureFrameSearch = Gtk.Frame()
+#    FeaturesGrid.add(featureCombo)
+#    featureFrameSearch = Gtk.Frame()
     featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
-    featureFrameSearch.add(featureSearchEntry)
-    FeaturesGrid.attach_next_to(featureFrameSearch, featureCombo, Gtk.PositionType.BOTTOM, 1, 1)
-    # FeaturesGrid.add(featureFrameSearch)
+#    featureFrameSearch.add(featureSearchEntry)
+    FeaturesGrid.attach(featureSearchEntry,0,0,14,1)
+#    FeaturesGrid.attach_next_to(featureFrameSearch, featureCombo, Gtk.PositionType.BOTTOM, 1, 1)
+    FeaturesGrid.attach_next_to(featureCombo,featureSearchEntry,Gtk.PositionType.RIGHT,1,1)
+#    FeaturesGrid.add(featureFrameSearch)
     FeatureScrollbar = createScrollbar(TreeFeatures)
-    FeaturesGrid.attach_next_to(FeatureScrollbar, featureFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
+    FeaturesGrid.attach_next_to(FeatureScrollbar, featureSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
 
     FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
 
