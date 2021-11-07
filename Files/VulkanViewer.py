@@ -636,6 +636,14 @@ def Vulkan(tab2):
 
             TreeSurface.expand_all()
 
+    def searchPropertiesTree(model, iter, Tree):
+        search_query = propertySearchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter, i).lower()
+            if search_query in value:
+                return True
+        Tree.expand_all()
+
     def searchFeaturesTree(model, iter, Tree):
         search_query = featureSearchEntry.get_text().lower()
         for i in range(Tree.get_n_columns()):
@@ -750,7 +758,7 @@ def Vulkan(tab2):
                 fgColor.append("BLACK")
 
         SparseTab_Store.clear()
-        TreeSparse.set_model(SparseTab_Store)
+        TreeSparse.set_model(SparseTab_Store_filter)
 
         if "Show All Properties" in property:
             k = 0;
@@ -898,12 +906,14 @@ def Vulkan(tab2):
     propertiesStore = Gtk.ListStore(str)
     propertiesCombo = Gtk.ComboBoxText()
     propertiesCombo.connect("changed", selectProperties)
-    propertiesGrid.add(propertiesCombo)
+#    propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
-    TreeSparse = Gtk.TreeView(SparseTab_Store, expand=True)
+    SparseTab_Store_filter = SparseTab_Store.filter_new()
+    TreeSparse = Gtk.TreeView(SparseTab_Store_filter, expand=True)
     TreeSparse.set_property("enable-tree-lines", True)
     TreeSparse.set_enable_search(True)
     TreeSparse.set_property("can-focus", False)
+
     for i, column_title in enumerate(SparseTitle):
         Sparserenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
@@ -916,8 +926,13 @@ def Vulkan(tab2):
         column.add_attribute(Sparserenderer, "background", 2)
         TreeSparse.append_column(column)
 
+    propertySearchEntry = createSearchEntry(SparseTab_Store_filter)
+    propertiesGrid.attach(propertySearchEntry,0,0,14,1)
+    propertiesGrid.attach_next_to(propertiesCombo,propertySearchEntry,Gtk.PositionType.RIGHT,1,1)
     propertiesScrollbar = createScrollbar(TreeSparse)
-    propertiesGrid.attach_next_to(propertiesScrollbar, propertiesCombo, Gtk.PositionType.BOTTOM, 1, 1)
+    propertiesGrid.attach_next_to(propertiesScrollbar, propertySearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
+
+    SparseTab_Store_filter.set_visible_func(searchPropertiesTree, data=TreeSparse)
     
     # -----------------Creating the Features Tab-----------------
 
