@@ -131,7 +131,7 @@ def Vulkan(tab2):
                     text = text1[:-1]
                     propertiesCombo.append_text(text.strip("\n"))
 
-        propertiesCombo.insert_text(0, "Show All Properties")
+        propertiesCombo.insert_text(0, "Show All Device Properties")
         propertiesCombo.set_active(0)
 
     #    notebook.set_tab_label(propertiesTab,Gtk.Label(label))
@@ -155,7 +155,7 @@ def Vulkan(tab2):
                     text = line[:-2]
                     featureCombo.append_text(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")))
 
-        featureCombo.insert_text(0, "Show All Features")
+        featureCombo.insert_text(0, "Show All Device Features")
         featureCombo.set_active(0)
 
     def Limits(GPUname):
@@ -714,7 +714,7 @@ def Vulkan(tab2):
 
         if property is None:
             property = " "
-        elif "Show All Properties" in property:
+        elif "Show All Device Properties" in property:
             os.system("cat /tmp/gpu-viewer/VKDDevicesparseinfo1.txt | awk '/./' > /tmp/gpu-viewer/filterProperties.txt")
         else:
             os.system(
@@ -760,7 +760,7 @@ def Vulkan(tab2):
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store_filter)
 
-        if "Show All Properties" in property:
+        if "Show All Device Properties" in property:
             k = 0;
             count = 0
             with open("/tmp/gpu-viewer/filterPropertiesLHS.txt", "r") as file1:
@@ -813,13 +813,13 @@ def Vulkan(tab2):
         feature = Combo.get_active_text()
         if feature is None:
             feature = " "
-        elif "Show All Features" in feature:
+        elif "Show All Device Features" in feature:
             os.system(
                 "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt")
 
         else:
             os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
+                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
 
         os.system(
             "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq > /tmp/gpu-viewer/VKDFeatures.txt")
