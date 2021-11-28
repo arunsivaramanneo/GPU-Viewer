@@ -28,7 +28,7 @@ else:
         os.system("mkdir /tmp/gpu-viewer")
         gtk = MyGtk("GPU-VIEWER")
         setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
-
+        
         if isVulkanSupported():
             vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
             t2 = threading.Thread(target=Vulkan, args=(vulkanTab,))
@@ -41,23 +41,23 @@ else:
         t1.join()
 
         if isOpenclSupported():
-            openclTab = gtk.createTab(Const.OPEN_CL_PNG, 130, Const. ICON_HEIGHT, False)
+            openclTab = gtk.createTab(Const.OPEN_CL_PNG, Const.ICON_WIDTH, Const. ICON_HEIGHT, False)
             t4 = threading.Thread(target=openCL, args=(openclTab,))
             t4.start()
             t4.join()
 
         if isVdpauinfoSupported():
-            vdpauTab = gtk.createTab(Const.VDPAU_CL_PNG, 130, Const. ICON_HEIGHT, False)
+            vdpauTab = gtk.createTab(Const.VDPAU_CL_PNG, Const.ICON_WIDTH, Const. ICON_HEIGHT, False)
             vdpauinfo(vdpauTab)
 
         aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
         t3 = threading.Thread(target=about, args=(aboutTab,))
         t3.start()
-        t3.join()
+        t3.join()   
 
     #    print(time.time()-T1)
         gtk.connect("delete-event", quit)
-        gtk.show_all()
+        gtk.show_all()  
         gtk.mainLoop()
 
 
