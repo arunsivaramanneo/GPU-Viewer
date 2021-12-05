@@ -52,11 +52,11 @@ def Vulkan(tab2):
         os.system(
             "cat /tmp/gpu-viewer/VKDDeviceinfo1.txt | sort | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         os.system(
-            "lscpu | awk '/name|^CPU|^L/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
+            "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
         os.system(
-            "lscpu | awk '/name|^CPU|^L/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-        os.system("cat /proc/meminfo | grep Mem | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
-        os.system("cat /proc/meminfo | grep Mem | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
+            "LC_ALL=C lscpu | awk '/name|^CPU|^L/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
+        os.system("cat /proc/meminfo | awk '/Mem/' | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
+        os.system("cat /proc/meminfo | awk '/Mem/' | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
         valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo.txt")
 
         try:
@@ -111,10 +111,10 @@ def Vulkan(tab2):
                 iter1 = DeviceTab_Store.append(None,["Operating System Details..."," ",Const.BGCOLOR3])
                 DeviceTab_Store.append(iter1,["Distribution", valueRHS[i].strip('\n'), background_color])
                 continue
-            if "Total" in valueLHS[i]:
+            if "MemTotal" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Memory Details..."," ",Const.BGCOLOR3])
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
-            elif "Mem" in valueLHS[i]:
+            elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
             else:
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
