@@ -444,14 +444,14 @@ def Vulkan(tab2):
     def Queues(GPUname):
 
         os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueue.*/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueueFamilyProperties:*/{flag=1;next}/VkPhysicalDeviceMemoryProperties.*/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
 
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
         os.system(
             "cat /tmp/gpu-viewer/VKDQueues.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDQueueLHS.txt")
         os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep Count | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuecount.txt")
+            "cat /tmp/gpu-viewer/VKDQueues.txt | grep queueCount | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuecount.txt")
 
         # finding and storing the value for Flags
 
@@ -470,28 +470,33 @@ def Vulkan(tab2):
                 if " = " in line:
                     qRHS.append(qRhs[j])
                     j = j + 1
-                if ":" in line or "---" in line:
-                    qRHS.append(" ")
+                else:
+                    qRHS.append("")
+        
+        qRHS.pop(0)
         k = 0
         for i in range(len(qLhs)):
             background_color = setBackgroundColor(k)
             if "true" in qRHS[i]:
                 fColor = "GREEN"
             elif "false" in qRHS[i]:
-                fColor = "RED"
+                fColor = "RED"  
             else:
                 fColor = "BLACK"
-            if "Properties" in qLhs[i]:
+            if "Properties[" in qLhs[i]:
                 iter1 = QueueTab_Store.append(None,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
                 k = 0
                 continue
             if "---" in qLhs[i]:
                 continue
-            if "VK_" in qLhs[i] and "Properties" not in qLhs[i]:
-                QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-
+            if "VK_" in qLhs[i] or "priorit" in qLhs[i] and "Properties" not in qLhs[i]:
+                iter3 = QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
+                continue
+            if "\t\t\t\t" in qLhs[i]:
+                QueueTab_Store.append(iter3,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
+                continue
             else :
-                if "queueFlags" in qLhs[i]:
+                if "queueFlags" in qLhs[i] or "VkQueueFamilyGlobalPriorityPropertiesKHR" in line:
                     iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t')," ",setBackgroundColor(2),fColor])
 
                     if "GRAPHICS" in qRHS[i]:
@@ -526,7 +531,7 @@ def Vulkan(tab2):
                     k = k + 1
                     iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                     
-            TreeQueue.expand_all()
+        TreeQueue.expand_all()
         label = "Queues (%d)" % len(qCount)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
 
