@@ -490,7 +490,7 @@ def Vulkan(tab2):
             if "---" in qLhs[i]:
                 continue
             if "VK_" in qLhs[i] or "priorit" in qLhs[i] and "Properties" not in qLhs[i]:
-                iter3 = QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
+                iter3 = QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).strip('count ='),setBackgroundColor(i),fColor])
                 continue
             if "\t\t\t\t" in qLhs[i]:
                 QueueTab_Store.append(iter3,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
