@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>io.github.arunsivaramanneo.GPUViewer</id>
+    <launchable type="desktop-id">io.github.arunsivaramanneo.GPUViewer.desktop</launchable>
+    <name>GPU-Viewer</name>
+    <summary>A front-end to glxinfo, vulkaninfo, clinfo and es2_info</summary>
+    <description>
+        <p>
+            This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work.
+        </p>
+    </description>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0</project_license>
+    <url type="homepage">https://github.com/arunsivaramanneo/GPU-Viewer</url>
+    <url type="bugtracker">https://github.com/arunsivaramanneo/GPU-Viewer/issues</url>
+    <url type="donation">https://www.paypal.me/ArunSivaraman</url>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://user-images.githubusercontent.com/30646692/42731013-13f37576-8822-11e8-96c8-04ab062f690f.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://user-images.githubusercontent.com/30646692/42731014-157f0b26-8822-11e8-95a8-695852d1d7c1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://user-images.githubusercontent.com/30646692/42731015-174af686-8822-11e8-8dfb-5baad1cface1.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://user-images.githubusercontent.com/30646692/42731016-18ca0628-8822-11e8-90c1-def21ee5d0bb.png</image>
+        </screenshot>
+    </screenshots>
+    <content_rating type="oars-1.1"/>
+    <releases>
+        <release version="1.38" date="2022-03-21"/>
+        <release version="1.37" date="2021-12-06"/>
+        <release version="1.36" date="2021-10-15"/>
+        <release version="1.35" date="2021-09-27"/>
+        <release version="1.15" date="2018-12-22"/>
+    </releases>
+</component>

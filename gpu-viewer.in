@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd @datadir@/gpu-viewer/Files
+exec python3 GPUViewer.py
