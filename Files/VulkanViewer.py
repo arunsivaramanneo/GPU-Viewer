@@ -104,7 +104,7 @@ def Vulkan(tab2):
                 valueRHS[i] = getVulkanVersion(valueRHS[i])
                 iter1 = DeviceTab_Store.append(None,["Vulkan Details..."," ",Const.BGCOLOR3])
             if "driverVersion" in valueLHS[i]:
-                valueRHS[i] = getDriverVersion(valueRHS)
+                valueRHS[i] = getDriverVersion(valueRHS,i)
             if "Model" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Processor Details..."," ",Const.BGCOLOR3])
             if "Description" in valueLHS[i]:

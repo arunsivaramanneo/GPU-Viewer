@@ -176,17 +176,17 @@ def getVulkanVersion(value):
     return "%d.%d.%d" % (majorVersion, minorVersion, patchVersion)
 
 
-def getDriverVersion(value):
-    if '4318' in value[6]:
-        majorVersion = (int(value[10]) >> 22) & 1023
-        minorVersion = (int(value[10]) >> 14) & 255
-        microVersion = (int(value[10]) >> 6) & 255
-        nanoVersion = int(value[10]) & 63
+def getDriverVersion(value,i):
+    if '4318' in value:
+        majorVersion = (int(value[i]) >> 22) & 1023
+        minorVersion = (int(value[i]) >> 14) & 255
+        microVersion = (int(value[i]) >> 6) & 255
+        nanoVersion = int(value[i]) & 63
         return "%d.%.2d.%.2d.%d" % (majorVersion, minorVersion, microVersion, nanoVersion)
     else:
-        majorVersion = int(value[10]) >> 22
-        minorVersion = int(value[10]) >> 12 & 1023
-        microVersion = int(value[10]) & 4095
+        majorVersion = int(value[i]) >> 22
+        minorVersion = int(value[i]) >> 12 & 1023
+        microVersion = int(value[i]) & 4095
         return "%d.%d.%d" % (majorVersion, minorVersion, microVersion)
 
 
