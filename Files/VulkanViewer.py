@@ -42,8 +42,8 @@ def Vulkan(tab2):
         os.system(
             "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '{gsub(/\(.*/,'True');}1'  > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % (GPUname,GPUname+1))
         # noinspection PyPep8
-       # os.system(
-        #    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | awk '/--.*/{flag=1;next}flag' | grep Version | awk '{gsub(/\(.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" %(GPUname,GPUname+1))
+        os.system(
+            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" %(GPUname))
 
         # noinspection PyPep8
         os.system(
