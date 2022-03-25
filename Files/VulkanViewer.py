@@ -599,7 +599,7 @@ def Vulkan(tab2):
 
     def Surface(GPU):
 
-        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id : %d/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU,GPU+1))
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDsurfaceType1.txt"%(GPU))
         
 
         os.system(
