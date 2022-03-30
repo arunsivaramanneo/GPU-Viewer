@@ -6,9 +6,9 @@
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 
-![Vulkan_tab](https://user-images.githubusercontent.com/30646692/135678832-4b9128d5-d2ae-4fdd-b8ce-b89ea41b81ae.png)
+![Screenshot from 2022-03-29 17-07-57](https://user-images.githubusercontent.com/30646692/160656599-393fab10-d3bf-4679-b9a7-90aff66863a8.png)
 
-![OpenGL_Tab](https://user-images.githubusercontent.com/30646692/135678855-cf840a78-1f8b-4e9a-a264-f08b318fd3d9.png)
+![Screenshot from 2022-03-29 17-08-27](https://user-images.githubusercontent.com/30646692/160656679-23e5164e-75b1-475a-9e94-f8ad2d77fe9e.png)
 
 ![OpenCL_Tab](https://user-images.githubusercontent.com/30646692/135678866-779b115e-6dd0-4639-8450-2c790c9a74f8.png)
 
@@ -37,8 +37,11 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 5. **Arch based distro** - 	[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. **Fedora (RPM) based distro** run the command **sudo dnf -y install clinfo egl-utils mesa-demos mesa-vulkan-drivers python3 vdpauinfo vulkan-tools** from the terminal, then complete steps 7 to 10.
 7. For others please follow steps 7 to 10
-8. Download the file and Extract to a folder
-9. Navigate to extracted folder, open terminal and enter ./install and follow on-screen instruction.
+8. Download the file  and Extract to a folder
+9. Navigate to extracted folder, open terminal and enter below commands
+    - meson _build
+    - cd _build
+    - ninja install
 10. Once completed,Application can be accessed at menu->System/Administration/System tools->GPU Viewer
 11. For **Vulkan Tab** to work Install vulkan-tools (sudo apt-get install vulkan-tools) in Ubuntu, vulkan-tools in Arch, Vulkan in Solus, also Vulkan enabled drivers should be installed.
 The installer should be able to take care of this dependency in Debian based distro and Solus.
