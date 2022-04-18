@@ -1,4 +1,5 @@
 import os
+from click import progressbar
 
 import gi
 
@@ -32,6 +33,7 @@ QueueTitle = ["Queue Family","Value"]
 InstanceTitle = ["Extensions", "Extension Revision"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
+GroupsTitle = ["Device Groups","Value"]
 
 def Vulkan(tab2):
     # Creating Tabs for different Features
@@ -640,6 +642,28 @@ def Vulkan(tab2):
                     SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
 
             TreeSurface.expand_all()
+    
+    def Groups(GPU):
+
+        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Device Groups.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Group %d:/{flag=1;next}/Group.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDGroups.txt"%(GPU))
+        
+        Groups_Store.clear()
+        TreeGroups.set_model(Groups_Store)
+        with open("/tmp/gpu-viewer/VKDGroups.txt", "r") as file1:
+            for i,line in enumerate(file1):
+                if 'Properties' in line or "Capabilities" in line:
+                    iter1 = Groups_Store.append(None,[(line.strip('\n')).strip('\t'),"",Const.BGCOLOR3])
+                    continue
+                if '\t\t' in line and not '\t\t\t\t' in line and not '\t\t\t' in line:
+                    iter2 = Groups_Store.append(iter1,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    continue
+                if "\t\t\t" in line and not "\t\t\t\t" in line:
+                    iter3 = Groups_Store.append(iter2,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    continue
+                else:
+                    Groups_Store.append(iter3,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+
+        TreeGroups.expand_all()
 
     def searchPropertiesTree(model, iter, Tree):
         search_query = propertySearchEntry.get_text().lower()
@@ -705,6 +729,7 @@ def Vulkan(tab2):
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
+                Groups(text)
 
                 gpu_image = getGpuImage("/tmp/gpu-viewer/VKDDeviceinfo1.txt")
                 image_renderer.set_from_pixbuf(gpu_image)
@@ -1164,7 +1189,6 @@ def Vulkan(tab2):
     SurfaceTab = Gtk.Box(spacing=10)
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
     #SurfaceCombo = Gtk.ComboBoxText()
-    SurfaceTypeList = Gtk.ListStore(str)
     #SurfaceCombo.connect("changed", selectSurfaceType)
     #SurfaceGrid.add(SurfaceCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
@@ -1190,6 +1214,19 @@ def Vulkan(tab2):
     DevicesGrid.set_border_width(20)
     DevicesGrid.set_column_spacing(40)
     DevicesFrame.add(DevicesGrid)
+    
+    # ------------------------- Creating the Device Groups Tab ---------------------------------------
+
+    GroupsTab = Gtk.Box(spacing=10)
+    GroupsGrid = createSubTab(GroupsTab,notebook,"Groups")
+    Groups_Store = Gtk.TreeStore(str,str,str)
+    TreeGroups = Gtk.TreeView(Groups_Store,expand=True)
+    TreeGroups.set_property("enable-tree-lines",True)
+    setColumns(TreeGroups,GroupsTitle,Const.MWIDTH,0.0)
+    GroupsScrollbar = createScrollbar(TreeGroups)
+    GroupsGrid.add(GroupsScrollbar)
+
+
 
     #    grid.set_row_spacing(10)
     os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | grep deviceName | grep -o  =.* | grep -o ' .*' > /tmp/gpu-viewer/GPU.txt")

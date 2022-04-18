@@ -18,7 +18,7 @@ from gi.repository import Gtk, Gio
 
 if path.exists("/tmp/gpu-viewer") == True:
     message_info = Gtk.MessageDialog(flags=0,message_type=Gtk.MessageType.INFO,buttons=Gtk.ButtonsType.OK,text="gpu-viewer  application is already running")
-    message_info.format_secondary_text("If you are unable to view the application please run rm -r /tmp/gpu-viewer and run the application again")
+    message_info.format_secondary_text("If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
     message_info.run()
     message_info.destroy()
 else:
