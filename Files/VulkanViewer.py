@@ -646,22 +646,33 @@ def Vulkan(tab2):
     def Groups(GPU):
 
         os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Device Groups.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Group %d:/{flag=1;next}/Group.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDGroups.txt"%(GPU))
+        os.system("cat /tmp/gpu-viewer/VKDGroups.txt |awk '{gsub(/[=] .*/,'True');print}' > /tmp/gpu-viewer/VKDGroupsLHS.txt")
+        os.system("cat /tmp/gpu-viewer/VKDGroups.txt | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDGroupsRHS.txt")
+
+        groupsLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDGroupsLHS.txt")
+        groupsRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDGroupsRHS.txt")
         
         Groups_Store.clear()
         TreeGroups.set_model(Groups_Store)
+        j = 0
         with open("/tmp/gpu-viewer/VKDGroups.txt", "r") as file1:
             for i,line in enumerate(file1):
+                if "=" in line:
+                    groupvalueRHS = groupsRHS[j].strip('\n')
+                    j = j + 1
+                else:
+                    groupvalueRHS = ""
                 if 'Properties' in line or "Capabilities" in line:
-                    iter1 = Groups_Store.append(None,[(line.strip('\n')).strip('\t'),"",Const.BGCOLOR3])
+                    iter1 = Groups_Store.append(None,[((groupsLHS[i].strip('\n')).strip('\t').replace(': count','')),groupvalueRHS,Const.BGCOLOR3])
                     continue
                 if '\t\t' in line and not '\t\t\t\t' in line and not '\t\t\t' in line:
-                    iter2 = Groups_Store.append(iter1,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    iter2 = Groups_Store.append(iter1,[((groupsLHS[i].strip('\n')).strip('\t')).replace(': count ',''),groupvalueRHS,setBackgroundColor(i)])
                     continue
                 if "\t\t\t" in line and not "\t\t\t\t" in line:
-                    iter3 = Groups_Store.append(iter2,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    iter3 = Groups_Store.append(iter2,[((groupsLHS[i].strip('\n')).strip('\t')).replace(': count ',''),groupvalueRHS,setBackgroundColor(i)])
                     continue
                 else:
-                    Groups_Store.append(iter3,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                    Groups_Store.append(iter3,[(groupsLHS[i].strip('\n')).strip('\t'),groupvalueRHS,setBackgroundColor(i)])
 
         TreeGroups.expand_all()
 
