@@ -24,6 +24,8 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
+AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
+
 LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
 
 MESA_LOGO_PNG = "../Images/Mesa.png"
@@ -94,7 +96,7 @@ ICON_HEIGHT = 50
 
 ICON_HEIGHT2 = 50
 
-WIDTH_RATIO = 0.75
+WIDTH_RATIO = 0.80
 
 WIDTH_RATIO2 = 0.75
 
