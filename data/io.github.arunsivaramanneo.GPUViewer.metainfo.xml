@@ -30,6 +30,7 @@
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
+        <release version="1.40" date="2022-04-28"/>
         <release version="1.38" date="2022-03-21"/>
         <release version="1.37" date="2021-12-06"/>
         <release version="1.36" date="2021-10-15"/>

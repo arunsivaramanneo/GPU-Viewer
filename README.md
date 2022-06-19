@@ -6,16 +6,19 @@
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 
-![Screenshot from 2022-03-29 17-07-57](https://user-images.githubusercontent.com/30646692/160656599-393fab10-d3bf-4679-b9a7-90aff66863a8.png)
+![Screenshot from 2022-04-24 19-37-53](https://user-images.githubusercontent.com/30646692/164991416-b647a045-8f8f-4b98-9ea4-791ef262647c.png)
 
-![Screenshot from 2022-03-29 17-08-27](https://user-images.githubusercontent.com/30646692/160656679-23e5164e-75b1-475a-9e94-f8ad2d77fe9e.png)
 
-![OpenCL_Tab](https://user-images.githubusercontent.com/30646692/135678866-779b115e-6dd0-4639-8450-2c790c9a74f8.png)
+![Screenshot from 2022-04-24 19-38-07](https://user-images.githubusercontent.com/30646692/164991422-11aa9671-3ee3-4450-b0b9-e73fb6c80fe0.png)
 
-![VDPAU](https://user-images.githubusercontent.com/30646692/102018647-5a8bc500-3d66-11eb-9701-d4a961837881.png)
 
-![about_tab](https://user-images.githubusercontent.com/30646692/135678971-5a745477-5266-48f1-b4a3-ff204b1040d6.png)
+![Screenshot from 2022-04-24 19-38-13](https://user-images.githubusercontent.com/30646692/164991428-0cca0696-018e-4154-b646-ddf08e00f768.png)
 
+
+![Screenshot from 2022-04-24 19-38-18](https://user-images.githubusercontent.com/30646692/164991433-c44da2fa-4cf2-40be-aa9c-0a44c57b09df.png)
+
+
+![Screenshot from 2022-04-24 19-38-28](https://user-images.githubusercontent.com/30646692/164991440-f17e9a18-44ee-43c1-96f9-6a64d044fd2e.png)
 
 
 
@@ -34,7 +37,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
     Please note all the dependencies python, vulkan-tools,clinfo, es2_info will be installed, if not installed before.
 
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
-5. **Arch based distro** - 	[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yaourt -s gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
+5. **Arch based distro** - 	[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yay -S gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. **Fedora (RPM) based distro** run the command **sudo dnf -y install clinfo egl-utils mesa-demos mesa-vulkan-drivers python3 vdpauinfo vulkan-tools** from the terminal, then complete steps 7 to 10.
 7. For others please follow steps 7 to 10
 8. Download the file  and Extract to a folder
@@ -82,9 +85,9 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 21.10
-2. Desktop : Gnome 40.4
-3. Kernel : 5.13.x-xx
+1. Operating System : Ubuntu 22.04
+2. Desktop : Gnome 42
+3. Kernel : 5.15.x-xx
 4. IDE : VSCode
 
 
