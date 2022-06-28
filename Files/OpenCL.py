@@ -1,4 +1,5 @@
 import os
+from typing import List
 import gi
 import Const
 
@@ -149,7 +150,8 @@ def openCL(tab):
                     oclDeviceDetailsLHS[i] = "  Number of devices"
                     oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
                 if "Extensions" in oclDeviceDetailsLHS[i]:
-                    oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(' ')
+                    oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(" ")
+                    oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
                     iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
                                                              str(len(oclDeviceExtenstions)).strip('\n'),
                                                              setBackgroundColor(i), fgcolor[i]])
