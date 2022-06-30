@@ -195,7 +195,7 @@ def setColumnFrameBuffer(TreeFB, Title):
 
         FBrenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
-        column.add_attribute(FBrenderer, "background", 25)
+        column.add_attribute(FBrenderer, "background", len(Title))
         if i < len(Title) - 1:
             FBrenderer.set_alignment(0.5, 0.5)
             column.set_alignment(0.5)
@@ -261,10 +261,10 @@ def getGpuImage(filename):
             elif "CUDA" in line and ("GTX" not in line or "RTX" not in line):
                 gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 break
-            elif "Radeon" in line:
+            elif "Radeon" in line and "AMD" in line:
                 gpu_image = fetchImageFromUrl(Const.AMDRADEON_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 break
-            elif "AMD" in line or "ATI" in line:
+            elif "AMD" in line or "ATI" in line and "Radeon" not in line:
                 gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
                 break
             elif "LLVM" in line:
