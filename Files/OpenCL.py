@@ -89,9 +89,12 @@ def openCL(tab):
             platformDetailsTreeView.expand_all()
             background_color = setBackgroundColor(i)
             if "Extensions" in oclPlatformDetailsLHS[i] and "suffix" not in oclPlatformDetailsLHS[i]:
+                if "Version" in oclPlatformDetailsLHS[i]:
+                    continue
                 oclPlatformExtensions = oclPlatformDetailsRHS[i].split(' ')
+                oclPlatformExtensions = list(filter(None,oclPlatformExtensions))
                 iter = platformDetails_Store.append(None, [oclPlatformDetailsLHS[i].strip('\n'),
-                                                           str(len(oclPlatformExtensions)), background_color])
+                                                           str(len(oclPlatformExtensions)), Const.BGCOLOR3])
                 for j in range(len(oclPlatformExtensions)):
                     background_color = setBackgroundColor(j)
                     platformDetails_Store.append(iter, [oclPlatformExtensions[j].strip('\n'), " ", background_color])

@@ -88,7 +88,7 @@ TOOLTIP_CONTACT = "Contact us"
 
 FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", "rsz", "gsz", "bsz", "asz", "flt",
                    "srgb", "aux", "depth", "stcl",
-                   "acr", "acg", "acb", "aca", "msnum", "msbufs", "caveats"]
+                   "acr", "acg", "acb", "aca", "msnum", "msbufs", "Swap", "caveats"]
 
 ICON_WIDTH = 150
 

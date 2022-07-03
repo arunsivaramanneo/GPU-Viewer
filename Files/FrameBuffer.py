@@ -1,3 +1,4 @@
+from typing import List
 import gi
 import os
 import Const
@@ -11,7 +12,7 @@ FrameBufferToolTip = ["Visual ID", "Visual Depth", "Visual Type", "Transparency"
                       "Blue Colorbuffer Size", "Alpha Colorbuffer Size"
                                                "float", "SRGB", "Auxillary Buffer", "Depth", "Stencil",
                       "Accumbuffer Red", "Accumbuffer Green", "Accumbuffer Blue", "Accumbuffer Alpha", "msnum",
-                      "msbufs", "Caveats"]
+                      "msbufs", "Swap", "Caveats"]
 
 
 def FrameBuffer(button):
@@ -26,7 +27,7 @@ def FrameBuffer(button):
 
     FBGLX_Store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str,
                                 str,
-                                str, str, str, str, str, str, str, str)
+                                str, str, str, str, str, str, str, str, str)
     TreeFBGLX = Gtk.TreeView(FBGLX_Store, expand=True)
     TreeFBGLX.set_enable_search(True)
     TreeFBGLX.set_property("enable-grid-lines", 3)
@@ -54,7 +55,7 @@ def FrameBuffer(button):
 
     FBConfig_Store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str,
                                    str,
-                                   str, str, str, str, str, str, str, str)
+                                   str, str, str, str, str, str, str, str, str)
     TreeFBConfig = Gtk.TreeView(FBConfig_Store, expand=True)
     TreeFBConfig.set_enable_search(True)
     TreeFBConfig.set_property("enable-grid-lines", 3)
@@ -66,6 +67,8 @@ def FrameBuffer(button):
     with open("/tmp/gpu-viewer/FrameBufferGLXFBconfigs.txt", "r") as file1:
         for line in file1:
             list.append(line.split())
+
+    
 
     for i in range(len(list) - 1):
         background_color = setBackgroundColor(i)
