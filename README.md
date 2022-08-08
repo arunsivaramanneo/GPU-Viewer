@@ -39,7 +39,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 4. **Debian based distro** users should be able to install the application by just running the .deb file attached in the Release notes
 5. **Arch based distro** - 	[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions) - users should be able to grab the application at https://aur.archlinux.org/packages/gpu-viewer/ or by running command **yay -S gpu-viewer** from the terminal . This should automatically take care of the dependencies. Thanks to **Dan Johnson (strit)** for maintaining the AUR Package
 6. **Fedora based distro** run the command **sudo dnf -y install clinfo egl-utils mesa-demos mesa-vulkan-drivers python3 vdpauinfo vulkan-tools** from the terminal, then complete steps 8 to 11.
-7. **openSUSE based distro** run the command **sudo zypper install clinfo mesa-demo mesa-demo-egl mesa-demo-es mesa-vulkan-device-select libvulkan_intel libvulkan_lvp libvulkan_radeon python3 libvdpau1 vulkan-tools** from the terminal, then complete steps 8 to 11.
+7. **openSUSE based distro** run the command **sudo zypper install clinfo mesa-demo mesa-vulkan-device-select libvulkan_intel libvulkan_lvp libvulkan_radeon python3 libvdpau1 vulkan-tools** from the terminal, then complete steps 8 to 11.
 8. For others please follow steps 8 to 11
 9. Download the file  and Extract to a folder
 10. Navigate to extracted folder, open terminal and enter below commands
