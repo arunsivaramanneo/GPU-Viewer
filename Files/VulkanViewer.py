@@ -103,10 +103,12 @@ def Vulkan(tab2):
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
             if "apiVersion" in valueLHS[i]:
-                valueRHS[i] = getVulkanVersion(valueRHS[i])
+                if '.' not in valueRHS[i]:
+                    valueRHS[i] = getVulkanVersion(valueRHS[i])
                 iter1 = DeviceTab_Store.append(None,["Vulkan Details..."," ",Const.BGCOLOR3])
             if "driverVersion" in valueLHS[i]:
-                valueRHS[i] = getDriverVersion(valueRHS,i)
+                if '.' not in valueRHS[i]:
+                    valueRHS[i] = getDriverVersion(valueRHS,i)
             if "Model" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Processor Details..."," ",Const.BGCOLOR3])
             if "Description" in valueLHS[i]:

@@ -157,7 +157,7 @@ def openCL(tab):
                     oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
                     iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
                                                              str(len(oclDeviceExtenstions)).strip('\n'),
-                                                             setBackgroundColor(i), fgcolor[i]])
+                                                             Const.BGCOLOR3, fgcolor[i]])
                     for j in range(len(oclDeviceExtenstions)):
                         DeviceDetailsTreeView.expand_all()
                         DeviceDetails_Store.append(iter,
@@ -225,7 +225,7 @@ def openCL(tab):
                                                         len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
                     iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
                                                                  oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
-                                                                 setBackgroundColor(i), fgcolor[i]])
+                                                                 Const.BGCOLOR3, fgcolor[i]])
                 elif "Built-in" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceKernels = oclDeviceMemoryImageDetailsRHS[i].split(';')
                     iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
@@ -294,7 +294,7 @@ def openCL(tab):
                 if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
                 iter = DeviceVector_store.append(None, [oclDeviceVectorDetailsLHS[i].strip('\n'),
-                                                        oclDeviceVectorDetailsRHS[i].strip('\n'), setBackgroundColor(i),
+                                                        oclDeviceVectorDetailsRHS[i].strip('\n'), Const.BGCOLOR3,
                                                         fgcolor[i]])
 
     def getDeviceQueueExecutionCapabilities(value):
