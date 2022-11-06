@@ -67,7 +67,7 @@ def Vulkan(tab2):
             # noinspection PyPep8
             os.system(
                 "cat /tmp/gpu-viewer/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' > /tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
-            os.system("echo $DESKTOP_SESSION >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
+            os.system("echo $XDG_CURRENT_DESKTOP >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             os.system("uname -r >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             os.system("echo $XDG_SESSION_TYPE >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
             valueLHS = valueLHS + copyContentsFromFile("/tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
