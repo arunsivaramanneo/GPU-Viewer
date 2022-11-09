@@ -68,19 +68,22 @@ else:
     def isOpenclSupported():
         with open("/tmp/gpu-viewer/clinfo.txt", "w") as file:
             clinfo_process = subprocess.Popen(Commands.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+            clinfo_process.wait()
             clinfo_process.communicate()
         return clinfo_process.returncode == 0
 
     def isOpenglSupported():
         with open("/tmp/gpu-viewer/glxinfo.txt", "w") as file:
             opengl_process = subprocess.Popen(Commands.opengl_output_command,shell=False,stdout= file,universal_newlines=True)
+            opengl_process.wait()
             opengl_process.communicate()
-        return opengl_process.returncode == 0
+        return opengl_process.returncode == 1
 
 
     def isVulkanSupported():
         with open("/tmp/gpu-viewer/vulkaninfo.txt","w") as file:
             vulkan_process = subprocess.Popen(Commands.vulkaninfo_output_command,shell=False,stdout= file,universal_newlines=True)
+            vulkan_process.wait()
             vulkan_process.communicate()
         return vulkan_process.returncode == 0
 
@@ -93,6 +96,7 @@ else:
     def isVdpauinfoSupported():
         with open("/tmp/gpu-viewer/vdpauinfo.txt", "w") as file:
             vdpauinfo_process = subprocess.Popen(Commands.vdpauinfo_output_command,shell=False,stdout= file,universal_newlines=True)
+            vdpauinfo_process.wait()
             vdpauinfo_process.communicate()
         return vdpauinfo_process.returncode == 0
 

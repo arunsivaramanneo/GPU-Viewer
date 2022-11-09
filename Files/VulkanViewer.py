@@ -1,6 +1,7 @@
 import os
 from click import progressbar
-
+import subprocess
+import Commands
 import gi
 
 import Const
@@ -38,67 +39,69 @@ GroupsTitle = ["Device Groups","Value"]
 def Vulkan(tab2):
     # Creating Tabs for different Features
 
-    # Creating Feature Tab
+    # Creating Feature TabFalseFalse
     def Devices(GPUname):
         # noinspection PyPep8
-        os.system(
-            "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1'  > /tmp/gpu-viewer/VKDDeviceinfo1.txt" % (GPUname))
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline >> /tmp/gpu-viewer/VKDDeviceinfo1.txt" %(GPUname))
+        fetch_vulkan_gpu_info_command = "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1' | sort " %(GPUname)
+        fetch_vulkan_gpu_pipeline_command = "%s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Commands.vulkaninfo_output_command[0],GPUname)
+        fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r"
+        fetch_mem_info_command = "cat /proc/meminfo | awk '/Mem/'"
+        fetch_lsb_release_info_command = "lsb_release -d -r -c"
 
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDDeviceinfo1.txt | sort | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDDeviceinfo.txt")
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDDeviceinfo1.txt | sort | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-        os.system(
-            "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r | awk '{gsub(/:.*/,'True');}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
-        os.system(
-            "LC_ALL=C lscpu | awk '/name|^CPU|^L/'| sort -r | grep -o :.* | grep -o '  .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-        os.system("cat /proc/meminfo | awk '/Mem/' | awk '{gsub(/:.*/,'True')l}1' >> /tmp/gpu-viewer/VKDDeviceinfo.txt")
-        os.system("cat /proc/meminfo | awk '/Mem/' | grep -o :.* | grep -o ' .*' >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo.txt")
+        with open("/tmp/gpu-viewer/VKDDeviceinfotemp.txt","w" ) as file:
+            fetch_vulkan_gpu_info_process = subprocess.Popen(fetch_vulkan_gpu_info_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_gpu_info_process.communicate()
+            fetch_vulkan_gpu_pipeline_process = subprocess.Popen(fetch_vulkan_gpu_pipeline_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_gpu_pipeline_process.communicate()
+            fetch_cpu_info_process = subprocess.Popen(fetch_cpu_info_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_cpu_info_process.communicate()
+            fetch_mem_info_process = subprocess.Popen(fetch_mem_info_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_cpu_info_process.communicate()
+            fetch_lsb_release_process = subprocess.Popen(fetch_lsb_release_info_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_lsb_release_process.communicate()
 
-        try:
-            os.system("lsb_release -d -r -c > /tmp/gpu-viewer/VKDLsbRelease.txt")
-            os.system("cat /tmp/gpu-viewer/VKDLsbRelease.txt | grep -o :.* >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-            # noinspection PyPep8
-            os.system(
-                "cat /tmp/gpu-viewer/VKDLsbRelease.txt | awk '{gsub(/:.*/,'True');}1' > /tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
-            os.system("echo $XDG_CURRENT_DESKTOP >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-            os.system("uname -r >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-            os.system("echo $XDG_SESSION_TYPE >> /tmp/gpu-viewer/VKDDeviceinfo2.txt")
-            valueLHS = valueLHS + copyContentsFromFile("/tmp/gpu-viewer/VKDLsbReleaseLHS.txt")
-            valueLHS.append("Desktop")
-            valueLHS.append("Kernel")
-            valueLHS.append("Windowing System")
-        except Exception as e:
-            raise e
-        # Storing the RHS values into a list
+        fetch_device_tab_lhs_command = "cat /tmp/gpu-viewer/VKDDeviceinfotemp.txt | awk '{gsub(/[=,:].*/,'True');}1' "
 
-        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfo2.txt")
+        with open("/tmp/gpu-viewer/VKDDeviceinfotempLHS.txt","w") as file:
+            fetch_device_tab_lhs_process = subprocess.Popen(fetch_device_tab_lhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_tab_lhs_process.communicate()
+        
+        fetch_device_tab_rhs_command = "cat /tmp/gpu-viewer/VKDDeviceinfotemp.txt | grep -oE '[=,:].*'"
+        fetch_XDG_CURRENT_DESKTOP_command = "echo $XDG_CURRENT_DESKTOP"
+        fetch_kernal_version_command = "uname -r"
+        fetch_windowing_system_command = "echo $XDG_SESSION_TYPE"
+        
+        with open("/tmp/gpu-viewer/VKDDeviceinfotempRHS.txt","w") as file:
+            fetch_device_tab_rhs_process = subprocess.Popen(fetch_device_tab_rhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_tab_rhs_process.communicate()
+            fetch_XDG_CURRENT_DESKTOP_process = subprocess.Popen(fetch_XDG_CURRENT_DESKTOP_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_XDG_CURRENT_DESKTOP_process.communicate()
+            fetch_kernal_version_process = subprocess.Popen(fetch_kernal_version_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_kernal_version_process.communicate()
+            fetch_windowing_system_process = subprocess.Popen(fetch_windowing_system_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_windowing_system_process.communicate()
 
+        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfotempLHS.txt")
+        valueLHS.append("Desktop")
+        valueLHS.append("Kernel")
+        valueLHS.append("Windowing System")
+        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfotempRHS.txt")
+
+        valueRHS = [i.strip('=') for i in valueRHS]
+        valueRHS = [i.strip(':') for i in valueRHS]
         for i in range(len(valueRHS)):
             if "0x" in valueRHS[i]:
                 valueRHS[i] = int(valueRHS[i], 16)
                 valueRHS[i] = str("%d" % valueRHS[i])
 
-        #valueRHS[0] = getVulkanVersion(valueRHS[0])
-        #valueRHS[4] = getDriverVersion(valueRHS)
-
 
         valueLHS = [i.strip('\t') for i in valueLHS]
-        valueRHS = [i.strip(':') for i in valueRHS]
         valueRHS = [i.strip('\t') for i in valueRHS]
         valueRHS = [i.strip(' ') for i in valueRHS]
-        # Printing the Details into the Treeview
 
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
-        deviceHardwareInfo = ["GPU","CPU","MEMORY","OS INFO."]
         
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
@@ -198,7 +201,7 @@ def Vulkan(tab2):
 
     def Extensions(GPUname):
 
-        for i in range(len(list)):
+        for i in range(len(gpu_list)):
             if GPUname == i:
                 # noinspection PyPep8
                 os.system(
@@ -731,8 +734,7 @@ def Vulkan(tab2):
     def radcall(combo):
 
         text = combo.get_active()
-
-        for i in range(len(list)):
+        for i in range(len(gpu_list)):
             if text == i:
                 Devices(text)
                 Features(text)
@@ -744,7 +746,7 @@ def Vulkan(tab2):
                 Surface(text)
                 Groups(text)
 
-                gpu_image = getGpuImage("/tmp/gpu-viewer/VKDDeviceinfo1.txt")
+                gpu_image = getGpuImage(gpu_list[text])
                 image_renderer.set_from_pixbuf(gpu_image)
 
             Instance()
@@ -1239,14 +1241,12 @@ def Vulkan(tab2):
     GroupsScrollbar = createScrollbar(TreeGroups)
     GroupsGrid.add(GroupsScrollbar)
 
+    with open("/tmp/gpu-viewer/GPU.txt","w") as file:
+        fetch_device_name_process = subprocess.Popen(Commands.vulkan_summary_command+Commands.fetch_device_name_command,shell=True,stdout=file,universal_newlines=True)
+        fetch_device_name_process.communicate()
 
-
-    #    grid.set_row_spacing(10)
-    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | grep deviceName | grep -o  =.* | grep -o ' .*' > /tmp/gpu-viewer/GPU.txt")
-
-    list = copyContentsFromFile("/tmp/gpu-viewer/GPU.txt")
-
-    list = [i.strip('\n ') for i in list]
+    gpu_list = copyContentsFromFile("/tmp/gpu-viewer/GPU.txt")
+    gpu_list = [i.strip('\n ') for i in gpu_list]
 
     DS = Gtk.Label()
     gpu_image = Gtk.Image()
@@ -1255,7 +1255,7 @@ def Vulkan(tab2):
     gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(Const.APP_LOGO_PNG, 50, 50)
     image_renderer = Gtk.Image.new_from_pixbuf(gpu_image)
     gpu_store = Gtk.ListStore(str)
-    for i in list:
+    for i in gpu_list:
         gpu_store.append([i])
 
     gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)

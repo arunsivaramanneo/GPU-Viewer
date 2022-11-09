@@ -3,7 +3,8 @@ import gi
 import Const
 import re
 import os.path
-
+import subprocess
+import Commands
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from FrameBuffer import FrameBuffer
@@ -29,7 +30,8 @@ def OpenGL(tab1):
     grid.attach(frame1, 0, 0, 12, 1)
     frame1.add(grid4)
     OpenGLInfo_list = Gtk.ListStore(str, str, str)
-    os.system("glxinfo -s > /tmp/gpu-viewer/glxinfo.txt")
+#    with open("tmp/gpu-viewer/OpenGL_Information.txt","a+") as file:
+#        opengl_information_process = subprocess.Popen([Commands.opengl_output_command,'grep string'])
     os.system("cat /tmp/gpu-viewer/glxinfo.txt | grep string | grep -v glx > /tmp/gpu-viewer/OpenGL_Information.txt")
     os.system("es2_info | awk '/EGL_VERSION|VENDOR/' >> /tmp/gpu-viewer/OpenGL_Information.txt")
     os.system("cat /tmp/gpu-viewer/OpenGL_Information.txt | grep -o :.* | grep -o ' .*' > /tmp/gpu-viewer/OpenGLRHS.txt")

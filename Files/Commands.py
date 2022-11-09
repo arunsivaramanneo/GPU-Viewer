@@ -6,6 +6,6 @@ opengl_output_command = ["glxinfo","-s"]
 
 # ------------- Vulkan Tab Commands
 
-vulkan_summary_command = ["vulkaninfo --summary"]
+vulkan_summary_command = "vulkaninfo --summary"
 
-fetch_device_name_command = ["vulkaninfo --summary | grep deviceName | grep -o  =.* | grep -o ' .*' "]
+fetch_device_name_command = " | grep deviceName | grep -o  =.* | grep -o ' .*' "
