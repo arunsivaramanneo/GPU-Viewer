@@ -219,7 +219,10 @@ def OpenGL(tab1):
     Button_FB.connect("clicked", FrameBuffer)
   #  FBFrame.add(Button_FB)
 
-    vendorImg = getGpuImage("/tmp/gpu-viewer/OpenGLRHS.txt")
+    fetch_gpu_renderer_command = "cat %s | grep renderer | grep -o :.* | grep -o ' .*'" %(Commands.opengl_device_info_file)
+    fetch_gpu_renderer_process = subprocess.Popen(fetch_gpu_renderer_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+    gpu_renderer = fetch_gpu_renderer_process.communicate()[0].decode("utf-8")
+    vendorImg = getGpuImage(gpu_renderer)
 
     grid.attach_next_to(Gtk.Image.new_from_pixbuf(vendorImg), Button_Limits, Gtk.PositionType.RIGHT, 1, 1)
     grid.attach(Button_FB, 3, 1, 2, 1)

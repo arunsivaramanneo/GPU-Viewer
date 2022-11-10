@@ -77,11 +77,11 @@ else:
             opengl_process = subprocess.Popen(Commands.opengl_output_command,shell=False,stdout= file,universal_newlines=True)
             opengl_process.wait()
             opengl_process.communicate()
-        return opengl_process.returncode == 1
+        return opengl_process.returncode == 0
 
 
     def isVulkanSupported():
-        with open("/tmp/gpu-viewer/vulkaninfo.txt","w") as file:
+        with open(Commands.vulkaninfo_output_file,"w") as file:
             vulkan_process = subprocess.Popen(Commands.vulkaninfo_output_command,shell=False,stdout= file,universal_newlines=True)
             vulkan_process.wait()
             vulkan_process.communicate()

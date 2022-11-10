@@ -42,13 +42,21 @@ def Vulkan(tab2):
     # Creating Feature TabFalseFalse
     def Devices(GPUname):
         # noinspection PyPep8
+
+        # --------------------------------- commands for fetching the Device Tab info --- Modify/Add Commands here -------------------------------------------------------------
+
         fetch_vulkan_gpu_info_command = "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1' | sort " %(GPUname)
-        fetch_vulkan_gpu_pipeline_command = "%s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Commands.vulkaninfo_output_command[0],GPUname)
+        fetch_vulkan_gpu_pipeline_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Commands.vulkaninfo_output_file,GPUname)
         fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r"
         fetch_mem_info_command = "cat /proc/meminfo | awk '/Mem/'"
         fetch_lsb_release_info_command = "lsb_release -d -r -c"
+        fetch_device_tab_rhs_command = "cat %s | grep -oE '[=,:].*'" %(Commands.vulkan_device_info_file)
+        fetch_XDG_CURRENT_DESKTOP_command = "echo $XDG_CURRENT_DESKTOP"
+        fetch_kernal_version_command = "uname -r"
+        fetch_windowing_system_command = "echo $XDG_SESSION_TYPE"
 
-        with open("/tmp/gpu-viewer/VKDDeviceinfotemp.txt","w" ) as file:
+        # ------------------------------------ Writing the Output of all the Commands to a File -----------------------------------------------------------------------------------------------------
+        with open(Commands.vulkan_device_info_file,"w" ) as file:
             fetch_vulkan_gpu_info_process = subprocess.Popen(fetch_vulkan_gpu_info_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_gpu_info_process.communicate()
             fetch_vulkan_gpu_pipeline_process = subprocess.Popen(fetch_vulkan_gpu_pipeline_command,stdout=file,universal_newlines=True,shell=True)
@@ -56,22 +64,21 @@ def Vulkan(tab2):
             fetch_cpu_info_process = subprocess.Popen(fetch_cpu_info_command,stdout=file,universal_newlines=True,shell=True)
             fetch_cpu_info_process.communicate()
             fetch_mem_info_process = subprocess.Popen(fetch_mem_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_cpu_info_process.communicate()
+            fetch_mem_info_process.communicate()
             fetch_lsb_release_process = subprocess.Popen(fetch_lsb_release_info_command,stdout=file,universal_newlines=True,shell=True)
             fetch_lsb_release_process.communicate()
 
-        fetch_device_tab_lhs_command = "cat /tmp/gpu-viewer/VKDDeviceinfotemp.txt | awk '{gsub(/[=,:].*/,'True');}1' "
+        fetch_device_tab_lhs_command = "cat %s |  %s " %(Commands.vulkan_device_info_file,Commands.remove_rhs_Command)
 
-        with open("/tmp/gpu-viewer/VKDDeviceinfotempLHS.txt","w") as file:
+
+        # -------------------------------------- Seperating the LHS side of the Device Tab ----------------------------------------------------------------------------------------------
+        with open(Commands.vulkan_device_info_lhs_file,"w") as file:
             fetch_device_tab_lhs_process = subprocess.Popen(fetch_device_tab_lhs_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_tab_lhs_process.communicate()
         
-        fetch_device_tab_rhs_command = "cat /tmp/gpu-viewer/VKDDeviceinfotemp.txt | grep -oE '[=,:].*'"
-        fetch_XDG_CURRENT_DESKTOP_command = "echo $XDG_CURRENT_DESKTOP"
-        fetch_kernal_version_command = "uname -r"
-        fetch_windowing_system_command = "echo $XDG_SESSION_TYPE"
-        
-        with open("/tmp/gpu-viewer/VKDDeviceinfotempRHS.txt","w") as file:
+
+        #------------------------------------- Seperating the RHS Side of the Device Tab -------------------------------------------------------------------------------------------------------------------       
+        with open(Commands.vulkan_device_info_rhs_file,"w") as file:
             fetch_device_tab_rhs_process = subprocess.Popen(fetch_device_tab_rhs_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_tab_rhs_process.communicate()
             fetch_XDG_CURRENT_DESKTOP_process = subprocess.Popen(fetch_XDG_CURRENT_DESKTOP_command,stdout=file,universal_newlines=True,shell=True)
@@ -81,14 +88,15 @@ def Vulkan(tab2):
             fetch_windowing_system_process = subprocess.Popen(fetch_windowing_system_command,stdout=file,universal_newlines=True,shell=True)
             fetch_windowing_system_process.communicate()
 
-        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfotempLHS.txt")
+        valueLHS = copyContentsFromFile(Commands.vulkan_device_info_lhs_file)
         valueLHS.append("Desktop")
         valueLHS.append("Kernel")
         valueLHS.append("Windowing System")
-        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceinfotempRHS.txt")
+        valueRHS = copyContentsFromFile(Commands.vulkan_device_info_rhs_file)
 
         valueRHS = [i.strip('=') for i in valueRHS]
         valueRHS = [i.strip(':') for i in valueRHS]
+        
         for i in range(len(valueRHS)):
             if "0x" in valueRHS[i]:
                 valueRHS[i] = int(valueRHS[i], 16)
@@ -145,18 +153,14 @@ def Vulkan(tab2):
 
     def Features(GPUname):
 
-    #    for i in range(len(list)):
-    #        if
-        i = GPUname
-                # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' | awk '/==/{flag=1 ; next} flag' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt" %(i,i+1))
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' > /tmp/gpu-viewer/VKDeviceFeatures.txt" %(i,i+1))
-    #    break
+        fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' " %(Commands.vulkaninfo_output_file,GPUname,GPUname+1)
+    
+        with open(Commands.vulkan_device_features_file,"w") as file:
+            fetch_device_features_process = subprocess.Popen(fetch_device_features_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_features_process.communicate()
+
         featureCombo.remove_all()
-        with open("/tmp/gpu-viewer/VKDeviceFeatures.txt", "r") as file:
+        with open(Commands.vulkan_device_features_file, "r") as file:
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
@@ -167,15 +171,24 @@ def Vulkan(tab2):
 
     def Limits(GPUname):
 
+        fetch_vulkan_Limits_ouput_command = "awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./'" %(GPUname)
+        fetch_vulkan_Limits_ouput_lhs_command = "cat %s | %s " %(Commands.vulkan_device_limits_file,Commands.remove_rhs_Command)
+        fetch_vulkan_Limits_ouput_rhs_command = "cat %s | grep -o '=.*' | grep -o '[ -].*'" %(Commands.vulkan_device_limits_file)
 
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./' > /tmp/gpu-viewer/VKDlimits1.txt" % GPUname)
-        os.system("cat /tmp/gpu-viewer/VKDlimits1.txt | awk '{gsub(/=.*/,'True');}1' > /tmp/gpu-viewer/VKDlimits.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDlimits1.txt | grep -o '=.*' | grep -o '[ -].*' > /tmp/gpu-viewer/VKDlimits2.txt")
+        with open(Commands.vulkan_device_limits_file,"w") as file:
+            fetch_Vulkan_Limits_ouput_process = subprocess.Popen(Commands.fetch_vulkaninfo_ouput_command+fetch_vulkan_Limits_ouput_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_Vulkan_Limits_ouput_process.communicate()
+        
+        with open(Commands.vulkan_device_limits_lhs_file,"w") as file:
+            fetch_vulkan_Limits_ouput_lhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_lhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_Limits_ouput_lhs_process.communicate()
 
-        valueLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDlimits.txt")
-        valueRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDlimits2.txt")
+        with open(Commands.vulkan_device_limits_rhs_file,"w") as file:
+            fetch_vulkan_Limits_ouput_rhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_rhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_Limits_ouput_rhs_process.communicate()
+
+        valueLHS = copyContentsFromFile(Commands.vulkan_device_limits_lhs_file)
+        valueRHS = copyContentsFromFile(Commands.vulkan_device_limits_rhs_file)
 
         # finding and converting any hexadecimal value to decimal
 
@@ -183,7 +196,7 @@ def Vulkan(tab2):
         TreeLimits.set_model(LimitsTab_Store_filter)
 
 
-        with open("/tmp/gpu-viewer/VKDlimits1.txt", "r") as file1:
+        with open(Commands.vulkan_device_limits_file, "r") as file1:
             j = 0
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
@@ -201,25 +214,28 @@ def Vulkan(tab2):
 
     def Extensions(GPUname):
 
-        for i in range(len(gpu_list)):
-            if GPUname == i:
-                # noinspection PyPep8
-                os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort > /tmp/gpu-viewer/VKDExtensions1.txt" % i)
-                break
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDExtensions1.txt | grep -o 'revision.*' | grep -o ' .*' > /tmp/gpu-viewer/VKDExtensionsRHS.txt")
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDExtensions.txt")
+        fetch_device_extensions_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort" %(Commands.vulkaninfo_output_file,GPUname)
+        fetch_device_extensions_rhs_command = "cat %s | grep -o 'revision.*' | grep -o ' .*' "%Commands.vulkan_device_extensions_file
+        fetch_device_extensions_lhs_command = "cat %s | %s " %(Commands.vulkan_device_extensions_file,Commands.remove_rhs_Command)
+        
+        with open(Commands.vulkan_device_extensions_file,"w") as file:
+            fetch_device_extensions_process=subprocess.Popen(fetch_device_extensions_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_extensions_process.communicate()
 
-        value = copyContentsFromFile("/tmp/gpu-viewer/VKDExtensionsRHS.txt")
+        with open(Commands.vulkan_device_extension_lhs_file,"w") as file:
+            fetch_device_extensions_lhs_process = subprocess.Popen(fetch_device_extensions_lhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_extensions_lhs_process.communicate()
+
+        with open(Commands.vulkan_device_extension_rhs_file,"w") as file:
+            fetch_device_extensions_rhs_process = subprocess.Popen(fetch_device_extensions_rhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_extensions_rhs_process.communicate()
+
+        value_rhs = copyContentsFromFile(Commands.vulkan_device_extension_rhs_file)
 
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_store_filter)
 
-        with open("/tmp/gpu-viewer/VKDExtensions.txt", "r") as file1:
+        with open(Commands.vulkan_device_extension_lhs_file, "r") as file1:
             count = len(file1.readlines())
             label = "Extensions (%d)" % count
             notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
@@ -227,7 +243,7 @@ def Vulkan(tab2):
             for i, line in enumerate(file1):
                 text = line.strip('\t')
                 background_color = setBackgroundColor(i)
-                ExtensionTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
+                ExtensionTab_Store.append([text.strip('\n'), value_rhs[i].strip('\n'), background_color])
 
     def Formats(GPUname):
                 # noinspection PyPep8
@@ -856,28 +872,34 @@ def Vulkan(tab2):
 
     def selectFeature(Combo):
         feature = Combo.get_active_text()
+
+        fetch_device_features_all_command = "cat %s | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep =" %(Commands.vulkan_device_features_file)
+        fetch_device_features_selected_command = "cat %s | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort " %(Commands.vulkan_device_features_file,feature)
+        fetch_device_features_selected_lhs_command = "cat %s | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq" %(Commands.vulkan_device_features_select_file)
+
         if feature is None:
             feature = " "
         elif "Show All Device Features" in feature:
-            os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep = > /tmp/gpu-viewer/VKDFeatures1.txt")
-
+            with open(Commands.vulkan_device_features_select_file,"w") as file:
+                fetch_device_all_features_process = subprocess.Popen(fetch_device_features_all_command,stdout=file,universal_newlines=True,shell=True)
+                fetch_device_all_features_process.communicate()
         else:
-            os.system(
-                "cat /tmp/gpu-viewer/VKDeviceFeatures.txt | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort > /tmp/gpu-viewer/VKDFeatures1.txt" % feature)
+            with open(Commands.vulkan_device_features_select_file,"w") as file:
+                fetch_device_select_feature_process = subprocess.Popen(fetch_device_features_selected_command,stdout=file,universal_newlines=True,shell=True)
+                fetch_device_select_feature_process.communicate()
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFeatures1.txt | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq > /tmp/gpu-viewer/VKDFeatures.txt")
+        with open(Commands.vulkan_device_features_lhs_file,"w") as file:
+            fetch_device_select_features_lhs_process = subprocess.Popen(fetch_device_features_selected_lhs_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_device_select_features_lhs_process.communicate()
 
         value = []
         fgColor = []
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store_filter)
-        #fgColor, value = colorTrueFalse("/tmp/gpu-viewer/VKDFeatures1.txt", "= true")
-        FeaturesLHS = copyContentsFromFile("/tmp/gpu-viewer/VKDFeatures.txt",)
+        FeaturesLHS = copyContentsFromFile(Commands.vulkan_device_features_lhs_file,)
         count = 0
         for i,LHS in enumerate(FeaturesLHS):
-            with open("/tmp/gpu-viewer/VKDFeatures1.txt", "r") as file1:
+            with open(Commands.vulkan_device_features_select_file, "r") as file1:
                 text = LHS.strip('\n')
                 for line in file1:
                     if text in line:
@@ -893,8 +915,7 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
 
-    #    labe13 = "Features (%d)" %(count)
-    #    notebook.set_tab_label(FeatureTab,Gtk.Label(labe13))
+# ---------------------------------------------------------------------- Main UI ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     grid = Gtk.Grid()
     tab2.add(grid)
@@ -1241,6 +1262,7 @@ def Vulkan(tab2):
     GroupsScrollbar = createScrollbar(TreeGroups)
     GroupsGrid.add(GroupsScrollbar)
 
+    #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
     with open("/tmp/gpu-viewer/GPU.txt","w") as file:
         fetch_device_name_process = subprocess.Popen(Commands.vulkan_summary_command+Commands.fetch_device_name_command,shell=True,stdout=file,universal_newlines=True)
         fetch_device_name_process.communicate()
