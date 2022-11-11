@@ -420,20 +420,6 @@ def OpenGL(tab1):
             if search_query in value:
                 return True
 
-#    def switchCall(self, value):
-#        if switch.get_active():
-#            os.system(
-#                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
-#            os.system(
-#                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
-#        else:
-#            os.system(
-#                "cat /tmp/gpu-viewer/glxinfo.txt | awk '/OpenGL core profile extensions:/{flag=1;next}/OpenGL version*/{flag=0} flag' | grep GL_ | sort > /tmp/gpu-viewer/extensions.txt")
-#            os.system(
-#                "cat /tmp/gpu-viewer/glxinfo.txt  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort >> /tmp/gpu-viewer/extensions.txt")
-#        Radio(1)
-#        Vendor_Combo.set_active(0)
-
     Vendor_Combo = Gtk.ComboBox.new_with_model(Vendor_Store)
     Vendor_Combo.connect("changed", radcall2,vList,"/tmp/gpu-viewer/extensions_GL.txt",OpenGLExt_list,TreeGLExt,OpenGLExt_list_filter)
     Vendor_renderer = Gtk.CellRendererText()

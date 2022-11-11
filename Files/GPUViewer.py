@@ -82,7 +82,7 @@ else:
 
     def isVulkanSupported():
         with open(Commands.vulkaninfo_output_file,"w") as file:
-            vulkan_process = subprocess.Popen(Commands.vulkaninfo_output_command,shell=False,stdout= file,universal_newlines=True)
+            vulkan_process = subprocess.Popen(Commands.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
             vulkan_process.wait()
             vulkan_process.communicate()
         return vulkan_process.returncode == 0

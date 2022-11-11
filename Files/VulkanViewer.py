@@ -247,34 +247,43 @@ def Vulkan(tab2):
 
     def Formats(GPUname):
                 # noinspection PyPep8
-
-        os.system(
-            "vulkaninfo --show-formats | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./' > /tmp/gpu-viewer/VKDFORMATS.txt" % (GPUname,GPUname+1))
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep FORMAT_  | grep -v FORMAT_FEATURE > /tmp/gpu-viewer/VKFORMATS.txt" )
-
-
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' > /tmp/gpu-viewer/VKFORMATSCount.txt")
-
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/linear*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKLinearCount.txt")
+        fetch_vulkan_device_formats_command = "cat %s |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./'" %(Commands.vulkaninfo_output_file,GPUname,GPUname+1)
+        fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE " %(Commands.vulkan_device_formats_file)
+        fetch_vulkan_device_format_types_count_command = "cat %s | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' " %(Commands.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_linear_count_command = "cat %s | awk '/linear*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_optimal_count_command = "cat %s | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_buffer_count_command = "cat %s | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
         
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKOptimalCount.txt")
+        with open(Commands.vulkan_device_formats_file,"w") as file:
+            fetch_vulkan_device_formats_process = subprocess.Popen(fetch_vulkan_device_formats_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_formats_process.communicate()
         
+        with open(Commands.vulkan_device_formats_types_file,"w") as file:
+            fetch_vulkan_device_format_types_process = subprocess.Popen(fetch_vulkan_device_formats_types_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_format_types_process.communicate()
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' > /tmp/gpu-viewer/VKBufferCount.txt")
+        with open(Commands.vulkan_device_format_types_count_file,"w") as file:
+            fetch_vulkan_device_format_types_count_process = subprocess.Popen(fetch_vulkan_device_format_types_count_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_format_types_count_process.communicate()
+
+        with open(Commands.vulkan_device_format_types_linear_count_file,"w") as file:
+            fetch_vulkan_device_format_type_linear_count_process = subprocess.Popen(fetch_vulkan_device_format_type_linear_count_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_format_type_linear_count_process.communicate()
         
+        with open(Commands.vulkan_device_format_types_optimal_count_file,"w") as file:
+            fetch_vulkan_device_format_type_optimal_count_process = subprocess.Popen(fetch_vulkan_device_format_type_optimal_count_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_format_type_optimal_count_process.communicate()
 
-        valueFormats = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATS.txt")
-        valueFormatsCount = copyContentsFromFile("/tmp/gpu-viewer/VKFORMATSCount.txt")
-        valueLinearCount = copyContentsFromFile("/tmp/gpu-viewer/VKLinearCount.txt")
-        valueOptimalCount = copyContentsFromFile("/tmp/gpu-viewer/VKOptimalCount.txt")
-        valueBufferCount = copyContentsFromFile("/tmp/gpu-viewer/VKBufferCount.txt")
+        with open(Commands.vulkan_device_format_types_buffer_count_file,"w") as file:
+            fetch_vulkan_device_format_type_buffer_count_process = subprocess.Popen(fetch_vulkan_device_format_type_buffer_count_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_format_type_buffer_count_process.communicate()        
+
+        valueFormats = copyContentsFromFile(Commands.vulkan_device_formats_types_file)
+        valueFormatsCount = copyContentsFromFile(Commands.vulkan_device_format_types_count_file)
+        valueLinearCount = copyContentsFromFile(Commands.vulkan_device_format_types_linear_count_file)
+        valueOptimalCount = copyContentsFromFile(Commands.vulkan_device_format_types_optimal_count_file)
+        valueBufferCount = copyContentsFromFile(Commands.vulkan_device_format_types_buffer_count_file)
         
 
    
@@ -301,21 +310,39 @@ def Vulkan(tab2):
                 else:
                     bufferStatus = "false"
                     bufferColor = Const.COLOR2
+
+                fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+
+
                 iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
                 if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
                     iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag' > /tmp/gpu-viewer/VKLinear.txt " %(valueFormats[n].strip('\n')))
-                    with open("/tmp/gpu-viewer/VKLinear.txt") as file1:
+                    
+                    with open(Commands.vulkan_device_format_types_linear_file,"w") as file:
+                        fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
+                        fetch_vulkan_device_format_linear_types_process.communicate()
+                        
+                    with open(Commands.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
-                    with open("/tmp/gpu-viewer/VKOptimal.txt") as file1:
+
+                    with open(Commands.vulkan_device_format_types_optimal_file,"w") as file:
+                        fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
+                        fetch_vulkan_device_format_optimal_types_process.communicate()
+             #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
+                    with open(Commands.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
-                    with open("/tmp/gpu-viewer/VKBuffer.txt") as file1:
+
+                    with open(Commands.vulkan_device_format_types_buffer_file,"w") as file:
+                        fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
+                        fetch_vulkan_device_format_buffer_types_process.communicate()
+              #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
+                    with open(Commands.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 

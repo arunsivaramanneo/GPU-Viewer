@@ -1,5 +1,5 @@
 mkdir_output_command = ["mkdir /tmp/gpu-viewer"]
-vulkaninfo_output_command = ["vulkaninfo"]
+vulkaninfo_output_command = ["vulkaninfo --show-formats"]
 vdpauinfo_output_command = ["vdpauinfo"]
 clinfo_output_command = ["clinfo -a | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' "]
 opengl_output_command = ["glxinfo","-s"]
@@ -37,17 +37,21 @@ vulkan_device_extension_rhs_file = "/tmp/gpu-viewer/VKDDeviceExtensionRHS.txt"
 
 #........................ Vulkan Limits commands and File Names -------------------------------------
 
-vulkan_device_limits_file = "/tmp/gpu-viewer/VKDDeviceLimitstemp.txt"
+vulkan_device_limits_file = "/tmp/gpu-viewer/VKDDeviceLimitsTemp.txt"
 vulkan_device_limits_lhs_file = "/tmp/gpu-viewer/VKDDeviceLimitsLHS.txt"
 vulkan_device_limits_rhs_file = "/tmp/gpu-viewer/VKDDeviceLimitsRHS.txt"
 
+#.........................Vulkan Formats Commands and File Names ----------------------------------
 
-
-
-
-
-
-
+vulkan_device_formats_file = "/tmp/gpu-viewer/VKDDeviceFormatsTemp.txt"
+vulkan_device_formats_types_file = "/tmp/gpu-viewer/VKDDeviceFormatsTypesTemp.txt"
+vulkan_device_format_types_count_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesCountTemp.txt"
+vulkan_device_format_types_linear_count_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesLinearCountTemp.txt"
+vulkan_device_format_types_optimal_count_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesOptimalCountTemp.txt"
+vulkan_device_format_types_buffer_count_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesBufferCountTemp.txt"
+vulkan_device_format_types_linear_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesLinearTypesTemp.txt"
+vulkan_device_format_types_optimal_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesOptimalTypesTemp.txt"
+vulkan_device_format_types_buffer_file = "/tmp/gpu-viewer/VKDDeviceFormatTypesBufferTypesTemp.txt"
 
 
 
