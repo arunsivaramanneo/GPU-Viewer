@@ -2,7 +2,7 @@
 import os
 import subprocess
 import Const
-import Commands
+import Filenames
 import os.path
 from os import path
 from Common import MyGtk, setScreenSize
@@ -25,9 +25,9 @@ if path.exists("/tmp/gpu-viewer") == True:
     message_info.destroy()
 else:
     def main():
-    #    T1 = time.time()
+        T1 = time.time()
 
-        mkdir_process = subprocess.Popen(Commands.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
+        mkdir_process = subprocess.Popen(Filenames.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
         mkdir_process.communicate()
         gtk = MyGtk("GPU-VIEWER")
         setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
@@ -59,7 +59,7 @@ else:
         t3.start()
         t3.join()   
 
-    #    print(time.time()-T1)
+        print(time.time()-T1)
         gtk.connect("delete-event", quit)
         gtk.show_all()  
         gtk.mainLoop()
@@ -67,22 +67,22 @@ else:
 
     def isOpenclSupported():
         with open("/tmp/gpu-viewer/clinfo.txt", "w") as file:
-            clinfo_process = subprocess.Popen(Commands.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+            clinfo_process = subprocess.Popen(Filenames.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
             clinfo_process.wait()
             clinfo_process.communicate()
         return clinfo_process.returncode == 0
 
     def isOpenglSupported():
         with open("/tmp/gpu-viewer/glxinfo.txt", "w") as file:
-            opengl_process = subprocess.Popen(Commands.opengl_output_command,shell=False,stdout= file,universal_newlines=True)
+            opengl_process = subprocess.Popen(Filenames.opengl_output_command,shell=False,stdout= file,universal_newlines=True)
             opengl_process.wait()
             opengl_process.communicate()
         return opengl_process.returncode == 0
 
 
     def isVulkanSupported():
-        with open(Commands.vulkaninfo_output_file,"w") as file:
-            vulkan_process = subprocess.Popen(Commands.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
+        with open(Filenames.vulkaninfo_output_file,"w") as file:
+            vulkan_process = subprocess.Popen(Filenames.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
             vulkan_process.wait()
             vulkan_process.communicate()
         return vulkan_process.returncode == 0
@@ -90,12 +90,13 @@ else:
 
     def quit(instance, value):
         os.system("unset LC_ALL")
-        os.system("rm /tmp/gpu-viewer -r")
+        rmdir_process =subprocess.Popen(Filenames.rmdir_output_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        rmdir_process.communicate()
         instance.quit()
 
     def isVdpauinfoSupported():
         with open("/tmp/gpu-viewer/vdpauinfo.txt", "w") as file:
-            vdpauinfo_process = subprocess.Popen(Commands.vdpauinfo_output_command,shell=False,stdout= file,universal_newlines=True)
+            vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=False,stdout= file,universal_newlines=True)
             vdpauinfo_process.wait()
             vdpauinfo_process.communicate()
         return vdpauinfo_process.returncode == 0

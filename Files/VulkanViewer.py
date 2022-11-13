@@ -1,7 +1,7 @@
 import os
 from click import progressbar
 import subprocess
-import Commands
+import Filenames
 import gi
 
 import Const
@@ -46,17 +46,17 @@ def Vulkan(tab2):
         # --------------------------------- commands for fetching the Device Tab info --- Modify/Add Commands here -------------------------------------------------------------
 
         fetch_vulkan_gpu_info_command = "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1' | sort " %(GPUname)
-        fetch_vulkan_gpu_pipeline_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Commands.vulkaninfo_output_file,GPUname)
+        fetch_vulkan_gpu_pipeline_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Filenames.vulkaninfo_output_file,GPUname)
         fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r"
         fetch_mem_info_command = "cat /proc/meminfo | awk '/Mem/'"
         fetch_lsb_release_info_command = "lsb_release -d -r -c"
-        fetch_device_tab_rhs_command = "cat %s | grep -oE '[=,:].*'" %(Commands.vulkan_device_info_file)
+        fetch_device_tab_rhs_command = "cat %s | grep -oE '[=,:].*'" %(Filenames.vulkan_device_info_file)
         fetch_XDG_CURRENT_DESKTOP_command = "echo $XDG_CURRENT_DESKTOP"
         fetch_kernal_version_command = "uname -r"
         fetch_windowing_system_command = "echo $XDG_SESSION_TYPE"
 
         # ------------------------------------ Writing the Output of all the Commands to a File -----------------------------------------------------------------------------------------------------
-        with open(Commands.vulkan_device_info_file,"w" ) as file:
+        with open(Filenames.vulkan_device_info_file,"w" ) as file:
             fetch_vulkan_gpu_info_process = subprocess.Popen(fetch_vulkan_gpu_info_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_gpu_info_process.communicate()
             fetch_vulkan_gpu_pipeline_process = subprocess.Popen(fetch_vulkan_gpu_pipeline_command,stdout=file,universal_newlines=True,shell=True)
@@ -68,17 +68,17 @@ def Vulkan(tab2):
             fetch_lsb_release_process = subprocess.Popen(fetch_lsb_release_info_command,stdout=file,universal_newlines=True,shell=True)
             fetch_lsb_release_process.communicate()
 
-        fetch_device_tab_lhs_command = "cat %s |  %s " %(Commands.vulkan_device_info_file,Commands.remove_rhs_Command)
+        fetch_device_tab_lhs_command = "cat %s |  %s " %(Filenames.vulkan_device_info_file,Filenames.remove_rhs_Command)
 
 
         # -------------------------------------- Seperating the LHS side of the Device Tab ----------------------------------------------------------------------------------------------
-        with open(Commands.vulkan_device_info_lhs_file,"w") as file:
+        with open(Filenames.vulkan_device_info_lhs_file,"w") as file:
             fetch_device_tab_lhs_process = subprocess.Popen(fetch_device_tab_lhs_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_tab_lhs_process.communicate()
         
 
         #------------------------------------- Seperating the RHS Side of the Device Tab -------------------------------------------------------------------------------------------------------------------       
-        with open(Commands.vulkan_device_info_rhs_file,"w") as file:
+        with open(Filenames.vulkan_device_info_rhs_file,"w") as file:
             fetch_device_tab_rhs_process = subprocess.Popen(fetch_device_tab_rhs_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_tab_rhs_process.communicate()
             fetch_XDG_CURRENT_DESKTOP_process = subprocess.Popen(fetch_XDG_CURRENT_DESKTOP_command,stdout=file,universal_newlines=True,shell=True)
@@ -88,11 +88,11 @@ def Vulkan(tab2):
             fetch_windowing_system_process = subprocess.Popen(fetch_windowing_system_command,stdout=file,universal_newlines=True,shell=True)
             fetch_windowing_system_process.communicate()
 
-        valueLHS = copyContentsFromFile(Commands.vulkan_device_info_lhs_file)
+        valueLHS = copyContentsFromFile(Filenames.vulkan_device_info_lhs_file)
         valueLHS.append("Desktop")
         valueLHS.append("Kernel")
         valueLHS.append("Windowing System")
-        valueRHS = copyContentsFromFile(Commands.vulkan_device_info_rhs_file)
+        valueRHS = copyContentsFromFile(Filenames.vulkan_device_info_rhs_file)
 
         valueRHS = [i.strip('=') for i in valueRHS]
         valueRHS = [i.strip(':') for i in valueRHS]
@@ -153,14 +153,14 @@ def Vulkan(tab2):
 
     def Features(GPUname):
 
-        fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/GPU*/{flag=0}flag' " %(Commands.vulkaninfo_output_file,GPUname,GPUname+1)
+        fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
     
-        with open(Commands.vulkan_device_features_file,"w") as file:
+        with open(Filenames.vulkan_device_features_file,"w") as file:
             fetch_device_features_process = subprocess.Popen(fetch_device_features_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_features_process.communicate()
 
         featureCombo.remove_all()
-        with open(Commands.vulkan_device_features_file, "r") as file:
+        with open(Filenames.vulkan_device_features_file, "r") as file:
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
@@ -172,23 +172,21 @@ def Vulkan(tab2):
     def Limits(GPUname):
 
         fetch_vulkan_Limits_ouput_command = "awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/VkPhysicalDeviceLimits:/{flag=1;next}/VkPhysicalDeviceSparseProperties:/{flag=0}flag' | awk '/--/{flag=1;next}flag' | awk '/./'" %(GPUname)
-        fetch_vulkan_Limits_ouput_lhs_command = "cat %s | %s " %(Commands.vulkan_device_limits_file,Commands.remove_rhs_Command)
-        fetch_vulkan_Limits_ouput_rhs_command = "cat %s | grep -o '=.*' | grep -o '[ -].*'" %(Commands.vulkan_device_limits_file)
+        fetch_vulkan_Limits_ouput_lhs_command = "cat %s | %s " %(Filenames.vulkan_device_limits_file,Filenames.remove_rhs_Command)
+        fetch_vulkan_Limits_ouput_rhs_command = "cat %s | grep -o '=.*' | grep -o '[ -].*'" %(Filenames.vulkan_device_limits_file)
 
-        with open(Commands.vulkan_device_limits_file,"w") as file:
-            fetch_Vulkan_Limits_ouput_process = subprocess.Popen(Commands.fetch_vulkaninfo_ouput_command+fetch_vulkan_Limits_ouput_command,stdout=file,universal_newlines=True,shell=True)
+        with open(Filenames.vulkan_device_limits_file,"w") as file:
+            fetch_Vulkan_Limits_ouput_process = subprocess.Popen(Filenames.fetch_vulkaninfo_ouput_command+fetch_vulkan_Limits_ouput_command,stdout=file,universal_newlines=True,shell=True)
             fetch_Vulkan_Limits_ouput_process.communicate()
         
-        with open(Commands.vulkan_device_limits_lhs_file,"w") as file:
-            fetch_vulkan_Limits_ouput_lhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_lhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_vulkan_Limits_ouput_lhs_process.communicate()
+        fetch_vulkan_Limits_ouput_lhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_limits_lhs = fetch_vulkan_Limits_ouput_lhs_process.communicate()[0].splitlines()
 
-        with open(Commands.vulkan_device_limits_rhs_file,"w") as file:
-            fetch_vulkan_Limits_ouput_rhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_rhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_vulkan_Limits_ouput_rhs_process.communicate()
+        fetch_vulkan_Limits_ouput_rhs_process = subprocess.Popen(fetch_vulkan_Limits_ouput_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_limits_rhs = fetch_vulkan_Limits_ouput_rhs_process.communicate()[0].splitlines()
 
-        valueLHS = copyContentsFromFile(Commands.vulkan_device_limits_lhs_file)
-        valueRHS = copyContentsFromFile(Commands.vulkan_device_limits_rhs_file)
+     #   vulkan_device_limits_lhs = copyContentsFromFile(Filenames.vulkan_device_limits_lhs_file)
+     #   vulkan_device_limits_rhs = copyContentsFromFile(Filenames.vulkan_device_limits_rhs_file)
 
         # finding and converting any hexadecimal value to decimal
 
@@ -196,16 +194,16 @@ def Vulkan(tab2):
         TreeLimits.set_model(LimitsTab_Store_filter)
 
 
-        with open(Commands.vulkan_device_limits_file, "r") as file1:
+        with open(Filenames.vulkan_device_limits_file, "r") as file1:
             j = 0
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 if '=' in line:
-                    text = valueLHS[i].strip('\t')
-                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).replace(' count',''), valueRHS[j].strip('\n'), background_color])
+                    text = vulkan_device_limits_lhs[i].strip('\t')
+                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'), background_color])
                     j = j + 1
                 else:
-                    text = valueLHS[i].strip('\t')
+                    text = vulkan_device_limits_lhs[i].strip('\t')
                     if "\t" in line :
                         iter2 = LimitsTab_Store.append(iter,[text.strip('\n')," ", background_color])
                     else:
@@ -214,82 +212,73 @@ def Vulkan(tab2):
 
     def Extensions(GPUname):
 
-        fetch_device_extensions_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort" %(Commands.vulkaninfo_output_file,GPUname)
-        fetch_device_extensions_rhs_command = "cat %s | grep -o 'revision.*' | grep -o ' .*' "%Commands.vulkan_device_extensions_file
-        fetch_device_extensions_lhs_command = "cat %s | %s " %(Commands.vulkan_device_extensions_file,Commands.remove_rhs_Command)
+        fetch_device_extensions_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort" %(Filenames.vulkaninfo_output_file,GPUname)
+        fetch_device_extensions_rhs_command = "cat %s | grep -o 'revision.*' | grep -o ' .*' "%Filenames.vulkan_device_extensions_file
+        fetch_device_extensions_lhs_command = "cat %s | %s " %(Filenames.vulkan_device_extensions_file,Filenames.remove_rhs_Command)
         
-        with open(Commands.vulkan_device_extensions_file,"w") as file:
+        with open(Filenames.vulkan_device_extensions_file,"w") as file:
             fetch_device_extensions_process=subprocess.Popen(fetch_device_extensions_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_extensions_process.communicate()
 
-        with open(Commands.vulkan_device_extension_lhs_file,"w") as file:
-            fetch_device_extensions_lhs_process = subprocess.Popen(fetch_device_extensions_lhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_device_extensions_lhs_process.communicate()
+        fetch_device_extensions_lhs_process = subprocess.Popen(fetch_device_extensions_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_extension_lhs = fetch_device_extensions_lhs_process.communicate()[0].splitlines()
 
-        with open(Commands.vulkan_device_extension_rhs_file,"w") as file:
-            fetch_device_extensions_rhs_process = subprocess.Popen(fetch_device_extensions_rhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_device_extensions_rhs_process.communicate()
-
-        value_rhs = copyContentsFromFile(Commands.vulkan_device_extension_rhs_file)
+        fetch_device_extensions_rhs_process = subprocess.Popen(fetch_device_extensions_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_extensions_rhs = fetch_device_extensions_rhs_process.communicate()[0].splitlines()
 
         ExtensionTab_Store.clear()
         TreeExtension.set_model(ExtensionTab_store_filter)
 
-        with open(Commands.vulkan_device_extension_lhs_file, "r") as file1:
-            count = len(file1.readlines())
-            label = "Extensions (%d)" % count
-            notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
-            file1.seek(0, 0)
-            for i, line in enumerate(file1):
-                text = line.strip('\t')
-                background_color = setBackgroundColor(i)
-                ExtensionTab_Store.append([text.strip('\n'), value_rhs[i].strip('\n'), background_color])
+        for i in range(len(vulkan_device_extension_lhs)):
+            background_color = setBackgroundColor(i)
+            ExtensionTab_Store.append([vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i],background_color])
+
+        label = "Extensions (%d)" %len(vulkan_device_extensions_rhs)
+        notebook.set_tab_label(ExtensionTab, Gtk.Label(label))
 
     def Formats(GPUname):
                 # noinspection PyPep8
-        fetch_vulkan_device_formats_command = "cat %s |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./'" %(Commands.vulkaninfo_output_file,GPUname,GPUname+1)
-        fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE " %(Commands.vulkan_device_formats_file)
-        fetch_vulkan_device_format_types_count_command = "cat %s | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' " %(Commands.vulkan_device_formats_file)
-        fetch_vulkan_device_format_type_linear_count_command = "cat %s | awk '/linear*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
-        fetch_vulkan_device_format_type_optimal_count_command = "cat %s | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
-        fetch_vulkan_device_format_type_buffer_count_command = "cat %s | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' " %(Commands.vulkan_device_formats_file)
+        fetch_vulkan_device_formats_command = "cat %s |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./'" %(Filenames.vulkaninfo_output_file,GPUname,GPUname+1)
+        fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE " %(Filenames.vulkan_device_formats_file)
+        fetch_vulkan_device_format_types_count_command = "cat %s | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' " %(Filenames.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_linear_count_command = "cat %s | awk '/linear*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_optimal_count_command = "cat %s | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
+        fetch_vulkan_device_format_type_buffer_count_command = "cat %s | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         
 
-        with open(Commands.vulkan_device_formats_file,"w") as file:
+        with open(Filenames.vulkan_device_formats_file,"w") as file:
             fetch_vulkan_device_formats_process = subprocess.Popen(fetch_vulkan_device_formats_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_formats_process.communicate()
         
-        with open(Commands.vulkan_device_formats_types_file,"w") as file:
+        with open(Filenames.vulkan_device_formats_types_file,"w") as file:
             fetch_vulkan_device_format_types_process = subprocess.Popen(fetch_vulkan_device_formats_types_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_format_types_process.communicate()
 
-        with open(Commands.vulkan_device_format_types_count_file,"w") as file:
+        with open(Filenames.vulkan_device_format_types_count_file,"w") as file:
             fetch_vulkan_device_format_types_count_process = subprocess.Popen(fetch_vulkan_device_format_types_count_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_format_types_count_process.communicate()
 
-        with open(Commands.vulkan_device_format_types_linear_count_file,"w") as file:
+        with open(Filenames.vulkan_device_format_types_linear_count_file,"w") as file:
             fetch_vulkan_device_format_type_linear_count_process = subprocess.Popen(fetch_vulkan_device_format_type_linear_count_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_format_type_linear_count_process.communicate()
         
-        with open(Commands.vulkan_device_format_types_optimal_count_file,"w") as file:
+        with open(Filenames.vulkan_device_format_types_optimal_count_file,"w") as file:
             fetch_vulkan_device_format_type_optimal_count_process = subprocess.Popen(fetch_vulkan_device_format_type_optimal_count_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_format_type_optimal_count_process.communicate()
 
-        with open(Commands.vulkan_device_format_types_buffer_count_file,"w") as file:
+        with open(Filenames.vulkan_device_format_types_buffer_count_file,"w") as file:
             fetch_vulkan_device_format_type_buffer_count_process = subprocess.Popen(fetch_vulkan_device_format_type_buffer_count_command,stdout=file,universal_newlines=True,shell=True)
             fetch_vulkan_device_format_type_buffer_count_process.communicate()        
 
-        valueFormats = copyContentsFromFile(Commands.vulkan_device_formats_types_file)
-        valueFormatsCount = copyContentsFromFile(Commands.vulkan_device_format_types_count_file)
-        valueLinearCount = copyContentsFromFile(Commands.vulkan_device_format_types_linear_count_file)
-        valueOptimalCount = copyContentsFromFile(Commands.vulkan_device_format_types_optimal_count_file)
-        valueBufferCount = copyContentsFromFile(Commands.vulkan_device_format_types_buffer_count_file)
-        
-
-   
+        valueFormats = copyContentsFromFile(Filenames.vulkan_device_formats_types_file)
+        valueFormatsCount = copyContentsFromFile(Filenames.vulkan_device_format_types_count_file)
+        valueLinearCount = copyContentsFromFile(Filenames.vulkan_device_format_types_linear_count_file)
+        valueOptimalCount = copyContentsFromFile(Filenames.vulkan_device_format_types_optimal_count_file)
+        valueBufferCount = copyContentsFromFile(Filenames.vulkan_device_format_types_buffer_count_file)
+         
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store_filter)
-        n = 0;p = 0; t = 0;s = 0
+        n = 0
         for i in range(len(valueFormatsCount)):
             for j in range(int(valueFormatsCount[i])):
                 if 'None' not in valueLinearCount[i]:
@@ -311,120 +300,116 @@ def Vulkan(tab2):
                     bufferStatus = "false"
                     bufferColor = Const.COLOR2
 
-                fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Commands.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
 
 
                 iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
                 if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
                     iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     
-                    with open(Commands.vulkan_device_format_types_linear_file,"w") as file:
+                    with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
                         fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_linear_types_process.communicate()
                         
-                    with open(Commands.vulkan_device_format_types_linear_file) as file1:
+                    with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
-                    with open(Commands.vulkan_device_format_types_optimal_file,"w") as file:
+                    with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
                         fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_optimal_types_process.communicate()
              #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
-                    with open(Commands.vulkan_device_format_types_optimal_file) as file1:
+                    with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
-                    with open(Commands.vulkan_device_format_types_buffer_file,"w") as file:
+                    with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
                         fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_buffer_types_process.communicate()
               #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
-                    with open(Commands.vulkan_device_format_types_buffer_file) as file1:
+                    with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                 n +=1
-
-
-
                 
         labe1Format = "Formats (%d)" %len(valueFormats)
         notebook.set_tab_label(FormatsTab,Gtk.Label(labe1Format))
 
     def MemoryTypes(GPUname):
-        # propertiesGrid.add(propertiesCombo)ame):
-        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
+        
+        # -------------------------------------------- Commands --------------------------------------------------
+        fetch_vulkan_device_memory_types_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/memoryTypes: */{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' "%(Filenames.vulkaninfo_output_file,GPUname)
+        fetch_vulkan_device_memory_types_lhs_command = "cat %s | %s | awk '/./'" %(Filenames.vulkan_device_memory_types_file,Filenames.remove_rhs_Command)
+        fetch_vulkan_device_memory_types_rhs_command = "cat %s | grep -o heapIndex.* | grep -o '= .*' " %(Filenames.vulkan_device_memory_types_file)
+        fetch_vulkan_device_memory_types_property_flags_command = "cat %s | grep propertyFlags | grep -o  =.* | grep -o ' .*' |  %s " %(Filenames.vulkan_device_memory_types_file,Filenames.remove_rhs_Command)
+        #os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
 
-        # New One
-        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/memoryTypes: */{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryTypes.txt" %GPUname)
+        with open(Filenames.vulkan_device_memory_types_file,"w") as file:
+            fetch_vulkan_device_memory_types_process = subprocess.Popen(fetch_vulkan_device_memory_types_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_memory_types_process.communicate()
 
+        fetch_vulkan_device_memory_types_lhs_process = subprocess.Popen(fetch_vulkan_device_memory_types_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_memory_types_lhs = fetch_vulkan_device_memory_types_lhs_process.communicate()[0].splitlines()
 
-        # MemoryType LHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | awk '{gsub(/[=:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
+        fetch_vulkan_device_memory_types_rhs_process = subprocess.Popen(fetch_vulkan_device_memory_types_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_memory_types_rhs = fetch_vulkan_device_memory_types_rhs_process.communicate()[0].splitlines()
 
-        #MemoryType qRHS
-        os.system("cat /tmp/gpu-viewer/VKDMemoryTypes.txt | grep -o heapIndex.* | grep -o '= .*' > /tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
+        fetch_vulkan_device_memory_types_property_flags_process = subprocess.Popen(fetch_vulkan_device_memory_types_property_flags_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_memory_types_property_flags = fetch_vulkan_device_memory_types_property_flags_process.communicate()[0].splitlines()
 
-        mLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesLHS.txt")
-        mRHS = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryTypesRHS.txt")
-        #Copying Values to RHS as per LHS
         j = 0
         mRhs = []
-        with open("/tmp/gpu-viewer/VKDMemoryTypes.txt") as file1:
+        with open(Filenames.vulkan_device_memory_types_file) as file1:
             for line in file1:
                 if "heapIndex" in line:
-                    mRhs.append(mRHS[j].strip('= '))
+                    mRhs.append(vulkan_memory_types_rhs[j].strip('= '))
                     j = j + 1
                 else:
                     mRhs.append(" ")
 
         propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT","PROTECTED_BIT","DEVICE_COHERENT_BIT_AMD","DEVICE_UNCACHED_BIT_AMD"]
 
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryType.txt | grep propertyFlags | grep -o  =.* | grep -o ' .*' | awk '{gsub(/:.*/,'True');print}' > /tmp/gpu-viewer/VKDMemoryPropertyFlags.txt")
-        propertyFlags = copyContentsFromFile("/tmp/gpu-viewer/VKDMemoryPropertyFlags.txt")
-
-
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
         p = 0
         n = 0
-        for i in range(len(mLhs)):
+        for i in range(len(vulkan_memory_types_lhs)):
             background_color = setBackgroundColor(i)
-            if "memoryTypes" in mLhs[i]:
-                iter = MemoryTab_Store.append(None,[(mLhs[i].strip('\n')).strip("\t")," ",Const.BGCOLOR3,"BLACK"])
+            if "memoryTypes" in vulkan_memory_types_lhs[i]:
+                iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",Const.BGCOLOR3,"BLACK"])
                 continue
-            if "MEMORY" in mLhs[i]:
+            if "MEMORY" in vulkan_memory_types_lhs[i]:
                 continue
-            if "None" in mLhs[i] and n == 0:
+            if "None" in vulkan_memory_types_lhs[i] and n == 0:
                 n = n + 1
                 continue
-            if "heapIndex" in mLhs[i]:
-                iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
+            if "heapIndex" in vulkan_memory_types_lhs[i]:
+                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
                 continue
-            if  "IMAGE" in mLhs[i] and ("FORMAT" not in mLhs[i] or "color" not in mLhs[i] or "sparse" not in mLhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+            if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
+                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                 continue
-            if "\t\t\t" in mLhs[i] and "IMAGE" not in mLhs[i]:
-                MemoryTab_Store.append(iter3,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+            if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
+                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                 continue
-            if  "IMAGE" in mLhs[i] and ("FORMAT" not in mLhs[i] or "color" not in mLhs[i] or "sparse" not in mLhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+            if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
+                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                 continue
-            if "\t\t\t" in mLhs[i] and "IMAGE" not in mLhs[i]:
-                MemoryTab_Store.append(iter3,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+            if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
+                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                 continue
             else:
                 Flag = []
-                if "propertyFlags" in mLhs[i]:
-                        propertyFlags[p]
+                if "propertyFlags" in vulkan_memory_types_lhs[i]:
+                        vulkan_memory_types_property_flags[p]
                         #text = (mRhs[i].strip('\n')).strip(": ")
-                        iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
-                        dec = int(propertyFlags[p], 16)
+                        iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                        dec = int(vulkan_memory_types_property_flags[p], 16)
                         if  dec == 0:
                             n = 0
                         binary = bin(dec)[2:]
@@ -446,86 +431,97 @@ def Vulkan(tab2):
                             MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
                         p = p + 1
                 else:
-                    iter2 = MemoryTab_Store.append(iter,[(mLhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
                     continue
 
-        labe12 = "Memory Types (%d)" %len(propertyFlags)
+        labe12 = "Memory Types (%d)" %len(vulkan_memory_types_property_flags)
         MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(labe12))
 
         TreeMemory.expand_all()
 
-        os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/memoryHeaps:/{flag=1; next}/memoryTypes:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryHeap.txt" % GPUname)
-        HCount = 0
+        #----------------------------------------------------- Memory Heaps ----------------------------------------------------------------------------------------------------------------------------------------
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDMemoryHeap.txt | grep = | grep -v count| grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' > /tmp/gpu-viewer/VKDDeviceSize.txt")
-        size = copyContentsFromFile("/tmp/gpu-viewer/VKDDeviceSize.txt")
+        fetch_vulkan_device_memory_heaps_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/memoryHeaps:/{flag=1; next}/memoryTypes:/{flag=0} flag' " %(Filenames.vulkaninfo_output_file,GPUname)
+        fetch_vulkan_device_memory_heaps_lhs_command = "cat %s | %s| awk '/./'" %(Filenames.vulkan_device_memory_heaps_file,Filenames.remove_rhs_Command)
+        fetch_vulkan_device_memory_heaps_rhs_command = "cat %s | grep = | grep -v count| grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' " %(Filenames.vulkan_device_memory_heaps_file)
 
-        os.system("cat /tmp/gpu-viewer/VKDMemoryHeap.txt | awk '{gsub(/[=:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDMemoryHeapLHS.txt")
+        with open(Filenames.vulkan_device_memory_heaps_file,"w") as file:
+            fetch_vulkan_device_memory_heaps_process = subprocess.Popen(fetch_vulkan_device_memory_heaps_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_memory_heaps_process.communicate()
+
+        fetch_vulkan_device_memory_heaps_lhs_process = subprocess.Popen(fetch_vulkan_device_memory_heaps_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_memory_heaps_lhs = fetch_vulkan_device_memory_heaps_lhs_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_memory_heaps_rhs_process = subprocess.Popen(fetch_vulkan_device_memory_heaps_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_memory_heaps_rhs = fetch_vulkan_device_memory_heaps_rhs_process.communicate()[0].splitlines()
+  
 
         HeapTab_Store.clear()
         TreeHeap.set_model(HeapTab_Store)
+
+        vulkan_memory_heaps_lhs = [i.strip('\t') for i in vulkan_memory_heaps_lhs]
     
-        i = 0
         j = 0
-        with open("/tmp/gpu-viewer/VKDMemoryHeapLHS.txt","r") as file1:
-            for line in file1:
-                if "memoryHeaps" in line:
-                    iter = HeapTab_Store.append(None,[(line.strip('\n')).strip('\t'),"",Const.BGCOLOR3])
+        HCount = 0
+        for i in range(len(vulkan_memory_heaps_lhs)):
+                if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
+                    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",Const.BGCOLOR3])
                     HCount = HCount + 1
                     continue
-                if "None" in line or "MEMORY_HEAP" in line and "memoryHeaps" not in line:
-                    HeapTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
+                if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
+                    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
                     continue
-                if "size" in line or "budget" in line or "usage" in line:
-                    iter2 = HeapTab_Store.append(iter,[(line.strip('\n')).strip('\t'),getDeviceSize(size[j]),setBackgroundColor(i)])
+                if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
+                    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
                     j = j + 1
                 else:
-                    iter2 = HeapTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"",setBackgroundColor(i)])
-                i = i + 1
+                    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
 
         TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
         MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(labe13))
-        label2 = "Memory Types (%d) & Heaps (%d)" %(len(propertyFlags),(HCount))
+        label2 = "Memory Types (%d) & Heaps (%d)" %(len(vulkan_memory_types_property_flags),(HCount))
         notebook.set_tab_label(MemoryTab,Gtk.Label(label2))
 
 
     def Queues(GPUname):
 
-        os.system(
-                    "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueueFamilyProperties:*/{flag=1;next}/VkPhysicalDeviceMemoryProperties.*/{flag=0} flag' | awk '/./'> /tmp/gpu-viewer/VKDQueues.txt" % GPUname)
+        #------------------------------ commands ---------------------------------------------------------------------------------------
 
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep -o [=,:].* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueueRHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' > /tmp/gpu-viewer/VKDQueueLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDQueues.txt | grep queueCount | grep -o =.* | grep -o ' .*' > /tmp/gpu-viewer/VKDQueuecount.txt")
+        fetch_vulkan_device_queues_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceMemoryProperties:/{flag=0}flag'|awk '/VkQueueFamilyProperties:*/{flag=1;next}/VkPhysicalDeviceMemoryProperties.*/{flag=0} flag' | awk '/./'" %(Filenames.vulkaninfo_output_file,GPUname)
+        fetch_vulkan_device_queues_lhs_command = "cat %s | %s " %(Filenames.vulkan_device_queues_file,Filenames.remove_rhs_Command)
+        fetch_vulkan_device_queues_rhs_command = "cat %s | grep -o [=,:].* | grep -o ' .*' " %(Filenames.vulkan_device_queues_file)
+        fetch_vulkan_device_queue_counts_command = "cat %s | grep queueCount " %(Filenames.vulkan_device_queues_file)
 
-        # finding and storing the value for Flags
+        with open(Filenames.vulkan_device_queues_file,"w") as file:
+            fetch_vulkan_device_queues_process = subprocess.Popen(fetch_vulkan_device_queues_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_queues_process.communicate()
+        
+        fetch_vulkan_device_queues_lhs_process = subprocess.Popen(fetch_vulkan_device_queues_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_queues_lhs= fetch_vulkan_device_queues_lhs_process.communicate()[0].splitlines()
 
-
-        qCount = copyContentsFromFile("/tmp/gpu-viewer/VKDQueuecount.txt")
-        qLhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueLHS.txt")
-        qRhs = copyContentsFromFile("/tmp/gpu-viewer/VKDQueueRHS.txt")
+        fetch_vulkan_device_queues_rhs_process = subprocess.Popen(fetch_vulkan_device_queues_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_queues_rhs = fetch_vulkan_device_queues_rhs_process.communicate()[0].splitlines()
+        
+        fetch_vulkan_device_queue_count_process = subprocess.Popen(fetch_vulkan_device_queue_counts_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_queue_counts = fetch_vulkan_device_queue_count_process.communicate()[0].splitlines()
 
         QueueTab_Store.clear()
         TreeQueue.set_model(QueueTab_Store)
 
         j = 0
         qRHS = []
-        with open("/tmp/gpu-viewer/VKDQueues.txt") as file1:
+        with open(Filenames.vulkan_device_queues_file) as file1:
             for line in file1:
                 if " = " in line:
-                    qRHS.append(qRhs[j])
+                    qRHS.append(vulkan_device_queues_rhs[j])
                     j = j + 1
                 else:
                     qRHS.append("")
         
         qRHS.pop(0)
         k = 0
-        for i in range(len(qLhs)):
+        for i in range(len(vulkan_device_queues_lhs)):
             background_color = setBackgroundColor(k)
             if "true" in qRHS[i]:
                 fColor = "GREEN"
@@ -533,21 +529,21 @@ def Vulkan(tab2):
                 fColor = "RED"  
             else:
                 fColor = "BLACK"
-            if "Properties[" in qLhs[i]:
-                iter1 = QueueTab_Store.append(None,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
+            if "Properties[" in vulkan_device_queues_lhs[i]:
+                iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],Const.BGCOLOR3,fColor])
                 k = 0
                 continue
-            if "---" in qLhs[i]:
+            if "---" in vulkan_device_queues_lhs[i]:
                 continue
-            if "VK_" in qLhs[i] or "priorit" in qLhs[i] and "Properties" not in qLhs[i]:
-                iter3 = QueueTab_Store.append(iter2,[(qLhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).strip('count ='),setBackgroundColor(i),fColor])
+            if "VK_" in vulkan_device_queues_lhs[i] or "priorit" in vulkan_device_queues_lhs[i] and "Properties" not in vulkan_device_queues_lhs[i]:
+                iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).strip('count ='),setBackgroundColor(i),fColor])
                 continue
-            if "\t\t\t\t" in qLhs[i]:
-                QueueTab_Store.append(iter3,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
+            if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
+                QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
                 continue
             else :
-                if "queueFlags" in qLhs[i] or "VkQueueFamilyGlobalPriorityPropertiesKHR" in line:
-                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t')," ",setBackgroundColor(2),fColor])
+                if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamilyGlobalPriorityPropertiesKHR" in line:
+                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",setBackgroundColor(2),fColor])
 
                     if "GRAPHICS" in qRHS[i]:
                         QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(1),Const.COLOR1])
@@ -579,72 +575,77 @@ def Vulkan(tab2):
                         QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","false",setBackgroundColor(1),Const.COLOR2])
                 else:
                     k = k + 1
-                    iter2 = QueueTab_Store.append(iter1,[(qLhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                     
         TreeQueue.expand_all()
-        label = "Queues (%d)" % len(qCount)
+        label = "Queues (%d)" % len(vulkan_device_queue_counts)
         notebook.set_tab_label(QueueTab, Gtk.Label(label))
 
     def Instance():
 
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/Instance Extensions.*/{flag=1;next}/Layers:.*/{flag=0}flag'| grep VK_ | sort > /tmp/gpu-viewer/VKDInstanceExtensions1.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDInstanceExtensions1.txt | awk '{gsub(/:.*/,'True');print} ' > /tmp/gpu-viewer/VKDInstanceExtensions.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDInstanceExtensions1.txt | grep -o 'revision.*' | grep -o ' .*' > /tmp/gpu-viewer/VKDInstanceExtensionsRHS.txt")
+        #--------------------------------------------------Commands -----------------------------------------------------------------------------------------
 
-        value = copyContentsFromFile("/tmp/gpu-viewer/VKDInstanceExtensionsRHS.txt")
+        fetch_vulkan_device_instances_command = "cat %s | awk '/Instance Extensions.*/{flag=1;next}/Layers:.*/{flag=0}flag'| grep VK_ | sort " %(Filenames.vulkaninfo_output_file)
+        fetch_vulkan_device_instances_lhs_command = "cat %s | %s " %(Filenames.vulkan_device_instances_file,Filenames.remove_rhs_Command)
+        fetch_vulkan_device_instances_rhs_command = "cat %s | grep -o 'revision.*' | grep -o ' .*'" %(Filenames.vulkan_device_instances_file)
+
+        with open(Filenames.vulkan_device_instances_file,"w") as file:
+            fetch_vulkan_device_instances_process = subprocess.Popen(fetch_vulkan_device_instances_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_instances_process.communicate()
+
+        fetch_vulkan_device_instances_lhs_process = subprocess.Popen(fetch_vulkan_device_instances_lhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_instance_lhs = fetch_vulkan_device_instances_lhs_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_instances_rhs_process = subprocess.Popen(fetch_vulkan_device_instances_rhs_command,stdout=subprocess.PIPE,universal_newlines=True,shell=True)
+        vulkan_device_instance_rhs = fetch_vulkan_device_instances_rhs_process.communicate()[0].splitlines()
+
         InstanceTab_Store.clear()
 
-        with open("/tmp/gpu-viewer/VKDInstanceExtensions.txt", "r") as file1:
-            count1 = len(file1.readlines())
-            label = "Instance Extensions (%d)" % count1
-            InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label))
-            file1.seek(0, 0)
-            for i, line in enumerate(file1):
-                text = line.strip('\t')
-                background_color = setBackgroundColor(i)
-                InstanceTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color])
+        for i in range(len(vulkan_device_instance_lhs)):
+            background_color = setBackgroundColor(i)
+            InstanceTab_Store.append([vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i],background_color])
 
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' > /tmp/gpu-viewer/VKDLayer1.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt  | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} ' > /tmp/gpu-viewer/VKDLayer.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/vulkaninfo.txt  | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' > /tmp/gpu-viewer/VKDLayerDescription.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o Vulkan.* | awk '{gsub(/,.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDVulkanVersion.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/VKDLayer1.txt | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' > /tmp/gpu-viewer/VKDLayerVersion.txt")
-
-        Vversion = copyContentsFromFile("/tmp/gpu-viewer/VKDVulkanVersion.txt")
-
-        LVersion = copyContentsFromFile("/tmp/gpu-viewer/VKDLayerVersion.txt")
+        label = "Instance Extensions (%d)" %len(vulkan_device_instance_lhs)
+        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label))
 
 
-        ECount = []
-        with open("/tmp/gpu-viewer/VKDLayer1.txt", "r") as file1:
-            for line in file1:
-                for j in range(RANGE1):
-                    if "Layer Extensions: count = %d" % j in line:
-                        ECount.append("%d" % j)
-                        break
+        #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
+        fetch_vulkan_device_layers_command = "cat %s  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag'" %(Filenames.vulkaninfo_output_file)
+        fetch_vulkan_device_layer_names_command = "cat %s | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} '" %(Filenames.vulkan_device_layers_file)
+        fetch_vulkan_device_layer_vulkan_version_command = "cat %s | grep ^VK | grep -o 'Vulkan.*' | awk '{gsub(/,.*/,'True');print}' | grep -o 'version.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
+        fetch_vulkan_device_layer_version_command = "cat %s | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' "  %(Filenames.vulkan_device_layers_file)
+        fetch_vulkan_device_layer_description_command = "cat %s | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' " %(Filenames.vulkan_device_layers_file)
+        fetch_vulkan_device_layer_extension_count_command = "cat %s | grep 'Layer Extensions' | grep -o '=.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
 
-        layerDescription = copyContentsFromFile("/tmp/gpu-viewer/VKDLayerDescription.txt")
+        with open(Filenames.vulkan_device_layers_file,"w") as file:
+            fetch_vulkan_device_layers_process = subprocess.Popen(fetch_vulkan_device_layers_command,stdout=file,universal_newlines=True,shell=True)
+            fetch_vulkan_device_layers_process.communicate()
+        
+        fetch_vulkan_device_layer_names_process = subprocess.Popen(fetch_vulkan_device_layer_names_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,shell=True)
+        layer_names = fetch_vulkan_device_layer_names_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_layer_vulkan_version_process = subprocess.Popen(fetch_vulkan_device_layer_vulkan_version_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,shell=True)
+        layer_vulkan_version = fetch_vulkan_device_layer_vulkan_version_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_layer_version_process = subprocess.Popen(fetch_vulkan_device_layer_version_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,shell=True)
+        layer_version = fetch_vulkan_device_layer_version_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_layer_description_process = subprocess.Popen(fetch_vulkan_device_layer_description_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,shell=True)
+        layer_descriptions = fetch_vulkan_device_layer_description_process.communicate()[0].splitlines()
+
+        fetch_vulkan_device_layer_extension_count_process = subprocess.Popen(fetch_vulkan_device_layer_extension_count_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,shell=True)
+        layer_extension_counts = fetch_vulkan_device_layer_extension_count_process.communicate()[0].splitlines()
+
         LayerTab_Store.clear()
 
-        count2 = len(LVersion)
-        label = "Instance Extensions (%d) & Layers (%d)" % (count1, count2)
-        label2 = "Instance Layers (%d)" % count2
+        label = "Instance Extensions (%d) & Layers (%d)" % (len(vulkan_device_instance_lhs), len(layer_names))
+        label2 = "Instance Layers (%d)" %len(layer_names)
         notebook.set_tab_label(InstanceTab, Gtk.Label(label))
         InstanceNotebook.set_tab_label(InstanceLayersTab, Gtk.Label(label2))
-        with open("/tmp/gpu-viewer/VKDLayer.txt", "r") as file1:
-            for i, line in enumerate(file1):
-                background_color = setBackgroundColor(i)
-                LayerTab_Store.append(
-                    [line.strip('\n'), Vversion[i].strip('\n'), LVersion[i].strip('\n'),
-                     ECount[i].strip('\n'), layerDescription[i].strip('\n'),
+        for i in range(len(layer_names)):
+            background_color = setBackgroundColor(i)
+            LayerTab_Store.append([layer_names[i], layer_vulkan_version[i], layer_version[i],
+                     layer_extension_counts[i], layer_descriptions[i],
                      background_color])
 
     def Surface(GPU):
@@ -900,22 +901,22 @@ def Vulkan(tab2):
     def selectFeature(Combo):
         feature = Combo.get_active_text()
 
-        fetch_device_features_all_command = "cat %s | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep =" %(Commands.vulkan_device_features_file)
-        fetch_device_features_selected_command = "cat %s | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort " %(Commands.vulkan_device_features_file,feature)
-        fetch_device_features_selected_lhs_command = "cat %s | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq" %(Commands.vulkan_device_features_select_file)
+        fetch_device_features_all_command = "cat %s | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep =" %(Filenames.vulkan_device_features_file)
+        fetch_device_features_selected_command = "cat %s | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort " %(Filenames.vulkan_device_features_file,feature)
+        fetch_device_features_selected_lhs_command = "cat %s | awk '{sub(/^[ \t]+/, 'True'); print }' | awk '{gsub(/= true/,'True');print}' | awk '{gsub(/= false/,'False');print}' | awk '{sub(/[ \t]+$/, 'True'); print }' | awk '/./' | sort | uniq" %(Filenames.vulkan_device_features_select_file)
 
         if feature is None:
             feature = " "
         elif "Show All Device Features" in feature:
-            with open(Commands.vulkan_device_features_select_file,"w") as file:
+            with open(Filenames.vulkan_device_features_select_file,"w") as file:
                 fetch_device_all_features_process = subprocess.Popen(fetch_device_features_all_command,stdout=file,universal_newlines=True,shell=True)
                 fetch_device_all_features_process.communicate()
         else:
-            with open(Commands.vulkan_device_features_select_file,"w") as file:
+            with open(Filenames.vulkan_device_features_select_file,"w") as file:
                 fetch_device_select_feature_process = subprocess.Popen(fetch_device_features_selected_command,stdout=file,universal_newlines=True,shell=True)
                 fetch_device_select_feature_process.communicate()
 
-        with open(Commands.vulkan_device_features_lhs_file,"w") as file:
+        with open(Filenames.vulkan_device_features_lhs_file,"w") as file:
             fetch_device_select_features_lhs_process = subprocess.Popen(fetch_device_features_selected_lhs_command,stdout=file,universal_newlines=True,shell=True)
             fetch_device_select_features_lhs_process.communicate()
 
@@ -923,10 +924,10 @@ def Vulkan(tab2):
         fgColor = []
         FeaturesTab_Store.clear()
         TreeFeatures.set_model(FeaturesTab_Store_filter)
-        FeaturesLHS = copyContentsFromFile(Commands.vulkan_device_features_lhs_file,)
+        FeaturesLHS = copyContentsFromFile(Filenames.vulkan_device_features_lhs_file,)
         count = 0
         for i,LHS in enumerate(FeaturesLHS):
-            with open(Commands.vulkan_device_features_select_file, "r") as file1:
+            with open(Filenames.vulkan_device_features_select_file, "r") as file1:
                 text = LHS.strip('\n')
                 for line in file1:
                     if text in line:
@@ -1291,7 +1292,7 @@ def Vulkan(tab2):
 
     #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
     with open("/tmp/gpu-viewer/GPU.txt","w") as file:
-        fetch_device_name_process = subprocess.Popen(Commands.vulkan_summary_command+Commands.fetch_device_name_command,shell=True,stdout=file,universal_newlines=True)
+        fetch_device_name_process = subprocess.Popen(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command,shell=True,stdout=file,universal_newlines=True)
         fetch_device_name_process.communicate()
 
     gpu_list = copyContentsFromFile("/tmp/gpu-viewer/GPU.txt")

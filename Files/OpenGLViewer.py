@@ -4,7 +4,7 @@ import Const
 import re
 import os.path
 import subprocess
-import Commands
+import Filenames
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from FrameBuffer import FrameBuffer
@@ -219,7 +219,7 @@ def OpenGL(tab1):
     Button_FB.connect("clicked", FrameBuffer)
   #  FBFrame.add(Button_FB)
 
-    fetch_gpu_renderer_command = "cat %s | grep renderer | grep -o :.* | grep -o ' .*'" %(Commands.opengl_device_info_file)
+    fetch_gpu_renderer_command = "cat %s | grep renderer | grep -o :.* | grep -o ' .*'" %(Filenames.opengl_device_info_file)
     fetch_gpu_renderer_process = subprocess.Popen(fetch_gpu_renderer_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
     gpu_renderer = fetch_gpu_renderer_process.communicate()[0].decode("utf-8")
     vendorImg = getGpuImage(gpu_renderer)
