@@ -47,7 +47,7 @@ def Vulkan(tab2):
 
         fetch_vulkan_gpu_info_command = "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1' | sort " %(GPUname)
         fetch_vulkan_gpu_pipeline_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Filenames.vulkaninfo_output_file,GPUname)
-        fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L/' | sort -r"
+        fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L|^Virt/' | sort -r"
         fetch_mem_info_command = "cat /proc/meminfo | awk '/Mem/'"
         fetch_lsb_release_info_command = "lsb_release -d -r -c"
         fetch_device_tab_rhs_command = "cat %s | grep -oE '[=,:].*'" %(Filenames.vulkan_device_info_file)
@@ -120,7 +120,7 @@ def Vulkan(tab2):
             if "driverVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getDriverVersion(valueRHS,i)
-            if "Model" in valueLHS[i]:
+            if "Virt" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Processor Details..."," ",Const.BGCOLOR3])
             if "Description" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Operating System Details..."," ",Const.BGCOLOR3])
