@@ -13,10 +13,10 @@ https://github.com/arunsivaramanneo/GPU-Viewer
 
 This program uses:
     -  python 3 or higher
-    -  GTK3+ for the graphical user interface
+    -  GTK4+ for the graphical user interface
     -  glxinfo(OpenGL), vulkaninfo(Vulkan), clinfo(OpenCL), es2_info(EGL) and vdpauinfo(VDPAU) for fetching the report
 
-If you like this application and the work we are doing, please consider supporting us by clicking on the DONATE button below. This will help us in keeping this project alive and bringing new features to the application
+If you find the project interesting enough, please consider making a donation. Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.
 
 Trademarks
     - OpenGL® and the oval logo are trademarks or registered trademarks of Silicon Graphics, Inc.

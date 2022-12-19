@@ -6,12 +6,17 @@ clinfo_output_command = ["clinfo -a | awk '/Number of platforms/{flag=1;print}/N
 opengl_output_command = ["glxinfo","-s"]
 fetch_vulkaninfo_ouput_command = "cat /tmp/gpu-viewer/vulkaninfo.txt |"
 
+fetch_screen_resolution_command = "xdpyinfo | awk '/dimensions/{print $2}'"
 #------------------------- Command Commands --------------------------------
 
 remove_rhs_Command = "awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' "
 remove_lhs_command = "grep -o [=,:].* | grep -o ' .*' "
 
+
+
 # ---------------------------Vulkan Tab - Commands and Filenames -------------------------------------
+
+gpu_viewer_folder_path = "/tmp/gpu-viewer"
 
 vulkaninfo_output_file = "/tmp/gpu-viewer/vulkaninfo.txt"
 
@@ -25,7 +30,13 @@ vulkan_summary_command = "vulkaninfo --summary"
 
 fetch_device_name_command = " grep deviceName | grep -o  =.* | grep -o ' .*' "
 
-#------------------- Vulkan Features Files and Commands ------------------------------------------------
+#---------------------------- Vulkan Properties and Commands -----------------------------------------------
+
+vulkan_device_properties_file = "/tmp/gpu-viewer/VKDDevicePropertiesTemp.txt"
+vulkan_device_filter_properties_file = "/tmp/gpu-viewer/VKDDevicePropertiesFilterTemp.txt"
+vulkan_device_filter_properties_lhs_file = "/tmp/gpu-viewer/VKDDevicePropertiesFilterLHSTemp.txt"
+
+ #------------------- Vulkan Features Files and Commands ------------------------------------------------
 
 vulkan_device_features_file = "/tmp/gpu-viewer/VKDDeviceFeaturesTemp.txt"
 vulkan_device_features_lhs_file = "/tmp/gpu-viewer/VKDDeviceFeaturesLHS.txt"
@@ -87,6 +98,59 @@ vulkan_device_instances_rhs_file = "/tmp/gpu-viewer/VKDDeviceInstancesRHSTemp.tx
 vulkan_device_layers_file = "/tmp/gpu-viewer/VKDDeviceLayersTemp.txt"
 vulkan_device_layers_name_file = "/tmp/gpu-viewer/VKDDeviceLayerNames.txt"
 
+
+#-------------------vulkan Device Surface Filenames -------------------------------------------------------------------------------
+
+vulkan_device_surface_file = "/tmp/gpu-viewer/VKDDeviceSurfaceTemp.txt"
+
+#-------------------vulkan Device Groups Filenames -------------------------------------------------------------------------------
+
+vulkan_device_groups_file = "/tmp/gpu-viewer/VKDDeviceGroupsTemp.txt"
+
+
 #-------------------------- OpenGL Files and Commands --------------------------------------------------------
 
-opengl_device_info_file = "/tmp/gpu-viewer/OpenGL_Information.txt"
+opengl_outpuf_file = "/tmp/gpu-viewer/glxinfo.txt"
+opengl_device_info_file = "/tmp/gpu-viewer/opengl_information.txt"
+opengl_info_lhs_file = "/tmp/gpu-viewer/opengl_information_lhs.txt"
+opengl_info_rhs_file = "/tmp/gpu-viewer/opengl_information_rhs.txt"
+opengl_vendor_gl_extension_file = "/tmp/gpu-viewer/opengl_vendor_gl_extension.txt"
+opengl_vendor_es_extension_file = "/tmp/gpu-viewer/opengl_vendor_es_extension.txt"
+egl_vendor_extension_file = "/tmp/gpu-viewer/egl_vendor_extension.txt"
+
+
+fetch_opengl_vendor_extensions_command = "cat %s | awk '/OpenGL extensions/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | grep GL_ | sort" %(opengl_outpuf_file)
+fetch_openglx_vendor_extensions_command ="cat %s  | awk '/client glx extensions/{flag=1; next}/GLX version/{flag=0} flag' | grep GLX_ | sort" %(opengl_outpuf_file)
+
+fetch_opengl_es_vendor_extensions_command = "cat %s  | awk '/OpenGL ES profile/{flag=1;next}/80 GLX Visuals/{flag=0} flag' | grep GL_ | sort" %(opengl_outpuf_file)
+
+fetch_egl_vendor_extension_command = "es2_info | awk '/EGL_EXTENSIONS.*/{flag=1;next}/EGL_CLIENT.*/{flag=0}flag'| awk '{n=split($0,a,/,/);{for (i=1;i<=n;i++) print a[i]}}' | grep -o EGL.* "
+
+#----------------------- OpenGL Limits ------------------------------------------------------------------------------------------------------------------
+
+opengl_core_limits_lhs_file = "/tmp/gpu-viewer/opengl_core_limits_lhs.txt"
+opengl_core_limits_file = "/tmp/gpu-viewer/opengl_core_limits.txt"
+
+fetch_opengl_core_limits_command = "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./' "
+fetch_opengl_core_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,'True');print}' " %(opengl_core_limits_file)
+
+opengl_compat_limits_file = "/tmp/gpu-viewer/opengl_compat_limits.txt"
+
+opengl_compat_limits_lhs_file = "/tmp/gpu-viewer/opengl_compat_limits_lhs.txt"
+
+fetch_opengl_compat_limits_command = "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./' "
+
+fetch_opengl_compat_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,'True');print}'" %(opengl_compat_limits_file)
+
+select_opengl_limits_file = "/tmp/gpu-viewer/selectOpenglLimits.txt"
+
+
+#-------------------------------------------- Clinfo filenames and Commands -------------------------------------------------------------------
+
+
+
+
+
+# ------------------------------------------- VDPAUINFO filenames and Commands ------------------------------------------------------------
+
+vdpauinfo_output_file = "/tmp/gpu-viewer/vdpauinfo.txt"

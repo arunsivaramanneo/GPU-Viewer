@@ -1,64 +1,46 @@
+import sys
 import gi
-import Const
-import os
-
-gi.require_version("Gtk", "3.0")
-gi.require_version("Gdk", "3.0")
-
-from gi.repository import Gdk, Gtk, GdkPixbuf
+import const
+import subprocess
+import Filenames
+gi.require_version('Gtk','4.0')
+from gi.repository import Gtk,GdkPixbuf,Gdk
 
 
 class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
-        self.set_icon_from_file(Const.APP_LOGO_PNG)
-        self.notebook = Gtk.Notebook()
-        self.add(self.notebook)
+        self.set_icon_name(const.APP_LOGO_PNG)
         setting = Gtk.Settings.get_default()
+        theme = Gtk.CssProvider()
+        theme.load_from_path('gtk.css')
+        setting.set_property("gtk-theme-name", "Orchis-Light")
 
-        if Gtk.get_minor_version() >= 22:
-            #print(Gtk.get_minor_version())
-            theme = Gtk.CssProvider()
-            theme.load_from_path("gtk.css")
-            screen = Gdk.Screen.get_default()
-            setting.set_property("gtk-theme-name", "Qogir")
-            style_context = self.get_style_context()
-            style_context.add_provider_for_screen(screen, theme, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        elif Const.THEME1:
-            setting.set_property("gtk-theme-name", "Yaru-dark")
-        elif Const.THEME2:
-            setting.set_property("gtk-theme-name", "Adwaita")
-
-    def createTab(self, iconUrl, iconWidth, iconHeight, aspectRatio):
-        tab = Gtk.Box(spacing=5)
-        openGlIcon = fetchImageFromUrl(iconUrl, iconWidth, iconHeight, aspectRatio)
-        self.notebook.append_page(tab, Gtk.Image.new_from_pixbuf(openGlIcon))
-        return tab
-
-    def mainLoop(self):
-        Gtk.main()
-
-    def quit(self):
-        Gtk.main_quit()
+def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
+    tab = Gtk.Box(orientation=1,spacing=10)
+    tab_icon = fetchImageFromUrl(icon_url,icon_width,icon_height,aspect_ratio)
+    notebook.append_page(tab,Gtk.Picture.new_for_pixbuf(tab_icon))
+    return tab
 
 #getting Ram Details in GB
+
+def setMargin(widget,start,top,bottom):
+    widget.set_margin_start(start)
+    widget.set_margin_top(top)
+    widget.set_margin_bottom(bottom)
 
 def getRamInGb(ram):
     ram1 = ram.split()
     return str("%.2f" %(float(ram1[0])/(1024*1024))) + " GB"
 
 # Setting the Minimum Screen Size
-def setScreenSize(self, widthRatio, heightRatio):
-    Screen = Gdk.Screen.get_default()
-    if Screen.get_height() == 2160:
-        self.set_default_size(Screen.get_width() * 0.40, Screen.get_height() * 0.60)
-    else:
-        self.set_default_size(Screen.get_width() * widthRatio, Screen.get_height() * heightRatio)
-
-    self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+def getScreenSize():
+    fetch_Screen_resolution_process = subprocess.Popen(Filenames.fetch_screen_resolution_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
+    screen_resolution = fetch_Screen_resolution_process.communicate()[0].split('x')
+    return screen_resolution[0].strip('\n'),screen_resolution[1].strip('\n')
 
 
-# fetching the Images/Logos from the Const File
+# fetching the Images/Logos from the const File
 def fetchImageFromUrl(imgUrl, iconWidth, iconHeight, aspectRatio):
     return GdkPixbuf.Pixbuf.new_from_file_at_scale(
         filename=imgUrl, width=iconWidth, height=iconHeight, preserve_aspect_ratio=aspectRatio)
@@ -71,25 +53,33 @@ def copyContentsFromFile(fileName):
             value.append(line)
     return value
 
+def fetchContentsFromCommand(command):
+    process = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
+    return process.communicate()[0].splitlines()
+
+def createMainFile(filename,command):
+    with open(filename,"w") as file:
+        process = subprocess.Popen(command,shell=True,stdout=file,universal_newlines=True)
+        process.communicate()
 
 # Setting the background color for rows
 def setBackgroundColor(i):
     if i % 2 == 0:
-        background_color = Const.BGCOLOR1
+        background_color = const.BGCOLOR1
     else:
-        background_color = Const.BGCOLOR2
+        background_color = const.BGCOLOR2
     return background_color
 
 
 # setting up Sub Tabs in Vulkan
 
 def createSubTab(Tab, notebook, label):
-    Tab.set_border_width(10)
-    notebook.append_page(Tab, Gtk.Label(label))
+ #   Tab.set_border_width(10)
+    notebook.append_page(Tab, Gtk.Label(label=label))
     Frame = Gtk.Frame()
-    Tab.add(Frame)
+    Tab.append(Frame)
     Grid = Gtk.Grid()
-    Frame.add(Grid)
+    Frame.set_child(Grid)
     return Grid
 
 
@@ -107,12 +97,14 @@ def setColumns(Treeview, Title, MWIDTH, align):
 
 # adding Scrollbar to the Treeview
 
-def createScrollbar(Treeview):
-    Scrollbar = Gtk.ScrolledWindow()
-    Scrollbar.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-    Scrollbar.set_vexpand(True)
-    Scrollbar.add(Treeview)
-    return Scrollbar
+def create_scrollbar(widget):
+    scrollbar = Gtk.ScrolledWindow()
+    scrollbar.set_policy(Gtk.PolicyType.AUTOMATIC,Gtk.PolicyType.AUTOMATIC)
+    scrollbar.set_vexpand(True)
+    scrollbar.set_hexpand(True)
+    scrollbar.set_visible(True)
+    scrollbar.set_child(widget)
+    return scrollbar
 
 
 # creating subFrame in Vulkan Tab
@@ -132,10 +124,10 @@ def colorTrueFalse(filename, text):
         for line in file1:
             if text in line:
                 value.append("true")
-                fgColor.append(Const.COLOR1)
+                fgColor.append(const.COLOR1)
             else:
                 value.append("false")
-                fgColor.append(Const.COLOR2)
+                fgColor.append(const.COLOR2)
     return fgColor, value
 
 def getFormatValue(filename,Format):
@@ -147,24 +139,22 @@ def getFormatValue(filename,Format):
             for i,f in enumerate(Format):
                 if "FEATURE" in line and i >= loop:
                     value.append("true")
-                    fgColor.append(Const.COLOR1)
+                    fgColor.append(const.COLOR1)
                     loop = loop + 1
                     if ":" in f:
                         break
                 if "None" in line and i >= loop:
                     value.append("false")
-                    fgColor.append(Const.COLOR2)
+                    fgColor.append(const.COLOR2)
                     loop = loop + 1
                     if ":" in f:
                         break
     return fgColor, value
 
 
-
-
 def getLinkButtonImg(img, link, toolTip):
-    Logbutton = Gtk.LinkButton(link)
-    Logbutton.add(Gtk.Image.new_from_pixbuf(img))
+    Logbutton = Gtk.LinkButton.new_with_label(link)
+    Logbutton.set_child(Gtk.Picture.new_for_pixbuf(img))
     Logbutton.set_tooltip_text(toolTip)
     return Logbutton
 
@@ -202,6 +192,12 @@ def setColumnFrameBuffer(TreeFB, Title):
         column.set_property("min-width", 40)
         TreeFB.set_property("can-focus", False)
         TreeFB.append_column(column)
+        
+def createSearchEntry(store_filter):
+    entry = Gtk.SearchEntry()
+    entry.set_property("placeholder_text","Type here to filter.....")
+    entry.connect("search-changed", refresh_filter, store_filter)
+    return entry
 
 
 def getDeviceSize(size):
@@ -228,6 +224,7 @@ def refresh_filter(self, store_filter):
     store_filter.refilter()
 
 
+
 def appendLimitsRHS(filename, temp):
     LimitsRHS = []
     LimitRHSValue = []
@@ -245,21 +242,21 @@ def appendLimitsRHS(filename, temp):
 
 def getGpuImage(line):
     if "Intel" in line:
-        gpu_image = fetchImageFromUrl(Const.INTEL_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.INTEL_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "GTX" in line and "GeForce" in line:
-        gpu_image = fetchImageFromUrl(Const.NVIDIA_GTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.NVIDIA_GTX_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "RTX" in line and "GeForce" in line:
-        gpu_image = fetchImageFromUrl(Const.NVIDIA_RTX_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.NVIDIA_RTX_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
-        gpu_image = fetchImageFromUrl(Const.GEFORCE_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.GEFORCE_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "CUDA" in line and ("GTX" not in line or "RTX" not in line):
-        gpu_image = fetchImageFromUrl(Const.NVIDIA_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.NVIDIA_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "Radeon" in line and "AMD" in line:
-        gpu_image = fetchImageFromUrl(Const.AMDRADEON_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.AMDRADEON_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "AMD" in line or "ATI" in line and "Radeon" not in line:
-        gpu_image = fetchImageFromUrl(Const.AMD_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.AMD_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "LLVM" in line:
-        gpu_image = fetchImageFromUrl(Const.LLVM_LOGO_SVG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.LLVM_LOGO_SVG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "Mesa" in line:
-        gpu_image = fetchImageFromUrl(Const.MESA_LOGO_PNG,Const.ICON_WIDTH,Const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.MESA_LOGO_PNG,const.ICON_WIDTH,const.ICON_HEIGHT, True)
     return gpu_image

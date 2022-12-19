@@ -1,68 +1,100 @@
 ﻿#!/usr/bin/python3
-import os
-import subprocess
-import Const
-import Filenames
-import os.path
-from os import path
-from Common import MyGtk, setScreenSize
-from OpenGLViewer import OpenGL
-from VulkanViewer import Vulkan
-from About import about
-from OpenCL import openCL
-from VdpauViewer import vdpauinfo
-import threading    
+import sys
 import gi
+import const
+import Common
+import subprocess
+import Filenames
+import threading
 import time
-    
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gio
+import os
+from pathlib import Path
 
-if path.exists("/tmp/gpu-viewer") == True:
-    message_info = Gtk.MessageDialog(flags=0,message_type=Gtk.MessageType.INFO,buttons=Gtk.ButtonsType.OK,text="gpu-viewer  application is already running")
-    message_info.format_secondary_text("If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
-    message_info.run()
-    message_info.destroy()
+gi.require_version('Gtk','4.0')
+gi.require_version('Gdk','4.0')
+from gi.repository import Gtk, Pango, Gdk, Adw
+
+from Common import getScreenSize,create_tab,MyGtk,setMargin
+from VulkanViewer import Vulkan
+from OpenCL import openCL
+from OpenGLViewer import OpenGL
+from VdpauViewer import vdpauinfo
+from About import about
+
+Title1 = "About GPU-Viewer v2.0"
+
+if Path(Filenames.gpu_viewer_folder_path).exists():
+
+    def show_message(app):
+        message_window = Gtk.ApplicationWindow(application=app)
+        message_window.set_title("gpu-viewer application is already running")
+        message_window.set_default_size(480,120)
+        message_window.set_resizable(False)
+        message_window.present()
+        message_window_frame = Gtk.Frame()
+        setMargin(message_window_frame,5,5,10)
+        label = Gtk.Label(label="If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
+        message_window.set_child(message_window_frame)
+        message_window_frame.set_child(label)
+        setMargin(message_window,5,5,10)
+
+    app = Gtk.Application()
+    app.connect("activate",show_message)
+    app.run(None)
+
 else:
-    def main():
+    def main(win):
         T1 = time.time()
 
         mkdir_process = subprocess.Popen(Filenames.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
         mkdir_process.communicate()
         gtk = MyGtk("GPU-VIEWER")
-        setScreenSize(gtk, Const.WIDTH_RATIO, Const.HEIGHT_RATIO1)
+    #    setScreenSize(gtk, const.WIDTH_RATIO, const.HEIGHT_RATIO1)
         
+        notebook = Gtk.Notebook()
+        win.set_child(notebook)
+
         if isVulkanSupported():
-            vulkanTab = gtk.createTab(Const.VULKAN_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+            vulkanTab = create_tab(notebook,const.VULKAN_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
+            page = notebook.get_page(vulkanTab)
+            page.set_property("tab-expand",True)
             t2 = threading.Thread(target=Vulkan, args=(vulkanTab,))
             t2.start()
             t2.join()
 
         if isOpenglSupported():
-            openGlTab = gtk.createTab(Const.OPEN_GL_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, True)
+            openGlTab = create_tab(notebook,const.OPEN_GL_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
+            page = notebook.get_page(openGlTab)
+            page.set_property("tab-expand",True)
             t1 = threading.Thread(target=OpenGL, args=(openGlTab,))
             t1.start()
             t1.join()
 
         if isOpenclSupported():
-            openclTab = gtk.createTab(Const.OPEN_CL_PNG, Const.ICON_WIDTH, Const. ICON_HEIGHT, False)
+            openclTab = create_tab(notebook,const.OPEN_CL_PNG, const.ICON_WIDTH, const. ICON_HEIGHT, False)
+            page = notebook.get_page(openclTab)
+            page.set_property("tab-fill",True)
+            page.set_property("tab-expand",True)
             t4 = threading.Thread(target=openCL, args=(openclTab,))
             t4.start()
             t4.join()
 
         if isVdpauinfoSupported():
-            vdpauTab = gtk.createTab(Const.VDPAU_CL_PNG, Const.ICON_WIDTH, Const. ICON_HEIGHT, False)
+            vdpauTab = create_tab(notebook,const.VDPAU_CL_PNG, const.ICON_WIDTH, const. ICON_HEIGHT, False)
+            page_vdpau = notebook.get_page(vdpauTab)
+            page_vdpau.set_property("tab-expand",True)
             vdpauinfo(vdpauTab)
 
-        aboutTab = gtk.createTab(Const.ABOUT_US_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT, False)
+        aboutTab = create_tab(notebook,const.ABOUT_US_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
+        page = notebook.get_page(aboutTab)
+        page.set_property("tab-expand",True)
         t3 = threading.Thread(target=about, args=(aboutTab,))
         t3.start()
         t3.join()   
 
         print(time.time()-T1)
-        gtk.connect("delete-event", quit)
-        gtk.show_all()  
-        gtk.mainLoop()
+        win.connect("close-request",quit)
+    #    gtk.mainLoop()
 
 
     def isOpenclSupported():
@@ -88,17 +120,29 @@ else:
         return vulkan_process.returncode == 0
 
 
-    def quit(instance, value):
+    def quit(instance):
         os.system("unset LC_ALL")
         rmdir_process =subprocess.Popen(Filenames.rmdir_output_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
         rmdir_process.communicate()
-        instance.quit()
+        instance.destroy()
 
     def isVdpauinfoSupported():
-        with open("/tmp/gpu-viewer/vdpauinfo.txt", "w") as file:
+        with open(Filenames.vdpauinfo_output_file, "w") as file:
             vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=False,stdout= file,universal_newlines=True)
             vdpauinfo_process.wait()
             vdpauinfo_process.communicate()
         return vdpauinfo_process.returncode == 0
 
-    main()  # Program starts here
+    def on_activate(app):
+        win = Gtk.ApplicationWindow(application=app)
+        win.present()
+        win.set_title("GPU-Viewer v2.0")
+        width,height = getScreenSize()
+        win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+        main(win)  # Program starts here
+
+    app = Gtk.Application()
+    app.connect('activate', on_activate)
+
+    app.run(None)   
+

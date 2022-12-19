@@ -1,23 +1,17 @@
+import sys
+import const
 import gi
-import Const
-import os
+gi.require_version('Gtk','4.0')
+from gi.repository import Gtk, Pango
+from Common import create_scrollbar,setBackgroundColor,getLinkButtonImg,fetchImageFromUrl,setMargin,getScreenSize
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, Pango
-from Common import setBackgroundColor, createScrollbar, setColumns, fetchImageFromUrl, getLinkButtonImg
-
-Title1 = ["About GPU-Viewer v1.44"]
-Title2 = ["Change Log"]
-
+title = ["About GPU-Viewer v2.01"]
 
 def about(tab3):
+    box = Gtk.Box(orientation=1)
     grid = Gtk.Grid()
-    tab3.add(grid)
-    frame1 = Gtk.Frame(label="")
-    grid.attach(frame1, 0, 1, 12, 1)
-#    grid.set_row_spacing(20)
-#    grid.set_column_spacing(20)
-    screen = Gdk.Screen.get_default()
+    tab3.append(box)
+    
     About_list = Gtk.ListStore(str, str)
 
     with open("../About GPU Viewer", "r") as file1:
@@ -25,12 +19,14 @@ def about(tab3):
             background_color = setBackgroundColor(i)
             About_list.append([line.strip('\n'), background_color])
 
-    TreeAbout = Gtk.TreeView(About_list, expand=True)
-    wrapWidth = screen.get_width() * 0.50
+    TreeAbout = Gtk.TreeView.new_with_model(About_list)
 
-    for i, column_title in enumerate(Title1):
+    screen_width, screen_height = getScreenSize()
+    wrap_width = int(screen_width) * 0.50
+
+    for i, column_title in enumerate(title):
         renderer1 = Gtk.CellRendererText()
-        renderer1.set_property("wrap-width", wrapWidth)
+        renderer1.set_property("wrap-width",wrap_width)
         renderer1.set_property("wrap-mode", Pango.WrapMode(0))
         column = Gtk.TreeViewColumn(column_title, renderer1, text=i)
         column.add_attribute(renderer1, "background", 1)
@@ -38,33 +34,42 @@ def about(tab3):
         TreeAbout.set_property("can-focus", False)
         TreeAbout.append_column(column)
 
-    scrollable_treelist1 = createScrollbar(TreeAbout)
-    frame1.add(scrollable_treelist1)
+    scrollable_treelist1 = create_scrollbar(TreeAbout)
+    box.append(scrollable_treelist1)
+    box.append(grid)
 
-    Logimg = fetchImageFromUrl(Const.LOG_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Logbutton = getLinkButtonImg(Logimg, Const.CHANGE_LOG_LINK, Const.TOOLTIP_CHANGE_LOG)
-    grid.attach_next_to(Logbutton, frame1, Gtk.PositionType.BOTTOM, 1, 1)
 
-    Licenseimg = fetchImageFromUrl(Const.LICENSE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Licensebutton = getLinkButtonImg(Licenseimg, Const.LICENSE_HTML_LINK, Const.TOOLTIP_LICENSE)
+    Logimg = fetchImageFromUrl(const.LOG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Logbutton = getLinkButtonImg(Logimg, const.CHANGE_LOG_LINK, const.TOOLTIP_CHANGE_LOG)
+    setMargin(Logbutton,10,5,5)
+    grid.attach(Logbutton, 0, 0,1,1)
+
+    Licenseimg = fetchImageFromUrl(const.LICENSE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Licensebutton = getLinkButtonImg(Licenseimg, const.LICENSE_HTML_LINK, const.TOOLTIP_LICENSE)
+    setMargin(Licensebutton,100,5,5)
     grid.attach_next_to(Licensebutton, Logbutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Faqimg = fetchImageFromUrl(Const.FAQ_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Faqbutton = getLinkButtonImg(Faqimg, Const.FAQ_LINK, Const.TOOLTIP_FAQ)
+    Faqimg = fetchImageFromUrl(const.FAQ_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Faqbutton = getLinkButtonImg(Faqimg, const.FAQ_LINK, const.TOOLTIP_FAQ)
+    setMargin(Faqbutton,100,5,5)
     grid.attach_next_to(Faqbutton, Licensebutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Reportimg = fetchImageFromUrl(Const.BUG_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Reportbutton = getLinkButtonImg(Reportimg, Const.ISSUE_LINK, Const.TOOLTIP_BUG)
+    Reportimg = fetchImageFromUrl(const.BUG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Reportbutton = getLinkButtonImg(Reportimg, const.ISSUE_LINK, const.TOOLTIP_BUG)
+    setMargin(Reportbutton,100,5,5)
     grid.attach_next_to(Reportbutton, Faqbutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Donateimg = fetchImageFromUrl(Const.DONATE_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Donatebutton = getLinkButtonImg(Donateimg, Const.PAYPAL_LINK, Const.TOOLTIP_DONATE)
+    Donateimg = fetchImageFromUrl(const.DONATE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Donatebutton = getLinkButtonImg(Donateimg, const.PAYPAL_LINK, const.TOOLTIP_DONATE)
+    setMargin(Donatebutton,100,5,5)
     grid.attach_next_to(Donatebutton, Reportbutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Githubimg = fetchImageFromUrl(Const.GITHUB_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Githubbutton = getLinkButtonImg(Githubimg, Const.GITHUB_LINK, Const.TOOLTIP_GITHUB)
+    Githubimg = fetchImageFromUrl(const.GITHUB_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Githubbutton = getLinkButtonImg(Githubimg, const.GITHUB_LINK, const.TOOLTIP_GITHUB)
+    setMargin(Githubbutton,100,5,5)
     grid.attach_next_to(Githubbutton, Donatebutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Contactimg = fetchImageFromUrl(Const.CONTACT_LOGO_PNG, Const.ICON_WIDTH, Const.ICON_HEIGHT2, True)
-    Contactbutton = getLinkButtonImg(Contactimg, Const.EMAIL_LINK, Const.TOOLTIP_CONTACT)
+    Contactimg = fetchImageFromUrl(const.CONTACT_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Contactbutton = getLinkButtonImg(Contactimg, const.EMAIL_LINK, const.TOOLTIP_CONTACT)
+    setMargin(Contactbutton,100,5,5)
     grid.attach_next_to(Contactbutton, Githubbutton, Gtk.PositionType.RIGHT, 1, 1)

@@ -1,13 +1,13 @@
 import os
 from typing import List
 import gi
-import Const
+import  const
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk
 
-from Common import copyContentsFromFile, createSubTab, createScrollbar, setColumns, setBackgroundColor
+from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -94,7 +94,7 @@ def openCL(tab):
                 oclPlatformExtensions = oclPlatformDetailsRHS[i].split(' ')
                 oclPlatformExtensions = list(filter(None,oclPlatformExtensions))
                 iter = platformDetails_Store.append(None, [oclPlatformDetailsLHS[i].strip('\n'),
-                                                           str(len(oclPlatformExtensions)), Const.BGCOLOR3])
+                                                           str(len(oclPlatformExtensions)), const.BGCOLOR3])
                 for j in range(len(oclPlatformExtensions)):
                     background_color = setBackgroundColor(j)
                     platformDetails_Store.append(iter, [oclPlatformExtensions[j].strip('\n'), " ", background_color])
@@ -157,7 +157,7 @@ def openCL(tab):
                     oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
                     iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
                                                              str(len(oclDeviceExtenstions)).strip('\n'),
-                                                             Const.BGCOLOR3, fgcolor[i]])
+                                                             const.BGCOLOR3, fgcolor[i]])
                     for j in range(len(oclDeviceExtenstions)):
                         DeviceDetailsTreeView.expand_all()
                         DeviceDetails_Store.append(iter,
@@ -167,6 +167,7 @@ def openCL(tab):
                     iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
                                                              oclDeviceDetailsRHS[i].strip('\n'), setBackgroundColor(i),
                                                              fgcolor[i]])
+
 
     def getDeviceMemoryImageDetails(value):
 
@@ -225,7 +226,7 @@ def openCL(tab):
                                                         len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
                     iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
                                                                  oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
-                                                                 Const.BGCOLOR3, fgcolor[i]])
+                                                                 const.BGCOLOR3, fgcolor[i]])
                 elif "Built-in" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceKernels = oclDeviceMemoryImageDetailsRHS[i].split(';')
                     iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
@@ -240,6 +241,7 @@ def openCL(tab):
                     iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
                                                                  oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
                                                                  setBackgroundColor(i), fgcolor[i]])
+
 
     def getDeviceVectorDetails(value):
 
@@ -294,7 +296,7 @@ def openCL(tab):
                 if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
                 iter = DeviceVector_store.append(None, [oclDeviceVectorDetailsLHS[i].strip('\n'),
-                                                        oclDeviceVectorDetailsRHS[i].strip('\n'), Const.BGCOLOR3,
+                                                        oclDeviceVectorDetailsRHS[i].strip('\n'), const.BGCOLOR3,
                                                         fgcolor[i]])
 
     def getDeviceQueueExecutionCapabilities(value):
@@ -374,8 +376,16 @@ def openCL(tab):
 
     #    os.system("rm /tmp/gpu-viewer/ocl*.txt")
 
+    def searchTreeEntry(model,iter,Tree):
+        search_query = searchEntry.get_text().lower()
+        for i in range(Tree.get_n_columns()):
+            value = model.get_value(iter, i).lower()
+        if search_query in value:
+                return True
+
     mainGrid = Gtk.Grid()
-    tab.add(mainGrid)
+    mainGrid.set_row_spacing(10)
+    tab.append(mainGrid)
 
     oclNotebook = Gtk.Notebook()
     mainGrid.attach(oclNotebook, 0, 2, 1, 1)
@@ -384,26 +394,26 @@ def openCL(tab):
     platformDetailsGrid = createSubTab(platformDetailsTab, oclNotebook, "Platform Details")
 
     platformDetails_Store = Gtk.TreeStore(str, str, str)
-    platformDetailsTreeView = Gtk.TreeView(model=platformDetails_Store, expand=True)
+    platformDetailsTreeView = Gtk.TreeView.new_with_model(platformDetails_Store)
     platformDetailsTreeView.set_property("enable-tree-lines", True)
 
-    setColumns(platformDetailsTreeView, platformDetailsHeader, Const.MWIDTH, 0.0)
+    setColumns(platformDetailsTreeView, platformDetailsHeader, const.MWIDTH, 0.0)
 
-    platformScrollbar = createScrollbar(platformDetailsTreeView)
-    platformDetailsGrid.add(platformScrollbar)
+    platformScrollbar = create_scrollbar(platformDetailsTreeView)
+    platformDetailsGrid.attach(platformScrollbar,0,0,1,1)
 
     DeviceDetailsTab = Gtk.Box(spacing=10)
     DeviceDetailsGrid = createSubTab(DeviceDetailsTab, oclNotebook, "Device Details")
 
     DeviceDetails_Store = Gtk.TreeStore(str, str, str, str)
-    DeviceDetailsTreeView = Gtk.TreeView(model=DeviceDetails_Store, expand=True)
+    DeviceDetailsTreeView = Gtk.TreeView.new_with_model(DeviceDetails_Store)
     DeviceDetailsTreeView.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceDetailsTreeView, deviceDetailsHeader)
 
-    DeviceDetailsScrollbar = createScrollbar(DeviceDetailsTreeView)
+    DeviceDetailsScrollbar = create_scrollbar(DeviceDetailsTreeView)
 
-    DeviceDetailsGrid.add(DeviceDetailsScrollbar)
+    DeviceDetailsGrid.attach(DeviceDetailsScrollbar,0,0,1,1)
 
     # Device Memory Details ...
 
@@ -411,13 +421,18 @@ def openCL(tab):
     DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory & Image Details")
 
     DeviceMemoryImage_store = Gtk.TreeStore(str, str, str, str)
-    DeviceMemoryImageTreeview = Gtk.TreeView(model=DeviceMemoryImage_store, expand=True)
+    DeviceMemoryImage_filter = DeviceMemoryImage_store.filter_new()
+    DeviceMemoryImageTreeview = Gtk.TreeView.new_with_model(DeviceMemoryImage_filter)
     DeviceMemoryImageTreeview.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceMemoryImageTreeview, deviceMemoryImageHeader)
 
-    DeviceMemoryImageScrollbar = createScrollbar(DeviceMemoryImageTreeview)
-    DeviceMemoryImageGrid.add(DeviceMemoryImageScrollbar)
+    searchEntry = createSearchEntry(DeviceMemoryImage_filter)
+    DeviceMemoryImageGrid.attach(searchEntry,0,0,1,1)
+    DeviceMemoryImageScrollbar = create_scrollbar(DeviceMemoryImageTreeview)
+    DeviceMemoryImageGrid.attach_next_to(DeviceMemoryImageScrollbar,searchEntry,Gtk.PositionType.BOTTOM,1,1)
+
+    DeviceMemoryImage_filter.set_visible_func(searchTreeEntry, data=DeviceMemoryImageTreeview)
 
     # Device Queue & Execution capabilities
 
@@ -426,13 +441,13 @@ def openCL(tab):
                                             "Device Queue & Execution Capabilities")
 
     DeviceQueueExecution_store = Gtk.TreeStore(str, str, str, str)
-    DeviceQueueExecutionTreeView = Gtk.TreeView(model=DeviceQueueExecution_store, expand=True)
+    DeviceQueueExecutionTreeView = Gtk.TreeView.new_with_model(DeviceQueueExecution_store)
     DeviceQueueExecutionTreeView.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceQueueExecutionTreeView, deviceMemoryImageHeader)
 
-    DeviceQueueExecutionScrollbar = createScrollbar(DeviceQueueExecutionTreeView)
-    DeviceQueueExecutionGrid.add(DeviceQueueExecutionScrollbar)
+    DeviceQueueExecutionScrollbar = create_scrollbar(DeviceQueueExecutionTreeView)
+    DeviceQueueExecutionGrid.attach(DeviceQueueExecutionScrollbar,0,0,1,1)
 
     # Device Vector Details
 
@@ -440,26 +455,27 @@ def openCL(tab):
     DeviceVectorGrid = createSubTab(DeviceVectorTab, oclNotebook, "Device Vector Details")
 
     DeviceVector_store = Gtk.TreeStore(str, str, str, str)
-    DeviceVectorTreeview = Gtk.TreeView(model=DeviceVector_store, expand=True)
+    DeviceVectorTreeview = Gtk.TreeView.new_with_model(DeviceVector_store)
     DeviceVectorTreeview.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceVectorTreeview, deviceMemoryImageHeader)
 
-    DeviceVectorScrollbar = createScrollbar(DeviceVectorTreeview)
-    DeviceVectorGrid.add(DeviceVectorScrollbar)
+    DeviceVectorScrollbar = create_scrollbar(DeviceVectorTreeview)
+    DeviceVectorGrid.attach(DeviceVectorScrollbar,0,0,1,1)
 
     # The Platform Drop Down
 
     platformGrid = Gtk.Grid()
-    platformGrid.set_border_width(20)
+ #   platformGrid.set_border_width(20)
     platformGrid.set_column_spacing(20)
     platformGrid.set_row_spacing(10)
     #   mainGrid.set_row_spacing(10)
     platformFrame = Gtk.Frame(hexpand=True)
-    mainGrid.add(platformFrame)
-    platformFrame.add(platformGrid)
+    mainGrid.attach(platformFrame,0,0,1,1)
+    platformFrame.set_child(platformGrid)
 
     platformLabel = Gtk.Label()
+    setMargin(platformLabel,30,10,10)
     platformLabel.set_text("Platform Name :")
     platformGrid.attach(platformLabel, 0, 1, 1, 1)
 
@@ -468,11 +484,14 @@ def openCL(tab):
     oclPlatforms = getPlatformNames()
 
     AvailableDevices = Gtk.Label()
+    
     AvailableDevices.set_label("Available Device(s) :")
+    setMargin(AvailableDevices,20,10,10)
     platformGrid.attach_next_to(AvailableDevices, platformLabel, Gtk.PositionType.BOTTOM, 2, 1)
 
     Devices_store = Gtk.ListStore(str)
     Devices_combo = Gtk.ComboBox.new_with_model(Devices_store)
+    setMargin(Devices_combo,30,10,10)
     Devices_combo.connect("changed", selectDevice)
     Devices_renderer = Gtk.CellRendererText(font="BOLD")
     Devices_combo.pack_start(Devices_renderer, True)
@@ -481,11 +500,13 @@ def openCL(tab):
     platformGrid.attach_next_to(Devices_combo, AvailableDevices, Gtk.PositionType.RIGHT, 20, 1)
 
     numberOfDevicesEntry = Gtk.Entry()
+    setMargin(numberOfDevicesEntry,30,10,10)
 
     for i in oclPlatforms:
         platform_store.append([i])
 
     platform_combo = Gtk.ComboBox.new_with_model(platform_store)
+    setMargin(platform_combo,30,10,10)
     platform_combo.connect("changed", selectPlatform)
     platform_renderer = Gtk.CellRendererText(font="BOLD")
     platform_combo.pack_start(platform_renderer, True)
@@ -495,22 +516,24 @@ def openCL(tab):
     platformGrid.attach_next_to(platform_combo, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
     numberOfPlatforms = Gtk.Label()
+    setMargin(numberOfPlatforms,30,10,10)
     numberOfPlatforms.set_label("No. of Platforms :")
-    platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 10, 1)
+    platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfPlatformsEntry = Gtk.Entry()
+    setMargin(numberOfPlatformsEntry,30,10,10)
     numberOfPlatformsEntry.set_text(str(len(oclPlatforms)))
     numberOfPlatformsEntry.set_editable(False)
     platformGrid.attach_next_to(numberOfPlatformsEntry, numberOfPlatforms, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfDevices = Gtk.Label()
+    setMargin(numberOfDevices,30,10,10)
     numberOfDevices.set_label("No. Of Devices :")
-    platformGrid.attach_next_to(numberOfDevices, Devices_combo, Gtk.PositionType.RIGHT, 10, 1)
+    platformGrid.attach_next_to(numberOfDevices, Devices_combo, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfDevicesEntry.set_max_length(2)
     platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
 
-    tab.show_all()
 
 
 def setOclColumns(Treeview, Title):
@@ -520,6 +543,6 @@ def setOclColumns(Treeview, Title):
         column.add_attribute(renderer, "background", len(Title))
         if i == 1:
             column.add_attribute(renderer, "foreground", len(Title) + 1)
-        column.set_property("min-width", Const.MWIDTH)
+        column.set_property("min-width", const.MWIDTH)
         Treeview.set_property("can-focus", False)
         Treeview.append_column(column)

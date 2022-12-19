@@ -1,5 +1,7 @@
 import os.path as Path
 
+GTK_CSS = "gtk.css"
+
 ABOUT_US_PNG = "../Images/about-us.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
@@ -90,17 +92,17 @@ FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", 
                    "srgb", "aux", "depth", "stcl",
                    "acr", "acg", "acb", "aca", "msnum", "msbufs", "Swap", "caveats"]
 
-ICON_WIDTH = 150
+ICON_WIDTH = 300
 
 ICON_HEIGHT = 50
 
 ICON_HEIGHT2 = 50
 
-WIDTH_RATIO = 0.80
+WIDTH_RATIO = 0.78
 
 WIDTH_RATIO2 = 0.75
 
-HEIGHT_RATIO1 = 0.90
+HEIGHT_RATIO1 = 0.86
 
 HEIGHT_RATIO2 = 0.65
 
@@ -122,7 +124,7 @@ BGCOLOR1 = "#fff"
 BGCOLOR2 = "#eee"
 
 #BGCOLOR3 = "#ccc"
-BGCOLOR3 = "#838990"
+BGCOLOR3 = "#9FA3AC"
 
 COLOR1 = "GREEN"
 
