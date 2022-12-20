@@ -12,7 +12,7 @@ from pathlib import Path
 
 gi.require_version('Gtk','4.0')
 gi.require_version('Gdk','4.0')
-from gi.repository import Gtk, Pango, Gdk, Adw
+from gi.repository import Gtk, Pango, Gdk
 
 from Common import getScreenSize,create_tab,MyGtk,setMargin
 from VulkanViewer import Vulkan

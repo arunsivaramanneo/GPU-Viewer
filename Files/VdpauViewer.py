@@ -100,7 +100,7 @@ def vdpauinfo(tab2):
 			if "HIGH" in line:
 				videoMixerFeatureStore.append(iter,[(' '.join(line.split()[0:5])).strip('[]'),text,setBackgroundColor(i),fgcolor])
 			else:
-				videoMixerFeatureStore.append(iter,[line.split()[0].strip('\n'),text,setBackgroundColor(i),None])
+				videoMixerFeatureStore.append(iter,[line.split()[0].strip('\n'),text,setBackgroundColor(i),fgcolor])
 		
 		fetch_vdpau_mixer_parameter_command = "cat %s | awk '/parameter name/{flag=1;next}/attribute name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' " %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_mixer_parameter_process = subprocess.Popen(fetch_vdpau_mixer_parameter_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)

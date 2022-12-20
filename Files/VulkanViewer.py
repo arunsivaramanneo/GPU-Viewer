@@ -516,6 +516,7 @@ def Vulkan(tab2):
         k = 0
         for i in range(len(vulkan_device_queues_lhs)):
             background_color = setBackgroundColor(k)
+            k = k + 1
             if "true" in qRHS[i]:
                 fColor = "GREEN"
             elif "false" in qRHS[i]:
@@ -524,19 +525,19 @@ def Vulkan(tab2):
                 fColor = "BLACK"
             if "Properties[" in vulkan_device_queues_lhs[i]:
                 iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
-                k = 0
+            #    k = 0
                 continue
             if "---" in vulkan_device_queues_lhs[i]:
                 continue
-            if "VK_" in vulkan_device_queues_lhs[i] or "priorit" in vulkan_device_queues_lhs[i] and "Properties" not in vulkan_device_queues_lhs[i]:
-                iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).strip('count ='),setBackgroundColor(i),fColor])
+            if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
+                iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
                 continue
             if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
-                QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),setBackgroundColor(i),fColor])
+                QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                 continue
             else :
-                if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamilyGlobalPriorityPropertiesKHR" in line:
-                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",setBackgroundColor(2),fColor])
+                if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
+                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
 
                     if "GRAPHICS" in qRHS[i]:
                         QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(1),const.COLOR1])
@@ -566,8 +567,8 @@ def Vulkan(tab2):
                         QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","true",setBackgroundColor(1),const.COLOR1])
                     else:
                         QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","false",setBackgroundColor(1),const.COLOR2])
-                else:
                     k = k + 1
+                else:
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                     
         TreeQueue.expand_all()

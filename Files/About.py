@@ -5,7 +5,7 @@ gi.require_version('Gtk','4.0')
 from gi.repository import Gtk, Pango
 from Common import create_scrollbar,setBackgroundColor,getLinkButtonImg,fetchImageFromUrl,setMargin,getScreenSize
 
-title = ["About GPU-Viewer v2.01"]
+title = ["About GPU-Viewer v2.02"]
 
 def about(tab3):
     box = Gtk.Box(orientation=1)
