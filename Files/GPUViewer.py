@@ -14,7 +14,7 @@ gi.require_version('Gtk','4.0')
 gi.require_version('Gdk','4.0')
 from gi.repository import Gtk, Pango, Gdk
 
-from Common import getScreenSize,create_tab,MyGtk,setMargin
+from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile
 from VulkanViewer import Vulkan
 from OpenCL import openCL
 from OpenGLViewer import OpenGL
@@ -98,18 +98,20 @@ else:
 
 
     def isOpenclSupported():
-        with open("/tmp/gpu-viewer/clinfo.txt", "w") as file:
+        with open(Filenames.opencl_output_file, "w") as file:
             clinfo_process = subprocess.Popen(Filenames.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
             clinfo_process.wait()
             clinfo_process.communicate()
-        return clinfo_process.returncode == 0
+        clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
+        return len(clinfo_output) > 10 and clinfo_process.returncode == 0
 
     def isOpenglSupported():
-        with open("/tmp/gpu-viewer/glxinfo.txt", "w") as file:
-            opengl_process = subprocess.Popen(Filenames.opengl_output_command,shell=False,stdout= file,universal_newlines=True)
+        with open(Filenames.opengl_outpuf_file, "w") as file:
+            opengl_process = subprocess.Popen(Filenames.opengl_output_command,shell=True,stdout= file,universal_newlines=True)
             opengl_process.wait()
             opengl_process.communicate()
-        return opengl_process.returncode == 0
+        opengl_output = copyContentsFromFile(Filenames.opengl_outpuf_file)
+        return len(opengl_output) > 10 and opengl_process.returncode == 0
 
 
     def isVulkanSupported():
@@ -117,7 +119,8 @@ else:
             vulkan_process = subprocess.Popen(Filenames.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
             vulkan_process.wait()
             vulkan_process.communicate()
-        return vulkan_process.returncode == 0
+        vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
+        return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0
 
 
     def quit(instance):
@@ -128,10 +131,11 @@ else:
 
     def isVdpauinfoSupported():
         with open(Filenames.vdpauinfo_output_file, "w") as file:
-            vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=False,stdout= file,universal_newlines=True)
+            vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=True,stdout= file,universal_newlines=True)
             vdpauinfo_process.wait()
             vdpauinfo_process.communicate()
-        return vdpauinfo_process.returncode == 0
+        vdpauinfo_output = copyContentsFromFile(Filenames.vdpauinfo_output_file)
+        return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
 
     def on_activate(app):
         win = Gtk.ApplicationWindow(application=app)
