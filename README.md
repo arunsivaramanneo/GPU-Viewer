@@ -6,16 +6,15 @@
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
 
-![Screenshot from 2022-12-02 16-01-22](https://user-images.githubusercontent.com/30646692/205334737-fc1b158d-049c-437d-a9cb-50e9e94ee534.png)
+![Screenshot from 2022-12-20 10-16-05](https://user-images.githubusercontent.com/30646692/208642965-93253139-888d-45a8-bfb2-569fefb357d2.png)
 
+![Screenshot from 2022-12-20 10-16-10](https://user-images.githubusercontent.com/30646692/208643008-fa3ff333-3990-426d-be94-54a44dffa30d.png)
 
-![Screenshot from 2022-12-02 16-01-27](https://user-images.githubusercontent.com/30646692/205334795-21be9ef3-f51a-4001-b666-98cf3c4a28ba.png)
+![Screenshot from 2022-12-20 10-16-16](https://user-images.githubusercontent.com/30646692/208644090-8961ed30-ac80-4427-9350-79418fe97b84.png)
 
+![Screenshot from 2022-12-20 10-16-23](https://user-images.githubusercontent.com/30646692/208644125-18973119-d2e3-47bd-95dc-46998ba970d3.png)
 
-![Screenshot from 2022-12-02 16-01-31](https://user-images.githubusercontent.com/30646692/205334983-19f430c8-76dc-47d7-b567-c4807bfef443.png)
-
-
-![Screenshot from 2022-12-02 16-01-36](https://user-images.githubusercontent.com/30646692/205335312-ccef3df5-dfb5-4730-b931-9e499b7966f3.png)
+![Screenshot from 2022-12-20 10-16-29](https://user-images.githubusercontent.com/30646692/208644156-26a4c145-377e-4752-9209-f3fb3940a009.png)
 
 
 
@@ -25,7 +24,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 22.04 (Jammy)/Ubuntu 21.10(Impish)/Ubuntu 21.04(Hirsute)/Ubuntu 20.04(Focal)/Ubuntu 18.04 (Bionic)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 23.04(Lunar)/Ubuntu 22.10(Kinetic)/Ubuntu 22.04 (Jammy)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
@@ -83,7 +82,7 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 22.04
+1. Operating System : Ubuntu 23.04
 2. Desktop : Gnome 42
 3. Kernel : 5.15.x-xx
 4. IDE : VSCode
