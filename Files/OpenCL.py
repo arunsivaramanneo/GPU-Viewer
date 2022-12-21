@@ -1,13 +1,13 @@
-import os
-from typing import List
 import gi
 import  const
+import subprocess
+import Filenames
 
 gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk
 
-from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry
+from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry, createMainFile, fetchContentsFromCommand
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -17,11 +17,8 @@ deviceMemoryImageHeader = ["Device Information ", "Details "]
 def openCL(tab):
     def getPlatformNames():
 
-        os.system("clinfo -l > /tmp/gpu-viewer/PlatnDev.txt")
-        # noinspection PyPep8
-        os.system(
-            "cat /tmp/gpu-viewer/PlatnDev.txt | grep Platform | grep -o :.* | grep -o ' .*' > /tmp/gpu-viewer/oclPlatformNames.txt")
-        oclPlatformName = copyContentsFromFile("/tmp/gpu-viewer/oclPlatformNames.txt")
+        createMainFile(Filenames.opencl_plaform_and_device_names_file,Filenames.fetch_platform_and_device_names_command)
+        oclPlatformName = fetchContentsFromCommand(Filenames.fetch_platform_names_command)
         oclPlatformName = [i.strip(' ') for i in oclPlatformName]
         oclPlatformName = [i.strip('\n') for i in oclPlatformName]
         return oclPlatformName
@@ -44,12 +41,10 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/PlatnDev.txt | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./ > /tmp/gpu-viewer/oclDeviceNames.txt" %
-            oclPlatformslocal[value])
+        fetch_device_names_command = "cat %s | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,oclPlatforms[value])
         Devices_store.clear()
         Devices_combo.set_model(Devices_store)
-        oclDeviceNames = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceNames.txt")
+        oclDeviceNames = fetchContentsFromCommand(fetch_device_names_command)
         oclDeviceNames = [i.strip(' ') for i in oclDeviceNames]
         oclDeviceNames = [i.strip('\n') for i in oclDeviceNames]
 
@@ -72,16 +67,11 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./> /tmp/gpu-viewer/oclPlatformDetails.txt" %
-            oclPlatformslocal[value])
-        os.system(
-            "cat /tmp/gpu-viewer/oclPlatformDetails.txt | grep -o Platform.* | awk '{gsub(/  .*/,'True');print}' > /tmp/gpu-viewer/oclPlatformDetailsLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/oclPlatformDetails.txt | grep -o Platform.* | awk '{gsub(/Platform.*  /,'True');print}' > /tmp/gpu-viewer/oclPlatformDetailsRHS.txt")
+        fetch_platform_details_file_command = "cat %s | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./ " %(Filenames.opencl_output_file,oclPlatformslocal[value])
+        createMainFile(Filenames.opencl_platform_details_file,fetch_platform_details_file_command)
 
-        oclPlatformDetailsLHS = copyContentsFromFile("/tmp/gpu-viewer/oclPlatformDetailsLHS.txt")
-        oclPlatformDetailsRHS = copyContentsFromFile('/tmp/gpu-viewer/oclPlatformDetailsRHS.txt')
+        oclPlatformDetailsLHS = fetchContentsFromCommand(Filenames.fetch_platform_details_lhs_command)
+        oclPlatformDetailsRHS = fetchContentsFromCommand(Filenames.fetch_platform_details_rhs_command)
         platformDetails_Store.clear()
         platformDetailsTreeView.set_model(platformDetails_Store)
 
@@ -115,19 +105,17 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred | grep -v Available > /tmp/gpu-viewer/oclDeviceDetails.txt" % (
-            oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1))
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions|Available/' >> /tmp/gpu-viewer/oclDeviceDetails.txt" % (
-            oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1))
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/gpu-viewer/oclDeviceDetailsLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/gpu-viewer/oclDeviceDetailsRHS.txt")
+        fetch_device_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred | grep -v Available" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        fetch_device_extensions_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions|Available/'" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        
+        with open(Filenames.opencl_device_details_file,"w") as file:
+            fetch_device_details_file_process = subprocess.Popen(fetch_device_details_file_command,shell=True,stdout=file,universal_newlines=True)
+            fetch_device_details_file_process.communicate()
+            fetch_device_extensions_process = subprocess.Popen(fetch_device_extensions_command,shell=True,stdout=file,universal_newlines=True)
+            fetch_device_extensions_process.communicate()
 
-        oclDeviceDetailsLHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceDetailsLHS.txt")
-        oclDeviceDetailsRHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceDetailsRHS.txt")
+        oclDeviceDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_details_lhs_command)
+        oclDeviceDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_details_rhs_command)
 
         DeviceDetails_Store.clear()
         DeviceDetailsTreeView.set_model(DeviceDetails_Store)
@@ -182,16 +170,11 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq > /tmp/gpu-viewer/oclDeviceMemoryImageDetails.txt" % (
-            oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1))
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceMemoryImageDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/gpu-viewer/oclDeviceMemoryImageDetailsLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceMemoryImageDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/gpu-viewer/oclDeviceMemoryImageDetailsRHS.txt")
+        fetch_device_memory_and_image_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        createMainFile(Filenames.opencl_device_memory_and_image_file,fetch_device_memory_and_image_file_command)
 
-        oclDeviceMemoryImageDetailsLHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceMemoryImageDetailsLHS.txt")
-        oclDeviceMemoryImageDetailsRHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceMemoryImageDetailsRHS.txt")
+        oclDeviceMemoryImageDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_memory_and_image_details_lhs_command)
+        oclDeviceMemoryImageDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_memory_and_image_details_rhs_command)
 
         oclDeviceMemoryImageDetailsLHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsLHS]
         oclDeviceMemoryImageDetailsRHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsRHS]
@@ -256,16 +239,11 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq > /tmp/gpu-viewer/oclDeviceVectorDetails.txt" % (
-            oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1))
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceVectorDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/gpu-viewer/oclDeviceVectorDetailsLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceVectorDetails.txt | awk '{gsub(/.*          /,'True');print}' > /tmp/gpu-viewer/oclDeviceVectorDetailsRHS.txt")
+        fetch_device_vector_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        createMainFile(Filenames.opencl_device_vector_file,fetch_device_vector_details_file_command)
 
-        oclDeviceVectorDetailsLHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceVectorDetailsLHS.txt")
-        oclDeviceVectorDetailsRHS = copyContentsFromFile("/tmp/gpu-viewer/oclDeviceVectorDetailsRHS.txt")
+        oclDeviceVectorDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_vector_details_lhs_command)
+        oclDeviceVectorDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_vector_details_rhs_command)
 
         oclDeviceVectorDetailsLHS = [i.strip('\n') for i in oclDeviceVectorDetailsLHS]
         oclDeviceVectorDetailsRHS = [i.strip('\n') for i in oclDeviceVectorDetailsRHS]
@@ -312,18 +290,11 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        os.system(
-            "cat /tmp/gpu-viewer/clinfo.txt |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq > /tmp/gpu-viewer/oclDeviceQueueExecutionDetails.txt" % (
-            oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1))
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/     .*/,'True');print}' > /tmp/gpu-viewer/oclDeviceQueueExecutionDetailsLHS.txt")
-        os.system(
-            "cat /tmp/gpu-viewer/oclDeviceQueueExecutionDetails.txt | awk '{gsub(/^ .*        /,'True');print}' > /tmp/gpu-viewer/oclDeviceQueueExecutionDetailsRHS.txt")
+        fetch_device_queue_execution_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        createMainFile(Filenames.opencl_device_queue_execution_details_file,fetch_device_queue_execution_file_command)
 
-        oclDeviceQueueExecutionDetailsLHS = copyContentsFromFile(
-            "/tmp/gpu-viewer/oclDeviceQueueExecutionDetailsLHS.txt")
-        oclDeviceQueueExecutionDetailsRHS = copyContentsFromFile(
-            "/tmp/gpu-viewer/oclDeviceQueueExecutionDetailsRHS.txt")
+        oclDeviceQueueExecutionDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_queue_execution_details_lhs_command)
+        oclDeviceQueueExecutionDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_queue_execution_details_rhs_command)
 
         oclDeviceQueueExecutionDetailsLHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsLHS]
         oclDeviceQueueExecutionDetailsRHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsRHS]

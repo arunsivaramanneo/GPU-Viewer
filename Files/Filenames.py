@@ -149,7 +149,38 @@ select_opengl_limits_file = "/tmp/gpu-viewer/selectOpenglLimits.txt"
 
 opencl_output_file = "/tmp/gpu-viewer/clinfo.txt"
 
+opencl_plaform_and_device_names_file = "/tmp/gpu-viewer/PlatnDev.txt"
 
+
+fetch_platform_and_device_names_command = "clinfo -l"
+
+fetch_platform_names_command = "cat %s | grep Platform | grep -o :.* | grep -o ' .*' " %(opencl_plaform_and_device_names_file)
+
+opencl_platform_details_file = "/tmp/gpu-viewer/oclPlatformDetails.txt"
+
+fetch_platform_details_lhs_command = "cat %s | grep -o Platform.* | awk '{gsub(/  .*/,'True');print}' " %(opencl_platform_details_file)
+
+fetch_platform_details_rhs_command = "cat %s | grep -o Platform.* | awk '{gsub(/Platform.*  /,'True');print}'" %(opencl_platform_details_file)
+
+opencl_device_details_file = "/tmp/gpu-viewer/oclDeviceDetails.txt"
+
+fetch_device_details_lhs_command = "cat %s | awk '{gsub(/     .*/,'True');print}'" %(opencl_device_details_file)
+fetch_device_details_rhs_command = "cat %s | awk '{gsub(/^ .*        /,'True');print}'" %(opencl_device_details_file)
+
+opencl_device_memory_and_image_file = "/tmp/gpu-viewer/oclDeviceMemoryImageDetails.txt"
+
+fetch_device_memory_and_image_details_lhs_command = "cat %s | awk '{gsub(/     .*/,'True');print}'" %(opencl_device_memory_and_image_file)
+fetch_device_memory_and_image_details_rhs_command = "cat %s | awk '{gsub(/^ .*        /,'True');print}'" %(opencl_device_memory_and_image_file)
+
+opencl_device_vector_file = "/tmp/gpu-viewer/oclDeviceVectorDetails.txt"
+
+fetch_device_vector_details_lhs_command = "cat %s | awk '{gsub(/     .*/,'True');print}'" %(opencl_device_vector_file)
+fetch_device_vector_details_rhs_command = "cat %s | awk '{gsub(/^ .*        /,'True');print}'" %(opencl_device_vector_file)
+
+opencl_device_queue_execution_details_file = "/tmp/gpu-viewer/oclDeviceQueueExecutionDetails.txt"
+
+fetch_device_queue_execution_details_lhs_command = "cat %s | awk '{gsub(/     .*/,'True');print}'" %(opencl_device_queue_execution_details_file)
+fetch_device_queue_execution_details_rhs_command = "cat %s | awk '{gsub(/^ .*        /,'True');print}'" %(opencl_device_queue_execution_details_file)
 
 # ------------------------------------------- VDPAUINFO filenames and Commands ------------------------------------------------------------
 
