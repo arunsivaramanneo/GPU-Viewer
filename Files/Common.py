@@ -14,7 +14,7 @@ class MyGtk(Gtk.Window):
         setting = Gtk.Settings.get_default()
         theme = Gtk.CssProvider()
         theme.load_from_path('gtk.css')
-        setting.set_property("gtk-theme-name", "Orchis-Light")
+        setting.set_property("gtk-theme-name", "Orchis")
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)

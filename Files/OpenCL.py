@@ -393,17 +393,17 @@ def openCL(tab):
 
     DeviceMemoryImage_store = Gtk.TreeStore(str, str, str, str)
     DeviceMemoryImage_filter = DeviceMemoryImage_store.filter_new()
-    DeviceMemoryImageTreeview = Gtk.TreeView.new_with_model(DeviceMemoryImage_filter)
+    DeviceMemoryImageTreeview = Gtk.TreeView.new_with_model(DeviceMemoryImage_store)
     DeviceMemoryImageTreeview.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceMemoryImageTreeview, deviceMemoryImageHeader)
 
-    searchEntry = createSearchEntry(DeviceMemoryImage_filter)
-    DeviceMemoryImageGrid.attach(searchEntry,0,0,1,1)
+ #   searchEntry = createSearchEntry(DeviceMemoryImage_filter)
+ #   DeviceMemoryImageGrid.attach(searchEntry,0,0,1,1)
     DeviceMemoryImageScrollbar = create_scrollbar(DeviceMemoryImageTreeview)
-    DeviceMemoryImageGrid.attach_next_to(DeviceMemoryImageScrollbar,searchEntry,Gtk.PositionType.BOTTOM,1,1)
+    DeviceMemoryImageGrid.attach(DeviceMemoryImageScrollbar,0,0,1,1)
 
-    DeviceMemoryImage_filter.set_visible_func(searchTreeEntry, data=DeviceMemoryImageTreeview)
+ #   DeviceMemoryImage_filter.set_visible_func(searchTreeEntry, data=DeviceMemoryImageTreeview)
 
     # Device Queue & Execution capabilities
 

@@ -12,7 +12,7 @@ from pathlib import Path
 
 gi.require_version('Gtk','4.0')
 gi.require_version('Gdk','4.0')
-from gi.repository import Gtk, Pango, Gdk
+from gi.repository import Gtk, Pango, Gdk,Gio
 
 from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile
 from VulkanViewer import Vulkan
@@ -143,6 +143,12 @@ else:
         win.set_title("GPU-Viewer v2.0")
         width,height = getScreenSize()
         win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+        display = Gtk.Widget.get_display(win)
+        provider = Gtk.CssProvider.new()
+        fname = Gio.file_new_for_path('gtk.css')
+        provider.load_from_file(fname)
+        Gtk.StyleContext.add_provider_for_display(display, provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         main(win)  # Program starts here
 
     app = Gtk.Application()

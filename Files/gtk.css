@@ -1,3 +1,26 @@
-button {
- background-color: bisque; 
-};
+button.text-button {
+    min-width: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    background-color: bisque;
+}
+  notebook > header > tabs > tab {
+    min-height: 24px;
+    min-width: 24px;
+    padding: 6px 12px;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+  }
+  notebook > header > tabs > tab:checked {
+    color: #1967d2;
+  }
+  
+button.combo:only-child {
+  border-radius: 12px;
+  font-weight: 550;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: inset 0 0 0 2px transparent;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.87);
+}
+  
