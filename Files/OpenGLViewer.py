@@ -66,7 +66,7 @@ def OpenGL(tab):
         LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
         limitsCombo = Gtk.ComboBoxText()
-
+        setMargin(limitsCombo,2,2,2)
 
         # get Combo box value
 
@@ -408,6 +408,7 @@ def OpenGL(tab):
 
     vendor_combo_gl.connect("changed", radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
     Vendor_renderer = Gtk.CellRendererText()
+    setMargin(vendor_combo_gl,2,1,2)
     vendor_combo_gl.pack_start(Vendor_renderer, True)
     vendor_combo_gl.add_attribute(Vendor_renderer, "text", 0)
    # vendor_combo_gl.set_entry_text_column(0)
@@ -453,7 +454,7 @@ def OpenGL(tab):
 
     vendor_es_store = Gtk.ListStore(str)
     vendor_combo_es = Gtk.ComboBox.new_with_model(vendor_es_store)
-
+    setMargin(vendor_combo_es,2,1,2)
     for i in range(len(Vendor_ES)):
         vendor_es_store.append([Vendor_ES[i]])
 
@@ -499,7 +500,7 @@ def OpenGL(tab):
 
         vendor_egl_store = Gtk.ListStore(str)
         vendor_combo_egl = Gtk.ComboBox.new_with_model(vendor_egl_store)
-
+        setMargin(vendor_combo_egl,2,1,2)
         for i in range(len(Vendor_EGL)):
             vendor_egl_store.append([Vendor_EGL[i]])
         

@@ -16,12 +16,12 @@ button.text-button:hover {
     padding: 6px 12px;
     color: rgba(0, 0, 0, 0.6);
     font-weight: 600;
+    outline-style: double;
   }
   notebook > header > tabs > tab:checked {
     color: #1967d2;
-    background-color: #F7FAFB;
+    background-color: #EFF5F8;
     box-shadow: 0 2px 2.4px -1px rgba(247, 250, 251, 0.438), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(247, 250, 251, 0.438);
-    outline: none;
   }
 button.combo:only-child {
   border-radius: 12px;
@@ -33,4 +33,3 @@ button.combo:only-child {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
 }
-  
