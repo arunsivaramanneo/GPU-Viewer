@@ -96,4 +96,6 @@ The installer should be able to take care of this dependency in Debian based dis
 4. Intel HD(R) Graphics 630, Drivers - MESA (Open Source)
 5. 8 GB RAM
 
-**If you like/use this Application,consider supporing us by DONATING at PayPal https://www.paypal.me/ArunSivaraman.**
+**If you find the project interesting enough, please consider making a donation. Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.**
+
+[![Donate](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)](https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q)
