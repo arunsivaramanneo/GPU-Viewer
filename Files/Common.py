@@ -10,11 +10,8 @@ from gi.repository import Gtk,GdkPixbuf,Gdk
 class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
-        self.set_icon_name(const.APP_LOGO_PNG)
         setting = Gtk.Settings.get_default()
-        theme = Gtk.CssProvider()
-        theme.load_from_path('gtk.css')
-        setting.set_property("gtk-theme-name", "Orchis")
+        setting.set_property("gtk-theme-name", "Materia")
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)

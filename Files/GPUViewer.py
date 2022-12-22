@@ -151,7 +151,7 @@ else:
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         main(win)  # Program starts here
 
-    app = Gtk.Application()
+    app = Gtk.Application(application_id='io.github.arunsivaramanneo.GPUViewer')
     app.connect('activate', on_activate)
 
     app.run(None)   
