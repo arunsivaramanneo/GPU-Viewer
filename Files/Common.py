@@ -3,6 +3,7 @@ import gi
 import const
 import subprocess
 import Filenames
+from pathlib import Path
 gi.require_version('Gtk','4.0')
 from gi.repository import Gtk,GdkPixbuf,Gdk
 
@@ -11,7 +12,12 @@ class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
         setting = Gtk.Settings.get_default()
-        setting.set_property("gtk-theme-name", "Orchis")
+        if Path(Filenames.Orchis_gtk_theme_folder).exists(): 
+            setting.set_property("gtk-theme-name", "Orchis")
+        elif Path(Filenames.Materia_gtk_theme_folder).exists():
+            setting.set_property("gtk-theme-name","Materia")
+        else:
+            setting.set_property("gtk-theme-name","Adwaita")
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)

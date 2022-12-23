@@ -185,3 +185,8 @@ fetch_device_queue_execution_details_rhs_command = "cat %s | awk '{gsub(/^ .*   
 # ------------------------------------------- VDPAUINFO filenames and Commands ------------------------------------------------------------
 
 vdpauinfo_output_file = "/tmp/gpu-viewer/vdpauinfo.txt"
+
+#---------------------------------------------- Themes Folder ----------------------------------------------------------------------------------------------------
+
+Orchis_gtk_theme_folder = "/usr/share/themes/Orchis"
+Materia_gtk_theme_folder = "/usr/share/themes/Materia"
