@@ -630,24 +630,20 @@ def Vulkan(tab2):
             for line in file:
                 if '====' in line:
                     continue
-                if layer_names[i] in line and len(layer_names) - 1  > i:
+                if "VK" in line:
                     iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
                      layer_extension_counts[i], layer_descriptions[i],
                      setBackgroundColor(i)])
                     i = i + 1
                     if i % 2 == 0:
                         j = 0
+                    continue
                 elif "\t" in line and "\t\t" not in line:
                     iter2 = LayerTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
                 else:
                     LayerTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
-    #    for i in range(len(layer_names)):
-     #       background_color = setBackgroundColor(i)
-      #      LayerTab_Store.append([layer_names[i], layer_vulkan_version[i], layer_version[i],
-       #              layer_extension_counts[i], layer_descriptions[i],
-        #             background_color])
 
     def selectProperties(Combo):
         property = Combo.get_active_text()
