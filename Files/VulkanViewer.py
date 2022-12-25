@@ -600,7 +600,7 @@ def Vulkan(tab2):
 
 
         #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
-        fetch_vulkan_device_layers_command = "cat %s  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag'" %(Filenames.vulkaninfo_output_file)
+        fetch_vulkan_device_layers_command = "cat %s  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file)
         fetch_vulkan_device_layer_names_command = "cat %s | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} '" %(Filenames.vulkan_device_layers_file)
         fetch_vulkan_device_layer_vulkan_version_command = "cat %s | grep ^VK | grep -o 'Vulkan.*' | awk '{gsub(/,.*/,'True');print}' | grep -o 'version.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
         fetch_vulkan_device_layer_version_command = "cat %s | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' "  %(Filenames.vulkan_device_layers_file)
@@ -625,11 +625,29 @@ def Vulkan(tab2):
         label2 = "Instance Layers (%d)" %len(layer_names)
         notebook.set_tab_label(InstanceTab, Gtk.Label(label=label))
         InstanceNotebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
-        for i in range(len(layer_names)):
-            background_color = setBackgroundColor(i)
-            LayerTab_Store.append([layer_names[i], layer_vulkan_version[i], layer_version[i],
+        i = 0; j =1
+        with open(Filenames.vulkan_device_layers_file) as file:
+            for line in file:
+                if '====' in line:
+                    continue
+                if layer_names[i] in line and len(layer_names) - 1  > i:
+                    iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
                      layer_extension_counts[i], layer_descriptions[i],
-                     background_color])
+                     setBackgroundColor(i)])
+                    i = i + 1
+                    if i % 2 == 0:
+                        j = 0
+                elif "\t" in line and "\t\t" not in line:
+                    iter2 = LayerTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    j = j + 1
+                else:
+                    LayerTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    j = j + 1
+    #    for i in range(len(layer_names)):
+     #       background_color = setBackgroundColor(i)
+      #      LayerTab_Store.append([layer_names[i], layer_vulkan_version[i], layer_version[i],
+       #              layer_extension_counts[i], layer_descriptions[i],
+        #             background_color])
 
     def selectProperties(Combo):
         property = Combo.get_active_text()
@@ -1144,10 +1162,11 @@ def Vulkan(tab2):
     InstanceLayersGrid = createSubTab(InstanceLayersTab, InstanceNotebook, "Instance Layers")
     InstanceLayersGrid.set_row_spacing(3)
 
-    LayerTab_Store = Gtk.ListStore(str, str, str, str, str, str)
+    LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
     LayerTab_Store_filter = LayerTab_Store.filter_new()
     TreeLayer = Gtk.TreeView.new_with_model(LayerTab_Store_filter)
     TreeLayer.set_enable_search(TreeLayer)
+    TreeLayer.set_property("enable-tree-lines",True)
 
     setColumns(TreeLayer, LayerTitle, 100, 0.0)
 
