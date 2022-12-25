@@ -634,9 +634,11 @@ def Vulkan(tab2):
                     iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
                      layer_extension_counts[i], layer_descriptions[i],
                      setBackgroundColor(i)])
-                    i = i + 1
                     if i % 2 == 0:
-                        j = 0
+                        j = 1
+                    else:
+                        j = 2
+                    i = i + 1
                     continue
                 elif "\t" in line and "\t\t" not in line:
                     iter2 = LayerTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
@@ -875,11 +877,9 @@ def Vulkan(tab2):
                 Queues(text)
                 Surface(text)
                 Groups(text)
-                
-            Instance()
-
             gpu_image = getGpuImage(gpu_list[text])
             image_renderer.set_pixbuf(gpu_image)
+        Instance()
 
 
     grid = Gtk.Grid()
