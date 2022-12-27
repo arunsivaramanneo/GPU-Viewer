@@ -21,9 +21,9 @@ class MyGtk(Gtk.Window):
             setting.set_property("gtk-theme-name","Adwaita")
 
         #Setting Font
-        if Path(Filenames.Roboto_font_folder).exists():
-            setting.set_property("gtk-font-name","Roboto-Black 12")
-            setting.set_property("gtk-hint-font-metrics",True)
+    #    if Path(Filenames.Roboto_font_folder).exists():
+    #        setting.set_property("gtk-font-name","Roboto-Black 12")
+    #        setting.set_property("gtk-hint-font-metrics",True)
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)
