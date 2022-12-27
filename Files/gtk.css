@@ -3,7 +3,7 @@ button.text-button {
     padding-left: 16px;
     padding-right: 16px;
     background-color: bisque;
-    border-radius: 6px;
+    border-radius: 9px;
 }
 button.text-button:hover {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
@@ -12,9 +12,8 @@ button.text-button:hover {
 }
 notebook > header {
   border: none;
-  background-color: rgba(0, 0, 0, 0.07);
   padding: 3px;
-  margin: 3px;
+  margin: 1px;
   border-radius: 9px;
 }
   notebook > header > tabs > tab {
@@ -23,7 +22,7 @@ notebook > header {
     padding: 3px 12px;
     color: rgba(0, 0, 0, 0.4);
     font-weight: 600;
-    margin: 3px;
+    margin: 1px;
     border-radius: 9px;
   }
   
@@ -59,6 +58,7 @@ entry.search {
   border-radius: 9px;
   border-style: solid;
   border:2px solid;
+  border-color: #333333;
   background-color: rgba(0, 0, 0, 0.04);
   background-clip: padding-box;
 }
