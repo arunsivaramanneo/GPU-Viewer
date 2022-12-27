@@ -12,12 +12,18 @@ class MyGtk(Gtk.Window):
     def __init__(self, title):
         super(MyGtk, self).__init__(title=title)
         setting = Gtk.Settings.get_default()
+        # Setting Theme
         if Path(Filenames.Orchis_gtk_theme_folder).exists(): 
             setting.set_property("gtk-theme-name", "Orchis")
         elif Path(Filenames.Materia_gtk_theme_folder).exists():
             setting.set_property("gtk-theme-name","Materia-compact")
         else:
             setting.set_property("gtk-theme-name","Adwaita")
+
+        #Setting Font
+        if Path(Filenames.Roboto_font_folder).exists():
+            setting.set_property("gtk-font-name","Roboto-Black 12")
+            setting.set_property("gtk-hint-font-metrics",True)
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)

@@ -65,4 +65,5 @@ entry.search {
 combobox popover {
   margin-top: 2px;
   padding: 0;
+  background-color: transparent;
 }
