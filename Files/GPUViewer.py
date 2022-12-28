@@ -139,7 +139,8 @@ else:
 
     def on_activate(app):
         win = Gtk.ApplicationWindow(application=app)
-        win.present()
+        header = Gtk.HeaderBar()
+        win.set_titlebar(header)
         win.set_title("GPU-Viewer v2.0")
         width,height = getScreenSize()
         win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
@@ -149,6 +150,7 @@ else:
         provider.load_from_file(fname)
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        win.present()
         main(win)  # Program starts here
 
     app = Gtk.Application(application_id='io.github.arunsivaramanneo.GPUViewer')

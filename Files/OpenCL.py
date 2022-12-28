@@ -5,9 +5,9 @@ import Filenames
 
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk
+from gi.repository import Gtk,GdkPixbuf
 
-from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry, createMainFile, fetchContentsFromCommand
+from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry, createMainFile, fetchContentsFromCommand,getGpuImage
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -55,6 +55,8 @@ def openCL(tab):
             Devices_store.append([i])
 
         Devices_combo.set_active(0)
+        gpu_image = getGpuImage(oclDeviceNames[Devices_combo.get_active()])
+        image_renderer.set_pixbuf(gpu_image)
 
     def getPlatfromDetails(value):
 
@@ -460,6 +462,10 @@ def openCL(tab):
     setMargin(AvailableDevices,20,10,10)
     platformGrid.attach_next_to(AvailableDevices, platformLabel, Gtk.PositionType.BOTTOM, 2, 1)
 
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
+    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
+    setMargin(image_renderer,30,10,10)
+
     Devices_store = Gtk.ListStore(str)
     Devices_combo = Gtk.ComboBox.new_with_model(Devices_store)
     setMargin(Devices_combo,30,10,10)
@@ -505,6 +511,7 @@ def openCL(tab):
     numberOfDevicesEntry.set_max_length(2)
     platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
 
+    platformGrid.attach_next_to(image_renderer,numberOfDevicesEntry,Gtk.PositionType.RIGHT,1,1)
 
 
 def setOclColumns(Treeview, Title):

@@ -26,7 +26,9 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
+AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+
+AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
 
 LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
 
