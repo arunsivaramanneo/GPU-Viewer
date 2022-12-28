@@ -259,7 +259,7 @@ def getGpuImage(line):
     elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
         gpu_image = fetchImageFromUrl(const.GEFORCE_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "CUDA" in line and ("GTX" not in line or "RTX" not in line):
-        gpu_image = fetchImageFromUrl(const.NVIDIA_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
+        gpu_image = fetchImageFromUrl(const.CUDA_PNG, 100, const.ICON_HEIGHT, True)
     elif "Ryzen" in line and "AMD" in line:
         gpu_image = fetchImageFromUrl(const.AMDRYZEN_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "Radeon" in line and "AMD" in line:
@@ -268,6 +268,8 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.AMD_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "LLVM" in line:
         gpu_image = fetchImageFromUrl(const.LLVM_LOGO_SVG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
-    elif "Mesa" in line:
-        gpu_image = fetchImageFromUrl(const.MESA_LOGO_PNG,const.ICON_WIDTH,const.ICON_HEIGHT, True)
+    elif "Mesa" in line or "Clover" in line:
+        gpu_image = fetchImageFromUrl(const.MESA_LOGO_PNG,100,const.ICON_HEIGHT, False)
+    elif "Portable Computing Language" in line:
+        gpu_image = fetchImageFromUrl(const.POCL_LOGO_PNG,100,const.ICON_HEIGHT, False)
     return gpu_image

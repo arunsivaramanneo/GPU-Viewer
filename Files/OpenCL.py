@@ -344,6 +344,8 @@ def openCL(tab):
 
     def selectPlatform(combo):
         value = combo.get_active()
+        platform_image = getGpuImage(oclPlatforms[value])
+        platform_image_renderer.set_pixbuf(platform_image)
         getDeviceNames(value)
         getPlatfromDetails(value)
 
@@ -482,6 +484,9 @@ def openCL(tab):
     for i in oclPlatforms:
         platform_store.append([i])
 
+    platform_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG,100,100)
+    platform_image_renderer = Gtk.Picture.new_for_pixbuf(platform_image)
+    setMargin(platform_image_renderer,30,10,10)
     platform_combo = Gtk.ComboBox.new_with_model(platform_store)
     setMargin(platform_combo,30,10,10)
     platform_combo.connect("changed", selectPlatform)
@@ -497,11 +502,14 @@ def openCL(tab):
     numberOfPlatforms.set_label("No. of Platforms :")
     platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 1, 1)
 
+
     numberOfPlatformsEntry = Gtk.Entry()
     setMargin(numberOfPlatformsEntry,30,10,10)
     numberOfPlatformsEntry.set_text(str(len(oclPlatforms)))
     numberOfPlatformsEntry.set_editable(False)
     platformGrid.attach_next_to(numberOfPlatformsEntry, numberOfPlatforms, Gtk.PositionType.RIGHT, 1, 1)
+
+    platformGrid.attach_next_to(platform_image_renderer,numberOfPlatformsEntry,Gtk.PositionType.RIGHT,1,1)
 
     numberOfDevices = Gtk.Label()
     setMargin(numberOfDevices,30,10,10)

@@ -30,9 +30,13 @@ AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
 
 AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
 
+POCL_LOGO_PNG = "../Images/pocl.png"
+
+CUDA_PNG = "../Images/Cuda.png"
+
 LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
 
-MESA_LOGO_PNG = "../Images/Mesa.png"
+MESA_LOGO_PNG = "../Images/mesa-logo.png"
 
 INTEL_BANNER = "../Images/Intel_Banner.png"
 
