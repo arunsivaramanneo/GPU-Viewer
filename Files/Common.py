@@ -262,8 +262,10 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.CUDA_PNG, 100, const.ICON_HEIGHT, True)
     elif "Ryzen" in line and "AMD" in line:
         gpu_image = fetchImageFromUrl(const.AMDRYZEN_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
-    elif "Radeon" in line and "AMD" in line:
+    elif "Radeon" in line and "AMD" in line and "Pro" not in line:
         gpu_image = fetchImageFromUrl(const.AMDRADEON_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
+    elif "Radeon" in line and "AMD" in line and "Pro" in line:
+        gpu_image = fetchImageFromUrl(const.AMD_RADEON_Pro_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "AMD" in line or "ATI" in line and "Radeon" not in line:
         gpu_image = fetchImageFromUrl(const.AMD_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "LLVM" in line:

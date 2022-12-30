@@ -20,6 +20,8 @@ NVIDIA_GTX_LOGO_PNG = "../Images/nvidia-logo.png"
 
 NVIDIA_RTX_LOGO_PNG = "../Images/nvidia-RTX-logo.png"
 
+NVIDIA_CUDA_LOGO_PNG = "../Images/Cuda.png"
+
 GEFORCE_PNG = "../Images/GeForce.png"
 
 INTEL_LOGO_PNG = "../Images/intel-logo.png"
@@ -27,6 +29,10 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 AMD_LOGO_PNG = "../Images/AMD.png"
 
 AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+
+AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"
+
+AMD_RADEON_Pro_LOGO_PNG = "../Images/AMD_Radeon_Pro.png"
 
 AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
 
@@ -125,9 +131,9 @@ THEME4 = Path.isdir("/usr/share/themes/Paper")
 
 # .------------- Colors ---------------------
 
-BGCOLOR1 = "#fff"
+BGCOLOR1 = "#ffffff"
 
-BGCOLOR2 = "#eee"
+BGCOLOR2 = "#eeeeee"
 
 #BGCOLOR3 = "#ccc"
 BGCOLOR3 = "#9FA3AC"

@@ -261,12 +261,13 @@ def Vulkan(tab2):
     def Formats(GPUname):
                 # noinspection PyPep8
         fetch_vulkan_device_formats_command = "cat %s |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./'" %(Filenames.vulkaninfo_output_file,GPUname,GPUname+1)
-        fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE " %(Filenames.vulkan_device_formats_file)
+        fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE  | awk '/./'" %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_types_count_command = "cat %s | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' " %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_type_linear_count_command = "cat %s | awk '/linear*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_type_optimal_count_command = "cat %s | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_type_buffer_count_command = "cat %s | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         
+        FormatsCombo.remove_all()
         createMainFile(Filenames.vulkan_device_formats_file,fetch_vulkan_device_formats_command)
         
         createMainFile(Filenames.vulkan_device_formats_types_file,fetch_vulkan_device_formats_types_command,)
@@ -279,6 +280,16 @@ def Vulkan(tab2):
 
         createMainFile(Filenames.vulkan_device_format_types_buffer_count_file,fetch_vulkan_device_format_type_buffer_count_command)  
 
+        with open(Filenames.vulkan_device_formats_types_file,"r") as file:
+            for line in file:
+                FormatsCombo.append_text(((line.replace("FORMAT_","")).strip("\n")).strip("\t"))
+
+        FormatsCombo.insert_text(0, "Show All Device Formats")
+        FormatsCombo.set_active(0)
+
+    def selectFormats(value):
+
+        selected_Format = value.get_active_text()
         valueFormats = copyContentsFromFile(Filenames.vulkan_device_formats_types_file)
         valueFormatsCount = copyContentsFromFile(Filenames.vulkan_device_format_types_count_file)
         valueLinearCount = copyContentsFromFile(Filenames.vulkan_device_format_types_linear_count_file)
@@ -287,36 +298,100 @@ def Vulkan(tab2):
             
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store_filter)
-        n = 0
-        for i in range(len(valueFormatsCount)):
-            for j in range(int(valueFormatsCount[i])):
-                if 'None' not in valueLinearCount[i]:
+
+        if "Show All Device Formats" in selected_Format:
+            n = 0
+            for i in range(len(valueFormatsCount)):
+                for j in range(int(valueFormatsCount[i])):
+                    if 'None' not in valueLinearCount[i]:
+                        linearStatus = "true"
+                        linearColor = const.COLOR1
+                    else:
+                        linearStatus = "false"
+                        linearColor = const.COLOR2
+                    if 'None' not in valueOptimalCount[i]:
+                        optimalStatus = "true"
+                        optimalColor = const.COLOR1
+                    else:
+                        optimalStatus = "false"
+                        optimalColor = const.COLOR2
+                    if 'None' not in valueBufferCount[i]:
+                        bufferStatus = "true"
+                        bufferColor = const.COLOR1
+                    else:
+                        bufferStatus = "false"
+                        bufferColor = const.COLOR2
+
+                    fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                    fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                    fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+
+                    iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
+                    if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
+                        iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                        
+                        with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
+                            fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
+                            fetch_vulkan_device_format_linear_types_process.communicate()
+                            
+                        with open(Filenames.vulkan_device_format_types_linear_file) as file1:
+                            for k,line in enumerate(file1):
+                                FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                        iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+
+                        with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
+                            fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
+                            fetch_vulkan_device_format_optimal_types_process.communicate()
+                    #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
+                        with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
+                            for k,line in enumerate(file1):
+                                FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                        iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+
+                        with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
+                            fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
+                            fetch_vulkan_device_format_buffer_types_process.communicate()
+                    #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
+                        with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
+                            for k,line in enumerate(file1):
+                                FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+
+                    n +=1
+        else:
+                selected_value = value.get_active() - 1
+                sum = 0
+                for i in range(len(valueFormatsCount)):
+                    sum = sum + int(valueFormatsCount[i])
+                    if selected_value < sum:
+                        value = i
+                        break
+                if 'None' not in valueLinearCount[value]:
                     linearStatus = "true"
                     linearColor = const.COLOR1
                 else:
                     linearStatus = "false"
                     linearColor = const.COLOR2
-                if 'None' not in valueOptimalCount[i]:
+                if 'None' not in valueOptimalCount[value]:
                     optimalStatus = "true"
                     optimalColor = const.COLOR1
                 else:
                     optimalStatus = "false"
                     optimalColor = const.COLOR2
-                if 'None' not in valueBufferCount[i]:
+                if 'None' not in valueBufferCount[value]:
                     bufferStatus = "true"
                     bufferColor = const.COLOR1
                 else:
                     bufferStatus = "false"
                     bufferColor = const.COLOR2
 
-                fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
+                fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
+                fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
+                iter1 = FormatsTab_Store.append(None,[selected_Format,linearStatus,optimalStatus,bufferStatus,setBackgroundColor(0),linearColor,optimalColor,bufferColor]) 
 
-
-                iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
+                j = 1
                 if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
-                    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     
                     with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
                         fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -325,7 +400,7 @@ def Vulkan(tab2):
                     with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                     with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
                         fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -334,7 +409,7 @@ def Vulkan(tab2):
                     with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                     with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
                         fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -343,9 +418,10 @@ def Vulkan(tab2):
                     with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace("FORMAT_FEATURE_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    j +=1
+                TreeFormats.expand_all()
 
-                n +=1
-                
+
         labe1Format = "Formats (%d)" %len(valueFormats)
         notebook.set_tab_label(FormatsTab,Gtk.Label(label = labe1Format))
 
@@ -1019,6 +1095,8 @@ def Vulkan(tab2):
 
     # ------------Creating the Formats Tab --------------------------------------------------
 
+    FormatsCombo = Gtk.ComboBoxText()
+    FormatsCombo.connect("changed",selectFormats)
     FormatsTab = Gtk.Box(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
@@ -1027,6 +1105,7 @@ def Vulkan(tab2):
     FormatsTab_Store_filter = FormatsTab_Store.filter_new()
     TreeFormats = Gtk.TreeView.new_with_model(FormatsTab_Store_filter)
     TreeFormats.set_property("enable-tree-lines", True)
+    TreeFormats.set_enable_search(True)
  #   TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
         Formatsrenderer = Gtk.CellRendererText()
@@ -1047,9 +1126,10 @@ def Vulkan(tab2):
     formatSearchFrame = Gtk.Frame()
     formatSearchEntry = createSearchEntry(FormatsTab_Store_filter)
     formatSearchFrame.set_child(formatSearchEntry)
-    FormatsGrid.attach(formatSearchFrame,0,0,1,1)
+    FormatsGrid.attach(formatSearchFrame,0,0,14,1)
     FormatsScrollbar = create_scrollbar(TreeFormats)
-    FormatsGrid.attach_next_to(FormatsScrollbar, formatSearchFrame, Gtk.PositionType.BOTTOM, 1, 1)
+    FormatsGrid.attach_next_to(FormatsScrollbar, formatSearchFrame, Gtk.PositionType.BOTTOM, 15, 1)
+    FormatsGrid.attach_next_to(FormatsCombo,formatSearchFrame,Gtk.PositionType.RIGHT,1,1)
 
     FormatsTab_Store_filter.set_visible_func(searchFormatsTree, data=TreeFormats)
 
