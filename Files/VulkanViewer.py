@@ -806,6 +806,7 @@ def Vulkan(tab2):
         else:
             k = 0
             count = 0
+            iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),"BLACK"])
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
@@ -815,7 +816,7 @@ def Vulkan(tab2):
                         background_color = setBackgroundColor(k)
                         #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line:
                         if "\t\t" not in line:
-                            iter2 = SparseTab_Store.append(None,
+                            iter2 = SparseTab_Store.append(iter,
                                                [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
                         #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line:
                         if "\t\t" in line:
