@@ -299,7 +299,9 @@ def Vulkan(tab2):
         FormatsTab_Store.clear()
         TreeFormats.set_model(FormatsTab_Store_filter)
 
-        if "Show All Device Formats" in selected_Format:
+        if selected_Format is None:
+            pass
+        elif "Show All Device Formats" in selected_Format:
             n = 0
             for i in range(len(valueFormatsCount)):
                 for j in range(int(valueFormatsCount[i])):
