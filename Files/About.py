@@ -14,7 +14,7 @@ def about(tab3):
     
     About_list = Gtk.ListStore(str, str)
 
-    with open("../About GPU Viewer", "r") as file1:
+    with open("../About_GPU_Viewer", "r") as file1:
         for i, line in enumerate(file1):
             background_color = setBackgroundColor(i)
             About_list.append([line.strip('\n'), background_color])

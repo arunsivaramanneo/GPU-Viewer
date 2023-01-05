@@ -11,7 +11,6 @@ import os
 from pathlib import Path
 
 gi.require_version('Gtk','4.0')
-gi.require_version('Gdk','4.0')
 from gi.repository import Gtk, Pango, Gdk,Gio
 
 from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile
@@ -143,7 +142,12 @@ else:
         win.set_titlebar(header)
         win.set_title("GPU-Viewer v2.0")
         width,height = getScreenSize()
-        win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+        if int(width) > 2160 and int(height) < 1440:
+            win.set_size_request(2160 * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+        elif int(width) > 2160 and int(height) > 1440:
+            win.set_size_request(2160 * const.WIDTH_RATIO ,1440 * const.HEIGHT_RATIO1)
+        else:
+            win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
         fname = Gio.file_new_for_path('gtk.css')

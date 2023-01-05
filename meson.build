@@ -16,7 +16,7 @@ configure_file(
   install_dir: get_option('bindir')
 )
 
-install_data([ 'About GPU Viewer', 'Change Log.md', 'LICENSE', 'README.md' ])
+install_data([ 'About_GPU_Viewer', 'Change Log.md', 'LICENSE', 'README.md' ])
 
 install_subdir('Files',
   install_dir: get_option('datadir') / 'gpu-viewer')
