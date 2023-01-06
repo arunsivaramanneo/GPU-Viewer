@@ -91,7 +91,7 @@ else:
         t3.start()
         t3.join()   
 
-        print(time.time()-T1)
+    #    print(time.time()-T1)
         win.connect("close-request",quit)
     #    gtk.mainLoop()
 
