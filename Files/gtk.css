@@ -3,13 +3,25 @@ button.text-button {
     padding-left: 16px;
     padding-right: 16px;
     background-color: bisque;
+    color: rgba(0, 0, 0, 0.87);
     border-radius: 9px;
+    box-shadow: none;
 }
+
 button.text-button:hover {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
   background-color: bisque;
 }
+
+button.text-button:disabled{
+  box-shadow: none;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.38);
+  filter: none;
+  opacity: 1;
+}
+
 /*************
  * Notebooks *
  *************/
@@ -45,10 +57,20 @@ notebook > header {
   }
   
   
-  notebook > header > tabs > tab:checked {
-    color: #1967d2;
-    background-color: #EFF5F8;
-    box-shadow: 0 5px 2.4px -1px rgba(247, 250, 251, 0.438), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 3px 6px 0 rgba(247, 250, 251, 0.438);
+notebook > header tab:checked {
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
+  background-color: #EFF5F8;
+  background-clip: padding-box;
+  border-color: #dedede;
+  color: #1967d2;
+  box-shadow: 0 5px 2.4px -1px rgba(247, 250, 251, 0.438), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 3px 6px 0 rgba(247, 250, 251, 0.438);
+}
+
+  dropdown arrow,
+  combobox arrow {
+    -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+    min-height: 16px;
+    min-width: 16px;
   }
 button.combo:only-child {
   border-radius: 9px;
@@ -152,4 +174,20 @@ header{
   box-shadow: none;
   color: rgba(0, 0, 0, 0.6);
   font-weight: 500;
+}
+
+window{
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+}
+
+columnview.view > header > button,
+treeview.view > header > button {
+  padding: 2px 6px;
+  border-style: solid solid solid none;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+  background-clip: border-box;
 }
