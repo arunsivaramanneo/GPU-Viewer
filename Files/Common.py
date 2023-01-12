@@ -16,7 +16,7 @@ class MyGtk(Gtk.Window):
         if Path(Filenames.Materia_gtk_theme_folder).exists(): 
             setting.set_property("gtk-theme-name", "Materia-compact")
         elif Path(Filenames.Orchis_gtk_theme_folder).exists():
-            setting.set_property("gtk-theme-name","Orchis")
+            setting.set_property("gtk-theme-name","Orchis-Compact")
         else:
             setting.set_property("gtk-theme-name","Adwaita")
 

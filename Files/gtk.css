@@ -30,21 +30,18 @@ button.text-button:disabled{
   min-height: 24px;
   min-width: 24px;
   padding: 6px 12px;
-  border-width: 1px;
   border-color: transparent;
-  border-style: solid;
   outline: none;
-  background-clip: padding-box;
+  border-radius: 9px;
   box-shadow: none;
   color: rgba(0, 0, 0, 0.6);
   font-weight: 500;
+  border-style: solid solid solid none;
 }
 
 notebook > header {
   border: none;
   padding: 3px;
-  margin: 1px;
-  border-radius: 9px;
 }
   notebook > header > tabs > tab {
     min-height: 24px;
@@ -52,8 +49,6 @@ notebook > header {
     padding: 3px 12px;
     color: rgba(0, 0, 0, 0.4);
     font-weight: 600;
-    margin: 1px;
-    border-radius: 9px;
   }
   
   
@@ -63,7 +58,7 @@ notebook > header tab:checked {
   background-clip: padding-box;
   border-color: #dedede;
   color: #1967d2;
-  box-shadow: 0 5px 2.4px -1px rgba(247, 250, 251, 0.438), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 3px 6px 0 rgba(247, 250, 251, 0.438);
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
   dropdown arrow,
