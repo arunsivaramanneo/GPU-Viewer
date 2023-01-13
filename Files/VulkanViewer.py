@@ -721,11 +721,14 @@ def Vulkan(tab2):
                 elif "\t" in line and "\t\t" not in line:
                     iter2 = LayerTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
-                elif "\t\t" in line and "\t\t\t" not in line:
+                elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
                     iter3 = LayerTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
+                elif "Layer-Device" in line:
+                    iter4 = LayerTab_Store.append(iter3,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    j = j + 1
                 else:
-                    LayerTab_Store.append(iter3,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    LayerTab_Store.append(iter4,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
 
     def selectProperties(Combo):
