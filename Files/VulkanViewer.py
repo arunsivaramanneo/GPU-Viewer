@@ -469,7 +469,7 @@ def Vulkan(tab2):
                 continue
             if "None" in vulkan_memory_types_lhs[i] and n == 0:
                 n = n + 1
-                continue
+            #    continue
             if "heapIndex" in vulkan_memory_types_lhs[i]:
                 iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
                 continue
