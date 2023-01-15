@@ -252,8 +252,10 @@ def appendLimitsRHS(filename, temp):
     return LimitsRHS, LimitRHSValue
 
 def getGpuImage(line):
-    if "Intel" in line:
+    if "Intel" in line and "Arc" not in line:
         gpu_image = fetchImageFromUrl(const.INTEL_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
+    elif "Intel" in line and "Arc" in line:
+        gpu_image = fetchImageFromUrl(const.INTEL_ARC_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "GTX" in line and "GeForce" in line:
         gpu_image = fetchImageFromUrl(const.NVIDIA_GTX_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "RTX" in line and "GeForce" in line:

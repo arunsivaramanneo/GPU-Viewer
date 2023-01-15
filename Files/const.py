@@ -26,6 +26,8 @@ GEFORCE_PNG = "../Images/GeForce.png"
 
 INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
+INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
+
 AMD_LOGO_PNG = "../Images/AMD.png"
 
 AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
