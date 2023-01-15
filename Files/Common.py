@@ -44,9 +44,11 @@ def getRamInGb(ram):
 
 # Setting the Minimum Screen Size
 def getScreenSize():
-    fetch_Screen_resolution_process = subprocess.Popen(Filenames.fetch_screen_resolution_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
-    screen_resolution = fetch_Screen_resolution_process.communicate()[0].split('x')
-    return screen_resolution[0].strip('\n'),screen_resolution[1].strip('\n')
+    display = Gdk.Display.get_default()
+    monitors = display.get_monitors()
+    for m in monitors:
+        g = m.get_geometry()
+    return g.width,g.height
 
 
 # fetching the Images/Logos from the const File
