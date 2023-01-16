@@ -278,4 +278,22 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.MESA_LOGO_PNG,100,const.ICON_HEIGHT, False)
     elif "Portable Computing Language" in line:
         gpu_image = fetchImageFromUrl(const.POCL_LOGO_PNG,100,const.ICON_HEIGHT, False)
+    elif "Ubuntu" in line and "Gnome" not in line:
+        gpu_image = fetchImageFromUrl(const.Ubuntu_logo,24,20, True)
+    elif "Mint" in line:
+        gpu_image = fetchImageFromUrl(const.Mint_logo,24,20, True)
+    elif "Manjaro" in line:
+        gpu_image = fetchImageFromUrl(const.Manjaro_logo,24,20, True)
+    elif "GNOME" in line:
+        gpu_image = fetchImageFromUrl(const.Gnome_logo,24,20, True)
+    elif "Unity" in line:
+        gpu_image = fetchImageFromUrl(const.Unity_logo,20,20, True)
+    elif "Cinnamon" in line:
+        gpu_image = fetchImageFromUrl(const.Cinnamon_logo,24,20, True)
+    elif "wayland" in line:
+        gpu_image = fetchImageFromUrl(const.Wayland_logo,24,20, True)
+    elif "x11" in line:
+        gpu_image = fetchImageFromUrl(const.X11_logo,24,20, True)
+    else:
+        gpu_image = fetchImageFromUrl(const.DUMMY_PIXBUF,20,20,True)
     return gpu_image

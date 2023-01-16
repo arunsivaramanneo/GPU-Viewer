@@ -105,6 +105,27 @@ TOOLTIP_GITHUB = "Arun Sivaraman's Github"
 
 GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
 
+DUMMY_PIXBUF = "../Images/8e8e8e.png"
+TRANSPARENT_PIXBUF = "../Images/2c2c2c.png"
+
+
+# ----------------- Distro logos --------------------------------------
+
+Ubuntu_logo = "../Images/Ubuntu.png"
+Mint_logo = "../Images/linux_mint.png"
+Manjaro_logo = "../Images/Manjaro-log.png"
+
+
+#------------------- Desktop logo--------------------------------------
+
+Gnome_logo = "../Images/Gnome_logo.png"
+Unity_logo = "../Images/Unity_logo.png"
+Cinnamon_logo = "../Images/Cinnamon-logo.png"
+Wayland_logo = "../Images/Wayland_Logo.svg"
+X11_logo = "../Images/X11_Logo.png"
+
+
+
 TOOLTIP_CONTACT = "Contact us"
 
 FRAMEBUFFERLIST = ["vid", "vdep", "vt", "xsp", "bfsz", "lvl", "rt", "db", "st", "rsz", "gsz", "bsz", "asz", "flt",

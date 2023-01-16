@@ -8,7 +8,7 @@ import Filenames
 import subprocess
 from Common import copyContentsFromFile, getGpuImage,setColumns,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,createSearchEntry
 
-DeviceTitle = ["Device Information", "Details"]
+DeviceTitle = ["Device Information","", "Details"]
 SparseTitle = ["Device Properties", "Value"]
 LimitsTitle = ["Device Limits", "Value"]
 FeaturesTitle = ["Device Features", "Value"]
@@ -103,29 +103,39 @@ def Vulkan(tab2):
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
-        
+        dummy_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(const.DUMMY_PIXBUF, 24, 20)
+        dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
             if "apiVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getVulkanVersion(valueRHS[i])
-                iter1 = DeviceTab_Store.append(None,["Vulkan Details..."," ",const.BGCOLOR3])
+                iter1 = DeviceTab_Store.append(None,["Vulkan Details...",dummy_transparent," ",const.BGCOLOR3])
             if "driverVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getDriverVersion(valueRHS,i)
             if "Model" in valueLHS[i]:
-                iter1 = DeviceTab_Store.append(None,["Processor Details..."," ",const.BGCOLOR3])
+                iter1 = DeviceTab_Store.append(None,["Processor Details...",dummy_transparent,"",const.BGCOLOR3])
             if "Description" in valueLHS[i]:
-                iter1 = DeviceTab_Store.append(None,["Operating System Details..."," ",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,["Distribution", valueRHS[i].strip('\n'), background_color])
+                distro_logo = getGpuImage(valueRHS[i])
+                iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
+                DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),const.BGCOLOR1])
+                continue
+            if "Desktop" in valueLHS[i]:
+                desktop_logo = getGpuImage(valueRHS[i])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),const.BGCOLOR1])
+                continue
+            if "Windowing" in valueLHS[i]:
+                windowing_system_logo = getGpuImage(valueRHS[i])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),const.BGCOLOR1])
                 continue
             if "MemTotal" in valueLHS[i]:
-                iter1 = DeviceTab_Store.append(None,["Memory Details..."," ",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
+                iter1 = DeviceTab_Store.append(None,["Memory Details...",dummy_transparent," ",const.BGCOLOR3])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),const.BGCOLOR1])
             elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), getRamInGb(valueRHS[i]), background_color])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),const.BGCOLOR1])
             else:
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'), valueRHS[i].strip('\n'), background_color])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),const.BGCOLOR1])
 
         TreeDevice.expand_all()
 
@@ -984,12 +994,24 @@ def Vulkan(tab2):
     DeviceGrid = createSubTab(DeviceTab, notebook, "Device")
     DeviceGrid.set_row_spacing(3)
 
-    DeviceTab_Store = Gtk.TreeStore(str, str, str)
+    DeviceTab_Store = Gtk.TreeStore(str,GdkPixbuf.Pixbuf, str,str)
     TreeDevice = Gtk.TreeView.new_with_model(DeviceTab_Store)
     TreeDevice.set_property("enable-grid-lines", 1)
 
-
-    setColumns(TreeDevice, DeviceTitle, const.MWIDTH, 0.0)
+    for i,column_title in enumerate(DeviceTitle):
+        if i == 1:
+            renderer_pixbuf = Gtk.CellRendererPixbuf()
+            column_pixbuf = Gtk.TreeViewColumn(column_title)
+            column_pixbuf.pack_start(renderer_pixbuf, False)
+            column_pixbuf.add_attribute(renderer_pixbuf,"pixbuf",1)
+            column_pixbuf.add_attribute(renderer_pixbuf,"cell-background",3)
+            TreeDevice.append_column(column_pixbuf)
+        else:
+            renderer_text = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(column_title, renderer_text, text=i)
+            column.add_attribute(renderer_text,"background",3)
+            TreeDevice.append_column(column)
+ #   setColumns(TreeDevice, DeviceTitle, 20, 0.0)
 
     DeviceScrollbar = create_scrollbar(TreeDevice)
     DeviceGrid.attach(DeviceScrollbar,0,0,1,1)
