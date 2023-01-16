@@ -2,6 +2,8 @@ import os.path as Path
 
 GTK_CSS = "gtk.css"
 
+GTK_DARK_CSS = "gtk_dark.css"
+
 ABOUT_US_PNG = "../Images/about-us.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
@@ -30,7 +32,10 @@ INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+
+AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+
 
 AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"
 
@@ -123,25 +128,23 @@ HEIGHT_RATIO2 = 0.65
 MWIDTH = 350
 
 
-THEME1 = Path.isdir("/usr/share/themes/Adwaita")
-
-THEME2 = Path.isdir("/usr/share/themes/Adapta")
-
-THEME3 = Path.isdir("/usr/share/themes/Numix")
-
-THEME4 = Path.isdir("/usr/share/themes/Paper")
-
 # .------------- Colors ---------------------
 
-BGCOLOR1 = "#ffffff"
+#BGCOLOR1 = "#ffffff"
+BGCOLOR1 = "#2C2C2C"
 
 BGCOLOR2 = "#eeeeee"
+BGCOLOR2 = "#2C2C2C"
 
 #BGCOLOR3 = "#ccc"
-BGCOLOR3 = "#9FA3AC"
+#BGCOLOR3 = "#9FA3AC"
+BGCOLOR3 = "#8e8e8e"
+
 
 COLOR1 = "GREEN"
 
 COLOR2 = "RED"
+
+COLOR3 = "#FFFFFF"
 
 FONT = "Noto Sans Regular"

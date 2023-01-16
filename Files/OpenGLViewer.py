@@ -321,6 +321,7 @@ def OpenGL(tab):
     opengl_box.append(frame_opengl_info)
     opengl_info_list = Gtk.ListStore(str,str,str)
     Tree_opengl_info = Gtk.TreeView.new_with_model(opengl_info_list)
+    Tree_opengl_info.set_property("enable-grid-lines", 1)
 
     setColumns(Tree_opengl_info,Title2,const.MWIDTH,0.0)
 
@@ -379,6 +380,7 @@ def OpenGL(tab):
     opengl_extension_list = Gtk.ListStore(str,str)
     opengl_extension_list_filter = opengl_extension_list.filter_new()
     tree_opengl_extension = Gtk.TreeView.new_with_model(opengl_extension_list_filter)
+    tree_opengl_extension.set_property("enable-grid-lines", 1)
     tree_opengl_extension.set_headers_visible(False)
     opengl_extension_list_filter.set_visible_func(searchTreeExtGL)
 
@@ -424,6 +426,7 @@ def OpenGL(tab):
     opengl_es_extension_list = Gtk.ListStore(str,str)
     opengl_es_extension_list_filter = opengl_es_extension_list.filter_new()
     tree_opengl_es_extension = Gtk.TreeView.new_with_model(opengl_es_extension_list_filter)
+    tree_opengl_es_extension.set_property("enable-grid-lines", 1)
     tree_opengl_es_extension.set_headers_visible(False)
     opengl_es_extension_list_filter.set_visible_func(searchTreeExtES)
 
@@ -478,6 +481,7 @@ def OpenGL(tab):
         egl_extension_list = Gtk.ListStore(str,str)
         egl_extension_list_filter = egl_extension_list.filter_new()
         tree_egl_extension = Gtk.TreeView.new_with_model(egl_extension_list_filter)
+        tree_egl_extension.set_property("enable-grid-lines", 1)
         tree_egl_extension.set_headers_visible(False)
         egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
 

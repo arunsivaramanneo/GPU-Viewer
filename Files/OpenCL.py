@@ -127,7 +127,7 @@ def openCL(tab):
             elif "No" in oclDeviceDetailsRHS[i] and "None" not in oclDeviceDetailsRHS[i]:
                 fgcolor.append("RED")
             else:
-                fgcolor.append("BLACK")
+                fgcolor.append(const.COLOR3)
 
         for i in range(len(oclDeviceDetailsLHS)):
             DeviceDetailsTreeView.expand_all()
@@ -189,7 +189,7 @@ def openCL(tab):
             elif "No" in oclDeviceMemoryImageDetailsRHS[i] and "None" not in oclDeviceMemoryImageDetailsRHS[i]:
                 fgcolor.append("RED")
             else:
-                fgcolor.append("BLACK")
+                fgcolor.append(const.COLOR3)
 
         for i in range(len(oclDeviceMemoryImageDetailsLHS)):
             DeviceMemoryImageTreeview.expand_all()
@@ -257,7 +257,7 @@ def openCL(tab):
             elif "No" in oclDeviceVectorDetailsRHS[i] and "None" not in oclDeviceVectorDetailsRHS[i]:
                 fgcolor.append("RED")
             else:
-                fgcolor.append("BLACK")
+                fgcolor.append(const.COLOR3)
 
         for i in range(len(oclDeviceVectorDetailsLHS)):
             DeviceVectorTreeview.expand_all()
@@ -309,7 +309,7 @@ def openCL(tab):
             elif "No" in oclDeviceQueueExecutionDetailsRHS[i] and "None" not in oclDeviceQueueExecutionDetailsRHS[i]:
                 fgcolor.append("RED")
             else:
-                fgcolor.append("BLACK")
+                fgcolor.append(const.COLOR3)
 
         for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
             DeviceQueueExecutionTreeView.expand_all()
@@ -366,7 +366,8 @@ def openCL(tab):
 
     platformDetails_Store = Gtk.TreeStore(str, str, str)
     platformDetailsTreeView = Gtk.TreeView.new_with_model(platformDetails_Store)
-    platformDetailsTreeView.set_property("enable-tree-lines", True)
+    platformDetailsTreeView.set_property("enable-grid-lines", 1)
+#    platformDetailsTreeView.set_property("enable-tree-lines", True)
 
     setColumns(platformDetailsTreeView, platformDetailsHeader, const.MWIDTH, 0.0)
 
@@ -378,7 +379,8 @@ def openCL(tab):
 
     DeviceDetails_Store = Gtk.TreeStore(str, str, str, str)
     DeviceDetailsTreeView = Gtk.TreeView.new_with_model(DeviceDetails_Store)
-    DeviceDetailsTreeView.set_property("enable-tree-lines", True)
+    DeviceDetailsTreeView.set_property("enable-grid-lines", 1)
+#    DeviceDetailsTreeView.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceDetailsTreeView, deviceDetailsHeader)
 
@@ -394,7 +396,9 @@ def openCL(tab):
     DeviceMemoryImage_store = Gtk.TreeStore(str, str, str, str)
     DeviceMemoryImage_filter = DeviceMemoryImage_store.filter_new()
     DeviceMemoryImageTreeview = Gtk.TreeView.new_with_model(DeviceMemoryImage_store)
-    DeviceMemoryImageTreeview.set_property("enable-tree-lines", True)
+    DeviceMemoryImageTreeview.set_property("enable-grid-lines", 1)
+
+ #   DeviceMemoryImageTreeview.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceMemoryImageTreeview, deviceMemoryImageHeader)
 
@@ -413,7 +417,8 @@ def openCL(tab):
 
     DeviceQueueExecution_store = Gtk.TreeStore(str, str, str, str)
     DeviceQueueExecutionTreeView = Gtk.TreeView.new_with_model(DeviceQueueExecution_store)
-    DeviceQueueExecutionTreeView.set_property("enable-tree-lines", True)
+    DeviceQueueExecutionTreeView.set_property("enable-grid-lines", 1)
+ #   DeviceQueueExecutionTreeView.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceQueueExecutionTreeView, deviceMemoryImageHeader)
 
@@ -427,7 +432,8 @@ def openCL(tab):
 
     DeviceVector_store = Gtk.TreeStore(str, str, str, str)
     DeviceVectorTreeview = Gtk.TreeView.new_with_model(DeviceVector_store)
-    DeviceVectorTreeview.set_property("enable-tree-lines", True)
+    DeviceVectorTreeview.set_property("enable-grid-lines", 1)
+#    DeviceVectorTreeview.set_property("enable-tree-lines", True)
 
     setOclColumns(DeviceVectorTreeview, deviceMemoryImageHeader)
 

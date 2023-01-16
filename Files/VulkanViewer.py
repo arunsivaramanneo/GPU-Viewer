@@ -463,7 +463,7 @@ def Vulkan(tab2):
         for i in range(len(vulkan_memory_types_lhs)):
             background_color = setBackgroundColor(i)
             if "memoryTypes" in vulkan_memory_types_lhs[i]:
-                iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,"BLACK"])
+                iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
                 continue
             if "MEMORY" in vulkan_memory_types_lhs[i]:
                 continue
@@ -471,26 +471,26 @@ def Vulkan(tab2):
                 n = n + 1
                 continue
             if "heapIndex" in vulkan_memory_types_lhs[i]:
-                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,"BLACK"])
+                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,const.COLOR3])
                 continue
             if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                 continue
             if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
-                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                 continue
             if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                 continue
             if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
-                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                 continue
             else:
                 Flag = []
                 if "propertyFlags" in vulkan_memory_types_lhs[i]:
                         vulkan_memory_types_property_flags[p]
                         #text = (mRhs[i].strip('\n')).strip(": ")
-                        iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                        iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                         dec = int(vulkan_memory_types_property_flags[p], 16)
                         if  dec == 0:
                             n = 0
@@ -509,11 +509,11 @@ def Vulkan(tab2):
                             elif "false" in Flag[k]:
                                 fColor = "RED"
                             else:
-                                fColor = "BLACK"
+                                fColor = const.COLOR3
                             MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
                         p = p + 1
                 else:
-                    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,"BLACK"])
+                    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
                     continue
 
         labe12 = "Memory Types (%d)" %len(vulkan_memory_types_property_flags)
@@ -600,7 +600,7 @@ def Vulkan(tab2):
             elif "false" in qRHS[i]:
                 fColor = "RED"  
             else:
-                fColor = "BLACK"
+                fColor = const.COLOR3
             if "Properties[" in vulkan_device_queues_lhs[i]:
                 iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
             #    k = 0
@@ -776,7 +776,7 @@ def Vulkan(tab2):
                 fgColor.append(const.COLOR1)
             else:
                 value2.append(i)
-                fgColor.append("BLACK")
+                fgColor.append(const.COLOR3)
 
         SparseTab_Store.clear()
         TreeSparse.set_model(SparseTab_Store_filter)
@@ -812,7 +812,7 @@ def Vulkan(tab2):
         else:
             k = 0
             count = 0
-            iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),"BLACK"])
+            iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),const.COLOR3])
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
@@ -986,6 +986,8 @@ def Vulkan(tab2):
 
     DeviceTab_Store = Gtk.TreeStore(str, str, str)
     TreeDevice = Gtk.TreeView.new_with_model(DeviceTab_Store)
+    TreeDevice.set_property("enable-grid-lines", 1)
+
 
     setColumns(TreeDevice, DeviceTitle, const.MWIDTH, 0.0)
 
@@ -1000,7 +1002,8 @@ def Vulkan(tab2):
     LimitsTab_Store = Gtk.TreeStore(str, str, str)
     LimitsTab_Store_filter = LimitsTab_Store.filter_new()
     TreeLimits = Gtk.TreeView.new_with_model(LimitsTab_Store_filter)
-    TreeLimits.set_property("enable-tree-lines", True)
+ #   TreeLimits.set_property("enable-tree-lines", True)
+    TreeLimits.set_property("enable-grid-lines", 1)
     TreeLimits.set_enable_search(True)
 
     setColumns(TreeLimits, LimitsTitle, const.MWIDTH, 0.0)
@@ -1026,7 +1029,8 @@ def Vulkan(tab2):
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     SparseTab_Store_filter = SparseTab_Store.filter_new()
     TreeSparse = Gtk.TreeView.new_with_model(SparseTab_Store_filter)
-    TreeSparse.set_property("enable-tree-lines", True)
+    TreeSparse.set_property("enable-grid-lines", 1)
+ #   TreeSparse.set_property("enable-tree-lines", True)
     TreeSparse.set_enable_search(True)
     TreeSparse.set_property("can-focus", False)
 
@@ -1059,6 +1063,7 @@ def Vulkan(tab2):
     FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
     FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
     TreeFeatures = Gtk.TreeView.new_with_model(FeaturesTab_Store_filter)
+    TreeFeatures.set_property("enable-grid-lines", 1)
     TreeFeatures.set_enable_search(True)
     for i, column_title in enumerate(FeaturesTitle):
         Featurerenderer = Gtk.CellRendererText()
@@ -1091,6 +1096,7 @@ def Vulkan(tab2):
     ExtensionTab_Store = Gtk.ListStore(str, str, str)
     ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
     TreeExtension = Gtk.TreeView.new_with_model(ExtensionTab_store_filter)
+    TreeExtension.set_property("enable-grid-lines", 1)
 
     setColumns(TreeExtension, ExtensionsTitle, const.MWIDTH, 0.0)
 
@@ -1113,7 +1119,8 @@ def Vulkan(tab2):
     FormatsTab_Store = Gtk.TreeStore(str,str,str,str,str,str,str,str)
     FormatsTab_Store_filter = FormatsTab_Store.filter_new()
     TreeFormats = Gtk.TreeView.new_with_model(FormatsTab_Store_filter)
-    TreeFormats.set_property("enable-tree-lines", True)
+    TreeFormats.set_property("enable-grid-lines", 1)
+ #   TreeFormats.set_property("enable-tree-lines", True)
     TreeFormats.set_enable_search(True)
  #   TreeFormats.set_enable_search(True)
     for i, column_title in enumerate(FormatsTitle):
@@ -1155,8 +1162,9 @@ def Vulkan(tab2):
 
     MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
     TreeMemory = Gtk.TreeView.new_with_model(MemoryTab_Store)
+    TreeMemory.set_property("enable-grid-lines", 1)
     TreeMemory.set_enable_search(True)
-    TreeMemory.set_property("enable-tree-lines",True)
+ #   TreeMemory.set_property("enable-tree-lines",True)
 
     for i, column_title in enumerate(MemoryTitle):
         Memoryrenderer = Gtk.CellRendererText()
@@ -1178,6 +1186,7 @@ def Vulkan(tab2):
 
     HeapTab_Store = Gtk.TreeStore(str, str, str)
     TreeHeap = Gtk.TreeView.new_with_model(HeapTab_Store)
+    TreeHeap.set_property("enable-grid-lines", 1)
     TreeHeap.set_enable_search(True)
     for i, column_title in enumerate(HeapTitle):
         Heaprenderer = Gtk.CellRendererText()
@@ -1188,7 +1197,7 @@ def Vulkan(tab2):
         TreeHeap.set_property("can-focus", False)
         TreeHeap.append_column(column)
     
-    TreeHeap.set_property("enable-tree-lines",True)
+ #   TreeHeap.set_property("enable-tree-lines",True)
     HeapScrollbar = create_scrollbar(TreeHeap)
     MemoryHeapGrid.attach(HeapScrollbar,0,0,1,1)
 
@@ -1199,8 +1208,9 @@ def Vulkan(tab2):
 
     QueueTab_Store = Gtk.TreeStore(str, str, str, str)
     TreeQueue = Gtk.TreeView.new_with_model(QueueTab_Store)
+    TreeQueue.set_property("enable-grid-lines", 1)
     TreeQueue.set_enable_search(True)
-    TreeQueue.set_property("enable-tree-lines", True)
+ #   TreeQueue.set_property("enable-tree-lines", True)
     for i, column_title in enumerate(QueueTitle):
         Queuerenderer = Gtk.CellRendererText()
 #        Queuerenderer.set_alignment(0.5, 0.5)
@@ -1230,6 +1240,7 @@ def Vulkan(tab2):
     InstanceTab_Store = Gtk.ListStore(str, str, str)
     InstanceTab_Store_filter = InstanceTab_Store.filter_new()
     TreeInstance = Gtk.TreeView.new_with_model(InstanceTab_Store_filter)
+    TreeInstance.set_property("enable-grid-lines", 1)
     TreeInstance.set_enable_search(True)
 
     setColumns(TreeInstance, InstanceTitle, 300, 0.0)
@@ -1250,8 +1261,9 @@ def Vulkan(tab2):
     LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
     LayerTab_Store_filter = LayerTab_Store.filter_new()
     TreeLayer = Gtk.TreeView.new_with_model(LayerTab_Store_filter)
+    TreeLayer.set_property("enable-grid-lines", 1)
     TreeLayer.set_enable_search(TreeLayer)
-    TreeLayer.set_property("enable-tree-lines",True)
+ #   TreeLayer.set_property("enable-tree-lines",True)
 
     setColumns(TreeLayer, LayerTitle, 100, 0.0)
 
@@ -1273,7 +1285,8 @@ def Vulkan(tab2):
     #SurfaceGrid.add(SurfaceCombo)
     SurfaceTab_Store = Gtk.TreeStore(str, str, str)
     TreeSurface = Gtk.TreeView.new_with_model(SurfaceTab_Store)
-    TreeSurface.set_property("enable-tree-lines", True)
+    TreeSurface.set_property("enable-grid-lines", 1)
+ #   TreeSurface.set_property("enable-tree-lines", True)
     with open(Filenames.vulkaninfo_output_file, "r") as file1:
         for line in file1:
             if "VkSurfaceCapabilities" in line:
@@ -1295,7 +1308,8 @@ def Vulkan(tab2):
     GroupsGrid = createSubTab(GroupsTab,notebook,"Groups")
     Groups_Store = Gtk.TreeStore(str,str,str)
     TreeGroups = Gtk.TreeView.new_with_model(Groups_Store)
-    TreeGroups.set_property("enable-tree-lines",True)
+    TreeGroups.set_property("enable-grid-lines", 1)
+ #   TreeGroups.set_property("enable-tree-lines",True)
     setColumns(TreeGroups,GroupsTitle,const.MWIDTH,0.0)
     GroupsScrollbar = create_scrollbar(TreeGroups)
     GroupsGrid.attach(GroupsScrollbar,0,0,1,1)
