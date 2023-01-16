@@ -121,6 +121,7 @@ Manjaro_logo = "../Images/Manjaro-log.png"
 Gnome_logo = "../Images/Gnome_logo.png"
 Unity_logo = "../Images/Unity_logo.png"
 Cinnamon_logo = "../Images/Cinnamon-logo.png"
+Kde_logo = "../Images/kde-logo.png"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 

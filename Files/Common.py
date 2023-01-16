@@ -294,6 +294,8 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.Wayland_logo,24,20, True)
     elif "x11" in line:
         gpu_image = fetchImageFromUrl(const.X11_logo,24,20, True)
+    elif "KDE" in line:
+        gpu_image = fetchImageFromUrl(const.Kde_logo,24,20, True)
     else:
-        gpu_image = fetchImageFromUrl(const.DUMMY_PIXBUF,20,20,True)
+        gpu_image = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,24,20,True)
     return gpu_image
