@@ -103,7 +103,6 @@ def Vulkan(tab2):
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
-        dummy_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(const.DUMMY_PIXBUF, 24, 20)
         dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
