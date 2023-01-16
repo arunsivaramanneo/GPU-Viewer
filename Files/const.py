@@ -151,15 +151,15 @@ MWIDTH = 350
 
 # .------------- Colors ---------------------
 
-#BGCOLOR1 = "#ffffff"
-BGCOLOR1 = "#2C2C2C"
+BGCOLOR1 = "#ffffff"
+#BGCOLOR1 = "#2C2C2C"
 
 BGCOLOR2 = "#eeeeee"
-BGCOLOR2 = "#2C2C2C"
+# BGCOLOR2 = "#2C2C2C"
 
 #BGCOLOR3 = "#ccc"
-#BGCOLOR3 = "#9FA3AC"
-BGCOLOR3 = "#8e8e8e"
+BGCOLOR3 = "#9FA3AC"
+#BGCOLOR3 = "#8e8e8e"
 
 
 COLOR1 = "GREEN"

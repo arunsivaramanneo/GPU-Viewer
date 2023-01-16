@@ -119,23 +119,23 @@ def Vulkan(tab2):
             if "Description" in valueLHS[i]:
                 distro_logo = getGpuImage(valueRHS[i])
                 iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),background_color])
                 continue
             if "Desktop" in valueLHS[i]:
                 desktop_logo = getGpuImage(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),background_color])
                 continue
             if "Windowing" in valueLHS[i]:
                 windowing_system_logo = getGpuImage(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),background_color])
                 continue
             if "MemTotal" in valueLHS[i]:
                 iter1 = DeviceTab_Store.append(None,["Memory Details...",dummy_transparent," ",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
             elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
             else:
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),const.BGCOLOR1])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),background_color])
 
         TreeDevice.expand_all()
 
@@ -1004,6 +1004,7 @@ def Vulkan(tab2):
             column_pixbuf = Gtk.TreeViewColumn(column_title)
             column_pixbuf.pack_start(renderer_pixbuf, False)
             column_pixbuf.add_attribute(renderer_pixbuf,"pixbuf",1)
+            column_pixbuf.set_property("min-width", 20)
             column_pixbuf.add_attribute(renderer_pixbuf,"cell-background",3)
             TreeDevice.append_column(column_pixbuf)
         else:

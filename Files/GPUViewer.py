@@ -150,7 +150,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_dark.css')
+        fname = Gio.file_new_for_path('gtk.css')
         provider.load_from_file(fname)
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
