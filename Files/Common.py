@@ -283,11 +283,17 @@ def getGpuImage(line):
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
+    elif "opensuse" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20)
+    elif "Pop" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,20)
     elif "Mint" in line:
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,20, True)
     elif "Radeon" in line and "Ryzen" not in line:
         logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,20, True)
-    elif "LLVM" in line and "Ryzen" not in line:
+    elif "Mesa" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,20, True)
+    elif "LLVM" in line :
         logo_pixbuf = fetchImageFromUrl(const.LLVM_logo,32,20, True)
     elif "NVIDIA" in line and "Ryzen" not in line:
         logo_pixbuf = fetchImageFromUrl(const.Nvidia_logo,32,20, True)      

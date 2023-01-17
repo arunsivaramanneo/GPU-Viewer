@@ -116,6 +116,7 @@ Mint_logo = "../Images/linux_mint.png"
 Manjaro_logo = "../Images/Manjaro-log.png"
 Open_Suse_logo = "../Images/open_suse.png"
 fedora_logo = "../Images/Fedora_icon.png"
+Pop_os_logo = "../Images/pop_os.png"
 
 
 AMD_logo = "../Images/AMD_logo.png"
@@ -123,7 +124,7 @@ Radeon_logo = "../Images/radeon.png"
 Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
-
+Mesa_logo = "../Images/mesa.png"
 
 
 
@@ -155,7 +156,7 @@ WIDTH_RATIO = 0.80
 
 WIDTH_RATIO2 = 0.75
 
-HEIGHT_RATIO1 = 0.86
+HEIGHT_RATIO1 = 0.88    
 
 HEIGHT_RATIO2 = 0.65
 
