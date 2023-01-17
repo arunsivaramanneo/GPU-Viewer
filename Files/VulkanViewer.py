@@ -118,7 +118,7 @@ def Vulkan(tab2):
                 gpu_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'),background_color])
                 continue
-            if "driverInfo" in valueLHS[i]:
+            if "driverName" in valueLHS[i]:
                 driver_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'),background_color])
                 continue
