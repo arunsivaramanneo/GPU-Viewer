@@ -6,7 +6,7 @@ from gi.repository import Gtk,GdkPixbuf
 import const
 import Filenames
 import subprocess
-from Common import copyContentsFromFile, getGpuImage,setColumns,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,createSearchEntry
+from Common import copyContentsFromFile, getGpuImage,setColumns,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,createSearchEntry,getLogo
 
 DeviceTitle = ["Device Information","", "Details"]
 SparseTitle = ["Device Properties", "Value"]
@@ -103,6 +103,7 @@ def Vulkan(tab2):
         DeviceTab_Store.clear()
         TreeDevice.set_model(DeviceTab_Store)
 
+
         dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
         for i in range(len(valueRHS)):
             background_color = setBackgroundColor(i)
@@ -113,19 +114,26 @@ def Vulkan(tab2):
             if "driverVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getDriverVersion(valueRHS,i)
+            if "deviceName" in valueLHS[i]:
+                gpu_logo = getLogo(valueRHS[i])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'),background_color])
+                continue
             if "Model" in valueLHS[i]:
+                cpu_logo = getLogo(valueRHS[i])
                 iter1 = DeviceTab_Store.append(None,["Processor Details...",dummy_transparent,"",const.BGCOLOR3])
+                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'),background_color])
+                continue
             if "Description" in valueLHS[i]:
-                distro_logo = getGpuImage(valueRHS[i])
+                distro_logo = getLogo(valueRHS[i])
                 iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
                 DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),background_color])
                 continue
             if "Desktop" in valueLHS[i]:
-                desktop_logo = getGpuImage(valueRHS[i])
+                desktop_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),background_color])
                 continue
             if "Windowing" in valueLHS[i]:
-                windowing_system_logo = getGpuImage(valueRHS[i])
+                windowing_system_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),background_color])
                 continue
             if "MemTotal" in valueLHS[i]:

@@ -32,9 +32,9 @@ INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
 
 
 AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"
@@ -114,14 +114,21 @@ TRANSPARENT_PIXBUF = "../Images/2c2c2c.png"
 Ubuntu_logo = "../Images/Ubuntu.png"
 Mint_logo = "../Images/linux_mint.png"
 Manjaro_logo = "../Images/Manjaro-log.png"
+Open_Suse_logo = "../Images/open_suse.png"
+fedora_logo = "../Images/Fedora_icon.png"
+AMD_logo = "../Images/AMD_logo.png"
+Radeon_logo = "../Images/radeon.png"
+Nvidia_logo = "../Images/nvidia_logo.png"
+
 
 
 #------------------- Desktop logo--------------------------------------
 
-Gnome_logo = "../Images/Gnome_logo.png"
+Gnome_logo = "../Images/Gnome-logo.svg"
 Unity_logo = "../Images/Unity_logo.png"
 Cinnamon_logo = "../Images/Cinnamon-logo.png"
 Kde_logo = "../Images/kde-logo.png"
+Budgie_logo = "../Images/Budgie.png"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 
