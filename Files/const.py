@@ -116,9 +116,14 @@ Mint_logo = "../Images/linux_mint.png"
 Manjaro_logo = "../Images/Manjaro-log.png"
 Open_Suse_logo = "../Images/open_suse.png"
 fedora_logo = "../Images/Fedora_icon.png"
+
+
 AMD_logo = "../Images/AMD_logo.png"
 Radeon_logo = "../Images/radeon.png"
 Nvidia_logo = "../Images/nvidia_logo.png"
+LLVM_logo = "../Images/LLVM-Logo.png"
+Intel_logo = "../Images/Intel_logo.png"
+
 
 
 
@@ -174,6 +179,7 @@ COLOR1 = "GREEN"
 
 COLOR2 = "RED"
 
-COLOR3 = "#FFFFFF"
+#COLOR3 = "#FFFFFF"
+COLOR3  = "BLACK"
 
 FONT = "Noto Sans Regular"

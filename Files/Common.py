@@ -282,35 +282,37 @@ def getGpuImage(line):
 
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
-        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,24,20, True)
+        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
     elif "Mint" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Mint_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,20, True)
     elif "Radeon" in line and "Ryzen" not in line:
-        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,20, True)
     elif "LLVM" in line and "Ryzen" not in line:
-        logo_pixbuf = fetchImageFromUrl(const.LLVM_LOGO_SVG,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.LLVM_logo,32,20, True)
     elif "NVIDIA" in line and "Ryzen" not in line:
-        logo_pixbuf = fetchImageFromUrl(const.Nvidia_logo,24,20, True)      
+        logo_pixbuf = fetchImageFromUrl(const.Nvidia_logo,32,20, True)      
     elif "AMD" in line:
-        logo_pixbuf = fetchImageFromUrl(const.AMD_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.AMD_logo,32,20, True)      
+    elif "Intel" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Intel_logo,32,20, True)
     elif "Fedora" in line:
-        logo_pixbuf = fetchImageFromUrl(const.fedora_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.fedora_logo,32,20, True)
     elif "Manjaro" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Manjaro_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Manjaro_logo,32,20, True)
     elif "Budgie" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Budgie_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Budgie_logo,32,20, True)
     elif "GNOME" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,20, True)
     elif "Unity" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Unity_logo,20,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Unity_logo,32,20, True)
     elif "Cinnamon" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Cinnamon_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Cinnamon_logo,32,20, True)
     elif "wayland" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Wayland_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Wayland_logo,32,20, True)
     elif "x11" in line:
-        logo_pixbuf = fetchImageFromUrl(const.X11_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.X11_logo,32,20, True)
     elif "KDE" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Kde_logo,24,20, True)
+        logo_pixbuf = fetchImageFromUrl(const.Kde_logo,32,20, True)
     else:
-        logo_pixbuf = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,24,20,True)
+        logo_pixbuf = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,32,20,True)
     return logo_pixbuf
