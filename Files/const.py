@@ -117,6 +117,7 @@ Manjaro_logo = "../Images/Manjaro-log.png"
 Open_Suse_logo = "../Images/open_suse.png"
 fedora_logo = "../Images/Fedora_icon.png"
 Pop_os_logo = "../Images/pop_os.png"
+Flatpak_logo = "../Images/Flatpak.png"
 
 
 AMD_logo = "../Images/AMD_logo.png"

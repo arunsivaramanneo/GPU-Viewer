@@ -283,6 +283,8 @@ def getGpuImage(line):
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
+    elif "Flatpak" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,20)
     elif "opensuse" in line:
         logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20)
     elif "Pop" in line:
