@@ -118,6 +118,10 @@ Open_Suse_logo = "../Images/open_suse.png"
 fedora_logo = "../Images/Fedora_icon.png"
 Pop_os_logo = "../Images/pop_os.png"
 Flatpak_logo = "../Images/Flatpak.png"
+Elementary_logo = "../Images/elementaryOS.png"
+Debian_logo = "../Images/debian.png"
+Arch_logo = "../Images/arch.png"
+Solus_logo = "../Images/Solus.svg"
 
 
 AMD_logo = "../Images/AMD_logo.png"
@@ -126,6 +130,7 @@ Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
+Ryzen_logo = "../Images/Ryzen.png"
 
 
 
@@ -136,6 +141,8 @@ Unity_logo = "../Images/Unity_logo.png"
 Cinnamon_logo = "../Images/Cinnamon-logo.png"
 Kde_logo = "../Images/kde-logo.png"
 Budgie_logo = "../Images/Budgie.png"
+Mate_logo = "../Images/mate.png"
+XFCE_logo = "../Images/xfce-logo.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 

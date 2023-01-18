@@ -285,6 +285,12 @@ def getLogo(line):
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
     elif "Flatpak" in line:
         logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,20)
+    elif "Solus" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,20)
+    elif "Elementary" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,20)
+    elif "Debian" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Debian_logo,32,20)
     elif "opensuse" in line:
         logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20)
     elif "Pop" in line:
@@ -293,6 +299,8 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,20, True)
     elif "Radeon" in line and "Ryzen" not in line:
         logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,20, True)
+    elif "Ryzen" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,20, True)
     elif "Mesa" in line or "radv" in line or "llvmpipe" in line and "LLVM" not in line:
         logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,20, True)
     elif "LLVM" in line :
@@ -313,6 +321,10 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,20, True)
     elif "Unity" in line:
         logo_pixbuf = fetchImageFromUrl(const.Unity_logo,32,20, True)
+    elif "XFCE" in line:
+        logo_pixbuf = fetchImageFromUrl(const.XFCE_logo,32,20, True)
+    elif "MATE" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Mate_logo,32,20, True)
     elif "Cinnamon" in line:
         logo_pixbuf = fetchImageFromUrl(const.Cinnamon_logo,32,20, True)
     elif "wayland" in line:
