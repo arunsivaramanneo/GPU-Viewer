@@ -285,8 +285,14 @@ def getLogo(line):
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
     elif "Flatpak" in line:
         logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,20)
-    elif "Solus" in line:
+    elif "Kubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Kubuntu_logo,32,20)
+    elif "Lubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Lubuntu_logo,32,20)
+    elif "Solus" in line:       
         logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,20)
+    elif "Xubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,20)
     elif "Elementary" in line:
         logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,20)
     elif "Debian" in line:

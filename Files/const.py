@@ -122,6 +122,10 @@ Elementary_logo = "../Images/elementaryOS.png"
 Debian_logo = "../Images/debian.png"
 Arch_logo = "../Images/arch.png"
 Solus_logo = "../Images/Solus.svg"
+Xubuntu_logo = "../Images/xubuntu.png"
+Lubuntu_logo = "../Images/Lubuntu_logo.svg"
+Kubuntu_logo = "../Images/Kubuntu_logo.png"
+
 
 
 AMD_logo = "../Images/AMD_logo.png"
