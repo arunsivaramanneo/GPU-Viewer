@@ -125,6 +125,9 @@ Solus_logo = "../Images/Solus.svg"
 Xubuntu_logo = "../Images/xubuntu.png"
 Lubuntu_logo = "../Images/Lubuntu_logo.svg"
 Kubuntu_logo = "../Images/Kubuntu_logo.png"
+MX_linux_logo = "../Images/MX_Linux_logo.svg"
+Zorin_os_logo = "../Images/Zorin_Logo.svg"
+Linux_Lite_logo = "../Images/Linux-Lite-Logo.png"
 
 
 
@@ -147,6 +150,7 @@ Kde_logo = "../Images/kde-logo.png"
 Budgie_logo = "../Images/Budgie.png"
 Mate_logo = "../Images/mate.png"
 XFCE_logo = "../Images/xfce-logo.svg"
+Fluxbox_logo = "../Images/Fluxbox-logo.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 

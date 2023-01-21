@@ -301,6 +301,10 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20)
     elif "Pop" in line:
         logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,20)
+    elif "MX" in line:
+        logo_pixbuf = fetchImageFromUrl(const.MX_linux_logo,32,20)
+    elif "Zorin" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Zorin_os_logo,32,20)
     elif "Mint" in line:
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,20, True)
     elif "Radeon" in line and "Ryzen" not in line:
@@ -327,6 +331,8 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,20, True)
     elif "Unity" in line:
         logo_pixbuf = fetchImageFromUrl(const.Unity_logo,32,20, True)
+    elif "Fluxbox" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Fluxbox_logo,32,20, True)
     elif "XFCE" in line:
         logo_pixbuf = fetchImageFromUrl(const.XFCE_logo,32,20, True)
     elif "MATE" in line:
