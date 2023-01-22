@@ -137,7 +137,7 @@ Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
-Ryzen_logo = "../Images/Ryzen.png"
+Ryzen_logo = "../Images/Ryzen.svg"
 
 
 
@@ -182,14 +182,14 @@ MWIDTH = 350
 # .------------- Colors ---------------------
 
 BGCOLOR1 = "#ffffff"
-#BGCOLOR1 = "#2C2C2C"
+#BGCOLOR1 = "#2D2E36"
 
 BGCOLOR2 = "#eeeeee"
-# BGCOLOR2 = "#2C2C2C"
+#BGCOLOR2 = "#2D2E36"
 
 #BGCOLOR3 = "#ccc"
 BGCOLOR3 = "#9FA3AC"
-#BGCOLOR3 = "#8e8e8e"
+#BGCOLOR3 = "#001830"
 
 
 COLOR1 = "GREEN"
@@ -197,6 +197,6 @@ COLOR1 = "GREEN"
 COLOR2 = "RED"
 
 #COLOR3 = "#FFFFFF"
-COLOR3  = "BLACK"
+COLOR3  = "#333333"
 
 FONT = "Noto Sans Regular"

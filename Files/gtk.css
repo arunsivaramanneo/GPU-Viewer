@@ -1,3 +1,48 @@
+/***************
+ * Base States *
+ ***************/
+
+ @keyframes ripple_effect {
+  from {
+    background-image: radial-gradient(circle farthest-corner at center, alpha(currentColor,0.1) 0%, transparent 0%);
+  }
+  to {
+    background-image: radial-gradient(circle farthest-corner at center, alpha(currentColor,0.1) 100%, transparent 0%);
+  }
+}
+
+ window{
+  border-radius: 16px;
+  background-color: #fafbfc;
+  color: #464853;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+}
+
+treeview {
+  background-color: #fafbfc;
+  color: #464853;
+}
+grid{
+  background-color: #fafbfc;
+  color: #464853;
+}
+
+box{
+  background-color: #fafbfc;
+  color: #464853;
+}
+
+.titlebar box{
+  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
+  background-color: #333333;
+  border-radius: 4px 4px 0 0;
+  color: white;
+  font-weight: bold;
+}
+dropdown{
+  background-color: transparent;
+}
+
 button.text-button {
     min-width: 32px;
     padding-left: 16px;
@@ -7,6 +52,7 @@ button.text-button {
     border-radius: 9px;
     box-shadow: none;
 }
+
 
 button.text-button:hover {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
@@ -50,29 +96,36 @@ notebook > header {
     color: #85878e;
     font-weight: 600;
   }
+  notebook > header > tabs > tab:hover {
+    box-shadow: inset 0 -1px alpha(#5294e2,0.6), 0 1px alpha(#5294e2,0.6);
+  }
   
-  
+  notebook > header > tabs > arrow:hover {
+    color: rgba(70, 72, 83, 0.75);
+  }
+
 notebook > header tab:checked {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   background-color: #EFF5F8;
   background-clip: padding-box;
   border-color: #dedede;
   color: #1967d2;
-  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 -1px alpha(#5294e2,0.6), 0 1px alpha(#5294e2,0.6);
 }
 
-  dropdown arrow,
-  combobox arrow {
+
+  button.combo{
     -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
     min-height: 16px;
     min-width: 16px;
   }
+
 button.combo:only-child {
   border-radius: 9px;
   font-weight: 550;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
-  box-shadow: inset 0 0 0 2px transparent;
-  background-color: rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 0 0 2px #fafbfc;
+  background-color: #fafbfc;
   color: rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
@@ -116,10 +169,13 @@ entry.search {
   border-style: solid;
   border:2px solid;
   border-color: #333333;
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: #fafbfc;
+  color: #464853;
   background-clip: padding-box;
 }
+
 combobox popover {
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
   margin-top: 2px;
   padding: 0;
   background-color: transparent;
@@ -129,7 +185,7 @@ popover.background > arrow,
 popover.background > contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
-  background-color: #fafbfc;
+  background-color:transparent;
   background-clip: border-box;
   border-radius: 12px;
   color: rgba(0, 0, 0, 0.87);
@@ -171,28 +227,18 @@ header{
   font-weight: 500;
 }
 
-window{
-  border-radius: 16px;
-  background-color: #fafbfc;
-  color: #464853;
-  border: 2px solid rgba(0, 0, 0, 0.6);
-}
 
 columnview.view > header > button,
 treeview.view > header > button {
-  padding: 2px 6px;
-  border-style: solid solid solid none;
-  border-width: 1px;
-  border-color: rgba(0, 0, 0, 0.12);
-  border-radius: 0;
-  background-clip: border-box;
-  color: #6b6d75;
+  min-height: 0;
+  min-width: 0;
+  padding: 3px 6px;
   font-weight: bold;
+  color: #6b6d75;
+  background-color: #ffffff;
+  background-image: none;
+  border-style: solid solid solid none;
+  border: 2px solid #333333;
+  border-radius: 0;
+  border-image: linear-gradient(to bottom, #ffffff 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #ffffff 80%) 0 1 0 0/0 1px 0 0 stretch;
 }
-
-rubberband, .content-view > rubberband, columnview.view > rubberband,
-treeview.view > rubberband, gridview > rubberband, flowbox > rubberband {
-  border: 1px solid #68a2e6;
-  background-color: rgba(104, 162, 230, 0.2);
-}
-

@@ -13,12 +13,12 @@ class MyGtk(Gtk.Window):
         super(MyGtk, self).__init__(title=title)
         setting = Gtk.Settings.get_default()
         # Setting Theme
-        if Path(Filenames.Materia_gtk_theme_folder).exists(): 
-            setting.set_property("gtk-theme-name", "Materia-compact")
-        elif Path(Filenames.Orchis_gtk_theme_folder).exists():
-            setting.set_property("gtk-theme-name","Orchis-Compact")
-        else:
-            setting.set_property("gtk-theme-name","Adwaita")
+   #     if Path(Filenames.Materia_gtk_theme_folder).exists(): 
+   #         setting.set_property("gtk-theme-name", "Materia-dark")
+   #     elif Path(Filenames.Orchis_gtk_theme_folder).exists():
+   #         setting.set_property("gtk-theme-name","Orchis-Compact")
+   #     else:
+   #         setting.set_property("gtk-theme-name","Adwaita")
 
         #Setting Font
     #    if Path(Filenames.Roboto_font_folder).exists():
