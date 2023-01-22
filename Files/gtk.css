@@ -1,10 +1,7 @@
 /***************
  * Base States *
  ***************/
- .background {
-  color: #464853;
-  background-color: #fafbfc;
-}
+ 
  window{
   border-radius: 16px;
   background-color: #fafbfc;
@@ -13,12 +10,11 @@
   background-image: none;
 }
 
-button text{
-  background-color: bisque;
-}
 treeview {
   background-color: #fafbfc;
   color: #464853;
+  border: 1px solid #333333;
+  border-radius: 3px;
 }
 grid{
   background-color: #fafbfc;
@@ -42,12 +38,6 @@ textview > border {
   font-weight: bold;
 }
 
-rubberband, .content-view > rubberband, columnview.view > rubberband,
-treeview.view > rubberband, gridview > rubberband, flowbox > rubberband {
-  border: 1px solid #68a2e6;
-  background-color: rgba(104, 162, 230, 0.2);
-}
-
 /*************
  * Notebooks *
  *************/
@@ -65,9 +55,9 @@ treeview.view > rubberband, gridview > rubberband, flowbox > rubberband {
   border-style: solid solid solid none;
 }
 
-notebook > header {
-  border: none;
-  padding: 3px;
+notebook {
+  border: 2px solid #333333;
+  border-radius: 6px;
 }
   notebook > header > tabs > tab {
     min-height: 24px;
@@ -132,13 +122,42 @@ button.combo:only-child {
 popover.background > arrow,
 popover.background > contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
-  background-color:transparent;
+  padding: 6px;
+  background-color: #FFFFFF;
   background-clip: border-box;
-  border-radius: 9px;
+  border-radius: 12px;
   color: rgba(0, 0, 0, 0.87);
   border: 2px solid #333333;
 }
 
+popover.background modelbutton {
+  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
+  min-height: 22px;
+  min-width: 56px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, 0.87);
+  font: initial;
+  text-shadow: none;
+  box-shadow: none;
+  background: none;
+}
+
+popover.background modelbutton:hover {
+  transition: none;
+  background-color: #333333;
+  color: white;
+}
+
+.osd popover.background > arrow,
+.osd popover.background > contents, popover.background.touch-selection > arrow,
+popover.background.touch-selection > contents, popover.background.magnifier > arrow,
+popover.background.magnifier > contents, .osd {
+  color: rgba(0, 0, 0, 0.87);
+  background-clip: padding-box;
+  border-radius: 6px;
+  border: none;
+}
 
 scrollbar > range > trough > slider {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
@@ -151,6 +170,7 @@ scrollbar > range > trough > slider {
   box-shadow: none;
   outline: none;
 }
+
 entry {
   min-height: 36px;
   padding: 0 8px;
@@ -169,7 +189,7 @@ entry {
 entry.search {
   border-radius: 9px;
   border-style: solid;
-  border:1px solid;
+  border:2px solid;
   border-color: #333333;
   background-color: #fafbfc;
   color: #464853;
@@ -206,4 +226,11 @@ treeview.view > header > button {
   border: 2px solid #333333;
   border-radius: 0;
   border-image: linear-gradient(to bottom, #ffffff 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #ffffff 80%) 0 1 0 0/0 1px 0 0 stretch;
+}
+
+columnview.view:selected,
+treeview.view:selected {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0px;
 }
