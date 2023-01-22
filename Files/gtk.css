@@ -1,23 +1,21 @@
 /***************
  * Base States *
  ***************/
-
- @keyframes ripple_effect {
-  from {
-    background-image: radial-gradient(circle farthest-corner at center, alpha(currentColor,0.1) 0%, transparent 0%);
-  }
-  to {
-    background-image: radial-gradient(circle farthest-corner at center, alpha(currentColor,0.1) 100%, transparent 0%);
-  }
+ .background {
+  color: #464853;
+  background-color: #fafbfc;
 }
-
  window{
   border-radius: 16px;
   background-color: #fafbfc;
   color: #464853;
   border: 2px solid rgba(0, 0, 0, 0.6);
+  background-image: none;
 }
 
+button text{
+  background-color: bisque;
+}
 treeview {
   background-color: #fafbfc;
   color: #464853;
@@ -32,6 +30,10 @@ box{
   color: #464853;
 }
 
+textview > border {
+  background-color: #fdfdfe;
+}
+
 .titlebar box{
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
   background-color: #333333;
@@ -39,33 +41,11 @@ box{
   color: white;
   font-weight: bold;
 }
-dropdown{
-  background-color: transparent;
-}
 
-button.text-button {
-    min-width: 32px;
-    padding-left: 16px;
-    padding-right: 16px;
-    background-color: bisque;
-    color: rgba(0, 0, 0, 0.87);
-    border-radius: 9px;
-    box-shadow: none;
-}
-
-
-button.text-button:hover {
-  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  outline: none;
-  background-color: bisque;
-}
-
-button.text-button:disabled{
-  box-shadow: none;
-  background-color: rgba(0, 0, 0, 0.04);
-  color: rgba(0, 0, 0, 0.38);
-  filter: none;
-  opacity: 1;
+rubberband, .content-view > rubberband, columnview.view > rubberband,
+treeview.view > rubberband, gridview > rubberband, flowbox > rubberband {
+  border: 1px solid #68a2e6;
+  background-color: rgba(104, 162, 230, 0.2);
 }
 
 /*************
@@ -113,12 +93,28 @@ notebook > header tab:checked {
   box-shadow: inset 0 -1px alpha(#5294e2,0.6), 0 1px alpha(#5294e2,0.6);
 }
 
+/*************
+ * Button *
+ *************/
 
-  button.combo{
-    -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-    min-height: 16px;
-    min-width: 16px;
-  }
+button.text-button {
+  color: #464853;
+  font-weight: 600;
+  background-image: linear-gradient(bisque,bisque);
+  border: none;
+}
+
+button.text-button:hover {
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  outline: none;
+  background-color: bisque;
+}
+button.combo{
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  min-height: 16px;
+  min-width: 16px;
+  background-image: none;
+}
 
 button.combo:only-child {
   border-radius: 9px;
@@ -133,10 +129,16 @@ button.combo:only-child {
   border: 2px solid;
 }
 
-button.combo:hover {
-  box-shadow: 0 6px 3px -1px rgba(0, 0, 0, 0.2), 0 5px 3px 0 rgba(0, 0, 0, 0.14), 0 5px 6px 0 rgba(0, 0, 0, 0.12);
-  outline: none;
+popover.background > arrow,
+popover.background > contents {
+  transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
+  background-color:transparent;
+  background-clip: border-box;
+  border-radius: 9px;
+  color: rgba(0, 0, 0, 0.87);
+  border: 2px solid #333333;
 }
+
 
 scrollbar > range > trough > slider {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
@@ -167,48 +169,11 @@ entry {
 entry.search {
   border-radius: 9px;
   border-style: solid;
-  border:2px solid;
+  border:1px solid;
   border-color: #333333;
   background-color: #fafbfc;
   color: #464853;
   background-clip: padding-box;
-}
-
-combobox popover {
-  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-  margin-top: 2px;
-  padding: 0;
-  background-color: transparent;
-}
-
-popover.background > arrow,
-popover.background > contents {
-  transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
-  padding: 6px;
-  background-color:transparent;
-  background-clip: border-box;
-  border-radius: 12px;
-  color: rgba(0, 0, 0, 0.87);
-  border: 2px solid #333333;
-}
-
-popover.background modelbutton {
-  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
-  min-height: 22px;
-  min-width: 56px;
-  padding: 3px 9px;
-  border-radius: 6px;
-  color: rgba(0, 0, 0, 0.87);
-  font: initial;
-  text-shadow: none;
-  box-shadow: none;
-  background: none;
-}
-
-popover.background modelbutton:hover {
-  transition: none;
-  background-color: #333333;
-  color: #fafbfc;
 }
 
 header{
