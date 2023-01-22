@@ -137,7 +137,7 @@ Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
-Ryzen_logo = "../Images/Ryzen.svg"
+Ryzen_logo = "../Images/Ryzen.png"
 
 
 
