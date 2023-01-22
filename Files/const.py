@@ -151,6 +151,7 @@ Budgie_logo = "../Images/Budgie.png"
 Mate_logo = "../Images/mate.png"
 XFCE_logo = "../Images/xfce-logo.svg"
 Fluxbox_logo = "../Images/Fluxbox-logo.svg"
+Sway_logo = "../Images/Sway_Tree.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 

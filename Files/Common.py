@@ -284,27 +284,29 @@ def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,20, True)
     elif "Flatpak" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,20,True)
     elif "Kubuntu" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Kubuntu_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Kubuntu_logo,32,20,True)
     elif "Lubuntu" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Lubuntu_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Lubuntu_logo,32,20,True)
     elif "Solus" in line:       
-        logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,20,True)
     elif "Xubuntu" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,20,True)
+    elif "Arch" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Arch_logo,32,20, True)
     elif "Elementary" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,20,True)
     elif "Debian" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Debian_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Debian_logo,32,20,True)
     elif "opensuse" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,20,True)
     elif "Pop" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,20,True)
     elif "MX" in line:
-        logo_pixbuf = fetchImageFromUrl(const.MX_linux_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.MX_linux_logo,32,20,True)
     elif "Zorin" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Zorin_os_logo,32,20)
+        logo_pixbuf = fetchImageFromUrl(const.Zorin_os_logo,32,20,True)
     elif "Mint" in line:
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,20, True)
     elif "Radeon" in line and "Ryzen" not in line:
@@ -325,12 +327,14 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.fedora_logo,32,20, True)
     elif "Manjaro" in line:
         logo_pixbuf = fetchImageFromUrl(const.Manjaro_logo,32,20, True)
+    elif "sway" in line or "Sway" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Sway_logo,32,20, True)
     elif "Budgie" in line:
         logo_pixbuf = fetchImageFromUrl(const.Budgie_logo,32,20, True)
-    elif "GNOME" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,20, True)
     elif "Unity" in line:
         logo_pixbuf = fetchImageFromUrl(const.Unity_logo,32,20, True)
+    elif "GNOME" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,20, True)
     elif "Fluxbox" in line:
         logo_pixbuf = fetchImageFromUrl(const.Fluxbox_logo,32,20, True)
     elif "XFCE" in line:
