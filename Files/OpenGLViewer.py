@@ -86,7 +86,7 @@ def OpenGL(tab):
         LimitsGrid.attach(limitsCombo,0,0,1,1)
         LimitsCore_Store = Gtk.TreeStore(str, str, str)
         TreeCoreLimits = Gtk.TreeView.new_with_model(LimitsCore_Store)
-        TreeCoreLimits.set_property("enable-tree-lines",True)
+        TreeCoreLimits.set_property("enable-grid-lines",1)
 
 
         limitsCombo.connect("changed",showLimits, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
@@ -123,7 +123,7 @@ def OpenGL(tab):
         limitsCompatGrid.attach(limitsCompatCombo,0,0,1,1)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
         TreeCompatLimits = Gtk.TreeView.new_with_model(LimitsCompat_Store)
-        TreeCompatLimits.set_property("enable-tree-lines",True)
+        TreeCompatLimits.set_property("enable-grid-lines",1)
 
         limitsCompatCombo.connect("changed",showLimits, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
         limitsCompatCombo.set_active(0)

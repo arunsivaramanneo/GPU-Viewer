@@ -35,9 +35,11 @@ def vdpauinfo(tab2):
 		fetch_vdpau_decoder_capabilities_process = subprocess.Popen(fetch_vdpau_decoder_capabilities_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_decoder_capabilities = fetch_vdpau_decoder_capabilities_process.communicate()[0].splitlines()
 		
-		for i,line in  enumerate(vdpau_decoder_capabilities):
+		i = 0
+		for line in  vdpau_decoder_capabilities:
 			if "not" not in line:
 				vdpauinfoStore.append(iter,[line.split()[0].strip('\n')," ",setBackgroundColor(i)])
+				i = i + 1
 		
 
 		treeVdpauInfo.expand_all()
@@ -152,7 +154,7 @@ def vdpauinfo(tab2):
 	
 	vdpauinfoStore = Gtk.TreeStore(str,str,str)
 	treeVdpauInfo = Gtk.TreeView.new_with_model(vdpauinfoStore)
-	treeVdpauInfo.set_property("enable-tree-lines",True)
+	treeVdpauInfo.set_property("enable-grid-lines",1)
 
 	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
 
@@ -166,6 +168,7 @@ def vdpauinfo(tab2):
 
 	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
 	treeDecoder = Gtk.TreeView.new_with_model(decoderStore)
+	treeDecoder.set_property("enable-grid-lines",1)
 
 	setColumns(treeDecoder, decoderTitle, 300, 0.0)
 
@@ -179,7 +182,7 @@ def vdpauinfo(tab2):
 
 	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
 	treeSurfaceVideoLimits = Gtk.TreeView.new_with_model(surfaceVideoStore)
-	treeSurfaceVideoLimits.set_property("enable-tree-lines",True)
+	treeSurfaceVideoLimits.set_property("enable-grid-lines",1)
 
 	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
 
@@ -195,7 +198,7 @@ def vdpauinfo(tab2):
 
 	videoMixerFeatureStore = Gtk.TreeStore(str,str,str,str)
 	treeVideoMixerFeature = Gtk.TreeView.new_with_model(videoMixerFeatureStore)
-	treeVideoMixerFeature.set_property("enable-tree-lines", True)
+	treeVideoMixerFeature.set_property("enable-grid-lines", 1)
 	treeVideoMixerFeature.set_enable_search(True)
 
 	for i, column_title in enumerate(videoMixerFeatureTitle):
