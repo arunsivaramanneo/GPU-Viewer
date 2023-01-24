@@ -328,9 +328,9 @@ def openCL(tab):
                 elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i]:
                     oclDeviceKernels = oclDeviceQueueExecutionDetailsRHS[i].split(';')
                     iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
-                                                                    str(len(oclDeviceKernels) - 1).strip('\n'),
+                                                                    str(len(oclDeviceKernels) ).strip('\n'),
                                                                     setBackgroundColor(i), fgcolor[i]])
-                    for j in range(len(oclDeviceKernels) - 1):
+                    for j in range(len(oclDeviceKernels)):
                         DeviceQueueExecutionTreeView.expand_all()
                         DeviceQueueExecution_store.append(iter,
                                                           [oclDeviceKernels[j].strip('\n'), " ", setBackgroundColor(j),

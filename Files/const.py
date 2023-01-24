@@ -183,7 +183,7 @@ MWIDTH = 350
 # .------------- Colors ---------------------
 
 BGCOLOR1 = "#ffffff"
-#BGCOLOR1 = "#2D2E36"
+#BGCOLOR1 = "#2c2c2c"
 
 BGCOLOR2 = "#eeeeee"
 #BGCOLOR2 = "#2D2E36"
@@ -197,7 +197,7 @@ COLOR1 = "GREEN"
 
 COLOR2 = "RED"
 
-#COLOR3 = "#FFFFFF"
-COLOR3  = "#333333"
+COLOR3 = "#FFFFFF"
+#COLOR3  = "#333333"
 
 FONT = "Noto Sans Regular"
