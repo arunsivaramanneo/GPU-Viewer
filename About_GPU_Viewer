@@ -1,7 +1,8 @@
 
 Copyright (C) 2017-2023 Arun Sivaraman <arunsivaramanneo@gmail.com>
 
-GPU Viewer is a free Software: This program comes with absolutely no WARRANTY. You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
+GPU Viewer is a FREE SOFTWARE: This program comes with ABSOLUTELY NO WARRANTY. 
+You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
 Click on the GPLv3 Icon below to view the License
 
 This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo,es2_info and vdpauinfo. The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and VDPAU Information in ease over command-line.
@@ -16,7 +17,8 @@ This program uses:
     -  GTK4+ for the graphical user interface
     -  glxinfo(OpenGL), vulkaninfo(Vulkan), clinfo(OpenCL), es2_info(EGL) and vdpauinfo(VDPAU) for fetching the report
 
-If you find the project interesting enough, please consider making a donation. Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.
+If you find the project interesting enough, please consider making a DONATION. 
+Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.
 
 Trademarks
     - OpenGL® and the oval logo are trademarks or registered trademarks of Hewlett Packard Enterprise in the United States and/or other countries worldwide.
