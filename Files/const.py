@@ -197,7 +197,7 @@ COLOR1 = "GREEN"
 
 COLOR2 = "RED"
 
-COLOR3 = "#FFFFFF"
-#COLOR3  = "#333333"
+#COLOR3 = "#FFFFFF"
+COLOR3  = "#333333"
 
 FONT = "Noto Sans Regular"

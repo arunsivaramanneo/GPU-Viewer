@@ -140,6 +140,19 @@ def openCL(tab):
                 if "Number of devices" in oclDeviceDetailsLHS[i]:
                     oclDeviceDetailsLHS[i] = "  Number of devices"
                     oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
+                if "OpenCL" in oclDeviceDetailsLHS[i]:
+                    iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
+                                                             "", setBackgroundColor(i),
+                                                             fgcolor[i]])
+                    DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].strip('\n'), " ", setBackgroundColor(i),
+                                                    const.COLOR3])
+                    continue
+                if "0x" in oclDeviceDetailsRHS[i]:
+                    DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].strip('\n'), "", setBackgroundColor(i),
+                                                    const.COLOR3])
+                    continue
                 if "Extensions" in oclDeviceDetailsLHS[i]:
                     oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(" ")
                     oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
@@ -313,19 +326,13 @@ def openCL(tab):
 
         for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
             DeviceQueueExecutionTreeView.expand_all()
-            if "    " in oclDeviceQueueExecutionDetailsLHS[i]:
+            if "    " in oclDeviceQueueExecutionDetailsLHS[i] and "0x" not in oclDeviceQueueExecutionDetailsRHS[i]:
                 oclDeviceQueueExecutionDetailsLHS[i] = oclDeviceQueueExecutionDetailsLHS[i].strip("  ")
                 DeviceQueueExecution_store.append(iter, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
                                                          oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),
                                                          setBackgroundColor(i), fgcolor[i]])
             else:
-                if oclDeviceQueueExecutionDetailsLHS[i] in oclDeviceQueueExecutionDetailsRHS[i]:
-                    oclDeviceQueueExecutionDetailsRHS[i] = oclDeviceQueueExecutionDetailsRHS[i][
-                                                           len(oclDeviceQueueExecutionDetailsLHS[i]):].strip(' ')
-                    iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
-                                                                    oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),
-                                                                    setBackgroundColor(i), fgcolor[i]])
-                elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i]:
+                if "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" not in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
                     oclDeviceKernels = oclDeviceQueueExecutionDetailsRHS[i].split(';')
                     iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
                                                                     str(len(oclDeviceKernels) ).strip('\n'),
@@ -335,6 +342,12 @@ def openCL(tab):
                         DeviceQueueExecution_store.append(iter,
                                                           [oclDeviceKernels[j].strip('\n'), " ", setBackgroundColor(j),
                                                            '#fff'])
+                elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
+                    iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i],"",setBackgroundColor(i),fgcolor[i]])
+                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i],"",setBackgroundColor(i),fgcolor[i]])
+                elif "0x" in oclDeviceQueueExecutionDetailsRHS[i]:
+                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i]," ",setBackgroundColor(i),fgcolor[i]])
+                    continue
                 else:
                     iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
                                                                     oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),

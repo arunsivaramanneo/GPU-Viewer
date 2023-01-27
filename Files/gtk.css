@@ -14,7 +14,7 @@
 treeview {
   background-color: #fafbfc;
   color: rgba(0, 0, 0, 0.87);
-  border: 1px solid #333333;
+  border: 1px solid #6b6d75;
   border-radius: 6px;
 }
 grid{
@@ -83,7 +83,7 @@ textview > border {
 
 notebook {
   border-style: solid none none none;
-  border: 2px solid #333333;
+  border: 2px solid #6b6d75;
   border-radius: 12px;
 }
   notebook > header > tabs > tab {
