@@ -140,17 +140,27 @@ def openCL(tab):
                 if "Number of devices" in oclDeviceDetailsLHS[i]:
                     oclDeviceDetailsLHS[i] = "  Number of devices"
                     oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
-                if "OpenCL" in oclDeviceDetailsLHS[i]:
+                if "OpenCL" in oclDeviceDetailsLHS[i] and ("versions" in oclDeviceDetailsLHS[i] or "features" in oclDeviceDetailsLHS[i]):
                     iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
                                                              "", setBackgroundColor(i),
                                                              fgcolor[i]])
-                    DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].strip('\n'), " ", setBackgroundColor(i),
+                    if "versions" in oclDeviceDetailsLHS[i]:
+                        DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
+                                                    const.COLOR3])
+                    if "features" in oclDeviceDetailsLHS[i]:
+                        DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
                                                     const.COLOR3])
                     continue
-                if "0x" in oclDeviceDetailsRHS[i]:
-                    DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].strip('\n'), "", setBackgroundColor(i),
+                if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
+                    if "OpenCL" in oclDeviceDetailsRHS[i]:
+                        DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
+                                                    const.COLOR3])
+                    else:
+                        DeviceDetails_Store.append(iter,
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
                                                     const.COLOR3])
                     continue
                 if "Extensions" in oclDeviceDetailsLHS[i]:
@@ -344,9 +354,9 @@ def openCL(tab):
                                                            '#fff'])
                 elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
                     iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i],"",setBackgroundColor(i),fgcolor[i]])
-                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i],"",setBackgroundColor(i),fgcolor[i]])
+                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[2],setBackgroundColor(i),fgcolor[i]])
                 elif "0x" in oclDeviceQueueExecutionDetailsRHS[i]:
-                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i]," ",setBackgroundColor(i),fgcolor[i]])
+                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[2],setBackgroundColor(i),fgcolor[i]])
                     continue
                 else:
                     iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
