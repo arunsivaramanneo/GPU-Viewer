@@ -13,23 +13,24 @@
     <project_license>GPL-3.0</project_license>
     <url type="homepage">https://github.com/arunsivaramanneo/GPU-Viewer</url>
     <url type="bugtracker">https://github.com/arunsivaramanneo/GPU-Viewer/issues</url>
-    <url type="donation">https://www.paypal.me/ArunSivaraman</url>
+    <url type="donation">https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q</url>
     <screenshots>
         <screenshot type="default">
-            <image>https://user-images.githubusercontent.com/30646692/42731013-13f37576-8822-11e8-96c8-04ab062f690f.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/215234353-e628c921-a9f3-4f30-b9be-9cf2aebe6aa3.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/42731014-157f0b26-8822-11e8-95a8-695852d1d7c1.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/215234376-38454a3a-f9bc-453a-8c18-fac77d244731.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/42731015-174af686-8822-11e8-8dfb-5baad1cface1.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/215234382-535b28b6-b7f6-4a6c-a2bb-e514c6f12d1f.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/42731016-18ca0628-8822-11e8-90c1-def21ee5d0bb.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/215234423-ca2e9c16-aa8d-4aea-9993-c8c96931c98b.png</image>
         </screenshot>
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
+        <release version="2.22" date="2023-02-03"/>
         <release version="2.20" date="2023-01-24"/>
         <release version="2.15" date="2023-01-21"/>
         <release version="2.13" date="2023-01-13"/>
