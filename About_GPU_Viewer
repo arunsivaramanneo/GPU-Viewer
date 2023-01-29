@@ -15,7 +15,18 @@ https://github.com/arunsivaramanneo/GPU-Viewer
 This program uses:
     -  python 3 or higher
     -  GTK4+ for the graphical user interface
-    -  glxinfo(OpenGL), vulkaninfo(Vulkan), clinfo(OpenCL), es2_info(EGL) and vdpauinfo(VDPAU) for fetching the report
+    -  The below commands are used to fetch the report
+         - glxinfo(OpenGL Information)
+         - vulkaninfo(Vulkan Information) 
+         - clinfo(OpenCL Information)
+         - es2_info(EGL Information)
+         -  vdpauinfo(VDPAU Information) (Note : Supported on x11)
+         -  lscpu (CPU information)
+         -  lsb_release (Distro Information) 
+         - XDG_CURRENT_DESKTOP (Desktop Information)
+         - XDG_SESSION_TYPE (Windowing System Information)
+         - cat /proc/meminfo | awk '/Mem/' (Memory information)
+         - uname -r (Kernel Information)
 
 If you find the project interesting enough, please consider making a DONATION. 
 Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.

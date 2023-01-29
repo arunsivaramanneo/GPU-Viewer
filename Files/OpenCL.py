@@ -146,21 +146,21 @@ def openCL(tab):
                                                              fgcolor[i]])
                     if "versions" in oclDeviceDetailsLHS[i]:
                         DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
                                                     const.COLOR3])
                     if "features" in oclDeviceDetailsLHS[i]:
                         DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
                                                     const.COLOR3])
                     continue
                 if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
                     if "OpenCL" in oclDeviceDetailsRHS[i]:
                         DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
                                                     const.COLOR3])
                     else:
                         DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
+                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
                                                     const.COLOR3])
                     continue
                 if "Extensions" in oclDeviceDetailsLHS[i]:
