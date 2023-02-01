@@ -34,12 +34,16 @@ AMD_LOGO_PNG = "../Images/AMD.png"
 
 AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
 
+AMD_RADEON_VEGA_LOGO_PNG = "../Images/radeon-vega.png"
+
 #AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
 
 
 AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"
 
 AMD_RADEON_Pro_LOGO_PNG = "../Images/AMD_Radeon_Pro.png"
+
+
 
 AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
 
@@ -128,6 +132,7 @@ Kubuntu_logo = "../Images/Kubuntu_logo.png"
 MX_linux_logo = "../Images/MX_Linux_logo.svg"
 Zorin_os_logo = "../Images/Zorin_Logo.svg"
 Linux_Lite_logo = "../Images/Linux-Lite-Logo.png"
+OpenMandriva_logo = "../Images/Mandriva.png"
 
 
 
