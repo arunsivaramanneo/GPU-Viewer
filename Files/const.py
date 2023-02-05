@@ -32,11 +32,11 @@ INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
 
 AMD_RADEON_VEGA_LOGO_PNG = "../Images/radeon-vega.png"
 
-#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
 
 
 AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"
@@ -110,6 +110,7 @@ TOOLTIP_GITHUB = "Arun Sivaraman's Github"
 GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
 
 DUMMY_PIXBUF = "../Images/8e8e8e.png"
+
 TRANSPARENT_PIXBUF = "../Images/2c2c2c.png"
 
 
@@ -187,22 +188,22 @@ MWIDTH = 350
 
 # .------------- Colors ---------------------
 
-BGCOLOR1 = "#ffffff"
-#BGCOLOR1 = "#2c2c2c"
+#BGCOLOR1 = "#ffffff"
+BGCOLOR1 = "#2c2c2c"
 
-BGCOLOR2 = "#eeeeee"
-#BGCOLOR2 = "#2D2E36"
+#BGCOLOR2 = "#eeeeee"
+BGCOLOR2 = "#2D2E36"
 
 #BGCOLOR3 = "#ccc"
-BGCOLOR3 = "#9FA3AC"
-#BGCOLOR3 = "#001830"
+#BGCOLOR3 = "#9FA3AC"
+BGCOLOR3 = "#171717"
 
 
 COLOR1 = "GREEN"
 
 COLOR2 = "RED"
 
-#COLOR3 = "#FFFFFF"
-COLOR3  = "#333333"
+COLOR3 = "#FFFFFF"
+#COLOR3  = "#333333"
 
 FONT = "Noto Sans Regular"
