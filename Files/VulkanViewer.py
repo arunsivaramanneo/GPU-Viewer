@@ -1058,7 +1058,7 @@ def Vulkan(tab2):
     propertiesStore = Gtk.ListStore(str)
     propertiesCombo = Gtk.ComboBoxText()
     propertiesCombo.connect("changed", selectProperties)
-    setMargin(propertiesCombo,2,1,0)
+    setMargin(propertiesCombo,2,1,2)
 #    propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     SparseTab_Store_filter = SparseTab_Store.filter_new()

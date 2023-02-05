@@ -149,7 +149,7 @@ Ryzen_logo = "../Images/Ryzen.png"
 
 #------------------- Desktop logo--------------------------------------
 
-Gnome_logo = "../Images/Gnome-logo.svg"
+Gnome_logo = "../Images/Gnome_logo.png"
 Unity_logo = "../Images/Unity_logo.png"
 Cinnamon_logo = "../Images/Cinnamon-logo.png"
 Kde_logo = "../Images/kde-logo.png"
