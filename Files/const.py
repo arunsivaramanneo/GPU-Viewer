@@ -138,7 +138,7 @@ OpenMandriva_logo = "../Images/Mandriva.png"
 
 
 AMD_logo = "../Images/AMD_logo.png"
-Radeon_logo = "../Images/radeon.png"
+Radeon_logo = "../Images/AMD_Radeon.svg"
 Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
