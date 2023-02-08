@@ -134,8 +134,9 @@ MX_linux_logo = "../Images/MX_Linux_logo.svg"
 Zorin_os_logo = "../Images/Zorin_Logo.svg"
 Linux_Lite_logo = "../Images/Linux-Lite-Logo.png"
 OpenMandriva_logo = "../Images/Mandriva.png"
-
-
+Ubuntu_Budgie_logo = "../Images/Ubuntu_Budgie.png"
+Ubuntu_Studio_logo = "../Images/Ubuntu_Studio.png"
+RebornOS_logo = "../Images/RebornOS_Icon.png"
 
 AMD_logo = "../Images/AMD_logo.png"
 Radeon_logo = "../Images/AMD_Radeon.svg"
@@ -144,6 +145,7 @@ LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
 Ryzen_logo = "../Images/Ryzen.png"
+Intel_core_i7_logo = "../Images/intel-logo-core-i7.png"
 
 
 
@@ -177,7 +179,7 @@ ICON_HEIGHT2 = 50
 
 WIDTH_RATIO = 0.76
 
-WIDTH_RATIO2 = 0.75
+WIDTH_RATIO2 = 0.66
 
 HEIGHT_RATIO1 = 0.88    
 

@@ -283,8 +283,14 @@ def getGpuImage(line):
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,24, True)
+    elif "Budgie" in line and "Ubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Ubuntu_Budgie_logo,32,24, True)
+    elif "Studio" in line and "Ubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Ubuntu_Studio_logo,32,24, True)
     elif "Flatpak" in line:
         logo_pixbuf = fetchImageFromUrl(const.Flatpak_logo,32,24,True)
+    elif "RebornOS" in line:
+        logo_pixbuf = fetchImageFromUrl(const.RebornOS_logo,32,24,True)
     elif "Kubuntu" in line:
         logo_pixbuf = fetchImageFromUrl(const.Kubuntu_logo,32,24,True)
     elif "Lubuntu" in line:

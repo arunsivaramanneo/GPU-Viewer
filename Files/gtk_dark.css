@@ -123,7 +123,7 @@ notebook > header tab:checked {
 button.text-button {
   color: #464853;
   font-weight: 600;
-  background-image: linear-gradient(bisque,bisque);
+  background-image: linear-gradient(#ffb91e,#ffda89);
   border: none;
   border-radius: 9px;
 }
@@ -213,7 +213,7 @@ scrollbar > range > trough > slider {
   border: 4px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
-  background-color: rgba(0, 0, 0, 0.38);
+  background-color: whitesmoke;
   box-shadow: none;
   outline: none;
 }
