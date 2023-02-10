@@ -980,8 +980,8 @@ def Vulkan(tab2):
                 return True
         Tree.expand_all()
 
-    def radcall(combo):
-        text = combo.get_active()
+    def radcall(combo,dummy):
+        text = combo.props.selected
         for i in range(len(gpu_list)):
             if text == i:
                 Devices(text)
@@ -1374,28 +1374,23 @@ def Vulkan(tab2):
 
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
 
-    DS = Gtk.Label()
-    setMargin(DS,30,10,10)
+    availableDevices = Gtk.Label()
+    setMargin(availableDevices,30,10,10)
     gpu_image = Gtk.Image()
-    DS.set_text("Available Device(s) :")
-    DevicesGrid.attach(DS, 10, 2, 20, 1)
+    availableDevices.set_text("Available Device(s) :")
+    DevicesGrid.attach(availableDevices, 10, 2, 20, 1)
     gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
     image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
-    gpu_store = Gtk.ListStore(str)
+    gpu_DropDown = Gtk.DropDown()
+    gpu_DropDown_list = Gtk.StringList()
+    gpu_DropDown.set_model(gpu_DropDown_list)
+    gpu_DropDown.connect('notify::selected-item',radcall)
     for i in gpu_list:
-        gpu_store.append([i])
+        gpu_DropDown_list.append(i)
 
-    gpu_combo = Gtk.ComboBox.new_with_model(gpu_store)
-    gpu_combo.connect("changed", radcall)
-    setMargin(gpu_combo,30,10,10)
-    renderer_text = Gtk.CellRendererText(font="BOLD")
-    #   gpu_combo.set_property("has-frame", False)
-    gpu_combo.pack_start(renderer_text, True)
-    gpu_combo.add_attribute(renderer_text, "text", 0)
-    gpu_combo.set_entry_text_column(0)
-    gpu_combo.set_active(0)
+    setMargin(gpu_DropDown,30,10,10)
     setMargin(image_renderer,30,10,10)
-    DevicesGrid.attach_next_to(gpu_combo, DS, Gtk.PositionType.RIGHT, 30, 1)
-    DevicesGrid.attach_next_to(image_renderer,gpu_combo,Gtk.PositionType.RIGHT,30,1)
+    DevicesGrid.attach_next_to(gpu_DropDown,availableDevices,Gtk.PositionType.RIGHT,30,1)
+    DevicesGrid.attach_next_to(image_renderer,gpu_DropDown,Gtk.PositionType.RIGHT,30,1)
 #    DeviceGrid.attach_next_to(spinner,image_renderer,Gtk.PositionType.RIGHT,80,1)
 
