@@ -65,38 +65,37 @@ def OpenGL(tab):
         LimitsCoreTab = Gtk.Box(spacing=10)
         LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
-        limitsCombo = Gtk.ComboBoxText()
-        setMargin(limitsCombo,2,2,2)
+        limitsList = Gtk.StringList()
+        limitsDropDown =Gtk.DropDown()
+        limitsDropDown.set_model(limitsList)
+        setMargin(limitsDropDown,2,2,2)
 
         # get Combo box value
-
-        limitsCombo.remove_all()
+        limitsList.append("Show All OpenGL Hardware Core Limits")
         with open(Filenames.opengl_core_limits_lhs_file,"r") as file1:
             for line in file1:
                 if ":" in line:
                     text = line[:-2]
-                    limitsCombo.append_text(text.strip(" "))
-
-        limitsCombo.insert_text(0,"Show All OpenGL Hardware Core Limits")
+                    limitsList.append(text.strip(" "))
 
         LimitsCoreTab.append(LimitsCoreFrame)
         LimitsGrid = Gtk.Grid()
         LimitsGrid.set_row_spacing(5)
         LimitsCoreFrame.set_child(LimitsGrid)
-        LimitsGrid.attach(limitsCombo,0,0,1,1)
+        LimitsGrid.attach(limitsDropDown,0,0,1,1)
         LimitsCore_Store = Gtk.TreeStore(str, str, str)
         TreeCoreLimits = Gtk.TreeView.new_with_model(LimitsCore_Store)
         TreeCoreLimits.set_property("enable-grid-lines",1)
 
 
-        limitsCombo.connect("changed",showLimits, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
-        limitsCombo.set_active(0)
+        showLimits(limitsDropDown,0, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
+        limitsDropDown.connect("notify::selected-item",showLimits, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
 
     #    showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
 
         setColumns(TreeCoreLimits, LimitsTitle, const.MWIDTH,0.0)
         LimitsCoreScrollbar = create_scrollbar(TreeCoreLimits)
-        LimitsGrid.attach_next_to(LimitsCoreScrollbar,limitsCombo,Gtk.PositionType.BOTTOM,1,1)
+        LimitsGrid.attach_next_to(LimitsCoreScrollbar,limitsDropDown,Gtk.PositionType.BOTTOM,1,1)
 
         createMainFile(Filenames.opengl_compat_limits_file,Filenames.fetch_opengl_compat_limits_command)
 
@@ -105,35 +104,35 @@ def OpenGL(tab):
         LimitsCompatTab = Gtk.Box(spacing=10)
         LimitsNotebook.append_page(LimitsCompatTab,Gtk.Label(label="    Compat.\t"))
         LimitsCompatFrame = Gtk.Frame()
-        limitsCompatCombo = Gtk.ComboBoxText()
-
-        limitsCompatCombo.remove_all()
+        LimitsCompat_List = Gtk.StringList()
+        limitsCompatDropDown = Gtk.DropDown()
+        limitsCompatDropDown.set_model(LimitsCompat_List)
+        LimitsCompat_List.append("Show All OpenGL Hardware Compatible Limits")
         with open(Filenames.opengl_compat_limits_lhs_file,"r") as file1:
             for line in file1:
                 if ":" in line:
                     text = line[:-2]
-                    limitsCompatCombo.append_text(text.strip(" "))
+                    LimitsCompat_List.append(text.strip(" "))
 
-        limitsCompatCombo.insert_text(0,"Show All OpenGL Hardware Compatible Limits")
 
         LimitsCompatTab.append(LimitsCompatFrame)
         limitsCompatGrid = Gtk.Grid()
         limitsCompatGrid.set_row_spacing(5)
         LimitsCompatFrame.set_child(limitsCompatGrid)
-        limitsCompatGrid.attach(limitsCompatCombo,0,0,1,1)
+        limitsCompatGrid.attach(limitsCompatDropDown,0,0,1,1)
         LimitsCompat_Store = Gtk.TreeStore(str,str,str)
         TreeCompatLimits = Gtk.TreeView.new_with_model(LimitsCompat_Store)
         TreeCompatLimits.set_property("enable-grid-lines",1)
 
-        limitsCompatCombo.connect("changed",showLimits, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
-        limitsCompatCombo.set_active(0)
+        showLimits(limitsCompatDropDown,0, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
+        limitsCompatDropDown.connect("notify::selected-item",showLimits, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
 
 
      #   showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGLLimitsLHS.txt")
 
         setColumns(TreeCompatLimits, LimitsTitle, const.MWIDTH,0.0)
         LimitsCompatScrollbar = create_scrollbar(TreeCompatLimits)
-        limitsCompatGrid.attach_next_to(LimitsCompatScrollbar,limitsCompatCombo,Gtk.PositionType.BOTTOM,1,1)
+        limitsCompatGrid.attach_next_to(LimitsCompatScrollbar,limitsCompatDropDown,Gtk.PositionType.BOTTOM,1,1)
 
         def button_enable(win):
             button.set_sensitive(True)
@@ -143,10 +142,14 @@ def OpenGL(tab):
 
         LimitsWin.present()
 
-    def showLimits(Combo, Limits_Store, TreeLimits,openGLLimits):
+    def showLimits(dropdown,dummy,Limits_Store, TreeLimits,openGLLimits):
+        selected =dropdown.props.selected_item
+        limitValue = ""
+        if selected is not None:
+            limitValue = selected.props.string
+        
         k = 0
         count = 0
-        limitValue = Combo.get_active_text()
         fetch_show_opengl_limits_lhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_rhs_Command) 
         fetch_show_opengl_limits_rhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_lhs_command)
         fetch_show_select_opengl_limits_command = "cat %s | awk '/%s:/{flag=1;next}/:.*/{flag=0}flag'  "%(openGLLimits,limitValue)
@@ -209,9 +212,12 @@ def OpenGL(tab):
                         Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
 
 
-    def radcall2(button,List,filename,Store,tree,filter):
-        value = button.get_active()
-
+    def radcall2(dropdown,dummy,List,filename,Store,tree,filter):
+        selected =dropdown.props.selected_item
+        value = 0
+        if selected is not None:
+            value = dropdown.props.selected
+        
         GL_All = []
 
     #    List = copyContentsFromFile("/tmp/gpu-viewer/Vendor1.txt")
@@ -402,21 +408,19 @@ def OpenGL(tab):
 
     Vendor_GL, vList = getVendorList(Filenames.opengl_vendor_gl_extension_file)
 
-    vendor_gl_store = Gtk.ListStore(str)
-    vendor_combo_gl = Gtk.ComboBox.new_with_model(vendor_gl_store)
+    vendor_gl_list = Gtk.StringList()
+    vendor_dropdown_gl = Gtk.DropDown()
+    vendor_dropdown_gl.set_model(vendor_gl_list)
 
     for i in range(len(Vendor_GL)):
-        vendor_gl_store.append([Vendor_GL[i]])
-
-    vendor_combo_gl.connect("changed", radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
-    Vendor_renderer = Gtk.CellRendererText()
-    setMargin(vendor_combo_gl,2,1,2)
-    vendor_combo_gl.pack_start(Vendor_renderer, True)
-    vendor_combo_gl.add_attribute(Vendor_renderer, "text", 0)
-   # vendor_combo_gl.set_entry_text_column(0)
-    vendor_combo_gl.set_active(0)
-    grid_opengl_extension.attach(vendor_combo_gl,0,0,1,1)
-    grid_opengl_extension.attach_next_to(frame_search_gl,vendor_combo_gl,Gtk.PositionType.LEFT,150,1)
+        vendor_gl_list.append(Vendor_GL[i])
+    
+    vendor_dropdown_gl.connect('notify::selected-item', radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
+    radcall2(vendor_dropdown_gl,0,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
+    setMargin(vendor_dropdown_gl,2,1,2)
+   
+    grid_opengl_extension.attach(vendor_dropdown_gl,0,0,1,1)
+    grid_opengl_extension.attach_next_to(frame_search_gl,vendor_dropdown_gl,Gtk.PositionType.LEFT,150,1)
     opengl_extension_scrollbar = create_scrollbar(tree_opengl_extension)
     grid_opengl_extension.attach_next_to(opengl_extension_scrollbar,frame_search_gl,Gtk.PositionType.BOTTOM,151,1)
 
@@ -455,20 +459,17 @@ def OpenGL(tab):
     entry_es.grab_focus()
     frame_search_es.set_child(entry_es)
 
-    vendor_es_store = Gtk.ListStore(str)
-    vendor_combo_es = Gtk.ComboBox.new_with_model(vendor_es_store)
-    setMargin(vendor_combo_es,2,1,2)
+    vendor_es_list = Gtk.StringList()
+    vendor_dropdown_es = Gtk.DropDown()
+    vendor_dropdown_es.set_model(vendor_es_list)
+    setMargin(vendor_dropdown_es,2,1,2)
     for i in range(len(Vendor_ES)):
-        vendor_es_store.append([Vendor_ES[i]])
+        vendor_es_list.append(Vendor_ES[i])
 
-    vendor_combo_es.connect("changed", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,tree_opengl_es_extension,opengl_es_extension_list_filter)
-    Vendor_renderer_es = Gtk.CellRendererText()
-    vendor_combo_es.pack_start(Vendor_renderer_es, True)
-    vendor_combo_es.add_attribute(Vendor_renderer_es, "text", 0)
-   # vendor_combo_gl.set_entry_text_column(0)
-    vendor_combo_es.set_active(0)
-    grid_opengl_es_extension.attach(vendor_combo_es,0,0,1,1)
-    grid_opengl_es_extension.attach_next_to(frame_search_es,vendor_combo_es,Gtk.PositionType.LEFT,150,1)
+    radcall2(vendor_dropdown_es,0,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,tree_opengl_es_extension,opengl_es_extension_list_filter)
+    vendor_dropdown_es.connect("notify::selected-item", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,tree_opengl_es_extension,opengl_es_extension_list_filter)
+    grid_opengl_es_extension.attach(vendor_dropdown_es,0,0,1,1)
+    grid_opengl_es_extension.attach_next_to(frame_search_es,vendor_dropdown_es,Gtk.PositionType.LEFT,150,1)
     opengl_es_extension_scrollbar = create_scrollbar(tree_opengl_es_extension)
     grid_opengl_es_extension.attach_next_to(opengl_es_extension_scrollbar,frame_search_es,Gtk.PositionType.BOTTOM,151,1)
  #   opengl_extension_box.append(opengl_es_extension_scrollbar)
@@ -502,12 +503,14 @@ def OpenGL(tab):
 
         Vendor_EGL,veglList = getVendorList(Filenames.egl_vendor_extension_file)
 
-        vendor_egl_store = Gtk.ListStore(str)
-        vendor_combo_egl = Gtk.ComboBox.new_with_model(vendor_egl_store)
-        setMargin(vendor_combo_egl,2,1,2)
+        vendor_egl_list = Gtk.StringList()
+        vendor_dropdown_egl = Gtk.DropDown()
+        vendor_dropdown_egl.set_model(vendor_egl_list)
+        setMargin(vendor_dropdown_egl,2,1,2)
         for i in range(len(Vendor_EGL)):
-            vendor_egl_store.append([Vendor_EGL[i]])
+            vendor_egl_list.append(Vendor_EGL[i])
         
+        vendor_dropdown_egl.set_selected(0)
         frame_search_egl =Gtk.Frame()
         entry_egl = Gtk.SearchEntry()
         entry_egl.set_property("placeholder-text","Type here to filter extensions.....")
@@ -515,13 +518,10 @@ def OpenGL(tab):
         entry_egl.grab_focus()
         frame_search_egl.set_child(entry_egl)
 
-        vendor_combo_egl.connect("changed", radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,tree_egl_extension,egl_extension_list_filter)
-        Vendor_renderer_egl = Gtk.CellRendererText()
-        vendor_combo_egl.pack_start(Vendor_renderer_egl, True)
-        vendor_combo_egl.add_attribute(Vendor_renderer_egl, "text", 0)
-        vendor_combo_egl.set_active(0)
-        grid_egl_extension.attach(vendor_combo_egl,0,0,1,1)
-        grid_egl_extension.attach_next_to(frame_search_egl,vendor_combo_egl,Gtk.PositionType.LEFT,150,1)
+        radcall2(vendor_dropdown_egl,0,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,tree_egl_extension,egl_extension_list_filter)
+        vendor_dropdown_egl.connect('notify::selected-item', radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,tree_egl_extension,egl_extension_list_filter)
+        grid_egl_extension.attach(vendor_dropdown_egl,0,0,2,1)
+        grid_egl_extension.attach_next_to(frame_search_egl,vendor_dropdown_egl,Gtk.PositionType.LEFT,149,1)
         egl_extension_scrollbar = create_scrollbar(tree_egl_extension)
         grid_egl_extension.attach_next_to(egl_extension_scrollbar,frame_search_egl,Gtk.PositionType.BOTTOM,151,1)
 
