@@ -148,6 +148,8 @@ button.combo{
   min-height: 16px;
   min-width: 16px;
   background-image: none;
+  background-color: #2C2C2C;
+  outline: none;
 }
 
 button.combo:only-child {
@@ -162,8 +164,13 @@ button.combo:only-child {
   border-style: solid;
   border: 2px solid;
 }
+
 button.combo:hover{
   box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+button.dropdown{
+  background-color: #2C2C2C;
 }
 
 popover.background > arrow,
@@ -174,7 +181,7 @@ popover.background > contents {
   background-clip: border-box;
   border-radius: 12px;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 2px solid #C0C0C0;
 }
 
 popover.background modelbutton {
@@ -286,4 +293,33 @@ treeview.view:selected {
   border-radius: 0;
   box-shadow: none;
   border: 0px;
+}
+
+listview {
+  background-image: linear-gradient(#2c2c2c,#2c2c2c);
+  background-color: #2C2C2C;
+  border-radius: 0px;
+}
+
+dropdown > button {
+  background-image: linear-gradient(#2c2c2c,#2c2c2c);
+  border-radius: 9px;
+  min-width: 10px;
+  border: 2px solid #171717;
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+listview > row :hover {
+  border-style: none none none none;
+  outline: transparent;
+  background-color: #6b6d75;
+}
+
+
+popover.background listview > row {
+  padding: 4px 8px;
+  border: none;
+  margin: 0;
+  outline: none;
+  border-style: none none none none;
 }

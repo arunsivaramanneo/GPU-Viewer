@@ -153,16 +153,17 @@ def Vulkan(tab2):
         fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
     #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
         createMainFile(Filenames.vulkan_device_properties_file,fetch_device_properties_command)
-        propertiesCombo.remove_all()
+        
+        propertiesList = Gtk.StringList()
+        propertiesDropdown.set_model(propertiesList)
+        propertiesList.append("Show All Device Properties")
         with open(Filenames.vulkan_device_properties_file, "r") as file1:
             for i, line in enumerate(file1):
                 if "Vk" in line:
                     text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
                     text = text1[:-1]
-                    propertiesCombo.append_text(text.strip("\n"))
+                    propertiesList.append(text.strip("\n"))
 
-        propertiesCombo.insert_text(0, "Show All Device Properties")
-        propertiesCombo.set_active(0)
 
     def Limits(GPUname):
 
@@ -200,19 +201,20 @@ def Vulkan(tab2):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
 
         createMainFile(Filenames.vulkan_device_features_file,fetch_device_features_command)
-
-        featureCombo.remove_all()
+        featureList = Gtk.StringList()
+        featureDropdown.set_model(featureList)
+        featureList.append("Show All Device Features")
         with open(Filenames.vulkan_device_features_file, "r") as file:
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
-                    featureCombo.append_text(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")))
+                    featureList.append(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")))
 
-        featureCombo.insert_text(0, "Show All Device Features")
-        featureCombo.set_active(0)
-
-    def selectFeature(Combo):
-        feature = Combo.get_active_text()
+    def selectFeature(dropdown, _pspec):
+        selected =dropdown.props.selected_item
+        feature = ""
+        if selected is not None:
+            feature = selected.props.string
 
         fetch_device_features_all_command = "cat %s | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep =" %(Filenames.vulkan_device_features_file)
         fetch_device_features_selected_command = "cat %s | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort " %(Filenames.vulkan_device_features_file,feature)
@@ -288,7 +290,6 @@ def Vulkan(tab2):
         fetch_vulkan_device_format_type_optimal_count_command = "cat %s | awk '/optimal*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_type_buffer_count_command = "cat %s | awk '/buffer*/{getline;print}' | grep -o '[N,F].*' " %(Filenames.vulkan_device_formats_file)
         
-        FormatsCombo.remove_all()
         createMainFile(Filenames.vulkan_device_formats_file,fetch_vulkan_device_formats_command)
         
         createMainFile(Filenames.vulkan_device_formats_types_file,fetch_vulkan_device_formats_types_command,)
@@ -301,16 +302,19 @@ def Vulkan(tab2):
 
         createMainFile(Filenames.vulkan_device_format_types_buffer_count_file,fetch_vulkan_device_format_type_buffer_count_command)  
 
+        FormatsList = Gtk.StringList()
+        FormatsDropDown.set_model(FormatsList)
+        FormatsList.append("Show All Device Formats")
         with open(Filenames.vulkan_device_formats_types_file,"r") as file:
             for line in file:
-                FormatsCombo.append_text(((line.replace("FORMAT_","")).strip("\n")).strip("\t"))
+                FormatsList.append(((line.replace("FORMAT_","")).strip("\n")).strip("\t"))
 
-        FormatsCombo.insert_text(0, "Show All Device Formats")
-        FormatsCombo.set_active(0)
+    def selectFormats(dropdown,_pspec):
+        selected =dropdown.props.selected_item
+        selected_Format = ""
+        if selected is not None:
+            selected_Format = selected.props.string
 
-    def selectFormats(value):
-
-        selected_Format = value.get_active_text()
         valueFormats = copyContentsFromFile(Filenames.vulkan_device_formats_types_file)
         valueFormatsCount = copyContentsFromFile(Filenames.vulkan_device_format_types_count_file)
         valueLinearCount = copyContentsFromFile(Filenames.vulkan_device_format_types_linear_count_file)
@@ -381,7 +385,9 @@ def Vulkan(tab2):
 
                     n +=1
         else:
-                selected_value = value.get_active() - 1
+                selected_value = 0
+                if selected is not None:
+                    selected_value = dropdown.props.selected - 1
                 sum = 0
                 for i in range(len(valueFormatsCount)):
                     sum = sum + int(valueFormatsCount[i])
@@ -752,8 +758,12 @@ def Vulkan(tab2):
                     LayerTab_Store.append(iter4,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
                     j = j + 1
 
-    def selectProperties(Combo):
-        property = Combo.get_active_text()
+    def selectProperties(dropdown, _pspec):
+        selected =dropdown.props.selected_item
+        property = ""
+        if selected is not None:
+            property = selected.props.string
+
 
         fetch_device_properties_filter_properties_command = "cat %s | awk '/./' " %(Filenames.vulkan_device_properties_file)
         fetch_device_properties_selected_filter_properties_command = "cat %s | awk '/VkPhysicalDevice%s/{flag=1;next}/Properties.*/{flag=0}flag' " %(Filenames.vulkan_device_properties_file,property)
@@ -1055,10 +1065,11 @@ def Vulkan(tab2):
     propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
     propertiesGrid.set_row_spacing(5)
-    propertiesStore = Gtk.ListStore(str)
-    propertiesCombo = Gtk.ComboBoxText()
-    propertiesCombo.connect("changed", selectProperties)
-    setMargin(propertiesCombo,2,1,2)
+    propertiesList = Gtk.StringList()
+    propertiesDropdown = Gtk.DropDown()
+    propertiesDropdown.set_model(propertiesList)
+    propertiesDropdown.connect('notify::selected-item',selectProperties)
+    setMargin(propertiesDropdown,2,1,2)
 #    propertiesGrid.add(propertiesCombo)
     SparseTab_Store = Gtk.TreeStore(str, str, str, str)
     SparseTab_Store_filter = SparseTab_Store.filter_new()
@@ -1081,8 +1092,8 @@ def Vulkan(tab2):
         TreeSparse.append_column(column)
 
     propertySearchEntry = createSearchEntry(SparseTab_Store_filter)
-    propertiesGrid.attach(propertySearchEntry,0,0,14,1)
-    propertiesGrid.attach_next_to(propertiesCombo,propertySearchEntry,Gtk.PositionType.RIGHT,1,1)
+    propertiesGrid.attach(propertySearchEntry,0,0,12,1)
+    propertiesGrid.attach_next_to(propertiesDropdown,propertySearchEntry,Gtk.PositionType.RIGHT,3,1)
     propertiesScrollbar = create_scrollbar(TreeSparse)
     propertiesGrid.attach_next_to(propertiesScrollbar, propertySearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
 
@@ -1112,14 +1123,16 @@ def Vulkan(tab2):
         TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
-    featureCombo = Gtk.ComboBoxText()
-    featureCombo.connect("changed", selectFeature)
+    featureList  = Gtk.StringList()
+    featureDropdown = Gtk.DropDown()
+    featureDropdown.set_model(featureList)
+    featureDropdown.connect('notify::selected-item',selectFeature)
     featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
-    FeaturesGrid.attach(featureSearchEntry,0,0,14,1)
-    setMargin(featureCombo,2,1,2)
-    FeaturesGrid.attach_next_to(featureCombo,featureSearchEntry,Gtk.PositionType.RIGHT,1,1)
+    FeaturesGrid.attach(featureSearchEntry,0,0,12,1)
+    setMargin(featureDropdown,2,1,2)
     FeatureScrollbar = create_scrollbar(TreeFeatures)
     FeaturesGrid.attach_next_to(FeatureScrollbar, featureSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
+    FeaturesGrid.attach_next_to(featureDropdown,featureSearchEntry,Gtk.PositionType.RIGHT,3,1)
 
     FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
 
@@ -1144,8 +1157,10 @@ def Vulkan(tab2):
 
     # ------------Creating the Formats Tab --------------------------------------------------
 
-    FormatsCombo = Gtk.ComboBoxText()
-    FormatsCombo.connect("changed",selectFormats)
+    FormatsList = Gtk.StringList()
+    FormatsDropDown = Gtk.DropDown()
+    FormatsDropDown.set_model(FormatsList)
+    FormatsDropDown.connect('notify::selected-item',selectFormats)
     FormatsTab = Gtk.Box(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
@@ -1176,10 +1191,12 @@ def Vulkan(tab2):
     formatSearchFrame = Gtk.Frame()
     formatSearchEntry = createSearchEntry(FormatsTab_Store_filter)
     formatSearchFrame.set_child(formatSearchEntry)
-    FormatsGrid.attach(formatSearchFrame,0,0,14,1)
+    FormatsGrid.attach(formatSearchFrame,0,0,12,1)
     FormatsScrollbar = create_scrollbar(TreeFormats)
     FormatsGrid.attach_next_to(FormatsScrollbar, formatSearchFrame, Gtk.PositionType.BOTTOM, 15, 1)
-    FormatsGrid.attach_next_to(FormatsCombo,formatSearchFrame,Gtk.PositionType.RIGHT,1,1)
+ #   FormatsGrid.attach_next_to(FormatsCombo,formatSearchFrame,Gtk.PositionType.RIGHT,1,1)
+    FormatsGrid.attach_next_to(FormatsDropDown,formatSearchFrame,Gtk.PositionType.RIGHT,3,1)
+
 
     FormatsTab_Store_filter.set_visible_func(searchFormatsTree, data=TreeFormats)
 
