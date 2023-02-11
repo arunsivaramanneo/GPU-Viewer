@@ -23,15 +23,18 @@ def openCL(tab):
         oclPlatformName = [i.strip('\n') for i in oclPlatformName]
         return oclPlatformName
 
-    def selectDevice(combo):
-        value = combo.get_active()
+    def selectDevice(dropdown,dummy):
+        selected =dropdown.props.selected_item
+        value = 0
+        if selected is not None:
+            value = dropdown.props.selected
         getDeviceDetails(value)
         getDeviceMemoryImageDetails(value)
         getDeviceVectorDetails(value)
         getDeviceQueueExecutionCapabilities(value)
 
     def getDeviceNames(value):
-
+        
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
@@ -42,8 +45,9 @@ def openCL(tab):
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         fetch_device_names_command = "cat %s | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,oclPlatforms[value])
-        Devices_store.clear()
-        Devices_combo.set_model(Devices_store)
+
+        Devices_list = Gtk.StringList()
+        Devices_dropdown.set_model(Devices_list)
         oclDeviceNames = fetchContentsFromCommand(fetch_device_names_command)
         oclDeviceNames = [i.strip(' ') for i in oclDeviceNames]
         oclDeviceNames = [i.strip('\n') for i in oclDeviceNames]
@@ -52,9 +56,7 @@ def openCL(tab):
         numberOfDevicesEntry.set_editable(False)
 
         for i in oclDeviceNames:
-            Devices_store.append([i])
-
-        Devices_combo.set_active(0)
+            Devices_list.append(i)
 
     def getPlatfromDetails(value):
 
@@ -94,7 +96,7 @@ def openCL(tab):
 
     def getDeviceDetails(value):
 
-        value2 = platform_combo.get_active()
+        value2 = platform_dropdown.props.selected
 
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
@@ -182,7 +184,7 @@ def openCL(tab):
 
     def getDeviceMemoryImageDetails(value):
 
-        value2 = platform_combo.get_active()
+        value2 = platform_dropdown.props.selected
 
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
@@ -251,7 +253,7 @@ def openCL(tab):
 
     def getDeviceVectorDetails(value):
 
-        value2 = platform_combo.get_active()
+        value2 = platform_dropdown.props.selected
 
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
@@ -302,7 +304,7 @@ def openCL(tab):
 
     def getDeviceQueueExecutionCapabilities(value):
 
-        value2 = platform_combo.get_active()
+        value2 = platform_dropdown.props.selected
 
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
@@ -363,8 +365,11 @@ def openCL(tab):
                                                                     oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),
                                                                     setBackgroundColor(i), fgcolor[i]])
 
-    def selectPlatform(combo):
-        value = combo.get_active()
+    def selectPlatform(dropdown,dummy):
+        selected =dropdown.props.selected_item
+        value = 0
+        if selected is not None:
+            value = dropdown.props.selected
         getDeviceNames(value)
         getPlatfromDetails(value)
 
@@ -479,7 +484,7 @@ def openCL(tab):
     platformLabel.set_text("Platform Name :")
     platformGrid.attach(platformLabel, 0, 1, 1, 1)
 
-    platform_store = Gtk.ListStore(str)
+    platform_list = Gtk.StringList()
 
     oclPlatforms = getPlatformNames()
 
@@ -489,36 +494,32 @@ def openCL(tab):
     setMargin(AvailableDevices,20,10,10)
     platformGrid.attach_next_to(AvailableDevices, platformLabel, Gtk.PositionType.BOTTOM, 2, 1)
 
-    Devices_store = Gtk.ListStore(str)
-    Devices_combo = Gtk.ComboBox.new_with_model(Devices_store)
-    setMargin(Devices_combo,30,10,10)
-    Devices_combo.connect("changed", selectDevice)
-    Devices_renderer = Gtk.CellRendererText(font="BOLD")
-    Devices_combo.pack_start(Devices_renderer, True)
-    Devices_combo.add_attribute(Devices_renderer, "text", 0)
+    Devices_list = Gtk.StringList()
+    Devices_dropdown = Gtk.DropDown()
+    Devices_dropdown.set_model(Devices_list)
+    setMargin(Devices_dropdown,20,10,10)
+    Devices_dropdown.connect("notify::selected-item",selectDevice)
 
-    platformGrid.attach_next_to(Devices_combo, AvailableDevices, Gtk.PositionType.RIGHT, 20, 1)
+    platformGrid.attach_next_to(Devices_dropdown, AvailableDevices, Gtk.PositionType.RIGHT, 20, 1)
 
     numberOfDevicesEntry = Gtk.Entry()
     setMargin(numberOfDevicesEntry,30,10,10)
 
     for i in oclPlatforms:
-        platform_store.append([i])
+        platform_list.append(i)
 
-    platform_combo = Gtk.ComboBox.new_with_model(platform_store)
-    setMargin(platform_combo,30,10,10)
-    platform_combo.connect("changed", selectPlatform)
-    platform_renderer = Gtk.CellRendererText(font="BOLD")
-    platform_combo.pack_start(platform_renderer, True)
-    platform_combo.add_attribute(platform_renderer, "text", 0)
-    platform_combo.set_active(0)
+    platform_dropdown = Gtk.DropDown()
+    platform_dropdown.set_model(platform_list)
+    setMargin(platform_dropdown,30,10,10)
+    selectPlatform(platform_dropdown,0)
+    platform_dropdown.connect("notify::selected-item",selectPlatform)
 
-    platformGrid.attach_next_to(platform_combo, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
+    platformGrid.attach_next_to(platform_dropdown, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
     numberOfPlatforms = Gtk.Label()
     setMargin(numberOfPlatforms,30,10,10)
     numberOfPlatforms.set_label("No. of Platforms :")
-    platformGrid.attach_next_to(numberOfPlatforms, platform_combo, Gtk.PositionType.RIGHT, 1, 1)
+    platformGrid.attach_next_to(numberOfPlatforms, platform_dropdown, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfPlatformsEntry = Gtk.Entry()
     setMargin(numberOfPlatformsEntry,30,10,10)
@@ -529,7 +530,7 @@ def openCL(tab):
     numberOfDevices = Gtk.Label()
     setMargin(numberOfDevices,30,10,10)
     numberOfDevices.set_label("No. Of Devices :")
-    platformGrid.attach_next_to(numberOfDevices, Devices_combo, Gtk.PositionType.RIGHT, 1, 1)
+    platformGrid.attach_next_to(numberOfDevices, Devices_dropdown, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfDevicesEntry.set_max_length(2)
     platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
