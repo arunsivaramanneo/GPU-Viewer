@@ -111,7 +111,7 @@ notebook > header tab:checked {
   box-shadow: inset 0 0 0 2px #fafbfc;
   background-color: #2c2c2c;
   background-clip: padding-box;
-  border-style: 2px solid;
+  border-style: solid;
   color: #d43c50;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
@@ -153,7 +153,7 @@ button.combo{
 }
 
 button.combo:only-child {
-  border-radius: 9px;
+  border-radius: 6px;
   font-weight: 550;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
@@ -217,7 +217,7 @@ scrollbar > range > trough > slider {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
   min-width: 8px;
   min-height: 8px;
-  border: 4px solid transparent;
+  border: 2px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
   background-color: whitesmoke;
@@ -304,9 +304,8 @@ listview {
 dropdown > button {
   background-image: linear-gradient(#2c2c2c,#2c2c2c);
   border-radius: 9px;
-  color: rgba(0, 0, 0, 0.87);
-  min-width: 10px;
-  border: 2px solid #171717;
+  border-style: solid;
+  border: 2px solid rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   font-weight: 550;
 }
