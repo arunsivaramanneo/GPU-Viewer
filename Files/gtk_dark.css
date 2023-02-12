@@ -318,7 +318,7 @@ dropdown > button :only-child{
 listview > row :hover {
   border-style: none none none none;
   outline: transparent;
-  background-color: #6b6d75;
+  background-color: #171717;
 }
 
 
@@ -328,4 +328,5 @@ popover.background listview > row {
   margin: 0;
   outline: none;
   border-style: none none none none;
+  background-color: transparent;
 }
