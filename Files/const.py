@@ -14,6 +14,8 @@ OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
 OPEN_CL_PNG = "../Images/OpenCL.png"
 
+#OPEN_CL_PNG = "../Images/OpenCL_Dark.png"
+
 EGL_PNG  = "../Images/Egl_logo.png"
 
 VDPAU_CL_PNG = "../Images/vdpauinfo.png"
@@ -147,6 +149,7 @@ Mesa_logo = "../Images/mesa.png"
 Ryzen_logo = "../Images/Ryzen.png"
 Intel_core_i7_logo = "../Images/intel-logo-core-i7.png"
 
+#Ryzen_logo = "../Images/Ryzen_Dark.svg"
 
 
 #------------------- Desktop logo--------------------------------------
@@ -163,7 +166,7 @@ Sway_logo = "../Images/Sway_Tree.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 
-
+#Gnome_logo = "../Images/Gnome_Dark.png"
 
 TOOLTIP_CONTACT = "Contact us"
 
