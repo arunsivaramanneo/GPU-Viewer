@@ -94,6 +94,7 @@ notebook {
     min-height: 24px;
     min-width: 24px;
     padding-top: 12px;
+    margin-bottom: 6px;
     padding-bottom: 12px ;
     background-color: #383838;
     color: white;
@@ -111,10 +112,11 @@ notebook {
 notebook > header tab:checked {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
-  background-color: #2c2c2c;
+  background-color: #2D2E36;
   background-clip: padding-box;
   border-style: solid;
   color: #d43c50;
+  font-weight: bolder;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
