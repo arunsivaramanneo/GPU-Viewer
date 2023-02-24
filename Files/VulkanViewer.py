@@ -1123,9 +1123,9 @@ def Vulkan(tab2):
         TreeFeatures.set_property("can-focus", False)
         TreeFeatures.append_column(column)
 
-    featureList  = Gtk.StringList()
+ #   featureList  = Gtk.StringList()
     featureDropdown = Gtk.DropDown()
-    featureDropdown.set_model(featureList)
+ #   featureDropdown.set_model(featureList)
     featureDropdown.connect('notify::selected-item',selectFeature)
     featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
     FeaturesGrid.attach(featureSearchEntry,0,0,12,1)
