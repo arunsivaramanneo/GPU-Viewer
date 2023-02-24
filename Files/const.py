@@ -12,9 +12,9 @@ OPEN_GL_PNG = "../Images/OpenGL.png"
 
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
-#OPEN_CL_PNG = "../Images/OpenCL.png"
+OPEN_CL_PNG = "../Images/OpenCL.png"
 
-OPEN_CL_PNG = "../Images/OpenCL_Dark.png"
+#OPEN_CL_PNG = "../Images/OpenCL_Dark.png"
 
 EGL_PNG  = "../Images/Egl_logo.png"
 
@@ -34,11 +34,11 @@ INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
 
 AMD_RADEON_VEGA_LOGO_PNG = "../Images/radeon-vega.png"
 
-#AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
 
 
 AMD_Ryzen_RADEON_LOGO_PNG = "../Images/AMD_Ryzen_Radeon.png"

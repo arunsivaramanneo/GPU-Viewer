@@ -480,7 +480,7 @@ def openCL(tab):
     platformFrame.set_child(platformGrid)
 
     platformLabel = Gtk.Label()
-    setMargin(platformLabel,30,10,10)
+    setMargin(platformLabel,200,10,10)
     platformLabel.set_text("Platform Name :")
     platformGrid.attach(platformLabel, 0, 1, 1, 1)
 
@@ -491,7 +491,7 @@ def openCL(tab):
     AvailableDevices = Gtk.Label()
     
     AvailableDevices.set_label("Available Device(s) :")
-    setMargin(AvailableDevices,20,10,10)
+    setMargin(AvailableDevices,200,10,10)
     platformGrid.attach_next_to(AvailableDevices, platformLabel, Gtk.PositionType.BOTTOM, 2, 1)
 
     Devices_list = Gtk.StringList()

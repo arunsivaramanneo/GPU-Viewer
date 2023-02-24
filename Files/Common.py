@@ -89,6 +89,9 @@ def createSubTab(Tab, notebook, label):
     notebook.append_page(Tab, Gtk.Label(label=label))
     Frame = Gtk.Frame()
     Tab.append(Frame)
+    notebook.set_property('tab-pos',Gtk.PositionType.LEFT) 
+    page = notebook.get_page(Tab)
+    page.set_property("tab-expand",False)
     Grid = Gtk.Grid()
     Frame.set_child(Grid)
     return Grid

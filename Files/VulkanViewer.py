@@ -544,7 +544,7 @@ def Vulkan(tab2):
                     continue
 
         labe12 = "Memory Types (%d)" %len(vulkan_memory_types_property_flags)
-        MemoryNotebook.set_tab_label(MemoryTypeTab,Gtk.Label(label=labe12))
+        notebook.set_tab_label(MemoryTypeTab,Gtk.Label(label=labe12))
 
         TreeMemory.expand_all()
 
@@ -583,9 +583,9 @@ def Vulkan(tab2):
 
         TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
-        MemoryNotebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
-        label2 = "Memory Types (%d) & Heaps (%d)" %(len(vulkan_memory_types_property_flags),(HCount))
-        notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
+        notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
+    #    label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags),(HCount))
+    #    notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
 
     def Queues(GPUname):
 
@@ -701,7 +701,7 @@ def Vulkan(tab2):
             InstanceTab_Store.append([vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i],background_color])
 
         label = "Instance Extensions (%d)" %len(vulkan_device_instance_lhs)
-        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
+#        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
 
 
         #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
@@ -726,10 +726,10 @@ def Vulkan(tab2):
 
         LayerTab_Store.clear()
 
-        label = "Instance Extensions (%d) & Layers (%d)" % (len(vulkan_device_instance_lhs), len(layer_names))
+        label = "Instance Extensions (%d)" % (len(vulkan_device_instance_lhs))
         label2 = "Instance Layers (%d)" %len(layer_names)
-        notebook.set_tab_label(InstanceTab, Gtk.Label(label=label))
-        InstanceNotebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
+        notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
+        notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
         i = 0; j =1
         with open(Filenames.vulkan_device_layers_file) as file:
             for line in file:
@@ -1203,12 +1203,12 @@ def Vulkan(tab2):
         # ------------------------Memory Types & Heaps----------------------------------------------
 
     MemoryTab = Gtk.Box(spacing=10)
-    MemoryTab.set_orientation(1)
-    MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
-    MemoryNotebook = Gtk.Notebook()
-    MemoryGrid.attach(MemoryNotebook,0,0,1,1)
+#    MemoryTab.set_orientation(1)
+#    MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
+#    MemoryNotebook = Gtk.Notebook()
+#    MemoryGrid.attach(MemoryNotebook,0,0,1,1)
     MemoryTypeTab = Gtk.Box(spacing=10)
-    MemoryTypeGrid = createSubTab(MemoryTypeTab, MemoryNotebook, "Memory Types")
+    MemoryTypeGrid = createSubTab(MemoryTypeTab, notebook, "Memory Types")
     MemoryTypeGrid.set_row_spacing(3)
 
     MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
@@ -1231,7 +1231,7 @@ def Vulkan(tab2):
     MemoryTypeGrid.attach(MemoryScrollbar,0,0,1,1)
 
     MemoryHeapTab = Gtk.Box(spacing=10)
-    MemoryHeapGrid = createSubTab(MemoryHeapTab, MemoryNotebook, "Memory Heap")
+    MemoryHeapGrid = createSubTab(MemoryHeapTab, notebook, "Memory Heap")
     MemoryHeapGrid.set_row_spacing(3)
     #HeapGrid = Gtk.Box(spacing=10)
 
@@ -1280,12 +1280,12 @@ def Vulkan(tab2):
 
     # -------------------------Creating the Instances & Layers ---------------------------------------------
 
-    InstanceTab = Gtk.Box(spacing=10)
-    InstanceGrid = createSubTab(InstanceTab, notebook, "Instances & layers")
-    InstanceNotebook = Gtk.Notebook()
-    InstanceGrid.attach(InstanceNotebook,0,0,1,1)
+#    InstanceTab = Gtk.Box(spacing=10)
+#    InstanceGrid = createSubTab(InstanceTab, notebook, "Instances & layers")
+#    InstanceNotebook = Gtk.Notebook()
+#    InstanceGrid.attach(InstanceNotebook,0,0,1,1)
     InstanceExtTab = Gtk.Box(spacing=10)
-    InstanceExtGrid = createSubTab(InstanceExtTab, InstanceNotebook, "Instance Extensions")
+    InstanceExtGrid = createSubTab(InstanceExtTab, notebook, "Instance Extensions")
     InstanceExtGrid.set_row_spacing(3)
 
     InstanceTab_Store = Gtk.ListStore(str, str, str)
@@ -1306,7 +1306,7 @@ def Vulkan(tab2):
     InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree, data=TreeInstance)
 
     InstanceLayersTab = Gtk.Box(spacing=10)
-    InstanceLayersGrid = createSubTab(InstanceLayersTab, InstanceNotebook, "Instance Layers")
+    InstanceLayersGrid = createSubTab(InstanceLayersTab, notebook, "Instance Layers")
     InstanceLayersGrid.set_row_spacing(3)
 
     LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
@@ -1375,7 +1375,7 @@ def Vulkan(tab2):
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
 
     availableDevices = Gtk.Label()
-    setMargin(availableDevices,30,10,10)
+    setMargin(availableDevices,350,10,10)
     gpu_image = Gtk.Image()
     availableDevices.set_text("Available Device(s) :")
     DevicesGrid.attach(availableDevices, 10, 2, 20, 1)
