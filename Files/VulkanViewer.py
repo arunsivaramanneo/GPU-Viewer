@@ -1375,7 +1375,7 @@ def Vulkan(tab2):
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
 
     availableDevices = Gtk.Label()
-    setMargin(availableDevices,350,10,10)
+    setMargin(availableDevices,300,10,10)
     gpu_image = Gtk.Image()
     availableDevices.set_text("Available Device(s) :")
     DevicesGrid.attach(availableDevices, 10, 2, 20, 1)
