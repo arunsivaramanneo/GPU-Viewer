@@ -481,7 +481,7 @@ def Vulkan(tab2):
                 else:
                     mRhs.append(" ")
 
-        propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT","PROTECTED_BIT","DEVICE_COHERENT_BIT_AMD","DEVICE_UNCACHED_BIT_AMD"]
+        propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT","PROTECTED_BIT","DEVICE_COHERENT_BIT_AMD","DEVICE_UNCACHED_BIT_AMD","RDMA_CAPABLE_BIT_NV"]
 
         MemoryTab_Store.clear()
         TreeMemory.set_model(MemoryTab_Store)
@@ -665,13 +665,17 @@ def Vulkan(tab2):
                     else:
                         QueueTab_Store.append(iter2,["PROTECTED_BIT","false",setBackgroundColor(1),const.COLOR2])
                     if "VIDEO_DECODE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","true",setBackgroundColor(2),const.COLOR1])
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT_KHR","true",setBackgroundColor(2),const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT","false",setBackgroundColor(2),const.COLOR2])
+                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT_KHR","false",setBackgroundColor(2),const.COLOR2])
                     if "VIDEO_ENCODE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","true",setBackgroundColor(1),const.COLOR1])
+                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT_KHR","true",setBackgroundColor(1),const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT","false",setBackgroundColor(1),const.COLOR2])
+                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT_KHR","false",setBackgroundColor(1),const.COLOR2])
+                    if "OPTICAL" in qRHS[i]:
+                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","true",setBackgroundColor(1),const.COLOR1])
+                    else:
+                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","false",setBackgroundColor(1),const.COLOR2])                    
                     k = k + 1
                 else:
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
@@ -1375,7 +1379,7 @@ def Vulkan(tab2):
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
 
     availableDevices = Gtk.Label()
-    setMargin(availableDevices,300,10,10)
+    setMargin(availableDevices,280,10,10)
     gpu_image = Gtk.Image()
     availableDevices.set_text("Available Device(s) :")
     DevicesGrid.attach(availableDevices, 10, 2, 20, 1)
