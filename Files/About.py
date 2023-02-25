@@ -5,7 +5,7 @@ gi.require_version('Gtk','4.0')
 from gi.repository import Gtk, Pango
 from Common import create_scrollbar,setBackgroundColor,getLinkButtonImg,fetchImageFromUrl,setMargin,getScreenSize
 
-title = ["About GPU-Viewer v2.24"]
+title = ["About GPU-Viewer v2.26"]
 
 def about(tab3):
     box = Gtk.Box(orientation=1)
@@ -20,6 +20,8 @@ def about(tab3):
             About_list.append([line.strip('\n'), background_color])
 
     TreeAbout = Gtk.TreeView.new_with_model(About_list)
+ #   TreeAbout = Gtk.ColumnView()
+    TreeAbout.set_model(About_list)
     TreeAbout.set_property("enable-grid-lines",1)
 
 
