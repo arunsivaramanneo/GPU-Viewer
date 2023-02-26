@@ -13,7 +13,7 @@
 }
 
 frame{
-  border-style: none none none none;
+  border-style: none none none none ;
 }
 treeview {
   background-color: #fafbfc;
@@ -92,21 +92,22 @@ headerbar {
 }
 
 notebook {
-  border: 1px solid #171717;
-  border-style: none solid none none;
-  border-radius: 12px;
+  border: 2px solid #171717;
+  border-style: solid none solid solid;
+  border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
   notebook > header > tabs > tab {
     min-height: 24px;
     min-width: 24px;
-    padding-top: 12px;
+    padding-top: 8px;
     margin-bottom: 6px;
-    padding-bottom: 6px ;
+    padding-bottom: 8px ;
     background-color: #383838;
     color: white;
     font-weight: 600;
     border-style: none solid none none;
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
   }
   notebook > header > tabs > tab:hover {
       box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
@@ -136,6 +137,7 @@ button.text-button {
   color: #464853;
   font-weight: 600;
   background-image: linear-gradient(#F2D2BD,#ffda89);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 9px;
 }

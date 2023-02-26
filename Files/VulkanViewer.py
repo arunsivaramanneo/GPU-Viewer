@@ -224,9 +224,10 @@ def Vulkan(tab2):
             feature =' '
         elif "Show All Device Features" in feature:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_all_command)
+            Featurecolumn1.set_title(FeaturesTitle[0])
         else:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_selected_command)
-
+            Featurecolumn1.set_title(feature)
         createMainFile(Filenames.vulkan_device_features_lhs_file,fetch_device_features_selected_lhs_command)
 
         value = []
@@ -250,7 +251,7 @@ def Vulkan(tab2):
                             fgColor.append(const.COLOR2)
                             break                        
                 background_color = setBackgroundColor(i)
-                FeaturesTab_Store.append([text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+                FeaturesTab_Store.append(["  " +text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
 
     def searchLimitsTree(model, iter, Tree):
         search_query = limitsSearchEntry.get_text().lower()
@@ -620,8 +621,7 @@ def Vulkan(tab2):
         qRHS.pop(0)
         k = 0
         for i in range(len(vulkan_device_queues_lhs)):
-            background_color = setBackgroundColor(k)
-            k = k + 1
+            background_color = setBackgroundColor(i)
             if "true" in qRHS[i]:
                 fColor = "GREEN"
             elif "false" in qRHS[i]:
@@ -635,9 +635,17 @@ def Vulkan(tab2):
             if "---" in vulkan_device_queues_lhs[i]:
                 continue
             if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
+                if i % 2 == 0:
+                    background_color = setBackgroundColor(1)
+                else:
+                    background_color =setBackgroundColor(2)
                 iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
                 continue
             if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
+                if i % 2 == 0:
+                    background_color = setBackgroundColor(1)
+                else:
+                    background_color =setBackgroundColor(2)
                 QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                 continue
             else :
@@ -673,9 +681,9 @@ def Vulkan(tab2):
                     else:
                         QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT_KHR","false",setBackgroundColor(1),const.COLOR2])
                     if "OPTICAL" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","true",setBackgroundColor(1),const.COLOR1])
+                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","true",setBackgroundColor(2),const.COLOR1])
                     else:
-                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","false",setBackgroundColor(1),const.COLOR2])                    
+                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","false",setBackgroundColor(2),const.COLOR2])                    
                     k = k + 1
                 else:
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
@@ -1114,18 +1122,22 @@ def Vulkan(tab2):
     TreeFeatures = Gtk.TreeView.new_with_model(FeaturesTab_Store_filter)
     TreeFeatures.set_property("enable-grid-lines", 1)
     TreeFeatures.set_enable_search(True)
-    for i, column_title in enumerate(FeaturesTitle):
-        Featurerenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, Featurerenderer, text=i)
-        column.set_sort_column_id(i)
-        column.set_resizable(True)
-        column.set_reorderable(True)
-        if i == 1:
-            column.add_attribute(Featurerenderer, "foreground", 3)
-        column.add_attribute(Featurerenderer, "background", 2)
-        column.set_property("min-width", const.MWIDTH)
-        TreeFeatures.set_property("can-focus", False)
-        TreeFeatures.append_column(column)
+#    for i, column_title in enumerate(FeaturesTitle):
+    Featurerenderer1 = Gtk.CellRendererText()
+    Featurecolumn1 = Gtk.TreeViewColumn(FeaturesTitle[0], Featurerenderer1, text=0)
+    Featurecolumn1.set_sort_column_id(i)
+    Featurecolumn1.set_resizable(True)
+    Featurecolumn1.set_reorderable(True)
+    Featurecolumn1.add_attribute(Featurerenderer1,"background",2)
+    TreeFeatures.append_column(Featurecolumn1)
+    Featurerenderer2 = Gtk.CellRendererText()
+    Featurecolumn2 =Gtk.TreeViewColumn(FeaturesTitle[1],Featurerenderer2,text=1)
+    Featurecolumn2.add_attribute(Featurerenderer2, "foreground", 3)
+    Featurecolumn2.add_attribute(Featurerenderer2, "background", 2)
+    Featurecolumn2.set_property("min-width", const.MWIDTH)
+    TreeFeatures.set_property("can-focus", False)
+    TreeFeatures.append_column(Featurecolumn2)
+    
 
  #   featureList  = Gtk.StringList()
     featureDropdown = Gtk.DropDown()
