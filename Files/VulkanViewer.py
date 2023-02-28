@@ -36,7 +36,7 @@ def Vulkan(tab2):
 
         fetch_vulkan_gpu_info_command = "vulkaninfo --summary | awk '/GPU%d/{flag=1;next}/^GPU.*/{flag=0}flag' | awk '{gsub(/\([0-9].*/,'True');}1' | sort " %(GPUname)
         fetch_vulkan_gpu_pipeline_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceLimits:/{flag=0}flag' | grep pipeline" %(Filenames.vulkaninfo_output_file,GPUname)
-        fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L|Core/' | sort -r"
+        fetch_cpu_info_command = "LC_ALL=C lscpu | awk '/name|^CPU|^L|Core|Thread/' | sort -rk 5,5"
         fetch_mem_info_command = "cat /proc/meminfo | awk '/Mem/'"
         fetch_lsb_release_info_command = "lsb_release -d -r -c"
         fetch_device_tab_rhs_command = "cat %s | grep -oE '[=,:].*'" %(Filenames.vulkan_device_info_file)
