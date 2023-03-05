@@ -16,11 +16,11 @@ frame{
   border-style: none none none none ;
 }
 treeview {
-  background-color: #fafbfc;
+  background-color: #F2F3F5;
   color: rgba(0, 0, 0, 0.87);
   border: 2px solid #171717;
   border-style: solid solid solid solid;
-  border-radius: 6px;
+  border-radius: 12px;
 }
 grid{
   background-color: #333333;

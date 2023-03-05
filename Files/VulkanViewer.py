@@ -899,14 +899,14 @@ def Vulkan(tab2):
                     SurfaceRHS = " "
                 if '---' in line:
                     continue
-                if "type" in line or "Formats" in line or "Modes" in line or "VkSurface" in line :
+                if "type" in line or "Formats" in line or " Modes" in line or "VkSurface" in line :
                     background_color = const.BGCOLOR3
                     iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
                 if ':' in line and ("types" not in line or "Formats" not in line or "Modes" not in line or "VkSurface" not in line) :
                     iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
-                if "VK_KHR" in line or "PRESENT_MODE" in line or "min" in line or "max" in line or "Transform" in line or "Protected" in line:
+                if "VK_KHR" in line or "PRESENT_MODE" in line or "min" in line or "max" in line or "Transform" in line or "Protected" in line or "presentMode" in line:
                     SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
                 else:
