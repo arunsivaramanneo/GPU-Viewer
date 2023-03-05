@@ -146,15 +146,15 @@ Nvidia_logo = "../Images/nvidia_logo.png"
 LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
-#Ryzen_logo = "../Images/Ryzen.png"
+Ryzen_logo = "../Images/Ryzen.png"
 Intel_core_i7_logo = "../Images/intel-logo-core-i7.png"
 
-Ryzen_logo = "../Images/Ryzen_Dark.svg"
+#Ryzen_logo = "../Images/Ryzen_Dark.svg"
 
 
 #------------------- Desktop logo--------------------------------------
 
-#Gnome_logo = "../Images/Gnome_logo.png"
+Gnome_logo = "../Images/Gnome_logo.png"
 Unity_logo = "../Images/Unity_logo.png"
 Cinnamon_logo = "../Images/Cinnamon-logo.png"
 Kde_logo = "../Images/kde-logo.png"
@@ -166,7 +166,7 @@ Sway_logo = "../Images/Sway_Tree.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 
-Gnome_logo = "../Images/Gnome_Dark.png"
+#Gnome_logo = "../Images/Gnome_Dark.png"
 
 TOOLTIP_CONTACT = "Contact us"
 
@@ -193,22 +193,22 @@ MWIDTH = 350
 
 # .------------- Colors ---------------------
 
-BGCOLOR1 = "#ffffff"
-#BGCOLOR1 = "#2c2c2c"
+#BGCOLOR1 = "#ffffff"
+BGCOLOR1 = "#2c2c2c"
 
-BGCOLOR2 = "#eeeeee"
-#BGCOLOR2 = "#2D2E36"
+#BGCOLOR2 = "#eeeeee"
+BGCOLOR2 = "#2D2E36"
 
 #BGCOLOR3 = "#ccc"
-BGCOLOR3 = "#9FA3AC"
-#BGCOLOR3 = "#171717"
+#BGCOLOR3 = "#9FA3AC"
+BGCOLOR3 = "#171717"
 
 
 COLOR1 = "GREEN"
 
 COLOR2 = "RED"
 
-#COLOR3 = "#FFFFFF"
-COLOR3  = "#333333"
+COLOR3 = "#FFFFFF"
+#COLOR3  = "#333333"
 
 FONT = "Noto Sans Regular"
