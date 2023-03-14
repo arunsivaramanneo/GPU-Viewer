@@ -16,23 +16,24 @@
     <url type="donation">https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q</url>
     <screenshots>
         <screenshot type="default">
-            <image>https://user-images.githubusercontent.com/30646692/218328803-39a37cfb-1875-4c95-8f8e-732a436d82a2.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/224904190-7bd1d97f-69df-45f6-8ffe-41d5ec37bd70.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/218328810-9b8eeb1a-16e1-4101-9856-27a110940afb.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/224904228-1f3c29b3-b12b-420c-a8b6-25293f734d22.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/218328816-efd5acf3-2c72-4bc4-8bc0-c3c48e8fe171.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/224904306-13997a82-12b9-4165-a5fa-a8b6270ac04e.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/218328824-ef139a81-dc14-4d85-96a9-0e987604d101.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/224904375-5dbb647b-87d7-404f-9365-8ae3a6f398ef.png</image>
         </screenshot>
         <screenshot>
-            <image>https://user-images.githubusercontent.com/30646692/218328833-a9b61960-1855-40dd-9a57-bd970d295b9c.png</image>
+            <image>https://user-images.githubusercontent.com/30646692/224904404-6f1b5356-068f-4ca2-a614-ad9923d7facc.png</image>
         </screenshot>
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
+        <release version="2.26" date="2023-03-14"/>
         <release version="2.24" date="2023-02-12"/>
         <release version="2.22" date="2023-02-01"/>
         <release version="2.20" date="2023-01-24"/>

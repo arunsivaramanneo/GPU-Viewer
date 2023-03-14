@@ -324,7 +324,7 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,24, True)
     elif "Ryzen" in line:
         logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,24, True)
-    elif "Mesa" in line or "radv" in line or "llvmpipe" in line and "LLVM" not in line:
+    elif "Mesa" in line or "radv" in line or "llvmpipe" in line or "dozen" in line or "venus" in line or "nvk" in line and "LLVM" not in line:
         logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,24, True)
     elif "LLVM" in line :
         logo_pixbuf = fetchImageFromUrl(const.LLVM_logo,32,24, True)

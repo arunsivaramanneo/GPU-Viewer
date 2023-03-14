@@ -26,6 +26,7 @@ if Path(Filenames.gpu_viewer_folder_path).exists():
 
     def show_message(app):
         message_window = Gtk.ApplicationWindow(application=app)
+        message_grid = Gtk.Grid()
         message_window.set_title("gpu-viewer application is already running")
         message_window.set_default_size(480,120)
         message_window.set_resizable(False)
@@ -34,8 +35,12 @@ if Path(Filenames.gpu_viewer_folder_path).exists():
         setMargin(message_window_frame,5,5,10)
         label = Gtk.Label(label="If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
         message_window.set_child(message_window_frame)
-        message_window_frame.set_child(label)
-        setMargin(message_window,5,5,10)
+        message_window_frame.set_child(message_grid)
+        setMargin(label,5,10,0)
+        message_grid.attach(label,0,0,1,1)
+ #       message_button_OK = Gtk.Button.new_with_label("Yes")
+ #       message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,10,2)
+    #    setMargin(message_window,5,5,10)
 
     app = Gtk.Application()
     app.connect("activate",show_message)
