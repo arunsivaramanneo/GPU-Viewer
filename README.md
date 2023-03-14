@@ -3,17 +3,17 @@
 ### A front-end to glxinfo, vulkaninfo, clinfo and es2_info.
 
 
-This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK3. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
+This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK4. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![Screenshot from 2023-02-12 18-05-00](https://user-images.githubusercontent.com/30646692/218328803-39a37cfb-1875-4c95-8f8e-732a436d82a2.png)
+![Screenshot from 2023-03-14 05-21-00](https://user-images.githubusercontent.com/30646692/224904190-7bd1d97f-69df-45f6-8ffe-41d5ec37bd70.png)
 
-![Screenshot from 2023-02-12 18-05-08](https://user-images.githubusercontent.com/30646692/218328810-9b8eeb1a-16e1-4101-9856-27a110940afb.png)
+![Screenshot from 2023-03-14 05-21-07](https://user-images.githubusercontent.com/30646692/224904228-1f3c29b3-b12b-420c-a8b6-25293f734d22.png)
 
-![Screenshot from 2023-02-12 18-05-25](https://user-images.githubusercontent.com/30646692/218328816-efd5acf3-2c72-4bc4-8bc0-c3c48e8fe171.png)
+![Screenshot from 2023-03-14 05-21-18](https://user-images.githubusercontent.com/30646692/224904306-13997a82-12b9-4165-a5fa-a8b6270ac04e.png)
 
-![Screenshot from 2023-02-12 18-05-33](https://user-images.githubusercontent.com/30646692/218328824-ef139a81-dc14-4d85-96a9-0e987604d101.png)
+![Screenshot from 2023-03-14 05-21-26](https://user-images.githubusercontent.com/30646692/224904375-5dbb647b-87d7-404f-9365-8ae3a6f398ef.png)
 
-![Screenshot from 2023-02-12 18-05-37](https://user-images.githubusercontent.com/30646692/218328833-a9b61960-1855-40dd-9a57-bd970d295b9c.png)
+![Screenshot from 2023-03-14 05-21-34](https://user-images.githubusercontent.com/30646692/224904404-6f1b5356-068f-4ca2-a614-ad9923d7facc.png)
 
 
 
