@@ -37,10 +37,18 @@ if Path(Filenames.gpu_viewer_folder_path).exists():
         message_window.set_child(message_window_frame)
         message_window_frame.set_child(message_grid)
         setMargin(label,5,10,0)
-        message_grid.attach(label,0,0,1,1)
- #       message_button_OK = Gtk.Button.new_with_label("Yes")
- #       message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,10,2)
-    #    setMargin(message_window,5,5,10)
+        message_grid.attach(label,0,0,20,1)
+    #    label2 = Gtk.Label(label="Do you want to run this Command Now ?")
+    #    setMargin(label2,5,25,10)
+     #   message_grid.attach_next_to(label2,label,Gtk.PositionType.BOTTOM,1,10)
+        message_button_OK = Gtk.Button.new_with_label("OK")
+        message_button_OK.connect("clicked",quit)
+    #    message_button_CANCEL = Gtk.Button.new_with_label("No")
+        setMargin(message_button_OK,500,50,10)
+        message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,5,1)
+     #   message_grid.attach_next_to(message_button_CANCEL,message_button_OK,Gtk.PositionType.RIGHT,10,1)
+    #    setMargin(message_button_CANCEL,50,50,10)
+        setMargin(message_window,5,5,10)
 
     app = Gtk.Application()
     app.connect("activate",show_message)
@@ -128,7 +136,9 @@ else:
 
 
     def quit(instance):
-        os.system("unset LC_ALL")
+        print("True")
+        unset_lc_all_process = subprocess.Popen(Filenames.unset_LC_ALL_conmand,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        unset_lc_all_process.communicate()
         rmdir_process =subprocess.Popen(Filenames.rmdir_output_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
         rmdir_process.communicate()
         instance.destroy()

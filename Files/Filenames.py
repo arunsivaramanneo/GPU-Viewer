@@ -7,6 +7,9 @@ opengl_output_command = ["glxinfo -s"]
 fetch_vulkaninfo_ouput_command = "cat /tmp/gpu-viewer/vulkaninfo.txt |"
 
 fetch_screen_resolution_command = "xdpyinfo | awk '/dimensions/{print $2}'"
+
+unset_LC_ALL_conmand = "unset LC_ALL"
+
 #------------------------- Command Commands --------------------------------
 
 remove_rhs_Command = "awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' "
