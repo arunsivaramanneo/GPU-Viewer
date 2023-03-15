@@ -139,6 +139,7 @@ OpenMandriva_logo = "../Images/Mandriva.png"
 Ubuntu_Budgie_logo = "../Images/Ubuntu_Budgie.png"
 Ubuntu_Studio_logo = "../Images/Ubuntu_Studio.png"
 RebornOS_logo = "../Images/RebornOS_Icon.png"
+NixOS_logo = "../Images/NixOS.png"
 
 AMD_logo = "../Images/AMD_logo.png"
 Radeon_logo = "../Images/AMD_Radeon.svg"
