@@ -761,16 +761,16 @@ def Vulkan(tab2):
                     i = i + 1
                     continue
                 elif "\t" in line and "\t\t" not in line:
-                    iter2 = LayerTab_Store.append(iter,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    iter2 = LayerTab_Store.append(iter,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
                     j = j + 1
                 elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
-                    iter3 = LayerTab_Store.append(iter2,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    iter3 = LayerTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
                     j = j + 1
                 elif "Layer-Device" in line:
-                    iter4 = LayerTab_Store.append(iter3,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    iter4 = LayerTab_Store.append(iter3,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
                     j = j + 1
                 else:
-                    LayerTab_Store.append(iter4,[(line.strip('\n')).strip('\t'),"","","","",setBackgroundColor(j)])
+                    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
                     j = j + 1
 
     def selectProperties(dropdown, _pspec):
