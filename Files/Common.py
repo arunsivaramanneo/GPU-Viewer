@@ -299,34 +299,34 @@ def getLogo(line):
     elif "Kubuntu" in line:
         logo_pixbuf = fetchImageFromUrl(const.Kubuntu_logo,32,24,True)
     elif "Lubuntu" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Lubuntu_logo,32,24,True)
-        elif "Solus" in line:       
-            logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,24,True)
-        elif "Mandriva" in line:       
-            logo_pixbuf = fetchImageFromUrl(const.OpenMandriva_logo,32,24,True)
-        elif "Xubuntu" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,24,True)
-        elif "Arch" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Arch_logo,32,24, True)
-        elif "Elementary" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,24,True)
-        elif "Debian" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Debian_logo,32,24,True)
-        elif "opensuse" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,24,True)
-        elif "Pop" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,24,True)
-        elif "MX" in line:
-            logo_pixbuf = fetchImageFromUrl(const.MX_linux_logo,32,24,True)
-        elif "Zorin" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Zorin_os_logo,32,24,True)
-        elif "Mint" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,24, True)
-        elif "Radeon" in line and "Ryzen" not in line:
-            logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,24, True)
-        elif "Ryzen" in line:
-            logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,24, True)
-        elif ("Mesa" in line or "radv" in line or "llvmpipe" in line or "dozen" in line or "venus" in line or "nvk" in line) and ("LLVM" not in line):
+        logo_pixbuf = fetchImageFromUrl(const.Lubuntu_logo,32,24,True)
+    elif "Solus" in line:       
+        logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,24,True)
+    elif "Mandriva" in line:       
+        logo_pixbuf = fetchImageFromUrl(const.OpenMandriva_logo,32,24,True)
+    elif "Xubuntu" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,24,True)
+    elif "Arch" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Arch_logo,32,24, True)
+    elif "Elementary" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Elementary_logo,32,24,True)
+    elif "Debian" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Debian_logo,32,24,True)
+    elif "opensuse" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Open_Suse_logo,32,24,True)
+    elif "Pop" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Pop_os_logo,32,24,True)
+    elif "MX" in line:
+        logo_pixbuf = fetchImageFromUrl(const.MX_linux_logo,32,24,True)
+    elif "Zorin" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Zorin_os_logo,32,24,True)
+    elif "Mint" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,24, True)
+    elif "Radeon" in line and "Ryzen" not in line:
+        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,24, True)
+    elif "Ryzen" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,24, True)
+    elif ("Mesa" in line or "radv" in line or "llvmpipe" in line or "dozen" in line or "venus" in line or "nvk" in line) and ("LLVM" not in line):
         logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,24, True)
     elif "LLVM" in line :
         logo_pixbuf = fetchImageFromUrl(const.LLVM_logo,32,24, True)
