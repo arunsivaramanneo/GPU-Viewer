@@ -61,6 +61,7 @@ def OpenGL(tab):
         LimitsWin = Gtk.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
         LimitsNotebook = Gtk.Notebook()
+        LimitsNotebook.set_property('tab-pos',Gtk.PositionType.LEFT) 
         LimitsWin.set_child(LimitsNotebook)
         LimitsCoreTab = Gtk.Box(spacing=10)
         LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
