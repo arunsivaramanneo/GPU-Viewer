@@ -136,7 +136,6 @@ else:
 
 
     def quit(instance):
-        print("True")
         unset_lc_all_process = subprocess.Popen(Filenames.unset_LC_ALL_conmand,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
         unset_lc_all_process.communicate()
         rmdir_process =subprocess.Popen(Filenames.rmdir_output_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
@@ -163,7 +162,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk.css')
+        fname = Gio.file_new_for_path('gtk_test.css')
         provider.load_from_file(fname)
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
