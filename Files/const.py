@@ -195,7 +195,7 @@ MWIDTH = 350
 # .------------- Colors ---------------------
 
 #BGCOLOR1 = "#ffffff"
-BGCOLOR1 = "#2c2c2c"
+BGCOLOR1 = "#353839"
 
 #BGCOLOR2 = "#eeeeee"
 BGCOLOR2 = "#2D2E36"
