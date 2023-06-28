@@ -123,7 +123,7 @@ notebook {
 notebook > header tab:checked {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
-  background-color: #353839;
+  background-color: #2C2C2C;
   background-clip: padding-box;
   border-style: solid;
   color: #d43c50;
@@ -338,7 +338,7 @@ dropdown > button :only-child{
 listview > row :hover {
   border-style: none none none none;
   outline: transparent;
-  background-color: #000;
+  background-color: rgba(0,0,0,0);
   color: white;
   font-weight: bolder;
   font-style: oblique;
