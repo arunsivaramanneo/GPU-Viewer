@@ -1007,7 +1007,7 @@ def Vulkan(tab2):
                 MemoryTypes(text)
                 Queues(text)
                 Surface(text)
-                Groups(text)
+       #         Groups(text)
             gpu_image = getGpuImage(gpu_list[text])
             image_renderer.set_pixbuf(gpu_image)
         Instance()
@@ -1374,15 +1374,15 @@ def Vulkan(tab2):
     
     # ------------------------- Creating the Device Groups Tab ---------------------------------------
 
-    GroupsTab = Gtk.Box(spacing=10)
-    GroupsGrid = createSubTab(GroupsTab,notebook,"Groups")
-    Groups_Store = Gtk.TreeStore(str,str,str)
-    TreeGroups = Gtk.TreeView.new_with_model(Groups_Store)
-    TreeGroups.set_property("enable-grid-lines", 1)
-    TreeGroups.set_property("enable-tree-lines",True)
-    setColumns(TreeGroups,GroupsTitle,const.MWIDTH,0.0)
-    GroupsScrollbar = create_scrollbar(TreeGroups)
-    GroupsGrid.attach(GroupsScrollbar,0,0,1,1)
+  #  GroupsTab = Gtk.Box(spacing=10)
+  #  GroupsGrid = createSubTab(GroupsTab,notebook,"Groups")
+  #  Groups_Store = Gtk.TreeStore(str,str,str)
+  #  TreeGroups = Gtk.TreeView.new_with_model(Groups_Store)
+  #  TreeGroups.set_property("enable-grid-lines", 1)
+  #  TreeGroups.set_property("enable-tree-lines",True)
+  #  setColumns(TreeGroups,GroupsTitle,const.MWIDTH,0.0)
+  #  GroupsScrollbar = create_scrollbar(TreeGroups)
+  #  GroupsGrid.attach(GroupsScrollbar,0,0,1,1)
 
     #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
 
