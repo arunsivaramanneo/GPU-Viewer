@@ -77,3 +77,8 @@ def about(tab3):
     Contactbutton = getLinkButtonImg(Contactimg, const.EMAIL_LINK, const.TOOLTIP_CONTACT)
     setMargin(Contactbutton,100,5,5)
     grid.attach_next_to(Contactbutton, Githubbutton, Gtk.PositionType.RIGHT, 1, 1)
+
+    Discordimg = fetchImageFromUrl(const.DISCORD_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
+    Discordbutton = getLinkButtonImg(Discordimg, const.DISCORD_LINK, const.TOOLTIP_CONTACT)
+    setMargin(Discordbutton,100,5,5)
+    grid.attach_next_to(Discordbutton, Contactbutton, Gtk.PositionType.RIGHT, 1, 1)

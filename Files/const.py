@@ -81,6 +81,8 @@ NVIDIA_LOGO_PNG = "../Images/Nvidia_logo.png"
 
 CONTACT_LOGO_PNG = "../Images/Contact.png"
 
+DISCORD_LOGO_PNG = "../Images/Discord.png"
+
 TOOLTIP_LICENSE = "View License"
 
 TOOLTIP_CHANGE_LOG = "View Change Log"
@@ -110,6 +112,8 @@ TWITTER_LINK = "https://twitter.com/arunsivaraman"
 TOOLTIP_GITHUB = "Arun Sivaraman's Github"
 
 GITHUB_LINK = "https://github.com/arunsivaramanneo/GPU-Viewer"
+
+DISCORD_LINK = "https://discord.gg/S7YbaWWM"
 
 DUMMY_PIXBUF = "../Images/8e8e8e.png"
 
