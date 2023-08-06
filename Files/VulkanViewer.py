@@ -367,6 +367,8 @@ def Vulkan(tab2):
                             
                         with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                             for k,line in enumerate(file1):
+                                if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -376,6 +378,8 @@ def Vulkan(tab2):
                     #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                         with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                             for k,line in enumerate(file1):
+                                if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -385,6 +389,8 @@ def Vulkan(tab2):
                     #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                         with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                             for k,line in enumerate(file1):
+                                if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                     n +=1
@@ -432,6 +438,8 @@ def Vulkan(tab2):
                         
                     with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
+                            if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -441,6 +449,8 @@ def Vulkan(tab2):
                 #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
+                            if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -450,6 +460,8 @@ def Vulkan(tab2):
                 #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
+                            if ("FORMAT_FEATURE_2_" in line):
+                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     j +=1
                 TreeFormats.expand_all()
