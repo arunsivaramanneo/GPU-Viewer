@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 gi.require_version('Gtk','4.0')
-from gi.repository import Gtk, Pango, Gdk,Gio
+from gi.repository import Gtk, Pango, Gdk,Gio,GLib
 
 from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile
 from VulkanViewer import Vulkan
@@ -152,7 +152,18 @@ else:
 
     def on_activate(app):
         win = Gtk.ApplicationWindow(application=app)
+        headerbar = Gtk.HeaderBar.new()
+        win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.0")
+
+        menubutton = Gtk.MenuButton.new()
+        menubutton.set_icon_name("open-menu-symbolic") 
+        menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
+        menubutton.set_menu_model(menu)
+        headerbar.pack_end(menubutton)
+
+        print(menubutton.get_active)
+
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:
             win.set_size_request(2160 * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
@@ -162,7 +173,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_test_1.css')
+        fname = Gio.file_new_for_path('gtk_test.css')
         provider.load_from_file(fname)
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)

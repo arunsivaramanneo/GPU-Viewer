@@ -237,6 +237,27 @@ def searchStore(TreeGLExt, grid3, refresh_filter):
 def refresh_filter(self, store_filter):
     store_filter.refilter()
 
+def create_drop_down(string_list_items):
+    drop_down_ui_string = f"""<interface>
+    <object class="GtkDropDown" id="drop-down">
+        <property name="model">
+        <object class="GtkStringList" id="string-list">x`
+            <items>
+            {string_list_items}
+            </items>
+        </object>
+        </property>
+        <property name="enable-search">true</property>
+        <property name="expression">
+        <lookup type="GtkStringObject" name="string"></lookup>
+        </property>
+    </object>
+    </interface>"""
+
+    builder = Gtk.Builder.new_from_string(drop_down_ui_string, -1)
+    drop_down = builder.get_object("drop-down")
+
+    return drop_down
 
 
 def appendLimitsRHS(filename, temp):
