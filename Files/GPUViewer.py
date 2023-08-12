@@ -13,7 +13,7 @@ from pathlib import Path
 gi.require_version('Gtk','4.0')
 from gi.repository import Gtk, Pango, Gdk,Gio,GLib
 
-from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile
+from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile,on_light_action_actived,on_dark_action_actived
 from VulkanViewer import Vulkan
 from OpenCL import openCL
 from OpenGLViewer import OpenGL
@@ -156,13 +156,19 @@ else:
         win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.0")
 
+        light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
+        light_action.connect("activate", on_light_action_actived,win)
+        win.add_action(light_action) # (self window) == win in MENU_XML
+        
+        dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
+        dark_action.connect("activate", on_dark_action_actived,win)
+        win.add_action(dark_action) # (self window) == win in MENU_XML
+
         menubutton = Gtk.MenuButton.new()
         menubutton.set_icon_name("open-menu-symbolic") 
         menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
         menubutton.set_menu_model(menu)
         headerbar.pack_end(menubutton)
-
-        print(menubutton.get_active)
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:

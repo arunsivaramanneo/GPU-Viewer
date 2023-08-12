@@ -5,7 +5,7 @@ import subprocess
 import Filenames
 from pathlib import Path
 gi.require_version('Gtk','4.0')
-from gi.repository import Gtk,GdkPixbuf,Gdk
+from gi.repository import Gtk,GdkPixbuf,Gdk,Gio
 
 
 class MyGtk(Gtk.Window):
@@ -81,6 +81,22 @@ def setBackgroundColor(i):
         background_color = const.BGCOLOR2
     return background_color
 
+def on_light_action_actived(self, action, win,param=None):
+    display = Gtk.Widget.get_display(win)
+    provider = Gtk.CssProvider.new()
+    fname = Gio.file_new_for_path('gtk_test_1.css')
+    provider.load_from_file(fname)
+    Gtk.StyleContext.add_provider_for_display(display, provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        
+def on_dark_action_actived(self, action,win, param=None):
+    display = Gtk.Widget.get_display(win)
+    provider = Gtk.CssProvider.new()
+    fname = Gio.file_new_for_path('gtk_test.css')
+    provider.load_from_file(fname)
+    Gtk.StyleContext.add_provider_for_display(display, provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        
 
 # setting up Sub Tabs in Vulkan
 

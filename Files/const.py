@@ -189,7 +189,7 @@ WIDTH_RATIO = 0.76
 
 WIDTH_RATIO2 = 0.66
 
-HEIGHT_RATIO1 = 0.88    
+HEIGHT_RATIO1 = 0.90    
 
 HEIGHT_RATIO2 = 0.65
 
@@ -227,12 +227,11 @@ MENU_XML="""
     <section>
       <item>
         <attribute name="action">win.about</attribute>
-        <attribute name="label" translatable="yes">_Jedi Theme</attribute>
+        <attribute name="label" translatable="yes">_Light theme</attribute>
       </item>
       <item>
         <attribute name="action">win.quit</attribute>
-        <attribute name="label" translatable="yes">_SIth Theme</attribute>
-        <attribute name="accel">&lt;Primary&gt;Q</attribute>
+        <attribute name="label" translatable="yes">_Dark theme</attribute>
     </item>
     </section>
   </menu>
