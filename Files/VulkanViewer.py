@@ -367,8 +367,6 @@ def Vulkan(tab2):
                             
                         with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                             for k,line in enumerate(file1):
-                                if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -378,8 +376,6 @@ def Vulkan(tab2):
                     #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                         with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                             for k,line in enumerate(file1):
-                                if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -389,8 +385,6 @@ def Vulkan(tab2):
                     #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                         with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                             for k,line in enumerate(file1):
-                                if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                                 FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                     n +=1
@@ -438,8 +432,6 @@ def Vulkan(tab2):
                         
                     with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
-                            if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -449,8 +441,6 @@ def Vulkan(tab2):
                 #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
-                            if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
@@ -460,8 +450,6 @@ def Vulkan(tab2):
                 #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
-                            if ("FORMAT_FEATURE_2_" in line):
-                                    line = line.replace('FORMAT_FEATURE_2_',"")
                             FormatsTab_Store.append(iter2,[((line.strip('\n')).strip('\t'))," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     j +=1
                 TreeFormats.expand_all()
@@ -914,18 +902,20 @@ def Vulkan(tab2):
                     SurfaceRHS = " "
                 if '---' in line:
                     continue
-                if "type" in line or "Formats" in line or " Modes" in line or "VkSurface" in line :
+                if "\t" in line and "\t\t" not in line:
                     background_color = const.BGCOLOR3
                     iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
-                if ':' in line and ("types" not in line or "Formats" not in line or "Modes" not in line or "VkSurface" not in line) :
+                if "\t\t" in line and "\t\t\t" not in line:
                     iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
-                if "VK_KHR" in line or "PRESENT_MODE" in line or "min" in line or "max" in line or "Transform" in line or "Protected" in line or "presentMode" in line:
-                    SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                if "\t\t\t" in line and "\t\t\t\t" not in line:
+                    iter3 = SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
                     continue
+                if "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                    iter4 = SurfaceTab_Store.append(iter3,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color]) 
                 else:
-                    SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
 
             TreeSurface.expand_all()
     

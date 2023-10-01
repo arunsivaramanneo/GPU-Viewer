@@ -189,7 +189,7 @@ WIDTH_RATIO = 0.76
 
 WIDTH_RATIO2 = 0.66
 
-HEIGHT_RATIO1 = 0.90    
+HEIGHT_RATIO1 = 0.92    
 
 HEIGHT_RATIO2 = 0.65
 
@@ -198,7 +198,7 @@ MWIDTH = 350
 
 # .------------- Colors ---------------------
 
-#BGCOLOR1 = "#ffffff"
+#BGCOLOR1 = "#e9edf6"
 BGCOLOR1 = "#353839"
 
 #BGCOLOR2 = "#eeeeee"
