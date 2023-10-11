@@ -5,7 +5,7 @@ gi.require_version('Gtk','4.0')
 from gi.repository import Gtk, Pango
 from Common import create_scrollbar,setBackgroundColor,getLinkButtonImg,fetchImageFromUrl,setMargin,getScreenSize
 
-title = ["About GPU-Viewer v2.31"]
+title = ["About GPU-Viewer v2.32"]
 
 def about(tab3):
     box = Gtk.Box(orientation=1)
@@ -78,7 +78,3 @@ def about(tab3):
     setMargin(Contactbutton,100,5,5)
     grid.attach_next_to(Contactbutton, Githubbutton, Gtk.PositionType.RIGHT, 1, 1)
 
-    Discordimg = fetchImageFromUrl(const.DISCORD_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Discordbutton = getLinkButtonImg(Discordimg, const.DISCORD_LINK, const.TOOLTIP_CONTACT)
-    setMargin(Discordbutton,100,5,5)
-    grid.attach_next_to(Discordbutton, Contactbutton, Gtk.PositionType.RIGHT, 1, 1)
