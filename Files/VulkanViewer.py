@@ -653,41 +653,13 @@ def Vulkan(tab2):
                 continue
             else :
                 if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
+                    supportedFlags = qRHS[i].split("|")
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
 
-                    if "GRAPHICS" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","true",setBackgroundColor(1),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["GRAPHICS_BIT","false",setBackgroundColor(1),const.COLOR2])
-                    if "COMPUTE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["COMPUTE_BIT","true",setBackgroundColor(2),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["COMPUTE_BIT","false",setBackgroundColor(2),const.COLOR2])
-                    if "TRANSFER" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["TRANSFER_BIT","true",setBackgroundColor(1),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["TRANSFER_BIT","false",setBackgroundColor(1),const.COLOR2])
-                    if "SPARSE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","true",setBackgroundColor(2),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["SPARSE_BINDING_BIT","false",setBackgroundColor(2),const.COLOR2])
-                    if "PROTECTED" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["PROTECTED_BIT","true",setBackgroundColor(1),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["PROTECTED_BIT","false",setBackgroundColor(1),const.COLOR2])
-                    if "VIDEO_DECODE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT_KHR","true",setBackgroundColor(2),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["VIDEO_DECODE_BIT_KHR","false",setBackgroundColor(2),const.COLOR2])
-                    if "VIDEO_ENCODE" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT_KHR","true",setBackgroundColor(1),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["VIDEO_ENCODE_BIT_KHR","false",setBackgroundColor(1),const.COLOR2])
-                    if "OPTICAL" in qRHS[i]:
-                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","true",setBackgroundColor(2),const.COLOR1])
-                    else:
-                        QueueTab_Store.append(iter2,["OPTICAL_FLOW_BIT_NV","false",setBackgroundColor(2),const.COLOR2])                    
-                    k = k + 1
+                    for count,flags in enumerate(supportedFlags, start=i+1):
+                        QueueTab_Store.append(iter2,[flags.replace("QUEUE_","")," ",setBackgroundColor(count),const.COLOR1])
+       
+                #    k = k + 1
                 else:
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                     
