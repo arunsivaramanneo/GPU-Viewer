@@ -631,10 +631,16 @@ def Vulkan(tab2):
                     qRHS.append("")
         
         qRHS.pop(0)
+    
         k = 0
         for i in range(len(vulkan_device_queues_lhs)):
             background_color = setBackgroundColor(i)
-            fColor = None
+            if "true" in qRHS[i]:
+                fColor = "GREEN"
+            elif "false" in qRHS[i]:
+                fColor = "RED"
+            else:
+                fColor = None
             if "Properties[" in vulkan_device_queues_lhs[i]:
                 iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
             #    k = 0
