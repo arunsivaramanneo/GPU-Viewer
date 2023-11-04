@@ -496,56 +496,65 @@ def Vulkan(tab2):
             if "memoryTypes" in vulkan_memory_types_lhs[i]:
                 iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
                 continue
-            if "MEMORY" in vulkan_memory_types_lhs[i]:
+            if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
+                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
                 continue
-            if "None" in vulkan_memory_types_lhs[i] and n == 0:
-                n = n + 1
-                continue
-            if "heapIndex" in vulkan_memory_types_lhs[i]:
-                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,const.COLOR3])
-                continue
-            if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
-                continue
-            if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
-                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
-                continue
-            if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
-                iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
-                continue
-            if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
-                MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+            if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
+                iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
                 continue
             else:
-                Flag = []
-                if "propertyFlags" in vulkan_memory_types_lhs[i]:
-                        vulkan_memory_types_property_flags[p]
-                        #text = (mRhs[i].strip('\n')).strip(": ")
-                        iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
-                        dec = int(vulkan_memory_types_property_flags[p], 16)
-                        if  dec == 0:
-                            n = 0
-                        binary = bin(dec)[2:]
-                        for j in range(len(binary)):
-                            if binary[j] == '0':
-                                Flag.insert(j, "false")
-                            if binary[j] == '1':
-                                Flag.insert(j, "true")
-                        for j in range(5 - len(binary)):
-                            Flag.insert(0, "false")
-                        Flag.reverse()
-                        for k in range(len(Flag)):
-                            if "true" in Flag[k]:
-                                fColor = "GREEN"
-                            elif "false" in Flag[k]:
-                                fColor = "RED"
-                            else:
-                                fColor = const.COLOR3
-                            MemoryTab_Store.append(iter2,[propertyFlag[k],Flag[k],setBackgroundColor(k),fColor])
-                        p = p + 1
-                else:
-                    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
-                    continue
+                MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
+       #     if "MEMORY" in vulkan_memory_types_lhs[i]:
+       #         continue
+        #    if "None" in vulkan_memory_types_lhs[i] and n == 0:
+        #        n = n + 1
+        #        continue
+        #    if "heapIndex" in vulkan_memory_types_lhs[i]:
+        #        iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i].strip('\n'),background_color,const.COLOR3])
+        #        continue
+        #    if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
+        #        iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+        #        continue
+        #    if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
+        #        MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+        #        continue
+        #    if  "IMAGE" in vulkan_memory_types_lhs[i] and ("FORMAT" not in vulkan_memory_types_lhs[i] or "color" not in vulkan_memory_types_lhs[i] or "sparse" not in vulkan_memory_types_lhs[i]):
+        #        iter3 = MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+        #        continue
+        #    if "\t\t\t" in vulkan_memory_types_lhs[i] and "IMAGE" not in vulkan_memory_types_lhs[i]:
+        #        MemoryTab_Store.append(iter3,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+        #        continue
+        #    if "propertyFlags" in vulkan_memory_types_lhs[i]:
+        #                vulkan_memory_types_property_flags[p]
+         #               #text = (mRhs[i].strip('\n')).strip(": ")
+         #               iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+          #              continue
+        #                dec = int(vulkan_memory_types_property_flags[p], 16)
+        #                if  dec == 0:
+        #                   n = 0
+        #                binary = bin(dec)[2:]
+        #                for j in range(len(binary)):
+        #                    if binary[j] == '0':
+        #                        Flag.insert(j, "false")
+        #                    if binary[j] == '1':
+        #                        Flag.insert(j, "true")
+        #                for j in range(5 - len(binary)):
+        #                    Flag.insert(0, "false")
+        #                Flag.reverse()
+        #                for k in range(len(Flag)):
+        #                    if "true" in Flag[k]:
+        #                        fColor = "GREEN"
+        #                    elif "false" in Flag[k]:
+        #                        fColor = "RED"
+        #                    else:
+        #                        fColor = const.COLOR3
+         #   if "MEMORY_PROPERTY" in vulkan_memory_types_lhs[i]:
+         #           print(vulkan_memory_types_lhs)
+         #           MemoryTab_Store.append(iter2,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+                 #       p = p + 1
+         #   else:
+          #      iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",background_color,const.COLOR3])
+          #      continue
 
         labe12 = "Memory Types (%d)" %len(vulkan_memory_types_property_flags)
         notebook.set_tab_label(MemoryTypeTab,Gtk.Label(label=labe12))
@@ -657,7 +666,7 @@ def Vulkan(tab2):
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
 
                     for count,flags in enumerate(supportedFlags, start=i+1):
-                        QueueTab_Store.append(iter2,[flags.replace("QUEUE_","")," ",setBackgroundColor(count),const.COLOR1])
+                        QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
        
                 #    k = k + 1
                 else:
