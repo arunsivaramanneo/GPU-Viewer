@@ -634,12 +634,7 @@ def Vulkan(tab2):
         k = 0
         for i in range(len(vulkan_device_queues_lhs)):
             background_color = setBackgroundColor(i)
-            if "true" in qRHS[i]:
-                fColor = "GREEN"
-            elif "false" in qRHS[i]:
-                fColor = "RED"  
-            else:
-                fColor = const.COLOR3
+            fColor = None
             if "Properties[" in vulkan_device_queues_lhs[i]:
                 iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
             #    k = 0
@@ -647,28 +642,18 @@ def Vulkan(tab2):
             if "---" in vulkan_device_queues_lhs[i]:
                 continue
             if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
-                if i % 2 == 0:
-                    background_color = setBackgroundColor(1)
-                else:
-                    background_color =setBackgroundColor(2)
                 iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
                 continue
             if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
-                if i % 2 == 0:
-                    background_color = setBackgroundColor(1)
-                else:
-                    background_color =setBackgroundColor(2)
                 QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                 continue
             else :
                 if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
                     supportedFlags = qRHS[i].split("|")
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
-
-                    for count,flags in enumerate(supportedFlags, start=i+1):
+                    for count,flags in enumerate(supportedFlags, start= i + 1):
                         QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
        
-                #    k = k + 1
                 else:
                     iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
                     

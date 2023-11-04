@@ -164,11 +164,11 @@ else:
         dark_action.connect("activate", on_dark_action_actived,win)
         win.add_action(dark_action) # (self window) == win in MENU_XML
 
-        menubutton = Gtk.MenuButton.new()
-        menubutton.set_icon_name("open-menu-symbolic") 
-        menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
-        menubutton.set_menu_model(menu)
-        headerbar.pack_end(menubutton)
+    #    menubutton = Gtk.MenuButton.new()
+    #    menubutton.set_icon_name("open-menu-symbolic") 
+    #    menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
+    #    menubutton.set_menu_model(menu)
+    #    headerbar.pack_end(menubutton)
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:
