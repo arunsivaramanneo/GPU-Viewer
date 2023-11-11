@@ -1,11 +1,11 @@
-
-Copyright (C) 2017-2023 Arun Sivaraman <arunsivaramanneo@gmail.com>
+Copyright (C) 2017-2024 Arun Sivaraman <arunsivaramanneo@gmail.com>
 
 GPU Viewer is a FREE SOFTWARE: This program comes with ABSOLUTELY NO WARRANTY. 
 You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
 Click on the GPLv3 Icon below to view the License
 
-This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo,es2_info and vdpauinfo. The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and VDPAU Information in ease over command-line.
+This project is developed as a basic front-end UI for the command-line outputs of glxinfo, vulkaninfo, clinfo,es2_info and vdpauinfo. 
+The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and VDPAU Information in ease over command-line.
 
 Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming languages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo, es2_info and vdpauinfo output.
 

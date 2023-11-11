@@ -18,7 +18,7 @@ from VulkanViewer import Vulkan
 from OpenCL import openCL
 from OpenGLViewer import OpenGL
 from VdpauViewer import vdpauinfo
-from About import about
+from aboutPage import about_page
 
 Title1 = "About GPU-Viewer v2.0"
 
@@ -100,7 +100,7 @@ else:
         aboutTab = create_tab(notebook,const.ABOUT_US_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
         page = notebook.get_page(aboutTab)
         page.set_property("tab-expand",True)
-        t3 = threading.Thread(target=about, args=(aboutTab,))
+        t3 = threading.Thread(target=about_page, args=(aboutTab,))
         t3.start()
         t3.join()   
 
@@ -152,17 +152,17 @@ else:
 
     def on_activate(app):
         win = Gtk.ApplicationWindow(application=app)
-        headerbar = Gtk.HeaderBar.new()
-        win.set_titlebar(headerbar)
+    #    headerbar = Gtk.HeaderBar.new()
+    #    win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.0")
 
-        light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
-        light_action.connect("activate", on_light_action_actived,win)
-        win.add_action(light_action) # (self window) == win in MENU_XML
+   #     light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
+    #    light_action.connect("activate", on_light_action_actived,win)
+    #    win.add_action(light_action) # (self window) == win in MENU_XML
         
-        dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
-        dark_action.connect("activate", on_dark_action_actived,win)
-        win.add_action(dark_action) # (self window) == win in MENU_XML
+    #    dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
+    #    dark_action.connect("activate", on_dark_action_actived,win)
+    #    win.add_action(dark_action) # (self window) == win in MENU_XML
 
     #    menubutton = Gtk.MenuButton.new()
     #    menubutton.set_icon_name("open-menu-symbolic") 

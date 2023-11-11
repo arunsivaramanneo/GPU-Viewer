@@ -5,14 +5,47 @@ import Filenames
 import subprocess
 from FrameBuffer import FrameBuffer
 gi.require_version('Gtk','4.0')
+gi.require_version(namespace='Adw', version='1')
 
-from gi.repository import Gtk
+
+from gi.repository import Gtk,Gio,GObject,Adw
+
+Adw.init()
 
 from Common import getScreenSize,createMainFile,create_scrollbar,setColumns,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,refresh_filter,appendLimitsRHS
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
+
+class ExtensionsDataObject(GObject.GObject):
+    def __init__(self, column1: str):
+        super(ExtensionsDataObject, self).__init__()
+        self.column1 = column1
+
+class DataObject(GObject.GObject):
+    def __init__(self, column1: str,column2: str):
+        super(DataObject, self).__init__()
+        self.column1 = column1
+        self.column2 = column2
+
+def setup(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    label.props.xalign = 0.0
+    item.set_child(label)
+
+def bind_column1(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    obj = item.get_item()
+    label.set_text(obj.column1)
+
+def bind_column2(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    obj = item.get_item()
+    label.set_label(obj.column2)
 
 def OpenGL(tab):
 
@@ -47,8 +80,7 @@ def OpenGL(tab):
         with open(Filenames.opengl_info_lhs_file, "r") as file1:
             for i,line in enumerate(file1):
                 text = line.strip(" ")
-                background_color = setBackgroundColor(i)
-                opengl_info_list.append([text.strip('\n'), value_opengl_information_rhs[i].strip('\n'), background_color])
+                opengl_info_list.append(DataObject(text.strip('\n'), value_opengl_information_rhs[i].strip('\n')))
     
     def clickme(button):
 
@@ -233,8 +265,8 @@ def OpenGL(tab):
                     if "_%s_" % List[int(value)] in line:
                         GL_All.append(line)
 
-        Store.clear()
-        tree.set_model(filter)
+        Store.remove_all()
+    #    tree.set_model(filter)
 
     #    for i in range(len(List)):
     #        if int(value) == i:
@@ -244,7 +276,7 @@ def OpenGL(tab):
         for i in range(count):
             background_color = setBackgroundColor(i)
             text = GL_All[i].strip(' ')
-            Store.append([text.strip('\n'), background_color])
+            Store.append(ExtensionsDataObject(text.strip('\n')))
 
     def getVendorList(filename):
 
@@ -326,13 +358,34 @@ def OpenGL(tab):
     setMargin(opengl_box,0,5,10)
     tab.append(opengl_box)
     opengl_box.append(frame_opengl_info)
-    opengl_info_list = Gtk.ListStore(str,str,str)
-    Tree_opengl_info = Gtk.TreeView.new_with_model(opengl_info_list)
-    Tree_opengl_info.set_property("enable-grid-lines", 1)
 
-    setColumns(Tree_opengl_info,Title2,const.MWIDTH,0.0)
+    openglColumnView = Gtk.ColumnView()
+    openglColumnView.props.show_row_separators = True
+    openglColumnView.props.single_click_activate = False
+    openglColumnView.props.show_column_separators = True
+    factoryOpenglLhs = Gtk.SignalListItemFactory()
+    factoryOpenglLhs.connect("setup", setup)
+    factoryOpenglLhs.connect("bind", bind_column1)
+    factoryOpenglRhs = Gtk.SignalListItemFactory()
+    factoryOpenglRhs.connect("setup", setup)
+    factoryOpenglRhs.connect("bind", bind_column2)
 
-    opengl_info_scrollbar = create_scrollbar(Tree_opengl_info)
+    openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
+    openglColumn1.set_factory(factoryOpenglLhs)
+    openglColumn1.set_resizable(True)
+    openglColumnView.append_column(openglColumn1)
+
+    openglColumn2 = Gtk.ColumnViewColumn.new("Details")
+    openglColumn2.set_factory(factoryOpenglRhs)
+    openglColumn2.set_expand(True)
+    openglColumnView.append_column(openglColumn2)
+
+    openglSelection = Gtk.SingleSelection()
+    opengl_info_list = Gio.ListStore.new(DataObject)
+    openglSelection.set_model(opengl_info_list)
+    openglColumnView.set_model(openglSelection)
+
+    opengl_info_scrollbar = create_scrollbar(openglColumnView)
     frame_opengl_info.set_child(opengl_info_scrollbar)
     opengl_info()
 
@@ -384,19 +437,29 @@ def OpenGL(tab):
     grid_opengl_extension = Gtk.Grid()
     opengl_extension_box.append(grid_opengl_extension)
 
-    opengl_extension_list = Gtk.ListStore(str,str)
-    opengl_extension_list_filter = opengl_extension_list.filter_new()
-    tree_opengl_extension = Gtk.TreeView.new_with_model(opengl_extension_list_filter)
-    tree_opengl_extension.set_property("enable-grid-lines", 1)
-    tree_opengl_extension.set_headers_visible(False)
-    opengl_extension_list_filter.set_visible_func(searchTreeExtGL)
+    openglExtensionColumnView = Gtk.ColumnView()
+    openglExtensionColumnView.props.show_row_separators = True
+    openglExtensionColumnView.props.single_click_activate = False
+    openglExtensionColumnView.props.show_column_separators = True
+    factoryOpenglExtensionLhs = Gtk.SignalListItemFactory()
+    factoryOpenglExtensionLhs.connect("setup", setup)
+    factoryOpenglExtensionLhs.connect("bind", bind_column1)
 
-    setColumns(tree_opengl_extension,Title,const.MWIDTH,0.0)
+    openglExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
+    openglExtensionsColumn1.set_factory(factoryOpenglExtensionLhs)
+    openglExtensionsColumn1.set_expand(True)
+    openglExtensionColumnView.append_column(openglExtensionsColumn1)
+
+
+    openglExtensionsSelection = Gtk.SingleSelection()
+    opengl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+    openglExtensionsSelection.set_model(opengl_extension_list)
+    openglExtensionColumnView.set_model(openglExtensionsSelection)
 
     frame_search_gl =Gtk.Frame()
     entry_gl = Gtk.SearchEntry()
     entry_gl.set_property("placeholder-text","Type here to filter extensions.....")
-    entry_gl.connect("search-changed",refresh_filter,opengl_extension_list_filter)
+#    entry_gl.connect("search-changed",refresh_filter,opengl_extension_list_filter)
     entry_gl.grab_focus()
     frame_search_gl.set_child(entry_gl)
 
@@ -416,25 +479,37 @@ def OpenGL(tab):
     for i in range(len(Vendor_GL)):
         vendor_gl_list.append(Vendor_GL[i])
     
-    vendor_dropdown_gl.connect('notify::selected-item', radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
-    radcall2(vendor_dropdown_gl,0,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,tree_opengl_extension,opengl_extension_list_filter)
+    vendor_dropdown_gl.connect('notify::selected-item', radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
+    radcall2(vendor_dropdown_gl,0,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
     setMargin(vendor_dropdown_gl,2,1,2)
    
     grid_opengl_extension.attach(vendor_dropdown_gl,0,0,1,1)
     grid_opengl_extension.attach_next_to(frame_search_gl,vendor_dropdown_gl,Gtk.PositionType.LEFT,150,1)
-    opengl_extension_scrollbar = create_scrollbar(tree_opengl_extension)
+    opengl_extension_scrollbar = create_scrollbar(openglExtensionColumnView)
     grid_opengl_extension.attach_next_to(opengl_extension_scrollbar,frame_search_gl,Gtk.PositionType.BOTTOM,151,1)
 
 
 #--------------------------- creating OpenGL ES Extension tab -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    opengl_es_extension_list = Gtk.ListStore(str,str)
-    opengl_es_extension_list_filter = opengl_es_extension_list.filter_new()
-    tree_opengl_es_extension = Gtk.TreeView.new_with_model(opengl_es_extension_list_filter)
-    tree_opengl_es_extension.set_property("enable-grid-lines", 1)
-    tree_opengl_es_extension.set_headers_visible(False)
-    opengl_es_extension_list_filter.set_visible_func(searchTreeExtES)
 
+    openglESExtensionColumnView = Gtk.ColumnView()
+    openglESExtensionColumnView.props.show_row_separators = True
+    openglESExtensionColumnView.props.single_click_activate = False
+    openglESExtensionColumnView.props.show_column_separators = True
+    factoryOpenglESExtensionLhs = Gtk.SignalListItemFactory()
+    factoryOpenglESExtensionLhs.connect("setup", setup)
+    factoryOpenglESExtensionLhs.connect("bind", bind_column1)
+
+    openglESExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
+    openglESExtensionsColumn1.set_factory(factoryOpenglESExtensionLhs)
+    openglESExtensionsColumn1.set_expand(True)
+    openglESExtensionColumnView.append_column(openglESExtensionsColumn1)
+
+
+    openglESExtensionsSelection = Gtk.SingleSelection()
+    opengl_es_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+    openglESExtensionsSelection.set_model(opengl_es_extension_list)
+    openglESExtensionColumnView.set_model(openglESExtensionsSelection)
 
     opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
     opengl_es_extension_box = Gtk.Box()
@@ -445,7 +520,7 @@ def OpenGL(tab):
     grid_opengl_es_extension = Gtk.Grid()
     opengl_es_extension_box.append(grid_opengl_es_extension)
 
-    setColumns(tree_opengl_es_extension,Title,const.MWIDTH,0.0)
+ #   setColumns(tree_opengl_es_extension,Title,const.MWIDTH,0.0)
 
     with open(Filenames.opengl_vendor_es_extension_file,"w") as file:
         fetch_vendor_es_extension_process = subprocess.Popen(Filenames.fetch_opengl_es_vendor_extensions_command,shell=True,stdout=file,universal_newlines=True)
@@ -456,7 +531,7 @@ def OpenGL(tab):
     frame_search_es =Gtk.Frame()
     entry_es = Gtk.SearchEntry()
     entry_es.set_property("placeholder-text","Type here to filter extensions.....")
-    entry_es.connect("search-changed",refresh_filter,opengl_es_extension_list_filter)
+#    entry_es.connect("search-changed",refresh_filter,opengl_es_extension_list_filter)
     entry_es.grab_focus()
     frame_search_es.set_child(entry_es)
 
@@ -467,11 +542,11 @@ def OpenGL(tab):
     for i in range(len(Vendor_ES)):
         vendor_es_list.append(Vendor_ES[i])
 
-    radcall2(vendor_dropdown_es,0,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,tree_opengl_es_extension,opengl_es_extension_list_filter)
-    vendor_dropdown_es.connect("notify::selected-item", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,tree_opengl_es_extension,opengl_es_extension_list_filter)
+    radcall2(vendor_dropdown_es,0,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
+    vendor_dropdown_es.connect("notify::selected-item", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
     grid_opengl_es_extension.attach(vendor_dropdown_es,0,0,1,1)
     grid_opengl_es_extension.attach_next_to(frame_search_es,vendor_dropdown_es,Gtk.PositionType.LEFT,150,1)
-    opengl_es_extension_scrollbar = create_scrollbar(tree_opengl_es_extension)
+    opengl_es_extension_scrollbar = create_scrollbar(openglESExtensionColumnView)
     grid_opengl_es_extension.attach_next_to(opengl_es_extension_scrollbar,frame_search_es,Gtk.PositionType.BOTTOM,151,1)
  #   opengl_extension_box.append(opengl_es_extension_scrollbar)
 
@@ -479,13 +554,31 @@ def OpenGL(tab):
     #------------------------------------- Creating EGL Extension -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     if es2_infoSupported():
+        eglExtensionColumnView = Gtk.ColumnView()
+        eglExtensionColumnView.props.show_row_separators = True
+        eglExtensionColumnView.props.single_click_activate = False
+        eglExtensionColumnView.props.show_column_separators = True
+        factoryEglExtensionLhs = Gtk.SignalListItemFactory()
+        factoryEglExtensionLhs.connect("setup", setup)
+        factoryEglExtensionLhs.connect("bind", bind_column1)
 
-        egl_extension_list = Gtk.ListStore(str,str)
-        egl_extension_list_filter = egl_extension_list.filter_new()
-        tree_egl_extension = Gtk.TreeView.new_with_model(egl_extension_list_filter)
-        tree_egl_extension.set_property("enable-grid-lines", 1)
-        tree_egl_extension.set_headers_visible(False)
-        egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
+        eglExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
+        eglExtensionsColumn1.set_factory(factoryEglExtensionLhs)
+        eglExtensionsColumn1.set_expand(True)
+        eglExtensionColumnView.append_column(eglExtensionsColumn1)
+
+
+        eglExtensionsSelection = Gtk.SingleSelection()
+        egl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+        eglExtensionsSelection.set_model(egl_extension_list)
+        eglExtensionColumnView.set_model(eglExtensionsSelection)
+
+    #    egl_extension_list = Gtk.ListStore(str,str)
+    #    egl_extension_list_filter = egl_extension_list.filter_new()
+    #    tree_egl_extension = Gtk.TreeView.new_with_model(egl_extension_list_filter)
+     #   tree_egl_extension.set_property("enable-grid-lines", 1)
+     #   tree_egl_extension.set_headers_visible(False)
+     #   egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
 
         egl_extension_logo = fetchImageFromUrl(const.EGL_PNG,200,50,False)
         egl_extension_box = Gtk.Box()
@@ -496,7 +589,7 @@ def OpenGL(tab):
         grid_egl_extension = Gtk.Grid()
         egl_extension_box.append(grid_egl_extension)
 
-        setColumns(tree_egl_extension,Title,const.MWIDTH,0.0)
+     #   setColumns(tree_egl_extension,Title,const.MWIDTH,0.0)
 
         with open(Filenames.egl_vendor_extension_file,"w") as file:
             fetch_vendor_egl_extension_process = subprocess.Popen(Filenames.fetch_egl_vendor_extension_command,shell=True,stdout=file,universal_newlines=True)
@@ -515,15 +608,15 @@ def OpenGL(tab):
         frame_search_egl =Gtk.Frame()
         entry_egl = Gtk.SearchEntry()
         entry_egl.set_property("placeholder-text","Type here to filter extensions.....")
-        entry_egl.connect("search-changed",refresh_filter,egl_extension_list_filter)
+    #    entry_egl.connect("search-changed",refresh_filter,egl_extension_list_filter)
         entry_egl.grab_focus()
         frame_search_egl.set_child(entry_egl)
 
-        radcall2(vendor_dropdown_egl,0,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,tree_egl_extension,egl_extension_list_filter)
-        vendor_dropdown_egl.connect('notify::selected-item', radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,tree_egl_extension,egl_extension_list_filter)
+        radcall2(vendor_dropdown_egl,0,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
+        vendor_dropdown_egl.connect('notify::selected-item', radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
         grid_egl_extension.attach(vendor_dropdown_egl,0,0,2,1)
         grid_egl_extension.attach_next_to(frame_search_egl,vendor_dropdown_egl,Gtk.PositionType.LEFT,149,1)
-        egl_extension_scrollbar = create_scrollbar(tree_egl_extension)
+        egl_extension_scrollbar = create_scrollbar(eglExtensionColumnView)
         grid_egl_extension.attach_next_to(egl_extension_scrollbar,frame_search_egl,Gtk.PositionType.BOTTOM,151,1)
 
 

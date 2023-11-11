@@ -1,7 +1,11 @@
 import sys
 import gi
 gi.require_version('Gtk','4.0')
-from gi.repository import Gtk,GdkPixbuf
+gi.require_version(namespace='Adw', version='1')
+
+from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
+
+Adw.init()
 
 import const
 import Filenames
@@ -24,6 +28,38 @@ InstanceTitle = ["Extensions", "Extension Revision"]
 LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
 SurfaceTitle = ["Surface Capabilities", "Value"]
 GroupsTitle = ["Device Groups","Value"]
+
+class DataObject(GObject.GObject):
+    def __init__(self, column1: str,column2: str):
+        super(DataObject, self).__init__()
+        self.column1 = column1
+        self.column2 = column2
+
+def setup(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    label.props.xalign = 0.0
+    item.set_child(label)
+
+
+def bind_column1(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    obj = item.get_item()
+    label.set_text(obj.column1)
+
+def bind_column2(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    obj = item.get_item()
+    if obj.column2 == "true":
+        label.add_css_class(css_class='success')
+        label.set_label(obj.column2)
+    elif obj.column2 == "false":
+        label.add_css_class(css_class='error')
+        label.set_label(obj.column2)
+    else:
+        label.set_label(obj.column2)
 
 def Vulkan(tab2):
     # Creating Tabs for different Features
@@ -227,16 +263,16 @@ def Vulkan(tab2):
             feature =' '
         elif "Show All Device Features" in feature:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_all_command)
-            Featurecolumn1.set_title(FeaturesTitle[0])
+            featureColumn1.set_title(FeaturesTitle[0])
         else:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_selected_command)
-            Featurecolumn1.set_title(feature)
+            featureColumn1.set_title(feature)
         createMainFile(Filenames.vulkan_device_features_lhs_file,fetch_device_features_selected_lhs_command)
 
         value = []
         fgColor = []
-        FeaturesTab_Store.clear()
-        TreeFeatures.set_model(FeaturesTab_Store_filter)
+        FeatureTab_Store.remove_all()
+    #    TreeFeatures.set_model(FeaturesTab_Store_filter)
         FeaturesLHS = copyContentsFromFile(Filenames.vulkan_device_features_lhs_file,)
         count = 0
         for i,LHS in enumerate(FeaturesLHS):
@@ -254,7 +290,7 @@ def Vulkan(tab2):
                             fgColor.append(const.COLOR2)
                             break                        
                 background_color = setBackgroundColor(i)
-                FeaturesTab_Store.append(["  " +text.strip('\n'), value[i].strip('\n'), background_color, fgColor[i]])
+                FeatureTab_Store.append(DataObject("  " +text.strip('\n'), value[i].strip('\n'), ))
 
     def searchLimitsTree(model, iter, Tree):
         search_query = limitsSearchEntry.get_text().lower()
@@ -275,12 +311,12 @@ def Vulkan(tab2):
 
         vulkan_device_extensions_rhs = fetchContentsFromCommand(fetch_device_extensions_rhs_command)
 
-        ExtensionTab_Store.clear()
-        TreeExtension.set_model(ExtensionTab_store_filter)
+        ExtensionTab_Store.remove_all()
+        extensionColumnView.set_model(extensionSelection)
 
         for i in range(len(vulkan_device_extension_lhs)):
             background_color = setBackgroundColor(i)
-            ExtensionTab_Store.append([vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i],background_color])
+            ExtensionTab_Store.append(DataObject(vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i]))
 
         label = "Extensions (%d)" %len(vulkan_device_extensions_rhs)
         notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
@@ -1094,59 +1130,115 @@ def Vulkan(tab2):
     FeaturesGrid = createSubTab(FeatureTab, notebook, "Features")
     #   FeaturesGrid.set_row_spacing(3)
 
-    FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
-    FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
-    TreeFeatures = Gtk.TreeView.new_with_model(FeaturesTab_Store_filter)
-    TreeFeatures.set_property("enable-grid-lines", 1)
-    TreeFeatures.set_enable_search(True)
+    featuresColumnView = Gtk.ColumnView()
+    featuresColumnView.props.show_row_separators = True
+    featuresColumnView.props.single_click_activate = False
+    featuresColumnView.props.show_column_separators = True
+    factoryFeaturesLhs = Gtk.SignalListItemFactory()
+    factoryFeaturesLhs.connect("setup", setup)
+    factoryFeaturesLhs.connect("bind", bind_column1)
+    factoryFeaturesRhs = Gtk.SignalListItemFactory()
+    factoryFeaturesRhs.connect("setup", setup)
+    factoryFeaturesRhs.connect("bind", bind_column2)
+
+    featureColumn1 = Gtk.ColumnViewColumn.new("Device Features")
+    featureColumn1.set_factory(factoryFeaturesLhs)
+    featureColumn1.set_resizable(True)
+    featuresColumnView.append_column(featureColumn1)
+
+    featureColumn2 = Gtk.ColumnViewColumn.new("Value")
+    featureColumn2.set_factory(factoryFeaturesRhs)
+    featureColumn2.set_expand(True)
+    featuresColumnView.append_column(featureColumn2)
+
+
+    featureSelection = Gtk.SingleSelection()
+    FeatureTab_Store = Gio.ListStore.new(DataObject)
+    featureSelection.set_model(FeatureTab_Store)
+    featuresColumnView.set_model(featureSelection)
+
+ #   FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
+ #   FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
+ #   TreeFeatures = Gtk.TreeView.new_with_model(FeaturesTab_Store_filter)
+ #   TreeFeatures.set_property("enable-grid-lines", 1)
+ #   TreeFeatures.set_enable_search(True)
 #    for i, column_title in enumerate(FeaturesTitle):
-    Featurerenderer1 = Gtk.CellRendererText()
-    Featurecolumn1 = Gtk.TreeViewColumn(FeaturesTitle[0], Featurerenderer1, text=0)
-    Featurecolumn1.set_sort_column_id(i)
-    Featurecolumn1.set_resizable(True)
-    Featurecolumn1.set_reorderable(True)
-    Featurecolumn1.add_attribute(Featurerenderer1,"background",2)
-    TreeFeatures.append_column(Featurecolumn1)
-    Featurerenderer2 = Gtk.CellRendererText()
-    Featurecolumn2 =Gtk.TreeViewColumn(FeaturesTitle[1],Featurerenderer2,text=1)
-    Featurecolumn2.add_attribute(Featurerenderer2, "foreground", 3)
-    Featurecolumn2.add_attribute(Featurerenderer2, "background", 2)
-    Featurecolumn2.set_property("min-width", const.MWIDTH)
-    TreeFeatures.set_property("can-focus", False)
-    TreeFeatures.append_column(Featurecolumn2)
+ #   Featurerenderer1 = Gtk.CellRendererText()
+ #   Featurecolumn1 = Gtk.TreeViewColumn(FeaturesTitle[0], Featurerenderer1, text=0)
+ #   Featurecolumn1.set_sort_column_id(i)
+ #   Featurecolumn1.set_resizable(True)
+ #   Featurecolumn1.set_reorderable(True)
+ #   Featurecolumn1.add_attribute(Featurerenderer1,"background",2)
+ #   TreeFeatures.append_column(Featurecolumn1)
+ #   Featurerenderer2 = Gtk.CellRendererText()
+ #   Featurecolumn2 =Gtk.TreeViewColumn(FeaturesTitle[1],Featurerenderer2,text=1)
+ #   Featurecolumn2.add_attribute(Featurerenderer2, "foreground", 3)
+ #   Featurecolumn2.add_attribute(Featurerenderer2, "background", 2)
+ #   Featurecolumn2.set_property("min-width", const.MWIDTH)
+ #   TreeFeatures.set_property("can-focus", False)
+  #  TreeFeatures.append_column(Featurecolumn2)
     
 
  #   featureList  = Gtk.StringList()
     featureDropdown = Gtk.DropDown()
  #   featureDropdown.set_model(featureList)
     featureDropdown.connect('notify::selected-item',selectFeature)
-    featureSearchEntry = createSearchEntry(FeaturesTab_Store_filter)
+    featureSearchEntry = Gtk.SearchEntry()
     FeaturesGrid.attach(featureSearchEntry,0,0,12,1)
     setMargin(featureDropdown,2,1,2)
-    FeatureScrollbar = create_scrollbar(TreeFeatures)
+    FeatureScrollbar = create_scrollbar(featuresColumnView)
     FeaturesGrid.attach_next_to(FeatureScrollbar, featureSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
     FeaturesGrid.attach_next_to(featureDropdown,featureSearchEntry,Gtk.PositionType.RIGHT,3,1)
 
-    FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
+#    FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
 
     ExtensionTab = Gtk.Box(spacing=10)
     ExtensionGrid = createSubTab(ExtensionTab, notebook, "Extensions")
     ExtensionGrid.set_row_spacing(2)
 
-    ExtensionTab_Store = Gtk.ListStore(str, str, str)
-    ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
-    TreeExtension = Gtk.TreeView.new_with_model(ExtensionTab_store_filter)
-    TreeExtension.set_property("enable-grid-lines", 1)
+    extensionColumnView = Gtk.ColumnView()
+    extensionColumnView.props.show_row_separators = True
+    extensionColumnView.props.single_click_activate = False
+    extensionColumnView.props.show_column_separators = True
+    factory = Gtk.SignalListItemFactory()
+    factory.connect("setup", setup)
+    factory.connect("bind", bind_column1)
+    factory2 = Gtk.SignalListItemFactory()
+    factory2.connect("setup", setup)
+    factory2.connect("bind", bind_column2)
+    scrollable_extension = create_scrollbar(extensionColumnView)
+    ExtensionTab.append(ExtensionGrid)
 
-    setColumns(TreeExtension, ExtensionsTitle, const.MWIDTH, 0.0)
+    deviceExtensionColumn = Gtk.ColumnViewColumn.new("Device Extensions")
+    deviceExtensionColumn.set_factory(factory)
+    deviceExtensionColumn.set_resizable(True)
+    extensionColumnView.append_column(deviceExtensionColumn)
+
+    extensionRevisionColumn = Gtk.ColumnViewColumn.new("Extension Revision")
+    extensionRevisionColumn.set_factory(factory2)
+    extensionRevisionColumn.set_expand(True)
+    extensionColumnView.append_column(extensionRevisionColumn)
+
+    extensionSelection = Gtk.SingleSelection()
+    ExtensionTab_Store = Gio.ListStore.new(DataObject)
+    extensionSelection.set_model(ExtensionTab_Store)
+    extensionColumnView.set_model(extensionSelection)
+#    ExtensionTab_Store = Gtk.ListStore(str, str, str)
+ #   ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
+ #   TreeExtension = Gtk.TreeView.new_with_model(ExtensionTab_store_filter)
+ #   TreeExtension.set_property("enable-grid-lines", 1)
+
+ #   setColumns(TreeExtension, ExtensionsTitle, const.MWIDTH, 0.0)
 
     extensionFrameSearch = Gtk.Frame()
-    extensionSearchEntry = createSearchEntry(ExtensionTab_store_filter)
+    extensionSearchEntry = Gtk.SearchEntry()
     extensionFrameSearch.set_child(extensionSearchEntry)
+    extensionSearchEntry.set_property("placeholder_text","Type here to filter.....")
+#    extensionSearchEntry.connect("search-changed", ExtensionTab_Store.find_with_equal_func())
     ExtensionGrid.attach(extensionFrameSearch,0,0,1,1)
-    ExtensionScrollbar = create_scrollbar(TreeExtension)
-    ExtensionGrid.attach_next_to(ExtensionScrollbar, extensionFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
-    ExtensionTab_store_filter.set_visible_func(searchExtensionTree, data=TreeExtension)
+ #   ExtensionScrollbar = create_scrollbar(TreeExtension)
+    ExtensionGrid.attach_next_to(scrollable_extension, extensionFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
+  #  ExtensionTab_store_filter.set_visible_func(searchExtensionTree, data=TreeExtension)
 
     # ------------Creating the Formats Tab --------------------------------------------------
 
