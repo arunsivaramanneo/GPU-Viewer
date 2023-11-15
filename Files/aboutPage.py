@@ -24,6 +24,7 @@ class DataObject(GObject.GObject):
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
+    label.props.use_markup = True
     label.props.xalign = 0.0
     item.set_child(label)
 

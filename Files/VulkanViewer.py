@@ -35,6 +35,55 @@ class DataObject(GObject.GObject):
         self.column1 = column1
         self.column2 = column2
 
+class ExpandDataObject(GObject.GObject):
+    def __init__(self, txt: str, txt2: str, children=None):
+        super(ExpandDataObject, self).__init__()
+        self.data = txt
+        self.data2 = txt2
+        self.children = children
+
+def add_tree_node(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(DataObject)
+        for child in item.children:
+            store.append(child)
+        return store
+    
+def setup_expander(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    expander = Gtk.TreeExpander.new()
+    expander.set_child(label)
+    item.set_child(expander)
+
+def bind_expander(widget, item):
+    """bind data from the store object to the widget"""
+    expander = item.get_child()
+    label = expander.get_child()
+    row = item.get_item()
+    expander.set_list_row(row)
+    obj = row.get_item()
+    label.set_label(obj.data)
+
+def bind1(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    label.set_label(obj.data2)
+
+
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
@@ -53,13 +102,14 @@ def bind_column2(widget, item):
     label = item.get_child()
     obj = item.get_item()
     if obj.column2 == "true":
-        label.add_css_class(css_class='success')
+        label.add_css_class(css_class='true')
         label.set_label(obj.column2)
     elif obj.column2 == "false":
-        label.add_css_class(css_class='error')
+        label.add_css_class(css_class='false')
         label.set_label(obj.column2)
     else:
         label.set_label(obj.column2)
+
 
 def Vulkan(tab2):
     # Creating Tabs for different Features
@@ -216,25 +266,26 @@ def Vulkan(tab2):
 
         vulkan_device_limits_rhs = fetchContentsFromCommand(fetch_vulkan_Limits_ouput_rhs_command)
 
-        LimitsTab_Store.clear()
-        TreeLimits.set_model(LimitsTab_Store_filter)
-
-
+        LimitsTab_Store.remove_all()
+    #    TreeLimits.set_model(LimitsTab_Store_filter)
+   
+    #    v1 = [ExpandDataObject("entrada 01", "other")]
+    #    v2 = [ExpandDataObject("entrada 02","", v1)]
+    #    LimitsTab_Store.append(ExpandDataObject("entrada 03", "else", v2)) 
         with open(Filenames.vulkan_device_limits_file, "r") as file1:
             j = 0
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
+                text = vulkan_device_limits_lhs[i].strip('\t')
                 if '=' in line:
                     text = vulkan_device_limits_lhs[i].strip('\t')
-                    iter = LimitsTab_Store.append(None,[(text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'), background_color])
+                    iter1 = LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n')))
                     j = j + 1
-                else:
-                    text = vulkan_device_limits_lhs[i].strip('\t')
-                    if "\t" in line :
-                        iter2 = LimitsTab_Store.append(iter,[text.strip('\n')," ", background_color])
-                    else:
-                        LimitsTab_Store.append(iter2,[text.strip('\n')," ", background_color])
-            TreeLimits.expand_all()
+                    continue
+                if "\t" in line:
+                    LimitsTab_Store.append(ExpandDataObject(text.strip('\n')," ",iter1))
+                
+     #       TreeLimits.expand_all()
 
     def Features(GPUname):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
@@ -717,11 +768,11 @@ def Vulkan(tab2):
 
         vulkan_device_instance_rhs = fetchContentsFromCommand(fetch_vulkan_device_instances_rhs_command)
 
-        InstanceTab_Store.clear()
+        InstanceTab_Store.remove_all()
 
         for i in range(len(vulkan_device_instance_lhs)):
             background_color = setBackgroundColor(i)
-            InstanceTab_Store.append([vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i],background_color])
+            InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
 
         label = "Instance Extensions (%d)" %len(vulkan_device_instance_lhs)
 #        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
@@ -962,7 +1013,7 @@ def Vulkan(tab2):
 
         TreeGroups.expand_all()
 
-    def searchFeaturesTree(model, iter, Tree):
+    def searchFeaturesTree():
         search_query = featureSearchEntry.get_text().lower()
         for i in range(Tree.get_n_columns()):
             value = model.get_value(iter, i).lower()
@@ -971,10 +1022,9 @@ def Vulkan(tab2):
 
     def searchExtensionTree(model, iter, Tree):
         search_query = extensionSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
+        print(search_query)
+        if ExtensionTab_Store.find_with_equal_func(search_query) == True:
+            return True
 
     def searchInstanceExtTree(model, iter, Tree):
         search_query = instanceSearchEntry.get_text().lower()
@@ -1068,23 +1118,53 @@ def Vulkan(tab2):
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
     LimitsGrid.set_row_spacing(3)
 
-    LimitsTab_Store = Gtk.TreeStore(str, str, str)
-    LimitsTab_Store_filter = LimitsTab_Store.filter_new()
-    TreeLimits = Gtk.TreeView.new_with_model(LimitsTab_Store_filter)
- #   TreeLimits.set_property("enable-tree-lines", True)
-    TreeLimits.set_property("enable-grid-lines", 1)
-    TreeLimits.set_enable_search(True)
+    limitsColumnView = Gtk.ColumnView()
+    limitsColumnView.props.show_row_separators = True
+    limitsColumnView.props.show_column_separators = True
 
-    setColumns(TreeLimits, LimitsTitle, const.MWIDTH, 0.0)
+    factory_limits = Gtk.SignalListItemFactory()
+    factory_limits.connect("setup",setup_expander)
+    factory_limits.connect("bind",bind_expander)
+
+    factory_limits_value = Gtk.SignalListItemFactory()
+    factory_limits_value.connect("setup",setup)
+    factory_limits_value.connect("bind",bind1)
+
+    limitSelection = Gtk.SingleSelection()
+    LimitsTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    limitModel = Gtk.TreeListModel.new(LimitsTab_Store,False,False,add_tree_node)
+    limitSelection.set_model(limitModel)
+
+    limitsColumnView.set_model(limitSelection)
+
+    limitColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_limits)
+    limitColumnLhs.set_resizable(True)
+    limitColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_limits_value)
+    limitColumnRhs.set_expand(True)
+
+    limitsColumnView.append_column(limitColumnLhs)
+    limitsColumnView.append_column(limitColumnRhs)
+
+
+ #   LimitsTab_Store = Gtk.TreeStore(str, str, str)
+ #   LimitsTab_Store_filter = LimitsTab_Store.filter_new()
+ #   TreeLimits = Gtk.TreeView.new_with_model(LimitsTab_Store_filter)
+ #   TreeLimits.set_property("enable-tree-lines", True)
+#    TreeLimits.set_property("enable-grid-lines", 1)
+#    TreeLimits.set_enable_search(True)
+
+#    setColumns(TreeLimits, LimitsTitle, const.MWIDTH, 0.0)
 
     limitsFrameSearch = Gtk.Frame()
-    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
+    limitsSearchEntry = Gtk.SearchEntry()
+#    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
     limitsFrameSearch.set_child(limitsSearchEntry)
     LimitsGrid.attach(limitsFrameSearch,0,0,1,1)
-    LimitsScrollbar = create_scrollbar(TreeLimits)
+    LimitsScrollbar = create_scrollbar(limitsColumnView)
     LimitsGrid.attach_next_to(LimitsScrollbar, limitsFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
 
-    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
+#    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
 
 
     propertiesTab = Gtk.Box(spacing=10)
@@ -1234,7 +1314,7 @@ def Vulkan(tab2):
     extensionSearchEntry = Gtk.SearchEntry()
     extensionFrameSearch.set_child(extensionSearchEntry)
     extensionSearchEntry.set_property("placeholder_text","Type here to filter.....")
-#    extensionSearchEntry.connect("search-changed", ExtensionTab_Store.find_with_equal_func())
+    extensionSearchEntry.connect("search-changed", searchExtensionTree)
     ExtensionGrid.attach(extensionFrameSearch,0,0,1,1)
  #   ExtensionScrollbar = create_scrollbar(TreeExtension)
     ExtensionGrid.attach_next_to(scrollable_extension, extensionFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
@@ -1373,22 +1453,52 @@ def Vulkan(tab2):
     InstanceExtGrid = createSubTab(InstanceExtTab, notebook, "Instance Extensions")
     InstanceExtGrid.set_row_spacing(3)
 
-    InstanceTab_Store = Gtk.ListStore(str, str, str)
-    InstanceTab_Store_filter = InstanceTab_Store.filter_new()
-    TreeInstance = Gtk.TreeView.new_with_model(InstanceTab_Store_filter)
-    TreeInstance.set_property("enable-grid-lines", 1)
-    TreeInstance.set_enable_search(True)
 
-    setColumns(TreeInstance, InstanceTitle, 300, 0.0)
+    instanceExtensionColumnView = Gtk.ColumnView()
+    instanceExtensionColumnView.props.show_row_separators = True
+    instanceExtensionColumnView.props.single_click_activate = False
+    instanceExtensionColumnView.props.show_column_separators = True
+    factory = Gtk.SignalListItemFactory()
+    factory.connect("setup", setup)
+    factory.connect("bind", bind_column1)
+    factory2 = Gtk.SignalListItemFactory()
+    factory2.connect("setup", setup)
+    factory2.connect("bind", bind_column2)
+ #   scrollable_instanceExtension = create_scrollbar(instanceExtensionColumnView)
+#    ExtensionTab.append(ExtensionGrid)
+
+    instanceExtensionColumn = Gtk.ColumnViewColumn.new("Instance Extensions")
+    instanceExtensionColumn.set_factory(factory)
+    instanceExtensionColumn.set_resizable(True)
+    instanceExtensionColumnView.append_column(instanceExtensionColumn)
+
+    instanceExtensionRevisionColumn = Gtk.ColumnViewColumn.new("Extension Revision")
+    instanceExtensionRevisionColumn.set_factory(factory2)
+    instanceExtensionRevisionColumn.set_expand(True)
+    instanceExtensionColumnView.append_column(instanceExtensionRevisionColumn)
+
+    instanceExtensionSelection = Gtk.SingleSelection()
+    InstanceTab_Store = Gio.ListStore.new(DataObject)
+    instanceExtensionSelection.set_model(InstanceTab_Store)
+    instanceExtensionColumnView.set_model(instanceExtensionSelection)
+
+ #   InstanceTab_Store = Gtk.ListStore(str, str, str)
+#    InstanceTab_Store_filter = InstanceTab_Store.filter_new()
+#    TreeInstance = Gtk.TreeView.new_with_model(InstanceTab_Store_filter)
+ #   TreeInstance.set_property("enable-grid-lines", 1)
+#    TreeInstance.set_enable_search(True)
+
+#    setColumns(TreeInstance, InstanceTitle, 300, 0.0)
 
     instanceSearchFrame = Gtk.Frame()
-    instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
+    instanceSearchEntry = Gtk.SearchEntry()
+ #   instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
     instanceSearchFrame.set_child(instanceSearchEntry)
     InstanceExtGrid.attach(instanceSearchFrame,0,0,1,1)
-    InstanceScrollbar = create_scrollbar(TreeInstance)
+    InstanceScrollbar = create_scrollbar(instanceExtensionColumnView)
     InstanceExtGrid.attach_next_to(InstanceScrollbar, instanceSearchFrame, Gtk.PositionType.BOTTOM, 1, 1)
 
-    InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree, data=TreeInstance)
+#    InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree, data=TreeInstance)
 
     InstanceLayersTab = Gtk.Box(spacing=10)
     InstanceLayersGrid = createSubTab(InstanceLayersTab, notebook, "Instance Layers")
