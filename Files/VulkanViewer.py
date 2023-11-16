@@ -55,7 +55,7 @@ def add_tree_node(item):
             
         if not item.children:
             return None
-        store = Gio.ListStore.new(DataObject)
+        store = Gio.ListStore.new(ExpandDataObject)
         for child in item.children:
             store.append(child)
         return store
@@ -74,6 +74,7 @@ def bind_expander(widget, item):
     row = item.get_item()
     expander.set_list_row(row)
     obj = row.get_item()
+ #   print(obj.data)
     label.set_label(obj.data)
 
 def bind1(widget, item):
@@ -81,7 +82,14 @@ def bind1(widget, item):
     label = item.get_child()
     row = item.get_item()
     obj = row.get_item()
-    label.set_label(obj.data2)
+    if "true" in obj.data2: 
+        label.add_css_class(css_class='true')
+        label.set_label(obj.data2)
+    elif "false" in obj.data2:
+        label.add_css_class(css_class='false')
+        label.set_label(obj.data2)
+    else:
+        label.set_label(obj.data2)
 
 
 def setup(widget, item):
@@ -101,10 +109,10 @@ def bind_column2(widget, item):
     """bind data from the store object to the widget"""
     label = item.get_child()
     obj = item.get_item()
-    if obj.column2 == "true":
+    if "true" in obj.column2:
         label.add_css_class(css_class='true')
         label.set_label(obj.column2)
-    elif obj.column2 == "false":
+    elif "false" in obj.column2:
         label.add_css_class(css_class='false')
         label.set_label(obj.column2)
     else:
@@ -277,13 +285,15 @@ def Vulkan(tab2):
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 text = vulkan_device_limits_lhs[i].strip('\t')
-                if '=' in line:
+                iter = None
+                if "\t\t" in line:
+                    iter = [ExpandDataObject(text.strip('\n')," ")]
+                elif '=' in line:
                     text = vulkan_device_limits_lhs[i].strip('\t')
-                    iter1 = LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n')))
+                    LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'),iter))
                     j = j + 1
                     continue
-                if "\t" in line:
-                    LimitsTab_Store.append(ExpandDataObject(text.strip('\n')," ",iter1))
+                LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), " ",iter))
                 
      #       TreeLimits.expand_all()
 
@@ -1013,25 +1023,21 @@ def Vulkan(tab2):
 
         TreeGroups.expand_all()
 
-    def searchFeaturesTree():
-        search_query = featureSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
 
-    def searchExtensionTree(model, iter, Tree):
-        search_query = extensionSearchEntry.get_text().lower()
-        print(search_query)
-        if ExtensionTab_Store.find_with_equal_func(search_query) == True:
-            return True
+    def _on_search_method_changed(search_entry,filterColumn):
+        filterColumn.changed(Gtk.FilterChange.DIFFERENT)
 
-    def searchInstanceExtTree(model, iter, Tree):
-        search_query = instanceSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
+    def _do_filter_extension_view(item, filter_list_model):
+        search_text_widget = extensionSearchEntry.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+    
+    def _do_filter_feature_view(item, filter_list_model):
+        search_text_widget = featureSearchEntry.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
+    def _do_filter_instances_view(item, filter_list_model):
+        search_text_widget = instanceSearchEntry.get_text()
+        return search_text_widget.upper() in item.column1.upper()
 
     def searchFormatsTree(model, iter, Tree):
         search_query = formatSearchEntry.get_text().lower()
@@ -1234,7 +1240,10 @@ def Vulkan(tab2):
 
     featureSelection = Gtk.SingleSelection()
     FeatureTab_Store = Gio.ListStore.new(DataObject)
-    featureSelection.set_model(FeatureTab_Store)
+    filterSortFeatureListStore = Gtk.FilterListModel(model=FeatureTab_Store)
+    filter_features = Gtk.CustomFilter.new(_do_filter_feature_view, filterSortFeatureListStore)
+    filterSortFeatureListStore.set_filter(filter_features)
+    featureSelection.set_model(filterSortFeatureListStore)
     featuresColumnView.set_model(featureSelection)
 
  #   FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
@@ -1264,6 +1273,8 @@ def Vulkan(tab2):
  #   featureDropdown.set_model(featureList)
     featureDropdown.connect('notify::selected-item',selectFeature)
     featureSearchEntry = Gtk.SearchEntry()
+    featureSearchEntry.set_property("placeholder_text","Type here to filter.....")
+    featureSearchEntry.connect("search-changed",_on_search_method_changed,filter_features)
     FeaturesGrid.attach(featureSearchEntry,0,0,12,1)
     setMargin(featureDropdown,2,1,2)
     FeatureScrollbar = create_scrollbar(featuresColumnView)
@@ -1301,8 +1312,12 @@ def Vulkan(tab2):
 
     extensionSelection = Gtk.SingleSelection()
     ExtensionTab_Store = Gio.ListStore.new(DataObject)
-    extensionSelection.set_model(ExtensionTab_Store)
+    filterSortExtensionListStore = Gtk.FilterListModel(model=ExtensionTab_Store)
+    filter_extensions = Gtk.CustomFilter.new(_do_filter_extension_view, filterSortExtensionListStore)
+    filterSortExtensionListStore.set_filter(filter_extensions)
+    extensionSelection.set_model(filterSortExtensionListStore)
     extensionColumnView.set_model(extensionSelection)
+
 #    ExtensionTab_Store = Gtk.ListStore(str, str, str)
  #   ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
  #   TreeExtension = Gtk.TreeView.new_with_model(ExtensionTab_store_filter)
@@ -1314,7 +1329,7 @@ def Vulkan(tab2):
     extensionSearchEntry = Gtk.SearchEntry()
     extensionFrameSearch.set_child(extensionSearchEntry)
     extensionSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    extensionSearchEntry.connect("search-changed", searchExtensionTree)
+    extensionSearchEntry.connect("search-changed", _on_search_method_changed,filter_extensions)
     ExtensionGrid.attach(extensionFrameSearch,0,0,1,1)
  #   ExtensionScrollbar = create_scrollbar(TreeExtension)
     ExtensionGrid.attach_next_to(scrollable_extension, extensionFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
@@ -1479,7 +1494,10 @@ def Vulkan(tab2):
 
     instanceExtensionSelection = Gtk.SingleSelection()
     InstanceTab_Store = Gio.ListStore.new(DataObject)
-    instanceExtensionSelection.set_model(InstanceTab_Store)
+    filterSortInstancesListStore = Gtk.FilterListModel(model=InstanceTab_Store)
+    filter_instances = Gtk.CustomFilter.new(_do_filter_instances_view, filterSortInstancesListStore)
+    filterSortInstancesListStore.set_filter(filter_instances)
+    instanceExtensionSelection.set_model(filterSortInstancesListStore)
     instanceExtensionColumnView.set_model(instanceExtensionSelection)
 
  #   InstanceTab_Store = Gtk.ListStore(str, str, str)
@@ -1492,6 +1510,8 @@ def Vulkan(tab2):
 
     instanceSearchFrame = Gtk.Frame()
     instanceSearchEntry = Gtk.SearchEntry()
+    instanceSearchEntry.set_property("placeholder_text","Type here to filter.....")
+    instanceSearchEntry.connect("search-changed",_on_search_method_changed,filter_instances)
  #   instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
     instanceSearchFrame.set_child(instanceSearchEntry)
     InstanceExtGrid.attach(instanceSearchFrame,0,0,1,1)

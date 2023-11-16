@@ -324,26 +324,22 @@ def OpenGL(tab):
 
 #----------------------------------Filter -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def searchTreeExtGL(model,iter,data=None):
-        search_query = entry_gl.get_text().lower()
-        for i in range(tree_opengl_extension.get_n_columns()):
-            value = model.get_value(iter,i).lower()
-            if search_query in value:
-                return True
 
-    def searchTreeExtES(model,iter,data=None):
-        search_query = entry_es.get_text().lower()
-        for i in range(tree_opengl_es_extension.get_n_columns()):
-            value = model.get_value(iter,i).lower()
-            if search_query in value:
-                return True
+    def _on_search_method_changed(search_entry,filterColumn):
+        filterColumn.changed(Gtk.FilterChange.DIFFERENT)
 
-    def searchTreeExtEGL(model,iter,data=None):
-        search_query = entry_egl.get_text().lower()
-        for i in range(tree_egl_extension.get_n_columns()):
-            value = model.get_value(iter,i).lower()
-            if search_query in value:
-                return True
+    def _do_filter_opengl_extension_view(item, filter_list_model):
+        search_text_widget = entry_gl.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
+    def _do_filter_opengl_es_extension_view(item, filter_list_model):
+        search_text_widget = entry_es.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
+    def _do_filter_egl_extension_view(item, filter_list_model):
+        search_text_widget = entry_egl.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
 # ------------------------------ Check es2_info Supported ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def es2_infoSupported():
@@ -453,13 +449,16 @@ def OpenGL(tab):
 
     openglExtensionsSelection = Gtk.SingleSelection()
     opengl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
-    openglExtensionsSelection.set_model(opengl_extension_list)
+    filterOpenglExtensionsListStore = Gtk.FilterListModel(model=opengl_extension_list)
+    filter_open_extensions = Gtk.CustomFilter.new(_do_filter_opengl_extension_view, filterOpenglExtensionsListStore)
+    filterOpenglExtensionsListStore.set_filter(filter_open_extensions)
+    openglExtensionsSelection.set_model(filterOpenglExtensionsListStore)
     openglExtensionColumnView.set_model(openglExtensionsSelection)
 
     frame_search_gl =Gtk.Frame()
     entry_gl = Gtk.SearchEntry()
     entry_gl.set_property("placeholder-text","Type here to filter extensions.....")
-#    entry_gl.connect("search-changed",refresh_filter,opengl_extension_list_filter)
+    entry_gl.connect("search-changed",_on_search_method_changed,filter_open_extensions)
     entry_gl.grab_focus()
     frame_search_gl.set_child(entry_gl)
 
@@ -508,7 +507,10 @@ def OpenGL(tab):
 
     openglESExtensionsSelection = Gtk.SingleSelection()
     opengl_es_extension_list = Gio.ListStore.new(ExtensionsDataObject)
-    openglESExtensionsSelection.set_model(opengl_es_extension_list)
+    filterOpenglESExtensionsListStore = Gtk.FilterListModel(model=opengl_es_extension_list)
+    filter_open_es_extensions = Gtk.CustomFilter.new(_do_filter_opengl_es_extension_view, filterOpenglESExtensionsListStore)
+    filterOpenglESExtensionsListStore.set_filter(filter_open_es_extensions)
+    openglESExtensionsSelection.set_model(filterOpenglESExtensionsListStore)
     openglESExtensionColumnView.set_model(openglESExtensionsSelection)
 
     opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
@@ -531,7 +533,7 @@ def OpenGL(tab):
     frame_search_es =Gtk.Frame()
     entry_es = Gtk.SearchEntry()
     entry_es.set_property("placeholder-text","Type here to filter extensions.....")
-#    entry_es.connect("search-changed",refresh_filter,opengl_es_extension_list_filter)
+    entry_es.connect("search-changed",_on_search_method_changed,filter_open_es_extensions)
     entry_es.grab_focus()
     frame_search_es.set_child(entry_es)
 
@@ -570,7 +572,10 @@ def OpenGL(tab):
 
         eglExtensionsSelection = Gtk.SingleSelection()
         egl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
-        eglExtensionsSelection.set_model(egl_extension_list)
+        filterEglExtensionsListStore = Gtk.FilterListModel(model=egl_extension_list)
+        filter_egl_extensions = Gtk.CustomFilter.new(_do_filter_egl_extension_view, filterEglExtensionsListStore)
+        filterEglExtensionsListStore.set_filter(filter_egl_extensions)
+        eglExtensionsSelection.set_model(filterEglExtensionsListStore)
         eglExtensionColumnView.set_model(eglExtensionsSelection)
 
     #    egl_extension_list = Gtk.ListStore(str,str)
@@ -608,7 +613,7 @@ def OpenGL(tab):
         frame_search_egl =Gtk.Frame()
         entry_egl = Gtk.SearchEntry()
         entry_egl.set_property("placeholder-text","Type here to filter extensions.....")
-    #    entry_egl.connect("search-changed",refresh_filter,egl_extension_list_filter)
+        entry_egl.connect("search-changed",_on_search_method_changed,filter_egl_extensions)
         entry_egl.grab_focus()
         frame_search_egl.set_child(entry_egl)
 
