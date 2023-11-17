@@ -1029,15 +1029,15 @@ def Vulkan(tab2):
 
     def _do_filter_extension_view(item, filter_list_model):
         search_text_widget = extensionSearchEntry.get_text()
-        return search_text_widget.upper() in item.column1.upper()
+        return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
     
     def _do_filter_feature_view(item, filter_list_model):
         search_text_widget = featureSearchEntry.get_text()
-        return search_text_widget.upper() in item.column1.upper()
+        return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
     def _do_filter_instances_view(item, filter_list_model):
         search_text_widget = instanceSearchEntry.get_text()
-        return search_text_widget.upper() in item.column1.upper()
+        return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
     def searchFormatsTree(model, iter, Tree):
         search_query = formatSearchEntry.get_text().lower()
