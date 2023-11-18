@@ -294,8 +294,10 @@ def Vulkan(tab2):
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
                             j = j + 1
                         else:
-                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
                             LimitsTab_Store.append(toprow)
+                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                            if i == len(vulkan_device_limits_lhs) - 1:
+                                LimitsTab_Store.append(toprow)
                             j = j + 1
                         iter = text
                         continue
@@ -704,22 +706,25 @@ def Vulkan(tab2):
                         continue
                     if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
                     #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                        print(iter)
                         childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
                         childrow.children.append(childchildrow)
                         toprow.children.append(childrow)
                         HeapTab_Store.append(toprow)
-                    #    iter = vulkan_memory_heaps_lhs[i]
+                        iter = vulkan_memory_heaps_lhs[i]
                         continue
                     if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
                     #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
                         childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], getDeviceSize(vulkan_memory_heaps_rhs[j]))
                         toprow.children.append(childrow)
                         j = j + 1
-                    #    iter = vulkan_memory_heaps_lhs[i]
+                        iter = vulkan_memory_heaps_lhs[i]
                         continue
                     else:
                     #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
                         childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                        iter = vulkan_memory_heaps_lhs[i]
+                        continue
                      #   toprow.children.append(childrow)
 
             #    toprow.children.append(childrow)
