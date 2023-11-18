@@ -36,11 +36,11 @@ class DataObject(GObject.GObject):
         self.column2 = column2
 
 class ExpandDataObject(GObject.GObject):
-    def __init__(self, txt: str, txt2: str, children=None):
+    def __init__(self, txt: str, txt2: str):
         super(ExpandDataObject, self).__init__()
         self.data = txt
         self.data2 = txt2
-        self.children = children
+        self.children = []
 
 def add_tree_node(item):
     if not (item):
@@ -64,6 +64,8 @@ def setup_expander(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
     expander = Gtk.TreeExpander.new()
+ #   expander.props.indent_for_icon = True
+ #   expander.props.indent_for_depth = True
     expander.set_child(label)
     item.set_child(expander)
 
@@ -281,19 +283,32 @@ def Vulkan(tab2):
     #    v2 = [ExpandDataObject("entrada 02","", v1)]
     #    LimitsTab_Store.append(ExpandDataObject("entrada 03", "else", v2)) 
         with open(Filenames.vulkan_device_limits_file, "r") as file1:
-            j = 0
+            j = 0; iter = None
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
                 text = vulkan_device_limits_lhs[i].strip('\t')
-                iter = None
-                if "\t\t" in line:
-                    iter = [ExpandDataObject(text.strip('\n')," ")]
-                elif '=' in line:
-                    text = vulkan_device_limits_lhs[i].strip('\t')
-                    LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'),iter))
-                    j = j + 1
+                if not (iter == text):
+                    if '=' in line and "\t\t" not in line:
+                        text = vulkan_device_limits_lhs[i].strip('\t')
+                        if iter == None:
+                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                            j = j + 1
+                        else:
+                            LimitsTab_Store.append(toprow)
+                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                            j = j + 1
+                        iter = text
+                        continue
+                #    iter = [ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'),iter2)]
+                #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                #    j = j + 1
+                if "\t\t" in line and "=" not in line:
+                 #   iter2 = [ExpandDataObject(text.strip('\n')," ",iter)]
+                    childrow = ExpandDataObject((text.strip('\n')).replace(' count',''), " ")
+                    toprow.children.append(childrow)
                     continue
-                LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), " ",iter))
+                LimitsTab_Store.append(toprow)
+             #   LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), " "))
                 
      #       TreeLimits.expand_all()
 
@@ -1039,6 +1054,10 @@ def Vulkan(tab2):
         search_text_widget = instanceSearchEntry.get_text()
         return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
+    def _do_filter_limits_view(item, filter_list_model):
+        search_text_widget = limitsSearchEntry.get_text()
+        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
     def searchFormatsTree(model, iter, Tree):
         search_query = formatSearchEntry.get_text().lower()
         for i in range(Tree.get_n_columns()):
@@ -1138,8 +1157,11 @@ def Vulkan(tab2):
 
     limitSelection = Gtk.SingleSelection()
     LimitsTab_Store = Gio.ListStore.new(ExpandDataObject)
+    filterSortLimitsStore = Gtk.FilterListModel(model=LimitsTab_Store)
+    filter_limits = Gtk.CustomFilter.new(_do_filter_limits_view, filterSortLimitsStore)
+    filterSortLimitsStore.set_filter(filter_limits)
 
-    limitModel = Gtk.TreeListModel.new(LimitsTab_Store,False,False,add_tree_node)
+    limitModel = Gtk.TreeListModel.new(filterSortLimitsStore,False,True,add_tree_node)
     limitSelection.set_model(limitModel)
 
     limitsColumnView.set_model(limitSelection)
@@ -1164,6 +1186,8 @@ def Vulkan(tab2):
 
     limitsFrameSearch = Gtk.Frame()
     limitsSearchEntry = Gtk.SearchEntry()
+    limitsSearchEntry.set_property("placeholder_text","Type here to filter.....")
+    limitsSearchEntry.connect("search-changed", _on_search_method_changed,filter_limits)
 #    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
     limitsFrameSearch.set_child(limitsSearchEntry)
     LimitsGrid.attach(limitsFrameSearch,0,0,1,1)
@@ -1219,7 +1243,7 @@ def Vulkan(tab2):
     featuresColumnView = Gtk.ColumnView()
     featuresColumnView.props.show_row_separators = True
     featuresColumnView.props.single_click_activate = False
-    featuresColumnView.props.show_column_separators = True
+    featuresColumnView.props.show_column_separators = False
     factoryFeaturesLhs = Gtk.SignalListItemFactory()
     factoryFeaturesLhs.connect("setup", setup)
     factoryFeaturesLhs.connect("bind", bind_column1)
@@ -1290,7 +1314,7 @@ def Vulkan(tab2):
     extensionColumnView = Gtk.ColumnView()
     extensionColumnView.props.show_row_separators = True
     extensionColumnView.props.single_click_activate = False
-    extensionColumnView.props.show_column_separators = True
+    extensionColumnView.props.show_column_separators = False
     factory = Gtk.SignalListItemFactory()
     factory.connect("setup", setup)
     factory.connect("bind", bind_column1)
@@ -1472,7 +1496,7 @@ def Vulkan(tab2):
     instanceExtensionColumnView = Gtk.ColumnView()
     instanceExtensionColumnView.props.show_row_separators = True
     instanceExtensionColumnView.props.single_click_activate = False
-    instanceExtensionColumnView.props.show_column_separators = True
+    instanceExtensionColumnView.props.show_column_separators = False
     factory = Gtk.SignalListItemFactory()
     factory.connect("setup", setup)
     factory.connect("bind", bind_column1)
