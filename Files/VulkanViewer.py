@@ -294,8 +294,8 @@ def Vulkan(tab2):
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
                             j = j + 1
                         else:
-                            LimitsTab_Store.append(toprow)
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                            LimitsTab_Store.append(toprow)
                             j = j + 1
                         iter = text
                         continue
@@ -685,28 +685,47 @@ def Vulkan(tab2):
 
         vulkan_memory_heaps_rhs = fetchContentsFromCommand(fetch_vulkan_device_memory_heaps_rhs_command)
   
-        HeapTab_Store.clear()
-        TreeHeap.set_model(HeapTab_Store)
+        HeapTab_Store.remove_all()
+    #    TreeHeap.set_model(HeapTab_Store)
 
         vulkan_memory_heaps_lhs = [i.strip('\t') for i in vulkan_memory_heaps_lhs]
     
         j = 0
-        HCount = 0
+        HCount = 0;iter = None
         for i in range(len(vulkan_memory_heaps_lhs)):
-                if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
-                    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",const.BGCOLOR3])
-                    HCount = HCount + 1
-                    continue
-                if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
-                    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
-                    continue
-                if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
-                    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
-                    j = j + 1
-                else:
-                    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                if not (iter == vulkan_memory_heaps_lhs[i]):
+                    if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
+                    #    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",const.BGCOLOR3])
+                    #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                        toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+                    #    HeapTab_Store.append(toprow)
+                        HCount = HCount + 1
+                        iter = vulkan_memory_heaps_lhs[i]
+                        continue
+                    if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
+                    #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                        childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                        childrow.children.append(childchildrow)
+                        toprow.children.append(childrow)
+                        HeapTab_Store.append(toprow)
+                    #    iter = vulkan_memory_heaps_lhs[i]
+                        continue
+                    if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
+                    #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
+                        childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], getDeviceSize(vulkan_memory_heaps_rhs[j]))
+                        toprow.children.append(childrow)
+                        j = j + 1
+                    #    iter = vulkan_memory_heaps_lhs[i]
+                        continue
+                    else:
+                    #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                        childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                     #   toprow.children.append(childrow)
 
-        TreeHeap.expand_all()
+            #    toprow.children.append(childrow)
+            #    HeapTab_Store.append(toprow)
+
+    #    TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
         notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
     #    label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags),(HCount))
@@ -1439,21 +1458,50 @@ def Vulkan(tab2):
     MemoryHeapGrid.set_row_spacing(3)
     #HeapGrid = Gtk.Box(spacing=10)
 
-    HeapTab_Store = Gtk.TreeStore(str, str, str)
-    TreeHeap = Gtk.TreeView.new_with_model(HeapTab_Store)
-    TreeHeap.set_property("enable-grid-lines", 1)
-    TreeHeap.set_enable_search(True)
-    for i, column_title in enumerate(HeapTitle):
-        Heaprenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, Heaprenderer, text=i)
-        column.set_resizable(True)
-        column.set_property("min-width", 150)
-        column.add_attribute(Heaprenderer, "background", 2)
-        TreeHeap.set_property("can-focus", False)
-        TreeHeap.append_column(column)
+
+    heapsColumnView = Gtk.ColumnView()
+    heapsColumnView.props.show_row_separators = True
+    heapsColumnView.props.show_column_separators = False
+
+    factory_heaps = Gtk.SignalListItemFactory()
+    factory_heaps.connect("setup",setup_expander)
+    factory_heaps.connect("bind",bind_expander)
+
+    factory_heaps_value = Gtk.SignalListItemFactory()
+    factory_heaps_value.connect("setup",setup)
+    factory_heaps_value.connect("bind",bind1)
+
+    heapSelection = Gtk.SingleSelection()
+    HeapTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    heapModel = Gtk.TreeListModel.new(HeapTab_Store,False,True,add_tree_node)
+    heapSelection.set_model(heapModel)
+
+    heapsColumnView.set_model(heapSelection)
+
+    heapColumnLhs = Gtk.ColumnViewColumn.new("Memory Heaps",factory_heaps)
+    heapColumnLhs.set_resizable(True)
+    heapColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_heaps_value)
+    heapColumnRhs.set_expand(True)
+
+    heapsColumnView.append_column(heapColumnLhs)
+    heapsColumnView.append_column(heapColumnRhs)
+
+#    HeapTab_Store = Gtk.TreeStore(str, str, str)
+#    TreeHeap = Gtk.TreeView.new_with_model(HeapTab_Store)
+#    TreeHeap.set_property("enable-grid-lines", 1)
+#    TreeHeap.set_enable_search(True)
+#   for i, column_title in enumerate(HeapTitle):
+#        Heaprenderer = Gtk.CellRendererText()
+#        column = Gtk.TreeViewColumn(column_title, Heaprenderer, text=i)
+#        column.set_resizable(True)
+#        column.set_property("min-width", 150)
+#        column.add_attribute(Heaprenderer, "background", 2)
+#        TreeHeap.set_property("can-focus", False)
+#        TreeHeap.append_column(column)
     
  #   TreeHeap.set_property("enable-tree-lines",True)
-    HeapScrollbar = create_scrollbar(TreeHeap)
+    HeapScrollbar = create_scrollbar(heapsColumnView)
     MemoryHeapGrid.attach(HeapScrollbar,0,0,1,1)
 
     # -------------------------Creating the Queues Tab -----------------------------------------------------
@@ -1547,6 +1595,18 @@ def Vulkan(tab2):
     InstanceLayersTab = Gtk.Box(spacing=10)
     InstanceLayersGrid = createSubTab(InstanceLayersTab, notebook, "Instance Layers")
     InstanceLayersGrid.set_row_spacing(3)
+
+    layersColumnView = Gtk.ColumnView()
+    layersColumnView.props.show_row_separators = True
+    layersColumnView.props.show_column_separators = True
+
+    factory_layers = Gtk.SignalListItemFactory()
+    factory_layers.connect("setup",setup_expander)
+    factory_layers.connect("bind",bind_expander)
+
+    factory_layers_value = Gtk.SignalListItemFactory()
+    factory_layers_value.connect("setup",setup)
+    factory_layers_value.connect("bind",bind1)
 
     LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
     LayerTab_Store_filter = LayerTab_Store.filter_new()

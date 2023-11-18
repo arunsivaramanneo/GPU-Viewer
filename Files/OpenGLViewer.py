@@ -358,7 +358,7 @@ def OpenGL(tab):
     openglColumnView = Gtk.ColumnView()
     openglColumnView.props.show_row_separators = True
     openglColumnView.props.single_click_activate = False
-    openglColumnView.props.show_column_separators = True
+    openglColumnView.props.show_column_separators = False
     factoryOpenglLhs = Gtk.SignalListItemFactory()
     factoryOpenglLhs.connect("setup", setup)
     factoryOpenglLhs.connect("bind", bind_column1)
