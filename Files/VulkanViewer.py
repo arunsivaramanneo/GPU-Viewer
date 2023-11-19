@@ -776,8 +776,8 @@ def Vulkan(tab2):
         
         vulkan_device_queue_counts = fetchContentsFromCommand(fetch_vulkan_device_queue_counts_command)
 
-        QueueTab_Store.clear()
-        TreeQueue.set_model(QueueTab_Store)
+        QueueTab_Store.remove_all()
+     #   TreeQueue.set_model(QueueTab_Store)
 
         j = 0
         qRHS = []
@@ -791,7 +791,7 @@ def Vulkan(tab2):
         
         qRHS.pop(0)
     
-        k = 0
+        k = 0; groupName = None
         for i in range(len(vulkan_device_queues_lhs)):
             background_color = setBackgroundColor(i)
             if "true" in qRHS[i]:
@@ -800,29 +800,46 @@ def Vulkan(tab2):
                 fColor = "RED"
             else:
                 fColor = None
-            if "Properties[" in vulkan_device_queues_lhs[i]:
-                iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
-            #    k = 0
-                continue
-            if "---" in vulkan_device_queues_lhs[i]:
-                continue
-            if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
-                iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
-                continue
-            if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
-                QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-                continue
-            else :
-                if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
-                    supportedFlags = qRHS[i].split("|")
-                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
-                    for count,flags in enumerate(supportedFlags, start= i + 1):
-                        QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
-       
-                else:
-                    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-                    
-        TreeQueue.expand_all()
+            if not (groupName == vulkan_device_queues_lhs[i]):
+                if "Properties[" in vulkan_device_queues_lhs[i]:
+                    if groupName == None:
+                        toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
+                    else:
+                        QueueTab_Store.append(toprow)
+                        toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
+                #    iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
+                #    k = 0
+                    groupName = vulkan_device_queues_lhs[i]
+                    continue
+                if "---" in vulkan_device_queues_lhs[i]:
+                    continue
+                if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
+                    iter3 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''))
+                    iter2.children.append(iter3)
+                #    iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
+                    continue
+                if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
+                    iter4 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
+                    iter3.children.append(iter4)
+                #    QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+                    continue
+                else :
+                    if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
+                        supportedFlags = qRHS[i].split("|")
+                        iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),"")
+                        toprow.children.append(iter2)
+                    #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
+                        for count,flags in enumerate(supportedFlags, start= i + 1):
+                            iter2_1 = ExpandDataObject(flags.replace("QUEUE_",""),"")
+                            iter2.children.append(iter2_1)
+                        #    QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
+        
+                    else:
+                        iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
+                        toprow.children.append(iter2)
+                    #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+        QueueTab_Store.append(toprow)           
+    #    TreeQueue.expand_all()
         label = "Queues (%d)" % len(vulkan_device_queue_counts)
         notebook.set_tab_label(QueueTab, Gtk.Label(label=label))
 
@@ -1222,15 +1239,6 @@ def Vulkan(tab2):
     limitsColumnView.append_column(limitColumnRhs)
 
 
- #   LimitsTab_Store = Gtk.TreeStore(str, str, str)
- #   LimitsTab_Store_filter = LimitsTab_Store.filter_new()
- #   TreeLimits = Gtk.TreeView.new_with_model(LimitsTab_Store_filter)
- #   TreeLimits.set_property("enable-tree-lines", True)
-#    TreeLimits.set_property("enable-grid-lines", 1)
-#    TreeLimits.set_enable_search(True)
-
-#    setColumns(TreeLimits, LimitsTitle, const.MWIDTH, 0.0)
-
     limitsFrameSearch = Gtk.Frame()
     limitsSearchEntry = Gtk.SearchEntry()
     limitsSearchEntry.set_property("placeholder_text","Type here to filter.....")
@@ -1316,27 +1324,6 @@ def Vulkan(tab2):
     filterSortFeatureListStore.set_filter(filter_features)
     featureSelection.set_model(filterSortFeatureListStore)
     featuresColumnView.set_model(featureSelection)
-
- #   FeaturesTab_Store = Gtk.ListStore(str, str, str, str)
- #   FeaturesTab_Store_filter = FeaturesTab_Store.filter_new()
- #   TreeFeatures = Gtk.TreeView.new_with_model(FeaturesTab_Store_filter)
- #   TreeFeatures.set_property("enable-grid-lines", 1)
- #   TreeFeatures.set_enable_search(True)
-#    for i, column_title in enumerate(FeaturesTitle):
- #   Featurerenderer1 = Gtk.CellRendererText()
- #   Featurecolumn1 = Gtk.TreeViewColumn(FeaturesTitle[0], Featurerenderer1, text=0)
- #   Featurecolumn1.set_sort_column_id(i)
- #   Featurecolumn1.set_resizable(True)
- #   Featurecolumn1.set_reorderable(True)
- #   Featurecolumn1.add_attribute(Featurerenderer1,"background",2)
- #   TreeFeatures.append_column(Featurecolumn1)
- #   Featurerenderer2 = Gtk.CellRendererText()
- #   Featurecolumn2 =Gtk.TreeViewColumn(FeaturesTitle[1],Featurerenderer2,text=1)
- #   Featurecolumn2.add_attribute(Featurerenderer2, "foreground", 3)
- #   Featurecolumn2.add_attribute(Featurerenderer2, "background", 2)
- #   Featurecolumn2.set_property("min-width", const.MWIDTH)
- #   TreeFeatures.set_property("can-focus", False)
-  #  TreeFeatures.append_column(Featurecolumn2)
     
 
  #   featureList  = Gtk.StringList()
@@ -1389,12 +1376,6 @@ def Vulkan(tab2):
     extensionSelection.set_model(filterSortExtensionListStore)
     extensionColumnView.set_model(extensionSelection)
 
-#    ExtensionTab_Store = Gtk.ListStore(str, str, str)
- #   ExtensionTab_store_filter = ExtensionTab_Store.filter_new()
- #   TreeExtension = Gtk.TreeView.new_with_model(ExtensionTab_store_filter)
- #   TreeExtension.set_property("enable-grid-lines", 1)
-
- #   setColumns(TreeExtension, ExtensionsTitle, const.MWIDTH, 0.0)
 
     extensionFrameSearch = Gtk.Frame()
     extensionSearchEntry = Gtk.SearchEntry()
@@ -1454,10 +1435,6 @@ def Vulkan(tab2):
         # ------------------------Memory Types & Heaps----------------------------------------------
 
     MemoryTab = Gtk.Box(spacing=10)
-#    MemoryTab.set_orientation(1)
-#    MemoryGrid = createSubTab(MemoryTab, notebook, "Memory Types & Heaps")
-#    MemoryNotebook = Gtk.Notebook()
-#    MemoryGrid.attach(MemoryNotebook,0,0,1,1)
     MemoryTypeTab = Gtk.Box(spacing=10)
     MemoryTypeGrid = createSubTab(MemoryTypeTab, notebook, "Memory Types")
     MemoryTypeGrid.set_row_spacing(3)
@@ -1490,22 +1467,6 @@ def Vulkan(tab2):
     memoryTypesColumnView.append_column(memoryTypesColumnLhs)
     memoryTypesColumnView.append_column(memoryTypesColumnRhs)
 
-#    MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
-#    TreeMemory = Gtk.TreeView.new_with_model(MemoryTab_Store)
-#    TreeMemory.set_property("enable-grid-lines", 1)
-#    TreeMemory.set_enable_search(True)
- #   TreeMemory.set_property("enable-tree-lines",True)
-
- #   for i, column_title in enumerate(MemoryTitle):
- #       Memoryrenderer = Gtk.CellRendererText()
- #       column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
- #       column.add_attribute(Memoryrenderer, "background", 2)
- #       if i > 0:
-  #          column.add_attribute(Memoryrenderer,"foreground",3)
-  #      column.set_resizable(True)
-  #      TreeMemory.set_property("can-focus", False)
-  #      TreeMemory.append_column(column)
-
     MemoryScrollbar = create_scrollbar(memoryTypesColumnView)
     MemoryTypeGrid.attach(MemoryScrollbar,0,0,1,1)
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -1513,7 +1474,6 @@ def Vulkan(tab2):
     MemoryHeapGrid = createSubTab(MemoryHeapTab, notebook, "Memory Heap")
     MemoryHeapGrid.set_row_spacing(3)
     #HeapGrid = Gtk.Box(spacing=10)
-
 
     heapsColumnView = Gtk.ColumnView()
     heapsColumnView.props.show_row_separators = True
@@ -1543,20 +1503,6 @@ def Vulkan(tab2):
     heapsColumnView.append_column(heapColumnLhs)
     heapsColumnView.append_column(heapColumnRhs)
 
-#    HeapTab_Store = Gtk.TreeStore(str, str, str)
-#    TreeHeap = Gtk.TreeView.new_with_model(HeapTab_Store)
-#    TreeHeap.set_property("enable-grid-lines", 1)
-#    TreeHeap.set_enable_search(True)
-#   for i, column_title in enumerate(HeapTitle):
-#        Heaprenderer = Gtk.CellRendererText()
-#        column = Gtk.TreeViewColumn(column_title, Heaprenderer, text=i)
-#        column.set_resizable(True)
-#        column.set_property("min-width", 150)
-#        column.add_attribute(Heaprenderer, "background", 2)
-#        TreeHeap.set_property("can-focus", False)
-#        TreeHeap.append_column(column)
-    
- #   TreeHeap.set_property("enable-tree-lines",True)
     HeapScrollbar = create_scrollbar(heapsColumnView)
     MemoryHeapGrid.attach(HeapScrollbar,0,0,1,1)
 
@@ -1565,25 +1511,54 @@ def Vulkan(tab2):
     QueueTab = Gtk.Box(spacing=10)
     QueueGrid = createSubTab(QueueTab, notebook, "Queue")
 
-    QueueTab_Store = Gtk.TreeStore(str, str, str, str)
-    TreeQueue = Gtk.TreeView.new_with_model(QueueTab_Store)
-    TreeQueue.set_property("enable-grid-lines", 1)
-    TreeQueue.set_enable_search(True)
- #   TreeQueue.set_property("enable-tree-lines", True)
-    for i, column_title in enumerate(QueueTitle):
-        Queuerenderer = Gtk.CellRendererText()
-#        Queuerenderer.set_alignment(0.5, 0.5)
-        column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
-#        column.set_alignment(0.5)
-        column.add_attribute(Queuerenderer, "background", 2)
-        column.set_resizable(True)
-        column.set_reorderable(True)
-        if i > 0:
-            column.add_attribute(Queuerenderer, "foreground", 3)
-        TreeQueue.set_property("can-focus", False)
-        TreeQueue.append_column(column)
+    queuesColumnView = Gtk.ColumnView()
+    queuesColumnView.props.show_row_separators = True
+    queuesColumnView.props.show_column_separators = False
 
-    QueueScrollbar = create_scrollbar(TreeQueue)
+    factory_queues = Gtk.SignalListItemFactory()
+    factory_queues.connect("setup",setup_expander)
+    factory_queues.connect("bind",bind_expander)
+
+    factory_queues_value = Gtk.SignalListItemFactory()
+    factory_queues_value.connect("setup",setup)
+    factory_queues_value.connect("bind",bind1)
+
+    queueSelection = Gtk.SingleSelection()
+    QueueTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    queueModel = Gtk.TreeListModel.new(QueueTab_Store,False,True,add_tree_node)
+    queueSelection.set_model(queueModel)
+
+    queuesColumnView.set_model(queueSelection)
+
+    queueColumnLhs = Gtk.ColumnViewColumn.new("Memory Heaps",factory_queues)
+    queueColumnLhs.set_resizable(True)
+    queueColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_queues_value)
+    queueColumnRhs.set_expand(True)
+
+    queuesColumnView.append_column(queueColumnLhs)
+    queuesColumnView.append_column(queueColumnRhs)
+
+
+ #   QueueTab_Store = Gtk.TreeStore(str, str, str, str)
+ #   TreeQueue = Gtk.TreeView.new_with_model(QueueTab_Store)
+ #   TreeQueue.set_property("enable-grid-lines", 1)
+ #   TreeQueue.set_enable_search(True)
+ #   TreeQueue.set_property("enable-tree-lines", True)
+ #   for i, column_title in enumerate(QueueTitle):
+  #      Queuerenderer = Gtk.CellRendererText()
+#        Queuerenderer.set_alignment(0.5, 0.5)
+  #      column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
+#        column.set_alignment(0.5)
+  #      column.add_attribute(Queuerenderer, "background", 2)
+   #     column.set_resizable(True)
+   #     column.set_reorderable(True)
+   #     if i > 0:
+   #         column.add_attribute(Queuerenderer, "foreground", 3)
+   #     TreeQueue.set_property("can-focus", False)
+   #     TreeQueue.append_column(column)
+
+    QueueScrollbar = create_scrollbar(queuesColumnView)
     QueueGrid.attach(QueueScrollbar,0,0,1,1)
 
     # -------------------------Creating the Instances & Layers ---------------------------------------------
