@@ -86,12 +86,11 @@ def bind1(widget, item):
     obj = row.get_item()
     if "true" in obj.data2: 
         label.add_css_class(css_class='true')
-        label.set_label(obj.data2)
     elif "false" in obj.data2:
         label.add_css_class(css_class='false')
-        label.set_label(obj.data2)
     else:
-        label.set_label(obj.data2)
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data2)
 
 
 def setup(widget, item):
@@ -972,41 +971,54 @@ def Vulkan(tab2):
                 value2.append(i)
                 fgColor.append(const.COLOR3)
 
-        SparseTab_Store.clear()
-        TreeSparse.set_model(SparseTab_Store_filter)
+        PropertiesTab_Store.remove_all()
+    #    TreeSparse.set_model(SparseTab_Store_filter)
 
         if "Show All Device Properties" in property:
             k = 0;
             count = 0
+            groupName = None
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
                     if "---" in line or "====" in line:
                         continue
-                    if "Vk" in line and "conformanceVersion" not in line:
-                        text1 = (text.replace("VkPhysicalDevice",'').replace(":",""))
-                        k = 0
-                        count += 1
-                        background_color = const.BGCOLOR3
-                        iter1 = SparseTab_Store.append(None, [(text1.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color,
-                                                              fgColor[i]])
-                    else:
-                        background_color = setBackgroundColor(k)
+                    if not (groupName == text):
+                        if "Vk" in line and "conformanceVersion" not in line:
+                            text1 = (text.replace("VkPhysicalDevice",'').replace(":",""))
+                            k = 0
+                            count += 1
+                            background_color = const.BGCOLOR3
+                            if groupName == None:
+                                toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
+                            #iter1 = SparseTab_Store.append(None, [(text1.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color, fgColor[i]])
+                            else:
+                                PropertiesTab_Store.append(toprow)
+                                toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
+                            groupName = text
+                        else:
+                            background_color = setBackgroundColor(k)
 
-                        #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line and "SAMPLE_COUNT" not in line and "\t\t" not in line:
-                        if "\t\t" not in line:
-                            iter2 = SparseTab_Store.append(iter1,
-                                               [(text.strip('\n')).replace("count",''), value2[i].strip('\n'), background_color, fgColor[i]])
-                        #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line or "SAMPLE_COUNT" in line or "\t\t" in line:
-                        if "\t\t" in line:
-                            SparseTab_Store.append(iter2, [(text.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color,
-                                                           fgColor[i]])
-                        k += 1
-                    TreeSparse.expand_all()
+                            #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line and "SAMPLE_COUNT" not in line and "\t\t" not in line:
+                            if "\t\t" not in line:
+                            #    iter2 = SparseTab_Store.append(iter1,
+                            #                       [(text.strip('\n')).replace("count",''), value2[i].strip('\n'), background_color, fgColor[i]])
+                                iter2 = ExpandDataObject((text.strip('\n')).replace("count",''), value2[i].strip('\n'))
+                                toprow.children.append(iter2)
+                            #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line or "SAMPLE_COUNT" in line or "\t\t" in line:
+                            if "\t\t" in line:
+                            # SparseTab_Store.append(iter2, [(text.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color,
+                            #                                fgColor[i]])
+                                iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
+                                iter2.children.append(iter3)
+                                k += 1
+                PropertiesTab_Store.append(toprow)
+            #        TreeSparse.expand_all()
         else:
             k = 0
             count = 0
-            iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),const.COLOR3])
+   #         iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),const.COLOR3])
+            toprow = ExpandDataObject(property,"")
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
@@ -1016,14 +1028,17 @@ def Vulkan(tab2):
                         background_color = setBackgroundColor(k)
                         #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line:
                         if "\t\t" not in line:
-                            iter2 = SparseTab_Store.append(iter,
-                                               [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
+                        #    iter2 = SparseTab_Store.append(iter,
+                         #                      [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
+                            iter2 = ExpandDataObject((text.strip('\n')).replace("count",''), value2[i].strip('\n'))
+                            toprow.children.append(iter2)
                         #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line:
                         if "\t\t" in line:
-                            SparseTab_Store.append(iter2, [text.strip('\n'), value2[i].strip('\n'), background_color,
-                                                           fgColor[i]])
+                                iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
+                                iter2.children.append(iter3)
                         k += 1
-                    TreeSparse.expand_all()
+                PropertiesTab_Store.append(toprow)
+                #    TreeSparse.expand_all()
 
     def Surface(GPU):
 
@@ -1037,35 +1052,52 @@ def Vulkan(tab2):
         valueLHS = fetchContentsFromCommand(fetch_vulkan_device_surface_lhs_command)
 
         SurfaceRHS = []
-        SurfaceTab_Store.clear()
-        TreeSurface.set_model(SurfaceTab_Store)
+        SurfaceTab_Store.remove_all()
+    #    TreeSurface.set_model(SurfaceTab_Store)
+        groupName = None
         with open(Filenames.vulkan_device_surface_file, "r") as file1:
             j=0
             for i,line in enumerate(file1):
                 background_color = setBackgroundColor(i)
-                if "=" in line:
-                    SurfaceRHS = valueRHS[j].strip('\n')
-                    j = j+1
-                else:
-                    SurfaceRHS = " "
                 if '---' in line:
                     continue
-                if "\t" in line and "\t\t" not in line:
-                    background_color = const.BGCOLOR3
-                    iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                    continue
-                if "\t\t" in line and "\t\t\t" not in line:
-                    iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                    continue
-                if "\t\t\t" in line and "\t\t\t\t" not in line:
-                    iter3 = SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                    continue
-                if "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                    iter4 = SurfaceTab_Store.append(iter3,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color]) 
-                else:
-                    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-
-            TreeSurface.expand_all()
+                if not (valueLHS[i] == groupName):
+                    if "=" in line:
+                        SurfaceRHS = valueRHS[j].strip('\n')
+                    #    print(SurfaceRHS)
+                        j = j+1
+                    else:
+                        SurfaceRHS = " "
+                    if "\t" in line and "\t\t" not in line:
+                        if groupName == None:
+                            toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        else:
+                            SurfaceTab_Store.append(toprow)
+                            toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                    #    background_color = const.BGCOLOR3
+                    #    iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                        groupName = valueLHS[i]
+                        continue
+                    if "\t\t" in line and "\t\t\t" not in line:
+                        iter2 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        toprow.children.append(iter2)
+                    #    iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                        continue
+                    if "\t\t\t" in line and "\t\t\t\t" not in line:
+                        iter3 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        iter2.children.append(iter3)
+                    #    iter3 = SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                        continue
+                    if "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                        iter4 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        iter3.children.append(iter4)
+                    #    iter4 = SurfaceTab_Store.append(iter3,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color]) 
+                    else:
+                        iter5 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        iter4.children.append(iter5)
+                    #    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+            SurfaceTab_Store.append(toprow)
+        #    TreeSurface.expand_all()
     
     def Groups(GPU):
 
@@ -1119,6 +1151,10 @@ def Vulkan(tab2):
         return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
     def _do_filter_limits_view(item, filter_list_model):
+        search_text_widget = limitsSearchEntry.get_text()
+        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
+    def _do_filter_properties_view(item, filter_list_model):
         search_text_widget = limitsSearchEntry.get_text()
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
 
@@ -1209,7 +1245,7 @@ def Vulkan(tab2):
 
     limitsColumnView = Gtk.ColumnView()
     limitsColumnView.props.show_row_separators = True
-    limitsColumnView.props.show_column_separators = True
+    limitsColumnView.props.show_column_separators = False
 
     factory_limits = Gtk.SignalListItemFactory()
     factory_limits.connect("setup",setup_expander)
@@ -1251,6 +1287,36 @@ def Vulkan(tab2):
 
 #    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
 
+    propertiesColumnView = Gtk.ColumnView()
+    propertiesColumnView.props.show_row_separators = True
+    propertiesColumnView.props.show_column_separators = False
+
+    factory_properties = Gtk.SignalListItemFactory()
+    factory_properties.connect("setup",setup_expander)
+    factory_properties.connect("bind",bind_expander)
+
+    factory_properties_value = Gtk.SignalListItemFactory()
+    factory_properties_value.connect("setup",setup)
+    factory_properties_value.connect("bind",bind1)
+
+    propertiesSelection = Gtk.SingleSelection()
+    PropertiesTab_Store = Gio.ListStore.new(ExpandDataObject)
+    filterSortPropertiesStore = Gtk.FilterListModel(model=PropertiesTab_Store)
+    filter_properties = Gtk.CustomFilter.new(_do_filter_properties_view, filterSortPropertiesStore)
+    filterSortPropertiesStore.set_filter(filter_properties)
+
+    propertiesModel = Gtk.TreeListModel.new(filterSortPropertiesStore,False,True,add_tree_node)
+    propertiesSelection.set_model(propertiesModel)
+
+    propertiesColumnView.set_model(propertiesSelection)
+
+    propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_properties)
+    propertiesColumnLhs.set_resizable(True)
+    propertiesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_properties_value)
+    propertiesColumnRhs.set_expand(True)
+
+    propertiesColumnView.append_column(propertiesColumnLhs)
+    propertiesColumnView.append_column(propertiesColumnRhs)
 
     propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
@@ -1261,33 +1327,38 @@ def Vulkan(tab2):
     propertiesDropdown.connect('notify::selected-item',selectProperties)
     setMargin(propertiesDropdown,2,1,2)
 #    propertiesGrid.add(propertiesCombo)
-    SparseTab_Store = Gtk.TreeStore(str, str, str, str)
-    SparseTab_Store_filter = SparseTab_Store.filter_new()
-    TreeSparse = Gtk.TreeView.new_with_model(SparseTab_Store_filter)
-    TreeSparse.set_property("enable-grid-lines", 1)
+
+
+
+#    SparseTab_Store = Gtk.TreeStore(str, str, str, str)
+#    SparseTab_Store_filter = SparseTab_Store.filter_new()
+#    TreeSparse = Gtk.TreeView.new_with_model(SparseTab_Store_filter)
+#    TreeSparse.set_property("enable-grid-lines", 1)
  #   TreeSparse.set_property("enable-tree-lines", True)
-    TreeSparse.set_enable_search(True)
-    TreeSparse.set_property("can-focus", False)
+#    TreeSparse.set_enable_search(True)
+#    TreeSparse.set_property("can-focus", False)
 
-    for i, column_title in enumerate(SparseTitle):
-        Sparserenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
-        column.set_sort_column_id(i)
-        column.set_resizable(True)
-        column.set_reorderable(True)
-        column.set_property("min-width", const.MWIDTH)
-        if i == 1:
-            column.add_attribute(Sparserenderer, "foreground", 3)
-        column.add_attribute(Sparserenderer, "background", 2)
-        TreeSparse.append_column(column)
+ #   for i, column_title in enumerate(SparseTitle):
+ #       Sparserenderer = Gtk.CellRendererText()
+  #      column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
+  #      column.set_sort_column_id(i)
+  #      column.set_resizable(True)
+  #      column.set_reorderable(True)
+  #      column.set_property("min-width", const.MWIDTH)
+  #      if i == 1:
+  #          column.add_attribute(Sparserenderer, "foreground", 3)
+  #      column.add_attribute(Sparserenderer, "background", 2)
+  #      TreeSparse.append_column(column)
 
-    propertySearchEntry = createSearchEntry(SparseTab_Store_filter)
+    propertySearchEntry = Gtk.SearchEntry()
+    propertySearchEntry.set_property("placeholder_text","Type here to filter.....")
+    propertySearchEntry.connect("search-changed", _on_search_method_changed,filter_properties)
     propertiesGrid.attach(propertySearchEntry,0,0,12,1)
     propertiesGrid.attach_next_to(propertiesDropdown,propertySearchEntry,Gtk.PositionType.RIGHT,3,1)
-    propertiesScrollbar = create_scrollbar(TreeSparse)
+    propertiesScrollbar = create_scrollbar(propertiesColumnView)
     propertiesGrid.attach_next_to(propertiesScrollbar, propertySearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
 
-    SparseTab_Store_filter.set_visible_func(searchPropertiesTree, data=TreeSparse)
+#    SparseTab_Store_filter.set_visible_func(searchPropertiesTree, data=TreeSparse)
 
     # -----------------Creating the Features Tab-----------------
 
@@ -1661,27 +1732,56 @@ def Vulkan(tab2):
 
     SurfaceTab = Gtk.Box(spacing=10)
     SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
+
+    surfaceColumnView = Gtk.ColumnView()
+    surfaceColumnView.props.show_row_separators = True
+    surfaceColumnView.props.show_column_separators = False
+
+    factory_surface = Gtk.SignalListItemFactory()
+    factory_surface.connect("setup",setup_expander)
+    factory_surface.connect("bind",bind_expander)
+
+    factory_surface_value = Gtk.SignalListItemFactory()
+    factory_surface_value.connect("setup",setup)
+    factory_surface_value.connect("bind",bind1)
+
+    surfaceSelection = Gtk.SingleSelection()
+    SurfaceTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    surfaceModel = Gtk.TreeListModel.new(SurfaceTab_Store,False,True,add_tree_node)
+    surfaceSelection.set_model(surfaceModel)
+
+    surfaceColumnView.set_model(surfaceSelection)
+
+    surfaceColumnLhs = Gtk.ColumnViewColumn.new("Surface Details",factory_surface)
+    surfaceColumnLhs.set_resizable(True)
+    surfaceColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_surface_value)
+    surfaceColumnRhs.set_expand(True)
+
+    surfaceColumnView.append_column(surfaceColumnLhs)
+    surfaceColumnView.append_column(surfaceColumnRhs)
+
     #SurfaceCombo = Gtk.ComboBoxText()
     #SurfaceCombo.connect("changed", selectSurfaceType)
     #SurfaceGrid.add(SurfaceCombo)
-    SurfaceTab_Store = Gtk.TreeStore(str, str, str)
-    TreeSurface = Gtk.TreeView.new_with_model(SurfaceTab_Store)
-    TreeSurface.set_property("enable-grid-lines", 1)
+ #   SurfaceTab_Store = Gtk.TreeStore(str, str, str)
+ #   TreeSurface = Gtk.TreeView.new_with_model(SurfaceTab_Store)
+ #   TreeSurface.set_property("enable-grid-lines", 1)
  #   TreeSurface.set_property("enable-tree-lines", True)
-    with open(Filenames.vulkaninfo_output_file, "r") as file1:
-        for line in file1:
-            if "VkSurfaceCapabilities" in line:
-                for i, column_title in enumerate(SurfaceTitle):
-                    Surfacerenderer = Gtk.CellRendererText()
-                    column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
-                    column.add_attribute(Surfacerenderer, "background", 2)
-                    column.set_property("min-width",const.MWIDTH)
-                    TreeSurface.set_property("can-focus", False)
-                    TreeSurface.append_column(column)
+#    with open(Filenames.vulkaninfo_output_file, "r") as file1:
+ #       for line in file1:
+  #          if "VkSurfaceCapabilities" in line:
+   #             for i, column_title in enumerate(SurfaceTitle):
+    #                Surfacerenderer = Gtk.CellRendererText()
+     #               column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
+      #              column.add_attribute(Surfacerenderer, "background", 2)
+       #             column.set_property("min-width",const.MWIDTH)
+        #            TreeSurface.set_property("can-focus", False)
+         #           TreeSurface.append_column(column)
 
-                SurfaceScrollbar = create_scrollbar(TreeSurface)
-                SurfaceGrid.attach(SurfaceScrollbar,0,0,1,1)
-                break
+    SurfaceScrollbar = create_scrollbar(surfaceColumnView)
+    SurfaceGrid.attach(SurfaceScrollbar,0,0,1,1)
+           #     break
     
     # ------------------------- Creating the Device Groups Tab ---------------------------------------
 
