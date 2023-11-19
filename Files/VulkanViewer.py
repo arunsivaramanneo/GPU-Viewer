@@ -296,8 +296,6 @@ def Vulkan(tab2):
                         else:
                             LimitsTab_Store.append(toprow)
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
-                            if i == len(vulkan_device_limits_lhs) - 1:
-                                LimitsTab_Store.append(toprow)
                             j = j + 1
                         iter = text
                         continue
@@ -309,7 +307,7 @@ def Vulkan(tab2):
                     childrow = ExpandDataObject((text.strip('\n')).replace(' count',''), " ")
                     toprow.children.append(childrow)
                     continue
-                LimitsTab_Store.append(toprow)
+            LimitsTab_Store.append(toprow)
              #   LimitsTab_Store.append(ExpandDataObject((text.strip('\n')).replace(' count',''), " "))
                 
      #       TreeLimits.expand_all()
@@ -601,23 +599,45 @@ def Vulkan(tab2):
 
         propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT","PROTECTED_BIT","DEVICE_COHERENT_BIT_AMD","DEVICE_UNCACHED_BIT_AMD","RDMA_CAPABLE_BIT_NV"]
 
-        MemoryTab_Store.clear()
-        TreeMemory.set_model(MemoryTab_Store)
+        MemoryTab_Store.remove_all()
+    #    TreeMemory.set_model(MemoryTab_Store)
         p = 0
         n = 0
+        groupName = None
         for i in range(len(vulkan_memory_types_lhs)):
             background_color = setBackgroundColor(i)
-            if "memoryTypes" in vulkan_memory_types_lhs[i]:
-                iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
-                continue
-            if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
-                iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
-                continue
-            if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
-                iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
-                continue
-            else:
-                MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
+            if not (vulkan_memory_types_lhs[i] == groupName):
+                if "memoryTypes" in vulkan_memory_types_lhs[i]:
+                    if groupName == None:
+                        iter = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
+                    else:
+                        MemoryTab_Store.append(iter)
+                #   iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
+                        iter = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
+                #    MemoryTab_Store.append(iter)
+                #    groupName = vulkan_memory_types_lhs[i]
+                    n = n + 1
+                    continue
+                if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
+                #    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
+                    iter2 = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i])
+                    iter.children.append(iter2)
+                #    MemoryTab_Store.append(iter)
+                #    groupName = vulkan_memory_types_lhs[i]
+                    continue
+                if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
+                #    iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
+                    iter3 = ExpandDataObject((((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_","")),mRhs[i])
+                    iter2.children.append(iter3)
+                #    print(vulkan_memory_types_lhs[i])
+                #    iter.children.append(iter2)
+                    groupName = vulkan_memory_types_lhs[i]
+                    continue
+                else:
+                #    MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
+                    iter4 = ExpandDataObject(((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",)
+                    iter3.children.append(iter4)
+        MemoryTab_Store.append(iter)
        #     if "MEMORY" in vulkan_memory_types_lhs[i]:
        #         continue
         #    if "None" in vulkan_memory_types_lhs[i] and n == 0:
@@ -673,7 +693,7 @@ def Vulkan(tab2):
         labe12 = "Memory Types (%d)" %len(vulkan_memory_types_property_flags)
         notebook.set_tab_label(MemoryTypeTab,Gtk.Label(label=labe12))
 
-        TreeMemory.expand_all()
+    #    TreeMemory.expand_all()
 
         #----------------------------------------------------- Memory Heaps ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -697,20 +717,23 @@ def Vulkan(tab2):
         for i in range(len(vulkan_memory_heaps_lhs)):
                 if not (iter == vulkan_memory_heaps_lhs[i]):
                     if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
+                        if iter == None:
+                            toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+                        else:
+                            HeapTab_Store.append(toprow)
+                            toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
                     #    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",const.BGCOLOR3])
-                    #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
-                        toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+                    #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n')
                     #    HeapTab_Store.append(toprow)
                         HCount = HCount + 1
                         iter = vulkan_memory_heaps_lhs[i]
                         continue
                     if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
                     #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
-                        print(iter)
                         childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
                         childrow.children.append(childchildrow)
-                        toprow.children.append(childrow)
-                        HeapTab_Store.append(toprow)
+                    #    toprow.children.append(childrow)
+                    #    HeapTab_Store.append(toprow)
                         iter = vulkan_memory_heaps_lhs[i]
                         continue
                     if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
@@ -721,14 +744,14 @@ def Vulkan(tab2):
                         iter = vulkan_memory_heaps_lhs[i]
                         continue
                     else:
+                        if "None" not in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" not in vulkan_memory_heaps_lhs[i]:
                     #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
-                        childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
-                        iter = vulkan_memory_heaps_lhs[i]
-                        continue
-                     #   toprow.children.append(childrow)
+                            childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                            iter = vulkan_memory_heaps_lhs[i]
+                            toprow.children.append(childrow)
 
             #    toprow.children.append(childrow)
-            #    HeapTab_Store.append(toprow)
+        HeapTab_Store.append(toprow)
 
     #    TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
@@ -1439,25 +1462,53 @@ def Vulkan(tab2):
     MemoryTypeGrid = createSubTab(MemoryTypeTab, notebook, "Memory Types")
     MemoryTypeGrid.set_row_spacing(3)
 
-    MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
-    TreeMemory = Gtk.TreeView.new_with_model(MemoryTab_Store)
-    TreeMemory.set_property("enable-grid-lines", 1)
-    TreeMemory.set_enable_search(True)
+    memoryTypesColumnView = Gtk.ColumnView()
+    memoryTypesColumnView.props.show_row_separators = True
+    memoryTypesColumnView.props.show_column_separators = False
+
+    factory_memory_types = Gtk.SignalListItemFactory()
+    factory_memory_types.connect("setup",setup_expander)
+    factory_memory_types.connect("bind",bind_expander)
+
+    factory_memory_types_value = Gtk.SignalListItemFactory()
+    factory_memory_types_value.connect("setup",setup)
+    factory_memory_types_value.connect("bind",bind1)
+
+    memoryTypesSelection = Gtk.SingleSelection()
+    MemoryTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    memoryTypesModel = Gtk.TreeListModel.new(MemoryTab_Store,False,True,add_tree_node)
+    memoryTypesSelection.set_model(memoryTypesModel)
+
+    memoryTypesColumnView.set_model(memoryTypesSelection)
+
+    memoryTypesColumnLhs = Gtk.ColumnViewColumn.new("Memory Types",factory_memory_types)
+    memoryTypesColumnLhs.set_resizable(True)
+    memoryTypesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_memory_types_value)
+    memoryTypesColumnRhs.set_expand(True)
+
+    memoryTypesColumnView.append_column(memoryTypesColumnLhs)
+    memoryTypesColumnView.append_column(memoryTypesColumnRhs)
+
+#    MemoryTab_Store = Gtk.TreeStore(str, str, str,str)
+#    TreeMemory = Gtk.TreeView.new_with_model(MemoryTab_Store)
+#    TreeMemory.set_property("enable-grid-lines", 1)
+#    TreeMemory.set_enable_search(True)
  #   TreeMemory.set_property("enable-tree-lines",True)
 
-    for i, column_title in enumerate(MemoryTitle):
-        Memoryrenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
-        column.add_attribute(Memoryrenderer, "background", 2)
-        if i > 0:
-            column.add_attribute(Memoryrenderer,"foreground",3)
-        column.set_resizable(True)
-        TreeMemory.set_property("can-focus", False)
-        TreeMemory.append_column(column)
+ #   for i, column_title in enumerate(MemoryTitle):
+ #       Memoryrenderer = Gtk.CellRendererText()
+ #       column = Gtk.TreeViewColumn(column_title, Memoryrenderer, text=i)
+ #       column.add_attribute(Memoryrenderer, "background", 2)
+ #       if i > 0:
+  #          column.add_attribute(Memoryrenderer,"foreground",3)
+  #      column.set_resizable(True)
+  #      TreeMemory.set_property("can-focus", False)
+  #      TreeMemory.append_column(column)
 
-    MemoryScrollbar = create_scrollbar(TreeMemory)
+    MemoryScrollbar = create_scrollbar(memoryTypesColumnView)
     MemoryTypeGrid.attach(MemoryScrollbar,0,0,1,1)
-
+# -----------------------------------------------------------------------------------------------------------------------------------
     MemoryHeapTab = Gtk.Box(spacing=10)
     MemoryHeapGrid = createSubTab(MemoryHeapTab, notebook, "Memory Heap")
     MemoryHeapGrid.set_row_spacing(3)
