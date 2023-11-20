@@ -35,6 +35,16 @@ class DataObject(GObject.GObject):
         self.column1 = column1
         self.column2 = column2
 
+class ExpandDataObject2(GObject.GObject):
+    def __init__(self, txt: str, txt2: str,txt3: str,txt4: str,txt5: str):
+        super(ExpandDataObject2, self).__init__()
+        self.data = txt
+        self.data2 = txt2
+        self.data3= txt3
+        self.data4= txt4
+        self.data5= txt5
+        self.children = []
+
 class ExpandDataObject(GObject.GObject):
     def __init__(self, txt: str, txt2: str):
         super(ExpandDataObject, self).__init__()
@@ -56,6 +66,25 @@ def add_tree_node(item):
         if not item.children:
             return None
         store = Gio.ListStore.new(ExpandDataObject)
+        for child in item.children:
+            store.append(child)
+        return store
+
+
+def add_tree_node2(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject2)
         for child in item.children:
             store.append(child)
         return store
@@ -92,6 +121,46 @@ def bind1(widget, item):
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data2)
 
+def bind2(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data3: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data3:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data3)
+
+
+def bind3(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data4: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data4:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data4)
+
+
+def bind4(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data5: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data5:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data5)
 
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
@@ -367,13 +436,6 @@ def Vulkan(tab2):
                 background_color = setBackgroundColor(i)
                 FeatureTab_Store.append(DataObject("  " +text.strip('\n'), value[i].strip('\n'), ))
 
-    def searchLimitsTree(model, iter, Tree):
-        search_query = limitsSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
-
     def Extensions(GPUname):
 
         fetch_device_extensions_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkQueueFamilyProperties/{flag=0}flag'|awk '/Device Extensions/{flag=1; next}/VkQueueFamilyProperties/{flag=0} flag' | grep VK_ | sort" %(Filenames.vulkaninfo_output_file,GPUname)
@@ -436,69 +498,91 @@ def Vulkan(tab2):
         valueOptimalCount = copyContentsFromFile(Filenames.vulkan_device_format_types_optimal_count_file)
         valueBufferCount = copyContentsFromFile(Filenames.vulkan_device_format_types_buffer_count_file)
             
-        FormatsTab_Store.clear()
-        TreeFormats.set_model(FormatsTab_Store_filter)
-
+        FormatsTab_Store.remove_all()
+    #    TreeFormats.set_model(FormatsTab_Store_filter)
+        groupName = None
         if selected_Format is None:
             pass
         elif "Show All Device Formats" in selected_Format:
             n = 0
+            formatsModel.set_autoexpand(False)
             for i in range(len(valueFormatsCount)):
                 for j in range(int(valueFormatsCount[i])):
-                    if 'None' not in valueLinearCount[i]:
-                        linearStatus = "true"
-                        linearColor = const.COLOR1
-                    else:
-                        linearStatus = "false"
-                        linearColor = const.COLOR2
-                    if 'None' not in valueOptimalCount[i]:
-                        optimalStatus = "true"
-                        optimalColor = const.COLOR1
-                    else:
-                        optimalStatus = "false"
-                        optimalColor = const.COLOR2
-                    if 'None' not in valueBufferCount[i]:
-                        bufferStatus = "true"
-                        bufferColor = const.COLOR1
-                    else:
-                        bufferStatus = "false"
-                        bufferColor = const.COLOR2
+                    if not (groupName == valueFormats[n]):
+                        if 'None' not in valueLinearCount[i]:
+                            linearStatus = "true"
+                            linearColor = const.COLOR1
+                        else:
+                            linearStatus = "false"
+                            linearColor = const.COLOR2
+                        if 'None' not in valueOptimalCount[i]:
+                            optimalStatus = "true"
+                            optimalColor = const.COLOR1
+                        else:
+                            optimalStatus = "false"
+                            optimalColor = const.COLOR2
+                        if 'None' not in valueBufferCount[i]:
+                            bufferStatus = "true"
+                            bufferColor = const.COLOR1
+                        else:
+                            bufferStatus = "false"
+                            bufferColor = const.COLOR2
+                        if groupName == None:
+                            toprow = ExpandDataObject2(((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,"")
+                        else:
+                            FormatsTab_Store.append(toprow)
+                            toprow = ExpandDataObject2(((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,"")
+                        groupName = valueFormats[n]
 
-                    fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                    fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
-                    fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                        fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                        fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
+                        fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,valueFormats[n].strip("\n"))
 
-                    iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
-                    if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
-                        iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                        
-                        with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
-                            fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
-                            fetch_vulkan_device_format_linear_types_process.communicate()
+                    #    iter1 = FormatsTab_Store.append(None,[((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,setBackgroundColor(n),linearColor,optimalColor,bufferColor]) 
+                    #    toprow = ExpandDataObject2(((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,"")
+                        if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
+                        #    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            iter2 = ExpandDataObject2("linearTiling"," "," "," ","")
+                            toprow.children.append(iter2)
                             
-                        with open(Filenames.vulkan_device_format_types_linear_file) as file1:
-                            for k,line in enumerate(file1):
-                                FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                        iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
+                                fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
+                                fetch_vulkan_device_format_linear_types_process.communicate()
+                                
+                            with open(Filenames.vulkan_device_format_types_linear_file) as file1:
+                                for k,line in enumerate(file1):
+                                    iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                                    iter2.children.append(iter3)
+                                #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                        #    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            iter2 = ExpandDataObject2("optimalTiling"," "," "," ","")
+                            toprow.children.append(iter2)
 
-                        with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
-                            fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
-                            fetch_vulkan_device_format_optimal_types_process.communicate()
-                    #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
-                        with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
-                            for k,line in enumerate(file1):
-                                FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                        iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
+                                fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
+                                fetch_vulkan_device_format_optimal_types_process.communicate()
+                        #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
+                            with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
+                                for k,line in enumerate(file1):
+                                    iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                                    iter2.children.append(iter3)
+                                #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                        #    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            iter2 = ExpandDataObject2("bufferFeatures"," "," "," ","")
+                            toprow.children.append(iter2)
 
-                        with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
-                            fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
-                            fetch_vulkan_device_format_buffer_types_process.communicate()
-                    #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
-                        with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
-                            for k,line in enumerate(file1):
-                                FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
+                                fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
+                                fetch_vulkan_device_format_buffer_types_process.communicate()
+                        #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
+                            with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
+                                for k,line in enumerate(file1):
+                                    iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                                    iter2.children.append(iter3)
+                                #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
-                    n +=1
+                        n +=1
+                FormatsTab_Store.append(toprow)
         else:
                 selected_value = 0
                 if selected is not None:
@@ -531,39 +615,53 @@ def Vulkan(tab2):
                 fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
                 fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
                 fetch_vulkan_device_format_buffer_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
-                iter1 = FormatsTab_Store.append(None,[selected_Format,linearStatus,optimalStatus,bufferStatus,setBackgroundColor(0),linearColor,optimalColor,bufferColor]) 
-
+            #    iter1 = FormatsTab_Store.append(None,[selected_Format,linearStatus,optimalStatus,bufferStatus,setBackgroundColor(0),linearColor,optimalColor,bufferColor]) 
+                toprow = ExpandDataObject2(selected_Format,linearStatus,optimalStatus,bufferStatus,"")
                 j = 1
                 if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
-                    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    
+                #    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = ExpandDataObject2("linearTiling"," "," "," ","")
+                    toprow.children.append(iter2)
+                            
                     with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
                         fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_linear_types_process.communicate()
                         
                     with open(Filenames.vulkan_device_format_types_linear_file) as file1:
                         for k,line in enumerate(file1):
-                            FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-
+                            iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                            iter2.children.append(iter3)
+                        #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                #    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = ExpandDataObject2("optimalTiling"," "," "," ","")
+                    toprow.children.append(iter2)
+                            
                     with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
                         fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_optimal_types_process.communicate()
                 #       os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag' > /tmp/gpu-viewer/VKOptimal.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_optimal_file) as file1:
                         for k,line in enumerate(file1):
-                            FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-                    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
-
+                            iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                            iter2.children.append(iter3)
+                        #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                #    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                    iter2 = ExpandDataObject2("bufferFeatures"," "," "," ","")
+                    toprow.children.append(iter2)
+                    
                     with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
                         fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
                         fetch_vulkan_device_format_buffer_types_process.communicate()
                 #      os.system("cat /tmp/gpu-viewer/VKDFORMATS.txt | awk '/^%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/buffer*/{flag=1;next}/Common*/{flag=0}flag' > /tmp/gpu-viewer/VKBuffer.txt " %(valueFormats[n].strip('\n')))
                     with open(Filenames.vulkan_device_format_types_buffer_file) as file1:
                         for k,line in enumerate(file1):
-                            FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
+                            iter3 = ExpandDataObject2((((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ","")
+                            iter2.children.append(iter3)
+                        #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                     j +=1
-                TreeFormats.expand_all()
+                formatsModel.set_autoexpand(True)
+                FormatsTab_Store.append(toprow)
+                
 
 
         labe1Format = "Formats (%d)" %len(valueFormats)
@@ -886,39 +984,55 @@ def Vulkan(tab2):
 
         layer_extension_counts = fetchContentsFromCommand(fetch_vulkan_device_layer_extension_count_command)
 
-        LayerTab_Store.clear()
+        LayerTab_Store.remove_all()
 
         label = "Instance Extensions (%d)" % (len(vulkan_device_instance_lhs))
         label2 = "Instance Layers (%d)" %len(layer_names)
         notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
         notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
         i = 0; j =1
+        groupName = None
         with open(Filenames.vulkan_device_layers_file) as file:
             for line in file:
                 if '====' in line:
                     continue
-                if "VK_LAYER" in line:
-                    iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
-                     layer_extension_counts[i], layer_descriptions[i],
-                     setBackgroundColor(i)])
-                    if i % 2 == 0:
-                        j = 1
+                if not (groupName == line):
+                    if "VK_LAYER" in line:
+                        if groupName == None:
+                            toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
+                        else:
+                            LayerTab_Store.append(toprow)
+                            toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
+                    #    iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
+                    #    layer_extension_counts[i], layer_descriptions[i],
+                        groupName = line
+                        i = i + 1
+                        continue
+                    elif "\t" in line and "\t\t" not in line:
+                        iter2 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                        toprow.children.append(iter2)
+                    #    continue
+                    #    iter2 = LayerTab_Store.append(iter,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                     #   j = j + 1
+                    elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
+                        iter3 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                        iter2.children.append(iter3)
+                     #   continue
+                    #    iter3 = LayerTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                    #    j = j + 1
+                    elif "Layer-Device" in line:
+                        iter4 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                        iter3.children.append(iter4)
+                    #    continue
+                    #    iter4 = LayerTab_Store.append(iter3,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                    #    j = j + 1
                     else:
-                        j = 2
-                    i = i + 1
-                    continue
-                elif "\t" in line and "\t\t" not in line:
-                    iter2 = LayerTab_Store.append(iter,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    j = j + 1
-                elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
-                    iter3 = LayerTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    j = j + 1
-                elif "Layer-Device" in line:
-                    iter4 = LayerTab_Store.append(iter3,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    j = j + 1
-                else:
-                    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    j = j + 1
+                        iter5 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                        iter4.children.append(iter5)
+                    #    continue
+                    #    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                    #    j = j + 1
+            LayerTab_Store.append(toprow)
 
     def selectProperties(dropdown, _pspec):
         selected =dropdown.props.selected_item
@@ -1155,7 +1269,17 @@ def Vulkan(tab2):
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
 
     def _do_filter_properties_view(item, filter_list_model):
-        search_text_widget = limitsSearchEntry.get_text()
+        search_text_widget = propertySearchEntry.get_text()
+        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
+
+    def _do_filter_layers_view(item, filter_list_model):
+        search_text_widget = layerSearchEntry.get_text()
+        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
+
+    def _do_filter_formats_view(item, filter_list_model):
+        search_text_widget = formatSearchEntry.get_text()
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
 
     def searchFormatsTree(model, iter, Tree):
@@ -1171,14 +1295,6 @@ def Vulkan(tab2):
             value = model.get_value(iter, i).lower()
             if search_query in value:
                 return True
-
-    def searchPropertiesTree(model, iter, Tree):
-        search_query = propertySearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
-        Tree.expand_all()
 
     def radcall(combo,dummy):
         text = combo.props.selected
@@ -1468,40 +1584,90 @@ def Vulkan(tab2):
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
 
-    FormatsTab_Store = Gtk.TreeStore(str,str,str,str,str,str,str,str)
-    FormatsTab_Store_filter = FormatsTab_Store.filter_new()
-    TreeFormats = Gtk.TreeView.new_with_model(FormatsTab_Store_filter)
-    TreeFormats.set_property("enable-grid-lines", 1)
- #   TreeFormats.set_property("enable-tree-lines", True)
-    TreeFormats.set_enable_search(True)
- #   TreeFormats.set_enable_search(True)
-    for i, column_title in enumerate(FormatsTitle):
-        Formatsrenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
-        column.add_attribute(Formatsrenderer, "background", 4)
-        column.set_resizable(True)
-        column.set_reorderable(True)
-    #    column.set_property("min-width", MWIDTH)
-        if i == 0:
-            column.set_property("min-width", 400)
-        if i > 0 :
-            column.set_property("min-width", 200)
-        if i > 0 and i < 4:
-            column.add_attribute(Formatsrenderer,"foreground",i+4)
 
-        TreeFormats.append_column(column)
+    formatsColumnView = Gtk.ColumnView()
+    formatsColumnView.props.show_row_separators = True
+    formatsColumnView.props.show_column_separators = False
+
+    factory_formats = Gtk.SignalListItemFactory()
+    factory_formats.connect("setup",setup_expander)
+    factory_formats.connect("bind",bind_expander)
+
+    factory_formats_value1 = Gtk.SignalListItemFactory()
+    factory_formats_value1.connect("setup",setup)
+    factory_formats_value1.connect("bind",bind1)
+
+
+    factory_formats_value2 = Gtk.SignalListItemFactory()
+    factory_formats_value2.connect("setup",setup)
+    factory_formats_value2.connect("bind",bind2)
+
+
+    factory_formats_value3 = Gtk.SignalListItemFactory()
+    factory_formats_value3.connect("setup",setup)
+    factory_formats_value3.connect("bind",bind3)
+
+    formatsSelection = Gtk.SingleSelection()
+    FormatsTab_Store = Gio.ListStore.new(ExpandDataObject2)
+    filterSortFormatsStore = Gtk.FilterListModel(model=FormatsTab_Store)
+    filter_formats = Gtk.CustomFilter.new(_do_filter_formats_view, filterSortFormatsStore)
+    filterSortFormatsStore.set_filter(filter_formats)
+
+    formatsModel = Gtk.TreeListModel.new(filterSortFormatsStore,False,False,add_tree_node2)
+    formatsSelection.set_model(formatsModel)
+
+    formatsColumnView.set_model(formatsSelection)
+
+    formatColumnLhs = Gtk.ColumnViewColumn.new("Device Formats",factory_formats)
+    formatColumnLhs.set_resizable(True)
+    formatColumnRhs1 = Gtk.ColumnViewColumn.new("linearTiling",factory_formats_value1)
+    formatColumnRhs1.set_expand(True)
+    formatColumnRhs2 = Gtk.ColumnViewColumn.new("optimalTiling",factory_formats_value2)
+    formatColumnRhs2.set_expand(True)
+    formatColumnRhs3 = Gtk.ColumnViewColumn.new("bufferFeatures",factory_formats_value3)
+    formatColumnRhs3.set_expand(True)
+
+    formatsColumnView.append_column(formatColumnLhs)
+    formatsColumnView.append_column(formatColumnRhs1)
+    formatsColumnView.append_column(formatColumnRhs2)
+    formatsColumnView.append_column(formatColumnRhs3)
+
+#    FormatsTab_Store = Gtk.TreeStore(str,str,str,str,str,str,str,str)
+#    FormatsTab_Store_filter = FormatsTab_Store.filter_new()
+#    TreeFormats = Gtk.TreeView.new_with_model(FormatsTab_Store_filter)
+ #   TreeFormats.set_property("enable-grid-lines", 1)
+ #   TreeFormats.set_property("enable-tree-lines", True)
+ #   TreeFormats.set_enable_search(True)
+ #   TreeFormats.set_enable_search(True)
+  #  for i, column_title in enumerate(FormatsTitle):
+  #      Formatsrenderer = Gtk.CellRendererText()
+   #     column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
+    #    column.add_attribute(Formatsrenderer, "background", 4)
+    #    column.set_resizable(True)
+    #    column.set_reorderable(True)
+    #    column.set_property("min-width", MWIDTH)
+    #    if i == 0:
+    #        column.set_property("min-width", 400)
+    #    if i > 0 :
+    #        column.set_property("min-width", 200)
+    #    if i > 0 and i < 4:
+    #        column.add_attribute(Formatsrenderer,"foreground",i+4)
+
+     #   TreeFormats.append_column(column)
 
     formatSearchFrame = Gtk.Frame()
-    formatSearchEntry = createSearchEntry(FormatsTab_Store_filter)
+    formatSearchEntry = Gtk.SearchEntry()
     formatSearchFrame.set_child(formatSearchEntry)
+    formatSearchEntry.set_property("placeholder_text","Type here to filter.....")
+    formatSearchEntry.connect("search-changed", _on_search_method_changed,filter_formats)
     FormatsGrid.attach(formatSearchFrame,0,0,12,1)
-    FormatsScrollbar = create_scrollbar(TreeFormats)
+    FormatsScrollbar = create_scrollbar(formatsColumnView)
     FormatsGrid.attach_next_to(FormatsScrollbar, formatSearchFrame, Gtk.PositionType.BOTTOM, 15, 1)
  #   FormatsGrid.attach_next_to(FormatsCombo,formatSearchFrame,Gtk.PositionType.RIGHT,1,1)
     FormatsGrid.attach_next_to(FormatsDropDown,formatSearchFrame,Gtk.PositionType.RIGHT,3,1)
 
 
-    FormatsTab_Store_filter.set_visible_func(searchFormatsTree, data=TreeFormats)
+#    FormatsTab_Store_filter.set_visible_func(searchFormatsTree, data=TreeFormats)
 
         # ------------------------Memory Types & Heaps----------------------------------------------
 
@@ -1698,35 +1864,82 @@ def Vulkan(tab2):
     InstanceLayersGrid = createSubTab(InstanceLayersTab, notebook, "Instance Layers")
     InstanceLayersGrid.set_row_spacing(3)
 
+
     layersColumnView = Gtk.ColumnView()
     layersColumnView.props.show_row_separators = True
-    layersColumnView.props.show_column_separators = True
+    layersColumnView.props.show_column_separators = False
 
     factory_layers = Gtk.SignalListItemFactory()
     factory_layers.connect("setup",setup_expander)
     factory_layers.connect("bind",bind_expander)
 
-    factory_layers_value = Gtk.SignalListItemFactory()
-    factory_layers_value.connect("setup",setup)
-    factory_layers_value.connect("bind",bind1)
+    factory_layers_value1 = Gtk.SignalListItemFactory()
+    factory_layers_value1.connect("setup",setup)
+    factory_layers_value1.connect("bind",bind1)
 
-    LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
-    LayerTab_Store_filter = LayerTab_Store.filter_new()
-    TreeLayer = Gtk.TreeView.new_with_model(LayerTab_Store_filter)
-    TreeLayer.set_property("enable-grid-lines", 1)
-    TreeLayer.set_enable_search(TreeLayer)
+
+    factory_layers_value2 = Gtk.SignalListItemFactory()
+    factory_layers_value2.connect("setup",setup)
+    factory_layers_value2.connect("bind",bind2)
+
+
+    factory_layers_value3 = Gtk.SignalListItemFactory()
+    factory_layers_value3.connect("setup",setup)
+    factory_layers_value3.connect("bind",bind3)
+
+
+    factory_layers_value4 = Gtk.SignalListItemFactory()
+    factory_layers_value4.connect("setup",setup)
+    factory_layers_value4.connect("bind",bind4)
+
+    layerSelection = Gtk.SingleSelection()
+    LayerTab_Store = Gio.ListStore.new(ExpandDataObject2)
+    filterSortLayersStore = Gtk.FilterListModel(model=LayerTab_Store)
+    filter_layers = Gtk.CustomFilter.new(_do_filter_layers_view, filterSortLayersStore)
+    filterSortLayersStore.set_filter(filter_layers)
+
+    layersModel = Gtk.TreeListModel.new(filterSortLayersStore,False,False,add_tree_node2)
+    layerSelection.set_model(layersModel)
+
+    layersColumnView.set_model(layerSelection)
+
+    layerColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_layers)
+    layerColumnLhs.set_resizable(True)
+    layerColumnRhs1 = Gtk.ColumnViewColumn.new("Value",factory_layers_value1)
+    layerColumnRhs1.set_expand(True)
+    layerColumnRhs2 = Gtk.ColumnViewColumn.new("Value",factory_layers_value2)
+    layerColumnRhs2.set_expand(True)
+    layerColumnRhs3 = Gtk.ColumnViewColumn.new("Value",factory_layers_value3)
+    layerColumnRhs3.set_expand(True)
+    layerColumnRhs4 = Gtk.ColumnViewColumn.new("Value",factory_layers_value4)
+    layerColumnRhs4.set_expand(True)
+
+    layersColumnView.append_column(layerColumnLhs)
+    layersColumnView.append_column(layerColumnRhs1)
+    layersColumnView.append_column(layerColumnRhs2)
+    layersColumnView.append_column(layerColumnRhs3)
+    layersColumnView.append_column(layerColumnRhs4)
+
+
+#    LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
+#    LayerTab_Store_filter = LayerTab_Store.filter_new()
+#    TreeLayer = Gtk.TreeView.new_with_model(LayerTab_Store_filter)
+#    TreeLayer.set_property("enable-grid-lines", 1)
+ #   TreeLayer.set_enable_search(TreeLayer)
  #   TreeLayer.set_property("enable-tree-lines",True)
 
-    setColumns(TreeLayer, LayerTitle, 100, 0.0)
+ #   setColumns(TreeLayer, LayerTitle, 100, 0.0)
 
     layerSearchFrame = Gtk.Frame()
-    layerSearchEntry = createSearchEntry(LayerTab_Store_filter)
+    layerSearchEntry = Gtk.SearchEntry()
+    layerSearchEntry.set_property("placeholder_text","Type here to filter.....")
+    layerSearchEntry.connect("search-changed",_on_search_method_changed,filter_layers)
     layerSearchFrame.set_child(layerSearchEntry)
     InstanceLayersGrid.attach(layerSearchFrame,0,0,1,1)
-    LayerScrollbar = create_scrollbar(TreeLayer)
+    LayerScrollbar = create_scrollbar(layersColumnView)
     InstanceLayersGrid.attach_next_to(LayerScrollbar, layerSearchFrame, Gtk.PositionType.BOTTOM, 1, 1)
 
-    LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree, data=TreeLayer)
+#    LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree, data=TreeLayer)
 
     # ------------------ Creating the Surface Tab --------------------------------------------------
 
