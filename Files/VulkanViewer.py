@@ -35,6 +35,14 @@ class DataObject(GObject.GObject):
         self.column1 = column1
         self.column2 = column2
 
+class ExpandDataObject3(GObject.GObject):
+    def __init__(self, txt: str, image: GdkPixbuf.Pixbuf, txt2: str):
+        super(ExpandDataObject3, self).__init__()
+        self.data = txt
+        self.data2 = image
+        self.data3 = txt2
+        self.children = []
+
 class ExpandDataObject2(GObject.GObject):
     def __init__(self, txt: str, txt2: str,txt3: str,txt4: str,txt5: str):
         super(ExpandDataObject2, self).__init__()
@@ -88,6 +96,24 @@ def add_tree_node2(item):
         for child in item.children:
             store.append(child)
         return store
+
+def add_tree_node3(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject3)
+        for child in item.children:
+            store.append(child)
+        return store
     
 def setup_expander(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
@@ -105,9 +131,24 @@ def bind_expander(widget, item):
     row = item.get_item()
     expander.set_list_row(row)
     obj = row.get_item()
- #   print(obj.data)
     label.set_label(obj.data)
 
+def setup_image(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    image_render = Gtk.Image()
+    item.set_child(image_render)
+
+def bind_image(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+ #   image_render = Gtk.Image()
+#    image_renderer = Gtk.Picture.new_for_pixbuf(image)
+#    row = item.get_item()
+#    obj = row.get_item()
+    label.set_from_pixbuf(obj.data2)
+    
 def bind1(widget, item):
     """bind data from the store object to the widget"""
     label = item.get_child()
@@ -256,7 +297,7 @@ def Vulkan(tab2):
 
         valueRHS = [i.strip('=') for i in valueRHS]
         valueRHS = [i.strip(':') for i in valueRHS]
-        
+
         for i in range(len(valueRHS)):
             if "0x" in valueRHS[i]:
                 valueRHS[i] = int(valueRHS[i], 16)
@@ -267,55 +308,88 @@ def Vulkan(tab2):
         valueRHS = [i.strip('\t') for i in valueRHS]
         valueRHS = [i.strip(' ') for i in valueRHS]
 
-        DeviceTab_Store.clear()
-        TreeDevice.set_model(DeviceTab_Store)
+        DeviceTab_Store.remove_all()
+    #    TreeDevice.set_model(DeviceTab_Store)
 
-
+        groupNameCheck = ["Vulkan Details...","Processor Details...","Memory Details...","Operating System Details..."]
         dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
+        groupName = None; k = 0
+        toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ")
         for i in range(len(valueRHS)):
-            background_color = setBackgroundColor(i)
             if "apiVersion" in valueLHS[i]:
+                groupName = "Vulkan Details..."
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getVulkanVersion(valueRHS[i])
-                iter1 = DeviceTab_Store.append(None,["Vulkan Details...",dummy_transparent," ",const.BGCOLOR3])
+            #    iter1 = DeviceTab_Store.append(None,["Vulkan Details...",dummy_transparent," ",const.BGCOLOR3])
+                #    toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ",)
             if "driverVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getDriverVersion(valueRHS,i)
             if "deviceName" in valueLHS[i]:
                 gpu_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'),background_color])
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
                 continue
             if "driverName" in valueLHS[i]:
                 driver_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'),background_color])
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
                 continue
             if "Model" in valueLHS[i]:
                 cpu_logo = getLogo(valueRHS[i])
-                iter1 = DeviceTab_Store.append(None,["Processor Details...",dummy_transparent,"",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'),background_color])
+                DeviceTab_Store.append(toprow) 
+            #    iter1 = DeviceTab_Store.append(None,["Processor Details...",dummy_transparent,"",const.BGCOLOR3])
+                toprow = ExpandDataObject3("Processor Details...",dummy_transparent,"")
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
+                groupName = "Processor Details..."
+                k =1
                 continue
             if "Description" in valueLHS[i]:
                 distro_logo = getLogo(valueRHS[i])
-                iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),background_color])
+                DeviceTab_Store.append(toprow) 
+            #    iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
+                toprow = ExpandDataObject3("Operating System Details...",dummy_transparent,"")
+        #     DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),distro_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
+                groupName = "Operating System Details..."
+                k = 3
                 continue
             if "Desktop" in valueLHS[i]:
                 desktop_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),background_color])
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
                 continue
             if "Windowing" in valueLHS[i]:
                 windowing_system_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),background_color])
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
                 continue
             if "MemTotal" in valueLHS[i]:
-                iter1 = DeviceTab_Store.append(None,["Memory Details...",dummy_transparent," ",const.BGCOLOR3])
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
+                DeviceTab_Store.append(toprow) 
+            #    iter1 = DeviceTab_Store.append(None,["Memory Details...",dummy_transparent," ",const.BGCOLOR3])
+                toprow = ExpandDataObject3("Memory Details...",dummy_transparent," ")
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
+                toprow.children.append(iter1)
+                k = 2
+                groupName = "Memory Details..."
             elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
+                toprow.children.append(iter1)
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
             else:
-                DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),background_color])
-
-        TreeDevice.expand_all()
+                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'))
+                toprow.children.append(iter1)
+            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),background_color])
+        DeviceTab_Store.append(toprow)
+    #    TreeDevice.expand_all()
 
         fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
     #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
@@ -353,7 +427,6 @@ def Vulkan(tab2):
         with open(Filenames.vulkan_device_limits_file, "r") as file1:
             j = 0; iter = None
             for i,line in enumerate(file1):
-                background_color = setBackgroundColor(i)
                 text = vulkan_device_limits_lhs[i].strip('\t')
                 if not (iter == text):
                     if '=' in line and "\t\t" not in line:
@@ -433,7 +506,6 @@ def Vulkan(tab2):
                             value.append('false')
                             fgColor.append(const.COLOR2)
                             break                        
-                background_color = setBackgroundColor(i)
                 FeatureTab_Store.append(DataObject("  " +text.strip('\n'), value[i].strip('\n'), ))
 
     def Extensions(GPUname):
@@ -452,7 +524,6 @@ def Vulkan(tab2):
         extensionColumnView.set_model(extensionSelection)
 
         for i in range(len(vulkan_device_extension_lhs)):
-            background_color = setBackgroundColor(i)
             ExtensionTab_Store.append(DataObject(vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i]))
 
         label = "Extensions (%d)" %len(vulkan_device_extensions_rhs)
@@ -511,22 +582,16 @@ def Vulkan(tab2):
                     if not (groupName == valueFormats[n]):
                         if 'None' not in valueLinearCount[i]:
                             linearStatus = "true"
-                            linearColor = const.COLOR1
                         else:
                             linearStatus = "false"
-                            linearColor = const.COLOR2
                         if 'None' not in valueOptimalCount[i]:
                             optimalStatus = "true"
-                            optimalColor = const.COLOR1
                         else:
                             optimalStatus = "false"
-                            optimalColor = const.COLOR2
                         if 'None' not in valueBufferCount[i]:
                             bufferStatus = "true"
-                            bufferColor = const.COLOR1
                         else:
                             bufferStatus = "false"
-                            bufferColor = const.COLOR2
                         if groupName == None:
                             toprow = ExpandDataObject2(((valueFormats[n].strip('\n')).strip('\t')).replace('FORMAT_',""),linearStatus,optimalStatus,bufferStatus,"")
                         else:
@@ -595,22 +660,16 @@ def Vulkan(tab2):
                         break
                 if 'None' not in valueLinearCount[value]:
                     linearStatus = "true"
-                    linearColor = const.COLOR1
                 else:
                     linearStatus = "false"
-                    linearColor = const.COLOR2
                 if 'None' not in valueOptimalCount[value]:
                     optimalStatus = "true"
-                    optimalColor = const.COLOR1
                 else:
                     optimalStatus = "false"
-                    optimalColor = const.COLOR2
                 if 'None' not in valueBufferCount[value]:
                     bufferStatus = "true"
-                    bufferColor = const.COLOR1
                 else:
                     bufferStatus = "false"
-                    bufferColor = const.COLOR2
 
                 fetch_vulkan_device_format_linear_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/linear*/{flag=1;next}/optimal*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
                 fetch_vulkan_device_format_optimal_types_command = "cat %s | awk '/FORMAT_%s$/{flag=1};flag;/Common.*/{flag=0}' | awk '/optimal*/{flag=1;next}/buffer*/{flag=0}flag'" %(Filenames.vulkan_device_formats_file,selected_Format)
@@ -1282,19 +1341,6 @@ def Vulkan(tab2):
         search_text_widget = formatSearchEntry.get_text()
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
 
-    def searchFormatsTree(model, iter, Tree):
-        search_query = formatSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
-
-    def searchInstanceLayersTree(model, iter, Tree):
-        search_query = layerSearchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-            if search_query in value:
-                return True
 
     def radcall(combo,dummy):
         text = combo.props.selected
@@ -1331,27 +1377,64 @@ def Vulkan(tab2):
     DeviceGrid = createSubTab(DeviceTab, notebook, "Device")
     DeviceGrid.set_row_spacing(3)
 
-    DeviceTab_Store = Gtk.TreeStore(str,GdkPixbuf.Pixbuf, str,str)
-    TreeDevice = Gtk.TreeView.new_with_model(DeviceTab_Store)
-    TreeDevice.set_property("enable-grid-lines", 1)
+    deviceColumnView = Gtk.ColumnView()
+    deviceColumnView.props.show_row_separators = True
+    deviceColumnView.props.show_column_separators = False
 
-    for i,column_title in enumerate(DeviceTitle):
-        if i == 1:
-            renderer_pixbuf = Gtk.CellRendererPixbuf()
-            column_pixbuf = Gtk.TreeViewColumn(column_title)
-            column_pixbuf.pack_start(renderer_pixbuf, False)
-            column_pixbuf.add_attribute(renderer_pixbuf,"pixbuf",1)
-            column_pixbuf.set_property("min-width", 20)
-            column_pixbuf.add_attribute(renderer_pixbuf,"cell-background",3)
-            TreeDevice.append_column(column_pixbuf)
-        else:
-            renderer_text = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(column_title, renderer_text, text=i)
-            column.add_attribute(renderer_text,"background",3)
-            TreeDevice.append_column(column)
+    factory_devices = Gtk.SignalListItemFactory()
+    factory_devices.connect("setup",setup_expander)
+    factory_devices.connect("bind",bind_expander)
+
+    factory_devices_value1 = Gtk.SignalListItemFactory()
+    factory_devices_value1.connect("setup",setup_image)
+    factory_devices_value1.connect("bind",bind_image)
+
+    factory_devices_value2 = Gtk.SignalListItemFactory()
+    factory_devices_value2.connect("setup",setup)
+    factory_devices_value2.connect("bind",bind2)
+
+    deviceSelection = Gtk.SingleSelection()
+    DeviceTab_Store = Gio.ListStore.new(ExpandDataObject3)
+
+    deviceModel = Gtk.TreeListModel.new(DeviceTab_Store,False,True,add_tree_node3)
+    deviceSelection.set_model(deviceModel)
+
+    deviceColumnView.set_model(deviceSelection)
+
+    deviceColumnLhs = Gtk.ColumnViewColumn.new("Device Details",factory_devices)
+    deviceColumnLhs.set_resizable(True)
+    deviceColumnLhs.set_expand(False)
+    deviceColumnRhs1 = Gtk.ColumnViewColumn.new("",factory_devices_value1)
+    deviceColumnRhs1.set_resizable(True)
+    deviceColumnRhs1.set_expand(False)
+    deviceColumnRhs2 = Gtk.ColumnViewColumn.new("Value",factory_devices_value2)
+    deviceColumnRhs2.set_expand(True)
+
+    deviceColumnView.append_column(deviceColumnLhs)
+    deviceColumnView.append_column(deviceColumnRhs1)
+    deviceColumnView.append_column(deviceColumnRhs2)
+
+#    DeviceTab_Store = Gtk.TreeStore(str,GdkPixbuf.Pixbuf, str,str)
+#    TreeDevice = Gtk.TreeView.new_with_model(DeviceTab_Store)
+#    TreeDevice.set_property("enable-grid-lines", 1)
+
+ #   for i,column_title in enumerate(DeviceTitle):
+  #      if i == 1:
+   #         renderer_pixbuf = Gtk.CellRendererPixbuf()
+   #         column_pixbuf = Gtk.TreeViewColumn(column_title)
+   #         column_pixbuf.pack_start(renderer_pixbuf, False)
+   #         column_pixbuf.add_attribute(renderer_pixbuf,"pixbuf",1)
+   #         column_pixbuf.set_property("min-width", 20)
+   #         column_pixbuf.add_attribute(renderer_pixbuf,"cell-background",3)
+   #         TreeDevice.append_column(column_pixbuf)
+   #     else:
+   #         renderer_text = Gtk.CellRendererText()
+   #         column = Gtk.TreeViewColumn(column_title, renderer_text, text=i)
+    #        column.add_attribute(renderer_text,"background",3)
+    #        TreeDevice.append_column(column)
  #   setColumns(TreeDevice, DeviceTitle, 20, 0.0)
 
-    DeviceScrollbar = create_scrollbar(TreeDevice)
+    DeviceScrollbar = create_scrollbar(deviceColumnView)
     DeviceGrid.attach(DeviceScrollbar,0,0,1,1)
 
     # ------------ Creating the Limits Tab -------------------------------------------
@@ -1620,12 +1703,14 @@ def Vulkan(tab2):
 
     formatColumnLhs = Gtk.ColumnViewColumn.new("Device Formats",factory_formats)
     formatColumnLhs.set_resizable(True)
+    formatColumnLhs.set_expand(True)
     formatColumnRhs1 = Gtk.ColumnViewColumn.new("linearTiling",factory_formats_value1)
     formatColumnRhs1.set_expand(True)
     formatColumnRhs2 = Gtk.ColumnViewColumn.new("optimalTiling",factory_formats_value2)
     formatColumnRhs2.set_expand(True)
     formatColumnRhs3 = Gtk.ColumnViewColumn.new("bufferFeatures",factory_formats_value3)
     formatColumnRhs3.set_expand(True)
+
 
     formatsColumnView.append_column(formatColumnLhs)
     formatsColumnView.append_column(formatColumnRhs1)
@@ -1905,6 +1990,7 @@ def Vulkan(tab2):
 
     layerColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_layers)
     layerColumnLhs.set_resizable(True)
+    layerColumnLhs.set_expand(True)
     layerColumnRhs1 = Gtk.ColumnViewColumn.new("Value",factory_layers_value1)
     layerColumnRhs1.set_expand(True)
     layerColumnRhs2 = Gtk.ColumnViewColumn.new("Value",factory_layers_value2)

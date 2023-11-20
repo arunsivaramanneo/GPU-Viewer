@@ -8,7 +8,7 @@ from Common import create_scrollbar,fetchImageFromUrl,getLinkButtonImg,setMargin
 
 Adw.init()
 
-title = "About GPU-Viewer v2.32"
+title = "About GPU-Viewer v2.34"
 
 import gi
 

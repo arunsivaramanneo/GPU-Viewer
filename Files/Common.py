@@ -210,6 +210,18 @@ def getDriverVersion(value,i):
         microVersion = int(value[i]) & 4095
         return "%d.%d.%d" % (majorVersion, minorVersion, microVersion)
 
+def setup(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    label.props.xalign = 0.0
+    item.set_child(label)
+
+
+def bind(widget, item,column):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    obj = item.get_item()
+    label.set_label(obj.column)
 
 def setColumnFrameBuffer(TreeFB, Title):
     for i, column_title in enumerate(Title):
@@ -323,7 +335,7 @@ def getGpuImage(line):
 
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
-        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,28, True)
+        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,128,128, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
     elif "Budgie" in line and "Ubuntu" in line:
@@ -361,9 +373,9 @@ def getLogo(line):
     elif "Mint" in line:
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,28, True)
     elif "Radeon" in line and "Ryzen" not in line:
-        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,28, True)
+        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,128,128, False)
     elif "Ryzen" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,28, True)
+        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,128,128, True)
     elif ("Mesa" in line or "radv" in line or "llvmpipe" in line or "dozen" in line or "venus" in line or "nvk" in line) and ("LLVM" not in line):
         logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,28, True)
     elif "LLVM" in line :
@@ -383,7 +395,7 @@ def getLogo(line):
     elif "Budgie" in line:
         logo_pixbuf = fetchImageFromUrl(const.Budgie_logo,32,28, True)
     elif "Unity" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Unity_logo,32,28, True)
+        logo_pixbuf = fetchImageFromUrl(const.Unity_logo,64,64, True)
     elif "GNOME" in line:
         logo_pixbuf = fetchImageFromUrl(const.Gnome_logo,32,28, True)
     elif "Fluxbox" in line:
