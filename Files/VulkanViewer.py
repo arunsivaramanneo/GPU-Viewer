@@ -132,6 +132,7 @@ def bind_expander(widget, item):
     expander.set_list_row(row)
     obj = row.get_item()
     label.set_label(obj.data)
+    label.add_css_class(css_class='parent')
 
 def setup_image(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
@@ -161,6 +162,7 @@ def bind1(widget, item):
     else:
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data2)
+    
 
 def bind2(widget, item):
     """bind data from the store object to the widget"""
@@ -1988,16 +1990,16 @@ def Vulkan(tab2):
 
     layersColumnView.set_model(layerSelection)
 
-    layerColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_layers)
+    layerColumnLhs = Gtk.ColumnViewColumn.new("Layers",factory_layers)
     layerColumnLhs.set_resizable(True)
     layerColumnLhs.set_expand(True)
-    layerColumnRhs1 = Gtk.ColumnViewColumn.new("Value",factory_layers_value1)
+    layerColumnRhs1 = Gtk.ColumnViewColumn.new("Vulkan Version",factory_layers_value1)
     layerColumnRhs1.set_expand(True)
-    layerColumnRhs2 = Gtk.ColumnViewColumn.new("Value",factory_layers_value2)
+    layerColumnRhs2 = Gtk.ColumnViewColumn.new("Layer Version",factory_layers_value2)
     layerColumnRhs2.set_expand(True)
-    layerColumnRhs3 = Gtk.ColumnViewColumn.new("Value",factory_layers_value3)
+    layerColumnRhs3 = Gtk.ColumnViewColumn.new("Extension Count",factory_layers_value3)
     layerColumnRhs3.set_expand(True)
-    layerColumnRhs4 = Gtk.ColumnViewColumn.new("Value",factory_layers_value4)
+    layerColumnRhs4 = Gtk.ColumnViewColumn.new("Description",factory_layers_value4)
     layerColumnRhs4.set_expand(True)
 
     layersColumnView.append_column(layerColumnLhs)

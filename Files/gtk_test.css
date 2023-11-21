@@ -80,7 +80,18 @@ textview > border {
   color: green;
 }
 
+.nothing{
+  color: #ffffff;
+}
 
+image{
+  padding: none;
+  
+}
+
+.parent{
+font-weight: 500;
+}
 headerbar {
   background-image: none;
   background-color: #333333;
@@ -309,7 +320,6 @@ columnview.view > header > button,
 treeview.view > header > button {
   min-height: 0;
   min-width: 0;
-  padding: 3px 6px;
   font-weight: bold;
   color: #6b6d75;
   background-color: #353839;
@@ -376,8 +386,10 @@ treeview {
 }
 
 columnview {
+  border-color: #353839;
   color: white;
   border-style: solid;
+  padding: none;
 }
 
 treeview :nth-child(1){

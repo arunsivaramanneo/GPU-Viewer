@@ -18,9 +18,35 @@ Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
 
-class ExtensionsDataObject(GObject.GObject):
+
+class ExpandDataObject(GObject.GObject):
+    def __init__(self, txt: str, txt2: str):
+        super(ExpandDataObject, self).__init__()
+        self.data = txt
+        self.data2 = txt2
+        self.children = []
+
+def add_tree_node(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject)
+        for child in item.children:
+            store.append(child)
+        return store
+
+class DataObject2(GObject.GObject):
     def __init__(self, column1: str):
-        super(ExtensionsDataObject, self).__init__()
+        super(DataObject2, self).__init__()
         self.column1 = column1
 
 class DataObject(GObject.GObject):
@@ -28,6 +54,15 @@ class DataObject(GObject.GObject):
         super(DataObject, self).__init__()
         self.column1 = column1
         self.column2 = column2
+
+def setup_expander(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    expander = Gtk.TreeExpander.new()
+ #   expander.props.indent_for_icon = True
+ #   expander.props.indent_for_depth = True
+    expander.set_child(label)
+    item.set_child(expander)
 
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
@@ -46,6 +81,30 @@ def bind_column2(widget, item):
     label = item.get_child()
     obj = item.get_item()
     label.set_label(obj.column2)
+
+def bind1(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data2: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data2:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data2)
+    
+
+def bind_expander(widget, item):
+    """bind data from the store object to the widget"""
+    expander = item.get_child()
+    label = expander.get_child()
+    row = item.get_item()
+    expander.set_list_row(row)
+    obj = row.get_item()
+    label.set_label(obj.data)
+    label.add_css_class(css_class='parent')
 
 def OpenGL(tab):
 
@@ -116,18 +175,48 @@ def OpenGL(tab):
         LimitsGrid.set_row_spacing(5)
         LimitsCoreFrame.set_child(LimitsGrid)
         LimitsGrid.attach(limitsDropDown,0,0,1,1)
-        LimitsCore_Store = Gtk.TreeStore(str, str, str)
-        TreeCoreLimits = Gtk.TreeView.new_with_model(LimitsCore_Store)
-        TreeCoreLimits.set_property("enable-grid-lines",1)
+
+        limitsColumnView = Gtk.ColumnView()
+        limitsColumnView.props.show_row_separators = True
+        limitsColumnView.props.show_column_separators = False
+
+        factory_limits = Gtk.SignalListItemFactory()
+        factory_limits.connect("setup",setup_expander)
+        factory_limits.connect("bind",bind_expander)
+
+        factory_limits_value = Gtk.SignalListItemFactory()
+        factory_limits_value.connect("setup",setup)
+        factory_limits_value.connect("bind",bind1)
+
+        limitSelection = Gtk.SingleSelection()
+        LimitsCore_Store = Gio.ListStore.new(ExpandDataObject)
+
+        limitModel = Gtk.TreeListModel.new(LimitsCore_Store,False,True,add_tree_node)
+        limitSelection.set_model(limitModel)
+
+        limitsColumnView.set_model(limitSelection)
+
+        limitColumnLhs = Gtk.ColumnViewColumn.new("OpenGL Hardware Limits",factory_limits)
+        limitColumnLhs.set_resizable(True)
+        limitColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_limits_value)
+        limitColumnRhs.set_expand(True)
+
+        limitsColumnView.append_column(limitColumnLhs)
+        limitsColumnView.append_column(limitColumnRhs)
 
 
-        showLimits(limitsDropDown,0, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
-        limitsDropDown.connect("notify::selected-item",showLimits, LimitsCore_Store, TreeCoreLimits,Filenames.opengl_core_limits_file)
+    #    LimitsCore_Store = Gtk.TreeStore(str, str, str)
+    #    TreeCoreLimits = Gtk.TreeView.new_with_model(LimitsCore_Store)
+    #    TreeCoreLimits.set_property("enable-grid-lines",1)
+
+
+        showLimits(limitsDropDown,0, LimitsCore_Store, limitsColumnView,Filenames.opengl_core_limits_file)
+        limitsDropDown.connect("notify::selected-item",showLimits, LimitsCore_Store, limitsColumnView,Filenames.opengl_core_limits_file)
 
     #    showLimits(LimitRHSValue, LimitsRHS, LimitsCore_Store, TreeCoreLimits,"/tmp/gpu-viewer/OpenGLCoreLimitsLHS.txt")
 
-        setColumns(TreeCoreLimits, LimitsTitle, const.MWIDTH,0.0)
-        LimitsCoreScrollbar = create_scrollbar(TreeCoreLimits)
+    #    setColumns(TreeCoreLimits, LimitsTitle, const.MWIDTH,0.0)
+        LimitsCoreScrollbar = create_scrollbar(limitsColumnView)
         LimitsGrid.attach_next_to(LimitsCoreScrollbar,limitsDropDown,Gtk.PositionType.BOTTOM,1,1)
 
         createMainFile(Filenames.opengl_compat_limits_file,Filenames.fetch_opengl_compat_limits_command)
@@ -153,18 +242,48 @@ def OpenGL(tab):
         limitsCompatGrid.set_row_spacing(5)
         LimitsCompatFrame.set_child(limitsCompatGrid)
         limitsCompatGrid.attach(limitsCompatDropDown,0,0,1,1)
-        LimitsCompat_Store = Gtk.TreeStore(str,str,str)
-        TreeCompatLimits = Gtk.TreeView.new_with_model(LimitsCompat_Store)
-        TreeCompatLimits.set_property("enable-grid-lines",1)
 
-        showLimits(limitsCompatDropDown,0, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
-        limitsCompatDropDown.connect("notify::selected-item",showLimits, LimitsCompat_Store, TreeCompatLimits,Filenames.opengl_compat_limits_file)
+    
+        limitsCompatColumnView = Gtk.ColumnView()
+        limitsCompatColumnView.props.show_row_separators = True
+        limitsCompatColumnView.props.show_column_separators = False
+
+        factory_compat_limits = Gtk.SignalListItemFactory()
+        factory_compat_limits.connect("setup",setup_expander)
+        factory_compat_limits.connect("bind",bind_expander)
+
+        factory_compat_limits_value = Gtk.SignalListItemFactory()
+        factory_compat_limits_value.connect("setup",setup)
+        factory_compat_limits_value.connect("bind",bind1)
+
+        limitCompatSelection = Gtk.SingleSelection()
+        LimitsCompat_Store = Gio.ListStore.new(ExpandDataObject)
+
+        limitCompatModel = Gtk.TreeListModel.new(LimitsCompat_Store,False,True,add_tree_node)
+        limitCompatSelection.set_model(limitCompatModel)
+
+        limitsCompatColumnView.set_model(limitCompatSelection)
+
+        limitCompatColumnLhs = Gtk.ColumnViewColumn.new("OpenGL Hardware Limits",factory_compat_limits)
+        limitCompatColumnLhs.set_resizable(True)
+        limitCompatColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_compat_limits_value)
+        limitCompatColumnRhs.set_expand(True)
+
+        limitsCompatColumnView.append_column(limitCompatColumnLhs)
+        limitsCompatColumnView.append_column(limitCompatColumnRhs)
+
+    #    LimitsCompat_Store = Gtk.TreeStore(str,str,str)
+    #    TreeCompatLimits = Gtk.TreeView.new_with_model(LimitsCompat_Store)
+    #    TreeCompatLimits.set_property("enable-grid-lines",1)
+
+        showLimits(limitsCompatDropDown,0, LimitsCompat_Store, limitsCompatColumnView,Filenames.opengl_compat_limits_file)
+        limitsCompatDropDown.connect("notify::selected-item",showLimits, LimitsCompat_Store, limitsCompatColumnView,Filenames.opengl_compat_limits_file)
 
 
      #   showLimits(LimitRHSValue2, LimitsRHS2, LimitsCompat_Store, TreeCompatLimits,"/tmp/gpu-viewer/OpenGLLimitsLHS.txt")
 
-        setColumns(TreeCompatLimits, LimitsTitle, const.MWIDTH,0.0)
-        LimitsCompatScrollbar = create_scrollbar(TreeCompatLimits)
+    #    setColumns(TreeCompatLimits, LimitsTitle, const.MWIDTH,0.0)
+        LimitsCompatScrollbar = create_scrollbar(limitsCompatColumnView)
         limitsCompatGrid.attach_next_to(LimitsCompatScrollbar,limitsCompatDropDown,Gtk.PositionType.BOTTOM,1,1)
 
         def button_enable(win):
@@ -213,37 +332,49 @@ def OpenGL(tab):
 
         LimitsRHS,LimitRHSValue = appendLimitsRHS(select_opengl_limits_file,opengl_limits_rhs)
 
-        Limits_Store.clear()
-        TreeLimits.set_model(Limits_Store)
-
+        Limits_Store.remove_all()
+     #   TreeLimits.set_model(Limits_Store)
+        groupName = None
         with open(select_opengl_limits_file,"r") as file:
             for i, line in enumerate(file):
                 background_color = setBackgroundColor(k)
                 k += 1
-                TreeLimits.expand_all()
+       #         TreeLimits.expand_all()
                 text = opengl_limits_lhs[i].strip(' ')
                 if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:
                     try:
-                        iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    #    iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        iter3 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                        toprow.children.append(iter3)
                     except Exception:
-                        iter3 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    #    iter3 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+            #         toprow.children.append(iter3)
                     finally:
                         pass
                 elif "      " in line and LimitRHSValue[i] == False and ":" not in line:
-                    Limits_Store.append(iter3, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                #    Limits_Store.append(iter3, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    iter4 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                    iter3.children.append(iter4)
                 else:
                     if ":" in line:
                         k = 0
                         text = opengl_limits_lhs[i]
                         count += 1
-                        iter2 = Limits_Store.append(None,
-                                                    [text.strip('\n'), LimitsRHS[i].strip('\n'), const.BGCOLOR3])
+                    #    iter2 = Limits_Store.append(None,[text.strip('\n'), LimitsRHS[i].strip('\n'), const.BGCOLOR3])
+                        Limits_Store.append(toprow)
+                        toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                    #    toprow.children.append(iter2)
                         continue
                     if count > 0 and "    " in line:
-                        Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                    #    Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        iter2_1 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                        toprow.children.append(iter2_1)
                     else:
-                        Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
-
+                    #    Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
+                        toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                        Limits_Store.append(toprow)
+            Limits_Store.append(toprow)
 
     def radcall2(dropdown,dummy,List,filename,Store,tree,filter):
         selected =dropdown.props.selected_item
@@ -274,9 +405,8 @@ def OpenGL(tab):
 
         count = len(GL_All)
         for i in range(count):
-            background_color = setBackgroundColor(i)
             text = GL_All[i].strip(' ')
-            Store.append(ExtensionsDataObject(text.strip('\n')))
+            Store.append(DataObject2(text.strip('\n')))
 
     def getVendorList(filename):
 
@@ -448,7 +578,7 @@ def OpenGL(tab):
 
 
     openglExtensionsSelection = Gtk.SingleSelection()
-    opengl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+    opengl_extension_list = Gio.ListStore.new(DataObject2)
     filterOpenglExtensionsListStore = Gtk.FilterListModel(model=opengl_extension_list)
     filter_open_extensions = Gtk.CustomFilter.new(_do_filter_opengl_extension_view, filterOpenglExtensionsListStore)
     filterOpenglExtensionsListStore.set_filter(filter_open_extensions)
@@ -506,7 +636,7 @@ def OpenGL(tab):
 
 
     openglESExtensionsSelection = Gtk.SingleSelection()
-    opengl_es_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+    opengl_es_extension_list = Gio.ListStore.new(DataObject2)
     filterOpenglESExtensionsListStore = Gtk.FilterListModel(model=opengl_es_extension_list)
     filter_open_es_extensions = Gtk.CustomFilter.new(_do_filter_opengl_es_extension_view, filterOpenglESExtensionsListStore)
     filterOpenglESExtensionsListStore.set_filter(filter_open_es_extensions)
@@ -571,7 +701,7 @@ def OpenGL(tab):
 
 
         eglExtensionsSelection = Gtk.SingleSelection()
-        egl_extension_list = Gio.ListStore.new(ExtensionsDataObject)
+        egl_extension_list = Gio.ListStore.new(DataObject2)
         filterEglExtensionsListStore = Gtk.FilterListModel(model=egl_extension_list)
         filter_egl_extensions = Gtk.CustomFilter.new(_do_filter_egl_extension_view, filterEglExtensionsListStore)
         filterEglExtensionsListStore.set_filter(filter_egl_extensions)
