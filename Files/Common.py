@@ -339,7 +339,7 @@ def getGpuImage(line):
 
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
-        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,128,128, True)
+        logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,28, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
     elif "Budgie" in line and "Ubuntu" in line:
@@ -377,9 +377,9 @@ def getLogo(line):
     elif "Mint" in line:
         logo_pixbuf = fetchImageFromUrl(const.Mint_logo,32,28, True)
     elif "Radeon" in line and "Ryzen" not in line:
-        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,128,128, False)
+        logo_pixbuf = fetchImageFromUrl(const.Radeon_logo,32,28, False)
     elif "Ryzen" in line:
-        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,128,128, True)
+        logo_pixbuf = fetchImageFromUrl(const.Ryzen_logo,32,28, True)
     elif ("Mesa" in line or "radv" in line or "llvmpipe" in line or "dozen" in line or "venus" in line or "nvk" in line) and ("LLVM" not in line):
         logo_pixbuf = fetchImageFromUrl(const.Mesa_logo,32,28, True)
     elif "LLVM" in line :
@@ -482,3 +482,75 @@ def bind1(widget, item):
     else:
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data2)
+
+
+class ExpandDataObject2(GObject.GObject):
+    def __init__(self, txt: str, txt2: str,txt3: str,txt4: str,txt5: str):
+        super(ExpandDataObject2, self).__init__()
+        self.data = txt
+        self.data2 = txt2
+        self.data3= txt3
+        self.data4= txt4
+        self.data5= txt5
+        self.children = []
+
+
+
+def add_tree_node2(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject2)
+        for child in item.children:
+            store.append(child)
+        return store
+
+def bind2(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data3: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data3:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data3)
+
+
+def bind3(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data4: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data4:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data4)
+
+
+def bind4(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data5: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data5:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data5)

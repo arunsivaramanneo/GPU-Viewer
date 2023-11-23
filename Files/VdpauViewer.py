@@ -2,7 +2,7 @@ import gi
 import const
 import Filenames
 import subprocess
-from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node
+from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4
 
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk,GObject,Gio,Adw
@@ -19,6 +19,14 @@ surfaceOutputTitle = ["Output Surface","Width","Height","Types"]
 SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
 vdpauinfoTitle = ["VDPAU Information","Details"]
 
+class DataObject(GObject.GObject):
+    def __init__(self, column1: str,column2: str,column3: str,column4: str,column5: str):
+        super(DataObject, self).__init__()
+        self.column1 = column1
+        self.column2 = column2
+        self.column3 = column3
+        self.column4 = column4
+        self.column4 = column5
 
 def vdpauinfo(tab2):
 
@@ -60,9 +68,9 @@ def vdpauinfo(tab2):
 
 		for i,line in  enumerate(vdpau_decoder_capabilities):
 			if "not" in line:
-				decoderStore.append([line.split()[0].strip('\n'),"not supported","not supported","not supported","not supported",setBackgroundColor(i)])
+				decoderStore.append(ExpandDataObject2(line.split()[0].strip('\n'),"not supported","not supported","not supported","not supported"))
 			else:
-				decoderStore.append([line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),line.split()[3].strip('\n'),line.split()[4].strip('\n'),setBackgroundColor(i)])
+				decoderStore.append(ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),line.split()[3].strip('\n'),line.split()[4].strip('\n')))
 	
 	def videoSurfaceLimits():
 		
@@ -142,6 +150,14 @@ def vdpauinfo(tab2):
 
 
 		treeVideoMixerFeature.expand_all()
+	
+
+	def _on_search_method_changed(search_entry,filterColumn):
+		filterColumn.changed(Gtk.FilterChange.DIFFERENT)
+
+	def _do_filter_decoder_view(item, filter_list_model):
+		search_text_widget = decoderSearchEntry.get_text()
+		return search_text_widget.upper() in item.data.upper()
 
 
 	grid = Gtk.Grid()
@@ -184,6 +200,7 @@ def vdpauinfo(tab2):
 	vdpauColumnLhs.set_resizable(True)
 	vdpauColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_vdpau_value)
 	vdpauColumnRhs.set_expand(True)
+
 	
 	vdpauinfoColumnView.append_column(vdpauColumnLhs)
 	vdpauinfoColumnView.append_column(vdpauColumnRhs)
@@ -203,14 +220,74 @@ def vdpauinfo(tab2):
 	decoderTab = Gtk.Box(spacing=20)
 	decoderGrid = createSubTab(decoderTab, notebook, "Decoder Capabilities")
 
-	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
-	treeDecoder = Gtk.TreeView.new_with_model(decoderStore)
-	treeDecoder.set_property("enable-grid-lines",1)
+	decoderInfoColumnView = Gtk.ColumnView()
+	decoderInfoColumnView.props.show_row_separators = True
+	decoderInfoColumnView.props.show_column_separators = False
+	
+	factory_decoder = Gtk.SignalListItemFactory()
+	factory_decoder.connect("setup",setup_expander)
+	factory_decoder.connect("bind",bind_expander)
+	
+	factory_decoder_value1 = Gtk.SignalListItemFactory()
+	factory_decoder_value1.connect("setup",setup)
+	factory_decoder_value1.connect("bind",bind1)
+	
 
-	setColumns(treeDecoder, decoderTitle, 300, 0.0)
+	factory_decoder_value2 = Gtk.SignalListItemFactory()
+	factory_decoder_value2.connect("setup",setup)
+	factory_decoder_value2.connect("bind",bind2)
 
-	decoderScrollbar = create_scrollbar(treeDecoder)
-	decoderGrid.attach(decoderScrollbar,0,0,1,1)
+
+	factory_decoder_value3 = Gtk.SignalListItemFactory()
+	factory_decoder_value3.connect("setup",setup)
+	factory_decoder_value3.connect("bind",bind3)
+
+
+	factory_decoder_value4 = Gtk.SignalListItemFactory()
+	factory_decoder_value4.connect("setup",setup)
+	factory_decoder_value4.connect("bind",bind4)
+
+	decoderSelection = Gtk.SingleSelection()
+	decoderStore = Gio.ListStore.new(ExpandDataObject2)
+	filterSortDecoderStore = Gtk.FilterListModel(model=decoderStore)
+	filter_decoder = Gtk.CustomFilter.new(_do_filter_decoder_view, filterSortDecoderStore)
+	filterSortDecoderStore.set_filter(filter_decoder)
+	
+	vdpauModel = Gtk.TreeListModel.new(filterSortDecoderStore,False,True,add_tree_node2)
+	decoderSelection.set_model(vdpauModel)
+	
+	decoderInfoColumnView.set_model(decoderSelection)
+	
+	decoderColumnLhs = Gtk.ColumnViewColumn.new("Decoder name",factory_decoder)
+	decoderColumnLhs.set_resizable(True)
+	decoderColumnRhs1 = Gtk.ColumnViewColumn.new("Level",factory_decoder_value1)
+	decoderColumnRhs1.set_expand(True)
+	decoderColumnRhs2 = Gtk.ColumnViewColumn.new("Macroblocks",factory_decoder_value2)
+	decoderColumnRhs2.set_expand(True)
+	decoderColumnRhs3 = Gtk.ColumnViewColumn.new("Width",factory_decoder_value3)
+	decoderColumnRhs3.set_expand(True)
+	decoderColumnRhs4 = Gtk.ColumnViewColumn.new("Height",factory_decoder_value4)
+	decoderColumnRhs4.set_expand(True)
+	
+	decoderInfoColumnView.append_column(decoderColumnLhs)
+	decoderInfoColumnView.append_column(decoderColumnRhs1)
+	decoderInfoColumnView.append_column(decoderColumnRhs2)
+	decoderInfoColumnView.append_column(decoderColumnRhs3)
+	decoderInfoColumnView.append_column(decoderColumnRhs4)
+
+#	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
+#	treeDecoder = Gtk.TreeView.new_with_model(decoderStore)
+#	treeDecoder.set_property("enable-grid-lines",1)
+
+#	setColumns(treeDecoder, decoderTitle, 300, 0.0)
+	decoderSearchEntry = Gtk.SearchEntry()
+	decoderSearchEntry.set_property("placeholder_text","Type here to filter.....")
+	decoderSearchEntry.connect("search-changed", _on_search_method_changed,filter_decoder)
+
+	decoderScrollbar = create_scrollbar(decoderInfoColumnView)
+	decoderGrid.attach(decoderSearchEntry,0,0,15,1)
+	decoderGrid.attach_next_to(decoderScrollbar, decoderSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
+
 
 # -------- Surface Limits -----------------------------------
 

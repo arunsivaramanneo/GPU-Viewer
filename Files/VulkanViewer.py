@@ -114,7 +114,7 @@ def bind_expander(widget, item):
 
 def setup_image(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
-    image_render = Gtk.Image()
+    image_render = Gtk.Picture()
     item.set_child(image_render)
 
 def bind_image(widget, item):
@@ -126,7 +126,7 @@ def bind_image(widget, item):
 #    image_renderer = Gtk.Picture.new_for_pixbuf(image)
 #    row = item.get_item()
 #    obj = row.get_item()
-    label.set_from_pixbuf(obj.data2)
+    label.set_pixbuf(obj.data2)
     
 def bind1(widget, item):
     """bind data from the store object to the widget"""
