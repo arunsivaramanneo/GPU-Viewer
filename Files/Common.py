@@ -5,7 +5,11 @@ import subprocess
 import Filenames
 from pathlib import Path
 gi.require_version('Gtk','4.0')
-from gi.repository import Gtk,GdkPixbuf,Gdk,Gio
+gi.require_version(namespace='Adw', version='1')
+
+from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw
+
+Adw.init()
 
 
 class MyGtk(Gtk.Window):
@@ -415,3 +419,66 @@ def getLogo(line):
     else:
         logo_pixbuf = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,32,28,True)
     return logo_pixbuf
+
+class ExpandDataObject(GObject.GObject):
+    def __init__(self, txt: str, txt2: str):
+        super(ExpandDataObject, self).__init__()
+        self.data = txt
+        self.data2 = txt2
+        self.children = []
+
+def add_tree_node(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject)
+        for child in item.children:
+            store.append(child)
+        return store
+
+def setup_expander(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    expander = Gtk.TreeExpander.new()
+ #   expander.props.indent_for_icon = True
+ #   expander.props.indent_for_depth = True
+    expander.set_child(label)
+    item.set_child(expander)
+
+def setup(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    label = Gtk.Label()
+    label.props.xalign = 0.0
+    item.set_child(label)
+
+def bind_expander(widget, item):
+    """bind data from the store object to the widget"""
+    expander = item.get_child()
+    label = expander.get_child()
+    row = item.get_item()
+    expander.set_list_row(row)
+    obj = row.get_item()
+    label.set_label(obj.data)
+    label.add_css_class(css_class='parent')
+
+def bind1(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data2: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data2:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data2)
