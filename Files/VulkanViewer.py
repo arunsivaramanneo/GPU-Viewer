@@ -4,6 +4,8 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
+from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node
+
 
 Adw.init()
 
@@ -53,30 +55,6 @@ class ExpandDataObject2(GObject.GObject):
         self.data5= txt5
         self.children = []
 
-class ExpandDataObject(GObject.GObject):
-    def __init__(self, txt: str, txt2: str):
-        super(ExpandDataObject, self).__init__()
-        self.data = txt
-        self.data2 = txt2
-        self.children = []
-
-def add_tree_node(item):
-    if not (item):
-            print("no item")
-            return model
-    else:        
-        if type(item) == Gtk.TreeListRow:
-            item = item.get_item()
-
-            print("converteu")
-            print(item)  
-            
-        if not item.children:
-            return None
-        store = Gio.ListStore.new(ExpandDataObject)
-        for child in item.children:
-            store.append(child)
-        return store
 
 
 def add_tree_node2(item):
@@ -217,6 +195,8 @@ def bind_column1(widget, item):
     label = item.get_child()
     obj = item.get_item()
     label.set_text(obj.column1)
+    label.add_css_class(css_class='parent')
+
 
 def bind_column2(widget, item):
     """bind data from the store object to the widget"""
@@ -313,85 +293,61 @@ def Vulkan(tab2):
         DeviceTab_Store.remove_all()
     #    TreeDevice.set_model(DeviceTab_Store)
 
-        groupNameCheck = ["Vulkan Details...","Processor Details...","Memory Details...","Operating System Details..."]
         dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
-        groupName = None; k = 0
         toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ")
         for i in range(len(valueRHS)):
             if "apiVersion" in valueLHS[i]:
-                groupName = "Vulkan Details..."
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getVulkanVersion(valueRHS[i])
-            #    iter1 = DeviceTab_Store.append(None,["Vulkan Details...",dummy_transparent," ",const.BGCOLOR3])
-                #    toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ",)
             if "driverVersion" in valueLHS[i]:
                 if '.' not in valueRHS[i]:
                     valueRHS[i] = getDriverVersion(valueRHS,i)
             if "deviceName" in valueLHS[i]:
                 gpu_logo = getLogo(valueRHS[i])
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
                 continue
             if "driverName" in valueLHS[i]:
                 driver_logo = getLogo(valueRHS[i])
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
                 continue
             if "Model" in valueLHS[i]:
                 cpu_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(toprow) 
-            #    iter1 = DeviceTab_Store.append(None,["Processor Details...",dummy_transparent,"",const.BGCOLOR3])
                 toprow = ExpandDataObject3("Processor Details...",dummy_transparent,"")
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
-                groupName = "Processor Details..."
-                k =1
                 continue
             if "Description" in valueLHS[i]:
                 distro_logo = getLogo(valueRHS[i])
                 DeviceTab_Store.append(toprow) 
-            #    iter1 = DeviceTab_Store.append(None,["Operating System Details...",dummy_transparent,"",const.BGCOLOR3])
                 toprow = ExpandDataObject3("Operating System Details...",dummy_transparent,"")
-        #     DeviceTab_Store.append(iter1,["Distribution",distro_logo,valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),distro_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
-                groupName = "Operating System Details..."
-                k = 3
                 continue
             if "Desktop" in valueLHS[i]:
                 desktop_logo = getLogo(valueRHS[i])
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
                 continue
             if "Windowing" in valueLHS[i]:
                 windowing_system_logo = getLogo(valueRHS[i])
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
                 continue
             if "MemTotal" in valueLHS[i]:
                 DeviceTab_Store.append(toprow) 
-            #    iter1 = DeviceTab_Store.append(None,["Memory Details...",dummy_transparent," ",const.BGCOLOR3])
                 toprow = ExpandDataObject3("Memory Details...",dummy_transparent," ")
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
                 toprow.children.append(iter1)
-                k = 2
-                groupName = "Memory Details..."
             elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
                 toprow.children.append(iter1)
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]),background_color])
             else:
                 iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'))
                 toprow.children.append(iter1)
-            #    DeviceTab_Store.append(iter1,[valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'),background_color])
         DeviceTab_Store.append(toprow)
-    #    TreeDevice.expand_all()
 
         fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
     #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
@@ -759,11 +715,8 @@ def Vulkan(tab2):
 
         MemoryTab_Store.remove_all()
     #    TreeMemory.set_model(MemoryTab_Store)
-        p = 0
-        n = 0
         groupName = None
         for i in range(len(vulkan_memory_types_lhs)):
-            background_color = setBackgroundColor(i)
             if not (vulkan_memory_types_lhs[i] == groupName):
                 if "memoryTypes" in vulkan_memory_types_lhs[i]:
                     if groupName == None:
@@ -774,7 +727,6 @@ def Vulkan(tab2):
                         iter = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
                 #    MemoryTab_Store.append(iter)
                 #    groupName = vulkan_memory_types_lhs[i]
-                    n = n + 1
                     continue
                 if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
                 #    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
@@ -949,15 +901,8 @@ def Vulkan(tab2):
         
         qRHS.pop(0)
     
-        k = 0; groupName = None
+        groupName = None
         for i in range(len(vulkan_device_queues_lhs)):
-            background_color = setBackgroundColor(i)
-            if "true" in qRHS[i]:
-                fColor = "GREEN"
-            elif "false" in qRHS[i]:
-                fColor = "RED"
-            else:
-                fColor = None
             if not (groupName == vulkan_device_queues_lhs[i]):
                 if "Properties[" in vulkan_device_queues_lhs[i]:
                     if groupName == None:
@@ -987,7 +932,7 @@ def Vulkan(tab2):
                         iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),"")
                         toprow.children.append(iter2)
                     #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
-                        for count,flags in enumerate(supportedFlags, start= i + 1):
+                        for flags in supportedFlags:
                             iter2_1 = ExpandDataObject(flags.replace("QUEUE_",""),"")
                             iter2.children.append(iter2_1)
                         #    QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
@@ -1018,7 +963,6 @@ def Vulkan(tab2):
         InstanceTab_Store.remove_all()
 
         for i in range(len(vulkan_device_instance_lhs)):
-            background_color = setBackgroundColor(i)
             InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
 
         label = "Instance Extensions (%d)" %len(vulkan_device_instance_lhs)
@@ -1051,7 +995,7 @@ def Vulkan(tab2):
         label2 = "Instance Layers (%d)" %len(layer_names)
         notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
         notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
-        i = 0; j =1
+        i = 0
         groupName = None
         with open(Filenames.vulkan_device_layers_file) as file:
             for line in file:
@@ -1150,8 +1094,7 @@ def Vulkan(tab2):
     #    TreeSparse.set_model(SparseTab_Store_filter)
 
         if "Show All Device Properties" in property:
-            k = 0;
-            count = 0
+            k = 0
             groupName = None
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
@@ -1161,9 +1104,6 @@ def Vulkan(tab2):
                     if not (groupName == text):
                         if "Vk" in line and "conformanceVersion" not in line:
                             text1 = (text.replace("VkPhysicalDevice",'').replace(":",""))
-                            k = 0
-                            count += 1
-                            background_color = const.BGCOLOR3
                             if groupName == None:
                                 toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                             #iter1 = SparseTab_Store.append(None, [(text1.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color, fgColor[i]])
@@ -1172,8 +1112,6 @@ def Vulkan(tab2):
                                 toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                             groupName = text
                         else:
-                            background_color = setBackgroundColor(k)
-
                             #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line and "SAMPLE_COUNT" not in line and "\t\t" not in line:
                             if "\t\t" not in line:
                             #    iter2 = SparseTab_Store.append(iter1,
@@ -1186,12 +1124,9 @@ def Vulkan(tab2):
                             #                                fgColor[i]])
                                 iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                                 iter2.children.append(iter3)
-                                k += 1
                 PropertiesTab_Store.append(toprow)
             #        TreeSparse.expand_all()
         else:
-            k = 0
-            count = 0
    #         iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),const.COLOR3])
             toprow = ExpandDataObject(property,"")
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
@@ -1200,7 +1135,6 @@ def Vulkan(tab2):
                     if "---" in line or "====" in line:
                         continue
                     else:
-                        background_color = setBackgroundColor(k)
                         #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line:
                         if "\t\t" not in line:
                         #    iter2 = SparseTab_Store.append(iter,
@@ -1211,7 +1145,6 @@ def Vulkan(tab2):
                         if "\t\t" in line:
                                 iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                                 iter2.children.append(iter3)
-                        k += 1
                 PropertiesTab_Store.append(toprow)
                 #    TreeSparse.expand_all()
 
@@ -1233,7 +1166,6 @@ def Vulkan(tab2):
         with open(Filenames.vulkan_device_surface_file, "r") as file1:
             j=0
             for i,line in enumerate(file1):
-                background_color = setBackgroundColor(i)
                 if '---' in line:
                     continue
                 if not (valueLHS[i] == groupName):
@@ -1405,7 +1337,7 @@ def Vulkan(tab2):
 
     deviceColumnLhs = Gtk.ColumnViewColumn.new("Device Details",factory_devices)
     deviceColumnLhs.set_resizable(True)
-    deviceColumnLhs.set_expand(False)
+    deviceColumnLhs.set_fixed_width(250)
     deviceColumnRhs1 = Gtk.ColumnViewColumn.new("",factory_devices_value1)
     deviceColumnRhs1.set_resizable(True)
     deviceColumnRhs1.set_expand(False)
@@ -1415,26 +1347,6 @@ def Vulkan(tab2):
     deviceColumnView.append_column(deviceColumnLhs)
     deviceColumnView.append_column(deviceColumnRhs1)
     deviceColumnView.append_column(deviceColumnRhs2)
-
-#    DeviceTab_Store = Gtk.TreeStore(str,GdkPixbuf.Pixbuf, str,str)
-#    TreeDevice = Gtk.TreeView.new_with_model(DeviceTab_Store)
-#    TreeDevice.set_property("enable-grid-lines", 1)
-
- #   for i,column_title in enumerate(DeviceTitle):
-  #      if i == 1:
-   #         renderer_pixbuf = Gtk.CellRendererPixbuf()
-   #         column_pixbuf = Gtk.TreeViewColumn(column_title)
-   #         column_pixbuf.pack_start(renderer_pixbuf, False)
-   #         column_pixbuf.add_attribute(renderer_pixbuf,"pixbuf",1)
-   #         column_pixbuf.set_property("min-width", 20)
-   #         column_pixbuf.add_attribute(renderer_pixbuf,"cell-background",3)
-   #         TreeDevice.append_column(column_pixbuf)
-   #     else:
-   #         renderer_text = Gtk.CellRendererText()
-   #         column = Gtk.TreeViewColumn(column_title, renderer_text, text=i)
-    #        column.add_attribute(renderer_text,"background",3)
-    #        TreeDevice.append_column(column)
- #   setColumns(TreeDevice, DeviceTitle, 20, 0.0)
 
     DeviceScrollbar = create_scrollbar(deviceColumnView)
     DeviceGrid.attach(DeviceScrollbar,0,0,1,1)
@@ -1528,28 +1440,6 @@ def Vulkan(tab2):
     propertiesDropdown.connect('notify::selected-item',selectProperties)
     setMargin(propertiesDropdown,2,1,2)
 #    propertiesGrid.add(propertiesCombo)
-
-
-
-#    SparseTab_Store = Gtk.TreeStore(str, str, str, str)
-#    SparseTab_Store_filter = SparseTab_Store.filter_new()
-#    TreeSparse = Gtk.TreeView.new_with_model(SparseTab_Store_filter)
-#    TreeSparse.set_property("enable-grid-lines", 1)
- #   TreeSparse.set_property("enable-tree-lines", True)
-#    TreeSparse.set_enable_search(True)
-#    TreeSparse.set_property("can-focus", False)
-
- #   for i, column_title in enumerate(SparseTitle):
- #       Sparserenderer = Gtk.CellRendererText()
-  #      column = Gtk.TreeViewColumn(column_title, Sparserenderer, text=i)
-  #      column.set_sort_column_id(i)
-  #      column.set_resizable(True)
-  #      column.set_reorderable(True)
-  #      column.set_property("min-width", const.MWIDTH)
-  #      if i == 1:
-  #          column.add_attribute(Sparserenderer, "foreground", 3)
-  #      column.add_attribute(Sparserenderer, "background", 2)
-  #      TreeSparse.append_column(column)
 
     propertySearchEntry = Gtk.SearchEntry()
     propertySearchEntry.set_property("placeholder_text","Type here to filter.....")
@@ -1719,29 +1609,6 @@ def Vulkan(tab2):
     formatsColumnView.append_column(formatColumnRhs2)
     formatsColumnView.append_column(formatColumnRhs3)
 
-#    FormatsTab_Store = Gtk.TreeStore(str,str,str,str,str,str,str,str)
-#    FormatsTab_Store_filter = FormatsTab_Store.filter_new()
-#    TreeFormats = Gtk.TreeView.new_with_model(FormatsTab_Store_filter)
- #   TreeFormats.set_property("enable-grid-lines", 1)
- #   TreeFormats.set_property("enable-tree-lines", True)
- #   TreeFormats.set_enable_search(True)
- #   TreeFormats.set_enable_search(True)
-  #  for i, column_title in enumerate(FormatsTitle):
-  #      Formatsrenderer = Gtk.CellRendererText()
-   #     column = Gtk.TreeViewColumn(column_title, Formatsrenderer, text=i)
-    #    column.add_attribute(Formatsrenderer, "background", 4)
-    #    column.set_resizable(True)
-    #    column.set_reorderable(True)
-    #    column.set_property("min-width", MWIDTH)
-    #    if i == 0:
-    #        column.set_property("min-width", 400)
-    #    if i > 0 :
-    #        column.set_property("min-width", 200)
-    #    if i > 0 and i < 4:
-    #        column.add_attribute(Formatsrenderer,"foreground",i+4)
-
-     #   TreeFormats.append_column(column)
-
     formatSearchFrame = Gtk.Frame()
     formatSearchEntry = Gtk.SearchEntry()
     formatSearchFrame.set_child(formatSearchEntry)
@@ -1758,7 +1625,7 @@ def Vulkan(tab2):
 
         # ------------------------Memory Types & Heaps----------------------------------------------
 
-    MemoryTab = Gtk.Box(spacing=10)
+#    MemoryTab = Gtk.Box(spacing=10)
     MemoryTypeTab = Gtk.Box(spacing=10)
     MemoryTypeGrid = createSubTab(MemoryTypeTab, notebook, "Memory Types")
     MemoryTypeGrid.set_row_spacing(3)

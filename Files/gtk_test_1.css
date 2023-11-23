@@ -5,7 +5,7 @@
  window{
   border-radius: 12px;
   background-image: none;
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   color: black;
   border: 1px solid #171717;
   border-style: solid solid none none;
@@ -16,21 +16,21 @@ frame{
   border-style: none none none none ;
 }
 treeview {
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   color: black;
   border: 2px solid #171717;
   border-style: solid solid none solid;
   border-radius: 6px;
 }
 grid{
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   color: black;
   border: 2px solid #171717;
   border-style: none;
 }
 
 box{
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   color: black;
 }
 
@@ -44,21 +44,22 @@ textview > border {
   background-color: #333333;
   color: white;
   font-weight: bold;
+  font-size: small;
 }
 
 .close{
-  color: black;
-  font-size: 28px;
+  color: #fff;
+  font-size: small;
   font-weight: bold;
 }
 .minimize{
-  color: black;
-  font-size: 28px;
+  color: #fff;
+  font-size: small;
   font-weight: bold;
 }
 .maximize{
-  color: black;
-  font-size: 28px;
+  color: #fff;
+  font-size: small;
   font-weight: bold;
 }
 .close:hover {
@@ -66,14 +67,32 @@ textview > border {
 }
 
 .close:focus {
-  color: #000;
+  color: #fff;
   text-decoration: none;
 }
 
 headerbar {
   background-image: none;
   background-color: #333333;
+  font-size: medium;
+  line-height: 1.2px;
 }
+
+.false {
+  color: red;
+}
+
+.true {
+  color: green;
+}
+
+.nothing{
+  color: #171717;
+}
+
+.parent{
+  font-weight: 500;
+  }
 
 /*************
  * Notebooks *
@@ -92,9 +111,9 @@ headerbar {
 }
 
 notebook {
-  border: 2px solid #FFFFFF;
+  border: 2px solid #F9F6EE;
   border-style: solid none solid solid;
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
@@ -105,10 +124,10 @@ notebook {
     margin-bottom: 6px;
     margin-right: 6px;
     padding-bottom: 8px ;
-    background-color: #FFFFFF;
+    background-color: #F9F6EE;
     color: black;
     font-weight: 600;
-    border: 2px solid #FFFFFF;
+    border: 2px solid #F9F6EE;
     border-style: solid solid solid solid;
     box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
   }
@@ -123,12 +142,12 @@ notebook {
 notebook > header tab:checked {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
-  background-color: #ffffff;
+  background-color: #F0EAD6;
   background-clip: padding-box;
   border-style: solid;
   color: #d43c50;
   font-weight: bolder;
-  border: 2px solid #FFFFFF;
+  border: 2px solid #F9F6EE;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -161,7 +180,7 @@ button.text-button:disabled{
 }
 
 button.combo{
-  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  -gtk-icon-source: -gtk-icontheme("go-down-symbolic");
   min-height: 16px;
   min-width: 16px;
   background-image: none;
@@ -195,10 +214,10 @@ popover.background > arrow,
 popover.background > contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   background-clip: border-box;
   border-radius: 12px;
-  color: #ffffff;
+  color: #F9F6EE;
   border: 2px solid #171717;
 }
 
@@ -217,7 +236,7 @@ popover.background modelbutton {
 
 popover.background modelbutton:hover {
   transition: none;
-  background-color: #ffffff;
+  background-color: #F9F6EE;
   color: #333333;
 }
 
@@ -238,7 +257,6 @@ scrollbar > range > trough > slider {
   border: 4px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
-  background-color: blacksmoke;
   box-shadow: none;
   outline: none;
 }
@@ -282,7 +300,7 @@ header{
   padding: 6px 12px;
   border-width: 1px;
   border-color: transparent;
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   border-style: none none none none;
   outline: none;
   background-clip: padding-box;
@@ -291,6 +309,9 @@ header{
   font-weight: 500;
 }
 
+label{
+  padding: 0px;
+}
 
 columnview.view > header > button,
 treeview.view > header > button {
@@ -299,10 +320,10 @@ treeview.view > header > button {
   padding: 3px 6px;
   font-weight: bold;
   color: #6b6d75;
-  background-color: #FFFFFF;
+  background-color: #F9F6EE;
   background-image: none;
   border-style: none none none none;
-  border: 0px solid #FFFFFF;
+  border: 0px solid #F9F6EE;
   border-radius: 0;
   border-image: linear-gradient(to bottom, #2c2c2c 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #2c2c2c 80%) 0 1 0 0/0 1px 0 0 stretch;
 }
@@ -315,14 +336,14 @@ treeview.view:selected {
 }
 
 listview {
-  background-image: linear-gradient(#FFFFFF,#FFFFFF);
-  background-color: #FFFFFF;
+  background-image: linear-gradient(#F9F6EE,#F9F6EE);
+  background-color: #F9F6EE;
   border-radius: 0px;
 }
 
 dropdown > button {
-  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-  background-image: linear-gradient(#FFFFFF,#FFFFFF);
+  -gtk-icon-source: -gtk-icontheme("go-down-symbolic");
+  background-image: linear-gradient(#F9F6EE,#F9F6EE);
   border-radius: 12px;
   border-style: solid;
   border: 2px solid rgba(0, 0, 0, 0.87);
@@ -339,11 +360,9 @@ listview > row :hover {
   border-style: none none none none;
   outline: transparent;
   background-color: rgba(0,0,0,0);
-  color: #d43c50;
+  color: #0096ff;
   font-weight: bolder;
   font-style: oblique;
-  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
-  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
 
@@ -357,8 +376,12 @@ popover.background listview > row {
 }
 
 treeview {
-  border-color: #FFFFFF;
+  border-color: #F9F6EE;
   border-style: solid;
   border-width: 2px;
   border-radius: 10px;
+}
+columnview {
+  color: #171717;
+  border-style: solid;
 }

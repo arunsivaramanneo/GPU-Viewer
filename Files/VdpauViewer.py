@@ -2,9 +2,11 @@ import gi
 import const
 import Filenames
 import subprocess
+from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk
+from gi.repository import Gtk,GObject,Gio,Adw
+Adw.init()
 
 from Common import setBackgroundColor, setColumns, createSubTab, create_scrollbar, createSubFrame, \
     colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, getFormatValue
@@ -27,9 +29,13 @@ def vdpauinfo(tab2):
 		vdpauinfo_information = fetch_Vdpau_information_process.communicate()[0].splitlines()
 
 		for i,line in enumerate(vdpauinfo_information):
-			vdpauinfoStore.append(None,[' '.join(line.split()[0:2]).strip('[]'),' '.join(line.split()[2:]).strip('[]'),setBackgroundColor(i)])
-
-		iter = vdpauinfoStore.append(None,["Supported Codecs:",' ',const.BGCOLOR3])
+		#	vdpauinfoStore.append(None,[' '.join(line.split()[0:2]).strip('[]'),' '.join(line.split()[2:]).strip('[]'),setBackgroundColor(i)])
+			toprow = ExpandDataObject(' '.join(line.split()[0:2]).strip('[]'),' '.join(line.split()[2:]).strip('[]'))
+			vdpauinfoStore.append(toprow)	  
+		#iter = vdpauinfoStore.append(None,["Supported Codecs:",' ',const.BGCOLOR3])
+		
+		iter = ExpandDataObject("Supported Codecs:",' ')
+	#	vdpauinfoStore.append(iter)
 
 		fetch_vdpau_decoder_capabilities_command = "cat %s | awk '/Decoder capabilities:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./'" %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_decoder_capabilities_process = subprocess.Popen(fetch_vdpau_decoder_capabilities_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
@@ -38,11 +44,13 @@ def vdpauinfo(tab2):
 		i = 0
 		for line in  vdpau_decoder_capabilities:
 			if "not" not in line:
-				vdpauinfoStore.append(iter,[line.split()[0].strip('\n')," ",setBackgroundColor(i)])
+				iter2 = ExpandDataObject(line.split()[0].strip('\n')," ")
+				iter.children.append(iter2)
+			#	vdpauinfoStore.append(iter,[line.split()[0].strip('\n')," ",setBackgroundColor(i)])
 				i = i + 1
-		
+		vdpauinfoStore.append(iter)
 
-		treeVdpauInfo.expand_all()
+	#	treeVdpauInfo.expand_all()
 
 	def decoderCapabilities():
 
@@ -152,13 +160,42 @@ def vdpauinfo(tab2):
 	vdpauinfoTab = Gtk.Box(spacing=20)
 	vdpauinfoGrid = createSubTab(vdpauinfoTab,notebook, "VDPAU Information")
 	
-	vdpauinfoStore = Gtk.TreeStore(str,str,str)
-	treeVdpauInfo = Gtk.TreeView.new_with_model(vdpauinfoStore)
-	treeVdpauInfo.set_property("enable-grid-lines",1)
+	vdpauinfoColumnView = Gtk.ColumnView()
+	vdpauinfoColumnView.props.show_row_separators = True
+	vdpauinfoColumnView.props.show_column_separators = False
+	
+	factory_vdpau = Gtk.SignalListItemFactory()
+	factory_vdpau.connect("setup",setup_expander)
+	factory_vdpau.connect("bind",bind_expander)
+	
+	factory_vdpau_value = Gtk.SignalListItemFactory()
+	factory_vdpau_value.connect("setup",setup)
+	factory_vdpau_value.connect("bind",bind1)
+	
+	vdpauSelection = Gtk.SingleSelection()
+	vdpauinfoStore = Gio.ListStore.new(ExpandDataObject)
+	
+	vdpauModel = Gtk.TreeListModel.new(vdpauinfoStore,False,True,add_tree_node)
+	vdpauSelection.set_model(vdpauModel)
+	
+	vdpauinfoColumnView.set_model(vdpauSelection)
+	
+	vdpauColumnLhs = Gtk.ColumnViewColumn.new("VDPAU Information",factory_vdpau)
+	vdpauColumnLhs.set_resizable(True)
+	vdpauColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_vdpau_value)
+	vdpauColumnRhs.set_expand(True)
+	
+	vdpauinfoColumnView.append_column(vdpauColumnLhs)
+	vdpauinfoColumnView.append_column(vdpauColumnRhs)
 
-	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
+	
+#	vdpauinfoStore = Gtk.TreeStore(str,str,str)
+#	treeVdpauInfo = Gtk.TreeView.new_with_model(vdpauinfoStore)
+#	treeVdpauInfo.set_property("enable-grid-lines",1)
 
-	vdpauinfoScrollbar = create_scrollbar(treeVdpauInfo)
+#	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
+
+	vdpauinfoScrollbar = create_scrollbar(vdpauinfoColumnView)
 	vdpauinfoGrid.attach(vdpauinfoScrollbar,0,0,1,1)
 
 # ------- Decoder Capabilities ----------------------------

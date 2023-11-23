@@ -555,7 +555,7 @@ def OpenGL(tab):
     grid_extension.attach(extensions_notebook,0,0,1,1)
 
     opengl_extension_logo = fetchImageFromUrl(const.OPEN_GL_PNG,250,50,False)
-    opengl_extension_box = Gtk.Box()
+    opengl_extension_box = Gtk.Box(orientation=1,spacing=10)
     extensions_notebook.append_page(opengl_extension_box,Gtk.Picture.new_for_pixbuf(opengl_extension_logo))
     page1 = extensions_notebook.get_page(opengl_extension_box)
     page1.set_property("tab-expand",True)
@@ -644,7 +644,7 @@ def OpenGL(tab):
     openglESExtensionColumnView.set_model(openglESExtensionsSelection)
 
     opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
-    opengl_es_extension_box = Gtk.Box()
+    opengl_es_extension_box = Gtk.Box(orientation=1,spacing=10)
     extensions_notebook.append_page(opengl_es_extension_box,Gtk.Picture.new_for_pixbuf(opengl_es_extension_logo))
     extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
     extensions_page2.set_property("tab-expand",True)
@@ -716,7 +716,7 @@ def OpenGL(tab):
      #   egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
 
         egl_extension_logo = fetchImageFromUrl(const.EGL_PNG,200,50,False)
-        egl_extension_box = Gtk.Box()
+        egl_extension_box = Gtk.Box(orientation=1,spacing=10)
         extensions_notebook.append_page(egl_extension_box,Gtk.Picture.new_for_pixbuf(egl_extension_logo))
         extensions_page3 = extensions_notebook.get_page(egl_extension_box)
         extensions_page3.set_property("tab-expand",True)

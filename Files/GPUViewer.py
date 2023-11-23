@@ -1,4 +1,6 @@
 ﻿#!/usr/bin/python3
+#define PING_TIMEOUT_DELAY 8000
+
 import sys
 import gi
 import const
@@ -152,23 +154,23 @@ else:
 
     def on_activate(app):
         win = Gtk.ApplicationWindow(application=app)
-    #    headerbar = Gtk.HeaderBar.new()
-    #    win.set_titlebar(headerbar)
+        headerbar = Gtk.HeaderBar.new()
+        win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.0")
 
-   #     light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
-    #    light_action.connect("activate", on_light_action_actived,win)
-    #    win.add_action(light_action) # (self window) == win in MENU_XML
+        light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
+        light_action.connect("activate", on_light_action_actived,win)
+        win.add_action(light_action) # (self window) == win in MENU_XML
         
-    #    dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
-    #    dark_action.connect("activate", on_dark_action_actived,win)
-    #    win.add_action(dark_action) # (self window) == win in MENU_XML
+        dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
+        dark_action.connect("activate", on_dark_action_actived,win)
+        win.add_action(dark_action) # (self window) == win in MENU_XML
 
-    #    menubutton = Gtk.MenuButton.new()
-    #    menubutton.set_icon_name("open-menu-symbolic") 
-    #    menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
-    #    menubutton.set_menu_model(menu)
-    #    headerbar.pack_end(menubutton)
+        menubutton = Gtk.MenuButton.new()
+        menubutton.set_icon_name("open-menu-symbolic") 
+        menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
+        menubutton.set_menu_model(menu)
+        headerbar.pack_end(menubutton)
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:
@@ -179,7 +181,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_test.css')
+        fname = Gio.file_new_for_path('gtk_test_1.css')
         provider.load_from_file(fname)
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)

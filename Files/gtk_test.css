@@ -85,7 +85,7 @@ textview > border {
 }
 
 image{
-  padding: none;
+  padding: 0px;
   
 }
 
@@ -389,9 +389,11 @@ columnview {
   border-color: #353839;
   color: white;
   border-style: solid;
-  padding: none;
 }
-
-treeview :nth-child(1){
-  background: none;
+columnview.view.expander,
+treeview.view.expander {
+  min-width: 16px;
+  min-height: 16px;
+  -gtk-icon-source: -gtk-icontheme("pan-end-symbolic");
+  color: rgba(255, 255, 255, 0.7);
 }
