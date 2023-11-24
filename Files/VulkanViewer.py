@@ -4,7 +4,7 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
-from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node
+from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4
 
 
 Adw.init()
@@ -14,22 +14,6 @@ import Filenames
 import subprocess
 from Common import copyContentsFromFile, getGpuImage,setColumns,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,createSearchEntry,getLogo
 
-DeviceTitle = ["Device Information","", "Details"]
-SparseTitle = ["Device Properties", "Value"]
-LimitsTitle = ["Device Limits", "Value"]
-FeaturesTitle = ["Device Features", "Value"]
-ExtensionsTitle = ["Device Extensions", "Extension Revision"]
-FormatsTitle = ["Device Formats","linearTiling","optimalTiling","bufferFeatures"]
-HeapTitle = ["Memory Heaps", "Value"]
-MemoryTitle = ["Memory Types", "Value"]
-QueuesLHS = ["VkQueueFamilyProperties", "QueueCount", "timestampValidBits", "queueFlags","GRAPHICS BIT", "COMPUTE BIT", "TRANSFER BIT",
-              "SPARSE BINDING BIT", "minImageTransferGranularity.width", "minImageTransferGranularity.height",
-              "minImageTransferGranularity.depth"]
-QueueTitle = ["Queue Family","Value"]
-InstanceTitle = ["Extensions", "Extension Revision"]
-LayerTitle = ["Layers", "Vulkan Version", "Layer Version", "Extension Count", "Description"]
-SurfaceTitle = ["Surface Capabilities", "Value"]
-GroupsTitle = ["Device Groups","Value"]
 
 class DataObject(GObject.GObject):
     def __init__(self, column1: str,column2: str):
@@ -44,36 +28,6 @@ class ExpandDataObject3(GObject.GObject):
         self.data2 = image
         self.data3 = txt2
         self.children = []
-
-class ExpandDataObject2(GObject.GObject):
-    def __init__(self, txt: str, txt2: str,txt3: str,txt4: str,txt5: str):
-        super(ExpandDataObject2, self).__init__()
-        self.data = txt
-        self.data2 = txt2
-        self.data3= txt3
-        self.data4= txt4
-        self.data5= txt5
-        self.children = []
-
-
-
-def add_tree_node2(item):
-    if not (item):
-            print("no item")
-            return model
-    else:        
-        if type(item) == Gtk.TreeListRow:
-            item = item.get_item()
-
-            print("converteu")
-            print(item)  
-            
-        if not item.children:
-            return None
-        store = Gio.ListStore.new(ExpandDataObject2)
-        for child in item.children:
-            store.append(child)
-        return store
 
 def add_tree_node3(item):
     if not (item):
@@ -92,25 +46,6 @@ def add_tree_node3(item):
         for child in item.children:
             store.append(child)
         return store
-    
-def setup_expander(widget, item):
-    """Setup the widget to show in the Gtk.Listview"""
-    label = Gtk.Label()
-    expander = Gtk.TreeExpander.new()
- #   expander.props.indent_for_icon = True
- #   expander.props.indent_for_depth = True
-    expander.set_child(label)
-    item.set_child(expander)
-
-def bind_expander(widget, item):
-    """bind data from the store object to the widget"""
-    expander = item.get_child()
-    label = expander.get_child()
-    row = item.get_item()
-    expander.set_list_row(row)
-    obj = row.get_item()
-    label.set_label(obj.data)
-    label.add_css_class(css_class='parent')
 
 def setup_image(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
@@ -127,62 +62,7 @@ def bind_image(widget, item):
 #    row = item.get_item()
 #    obj = row.get_item()
     label.set_pixbuf(obj.data2)
-    
-def bind1(widget, item):
-    """bind data from the store object to the widget"""
-    label = item.get_child()
-    row = item.get_item()
-    obj = row.get_item()
-    if "true" in obj.data2: 
-        label.add_css_class(css_class='true')
-    elif "false" in obj.data2:
-        label.add_css_class(css_class='false')
-    else:
-        label.add_css_class(css_class='nothing')
-    label.set_label(obj.data2)
-    
-
-def bind2(widget, item):
-    """bind data from the store object to the widget"""
-    label = item.get_child()
-    row = item.get_item()
-    obj = row.get_item()
-    if "true" in obj.data3: 
-        label.add_css_class(css_class='true')
-    elif "false" in obj.data3:
-        label.add_css_class(css_class='false')
-    else:
-        label.add_css_class(css_class='nothing')
-    label.set_label(obj.data3)
-
-
-def bind3(widget, item):
-    """bind data from the store object to the widget"""
-    label = item.get_child()
-    row = item.get_item()
-    obj = row.get_item()
-    if "true" in obj.data4: 
-        label.add_css_class(css_class='true')
-    elif "false" in obj.data4:
-        label.add_css_class(css_class='false')
-    else:
-        label.add_css_class(css_class='nothing')
-    label.set_label(obj.data4)
-
-
-def bind4(widget, item):
-    """bind data from the store object to the widget"""
-    label = item.get_child()
-    row = item.get_item()
-    obj = row.get_item()
-    if "true" in obj.data5: 
-        label.add_css_class(css_class='true')
-    elif "false" in obj.data5:
-        label.add_css_class(css_class='false')
-    else:
-        label.add_css_class(css_class='nothing')
-    label.set_label(obj.data5)
-
+ 
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
@@ -438,7 +318,7 @@ def Vulkan(tab2):
             feature =' '
         elif "Show All Device Features" in feature:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_all_command)
-            featureColumn1.set_title(FeaturesTitle[0])
+            featureColumn1.set_title("Device Features")
         else:
             createMainFile(Filenames.vulkan_device_features_select_file,fetch_device_features_selected_command)
             featureColumn1.set_title(feature)
