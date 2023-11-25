@@ -78,27 +78,31 @@ def vdpauinfo(tab2):
 		fetch_vdpau_surface_limits_process = subprocess.Popen(fetch_vdpau_surface_limits_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_surface_limits = fetch_vdpau_surface_limits_process.communicate()[0].splitlines()
 	
-		iter = surfaceVideoStore.append(None,["Video Surface","","","",const.BGCOLOR3])
+		toprow = ExpandDataObject2("Video Surface","","","","")
 		for i,line in enumerate(vdpau_surface_limits):
-			surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),(' '.join(line.split()[3:]).strip('[]')),setBackgroundColor(i)])
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),(' '.join(line.split()[3:]).strip('[]')),"")
+			toprow.children.append(iter)
+		surfaceVideoStore.append(toprow)
 
 		fetch_vdpau_surface_output_limits_command = "cat %s | awk '/Output surface:/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Bitmap surface:/{flag=0}flag' | awk '/./' " %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_surface_output_limits_process = subprocess.Popen(fetch_vdpau_surface_output_limits_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_surface_output_limits = fetch_vdpau_surface_output_limits_process.communicate()[0].splitlines()
 
-		iter = surfaceVideoStore.append(None,["Output Surface","","","",const.BGCOLOR3])
+		toprow = ExpandDataObject2("Output Surface","","","","")
 		for i,line in enumerate(vdpau_surface_output_limits):
-			surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2],(' '.join(line.split()[4:]).strip('[]')),setBackgroundColor(i)])
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2],(' '.join(line.split()[4:]).strip('[]')),"")
+			toprow.children.append(iter)
+		surfaceVideoStore.append(toprow)
 
 		fetch_vdpau_surface_bitmap_limits_command = "cat %s | awk '/Bitmap surface:/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Video mixer:/{flag=0}flag' | awk '/./' " %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_surface_bitmap_limits_process = subprocess.Popen(fetch_vdpau_surface_bitmap_limits_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_surface_bitmap_limits = fetch_vdpau_surface_bitmap_limits_process.communicate()[0].splitlines()
 
-		iter = surfaceVideoStore.append(None,["Bitmap Surface","","","",const.BGCOLOR3])
+		toprow = ExpandDataObject2("Bitmap Surface","","","","")
 		for i,line in enumerate(vdpau_surface_bitmap_limits):
-			surfaceVideoStore.append(iter,[line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),"",setBackgroundColor(i)])
-
-		treeSurfaceVideoLimits.expand_all()
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),"",setBackgroundColor(i))
+			toprow.children.append(iter)
+		surfaceVideoStore.append(toprow)
 
 		
 	def VideoMixerFeature():
@@ -107,7 +111,7 @@ def vdpauinfo(tab2):
 		fetch_vdpau_mixer_features_process = subprocess.Popen(fetch_vdpau_mixer_features_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_video_mixer_feature = fetch_vdpau_mixer_features_process.communicate()[0].splitlines()
 
-		iter = videoMixerFeatureStore.append(None,["Features","",const.BGCOLOR3,""])
+		toprow = ExpandDataObject2("Features","","","","")
 		for i,line in enumerate(vdpau_video_mixer_feature):
 			if 'y'in line:
 				text = "true"
@@ -116,40 +120,45 @@ def vdpauinfo(tab2):
 				text = "false"
 				fgcolor = const.COLOR2
 			if "HIGH" in line:
-				videoMixerFeatureStore.append(iter,[(' '.join(line.split()[0:5])).strip('[]'),text,setBackgroundColor(i),fgcolor])
+				iter = ExpandDataObject2((' '.join(line.split()[0:5])).strip('[]'),text,"","","")
+				toprow.children.append(iter)
 			else:
-				videoMixerFeatureStore.append(iter,[line.split()[0].strip('\n'),text,setBackgroundColor(i),fgcolor])
+				iter = ExpandDataObject2(line.split()[0].strip('\n'),text,"","","")
+				toprow.children.append(iter)
+		videoMixerFeatureStore.append(toprow)
 		
 		fetch_vdpau_mixer_parameter_command = "cat %s | awk '/parameter name/{flag=1;next}/attribute name.*/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' " %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_mixer_parameter_process = subprocess.Popen(fetch_vdpau_mixer_parameter_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_video_mixer_parameters =  fetch_vdpau_mixer_parameter_process.communicate()[0].splitlines()
 
-		iter = videoMixerFeatureStore.append(None,["Parameters","",const.BGCOLOR3,""])
+		toprow = ExpandDataObject2("Parameters","","","","")
 		for i,line in enumerate(vdpau_video_mixer_parameters):
 			if line.split()[1].strip('\n') == 'y':
 				text = "true"
 				fgcolor = const.COLOR1
 			else:
 				text = "false"
-				fgcolor = const.COLOR2
-			videoMixerFeatureStore.append(iter,[line.split()[0].strip('\n'),text,setBackgroundColor(i),fgcolor])
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),text,"","","")
+			toprow.children.append(iter)
+
+		videoMixerFeatureStore.append(toprow)		
 		
 		fetch_vdpau_mixer_attribute_command = "cat %s | awk '/Video mixer:/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/attribute name/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/-------.*/{flag=1;next}/Output surface:/{flag=0}flag' | awk '/./' " %(Filenames.vdpauinfo_output_file)
 		fetch_vdpau_mixer_attribute_process = subprocess.Popen(fetch_vdpau_mixer_attribute_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
 		vdpau_video_mixer_attribute = fetch_vdpau_mixer_attribute_process.communicate()[0].splitlines()
 
-		iter = videoMixerFeatureStore.append(None,["Attributes","",const.BGCOLOR3,""])
+		toprow = ExpandDataObject2("Attributes","","","","")
 		for i,line in enumerate(vdpau_video_mixer_attribute):
 			if line.split()[1].strip('\n') == 'y':
 				text = "true"
 				fgcolor = const.COLOR1
 			else:
 				text = "false"
-				fgcolor = const.COLOR2
-			videoMixerFeatureStore.append(iter,[line.split()[0].strip('\n'),text,setBackgroundColor(i),fgcolor])
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),text,"","","")
+			toprow.children.append(iter)
 
+		videoMixerFeatureStore.append(toprow	)
 
-		treeVideoMixerFeature.expand_all()
 	
 
 	def _on_search_method_changed(search_entry,filterColumn):
@@ -294,13 +303,60 @@ def vdpauinfo(tab2):
 	surfaceTab = Gtk.Box(spacing=20)
 	surfaceGrid = createSubTab(surfaceTab,notebook,"Surface Limits")
 
-	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
-	treeSurfaceVideoLimits = Gtk.TreeView.new_with_model(surfaceVideoStore)
-	treeSurfaceVideoLimits.set_property("enable-grid-lines",1)
+	vdpauSurfaceColumnView = Gtk.ColumnView()
+	vdpauSurfaceColumnView.props.show_row_separators = True
+	vdpauSurfaceColumnView.props.show_column_separators = False
+	
+	factory_surface_limits = Gtk.SignalListItemFactory()
+	factory_surface_limits.connect("setup",setup_expander)
+	factory_surface_limits.connect("bind",bind_expander)
+	
+	factory_surface_limits_value1 = Gtk.SignalListItemFactory()
+	factory_surface_limits_value1.connect("setup",setup)
+	factory_surface_limits_value1.connect("bind",bind1)
+	
 
-	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
+	factory_surface_limits_value2 = Gtk.SignalListItemFactory()
+	factory_surface_limits_value2.connect("setup",setup)
+	factory_surface_limits_value2.connect("bind",bind2)
 
-	surfaceVideoScrollbar = create_scrollbar(treeSurfaceVideoLimits)
+
+	factory_surface_limits_value3 = Gtk.SignalListItemFactory()
+	factory_surface_limits_value3.connect("setup",setup)
+	factory_surface_limits_value3.connect("bind",bind3)
+
+
+	vdpauSurfaceSelection = Gtk.SingleSelection()
+	surfaceVideoStore = Gio.ListStore.new(ExpandDataObject2)
+	
+	vdpauSurfaceModel = Gtk.TreeListModel.new(surfaceVideoStore,False,True,add_tree_node2)
+	vdpauSurfaceSelection.set_model(vdpauSurfaceModel)
+	
+	vdpauSurfaceColumnView.set_model(vdpauSurfaceSelection)
+	
+	vdpauSurfaceColumnLhs = Gtk.ColumnViewColumn.new("Suface",factory_surface_limits)
+	vdpauSurfaceColumnLhs.set_resizable(True)
+	vdpauSurfaceColumnLhs.set_expand(True)
+	vdpauSurfaceColumnRhs1 = Gtk.ColumnViewColumn.new("Width",factory_surface_limits_value1)
+	vdpauSurfaceColumnRhs1.set_expand(True)
+	vdpauSurfaceColumnRhs2 = Gtk.ColumnViewColumn.new("Height",factory_surface_limits_value2)
+	vdpauSurfaceColumnRhs2.set_expand(True)
+	vdpauSurfaceColumnRhs3 = Gtk.ColumnViewColumn.new("Width",factory_surface_limits_value3)
+	vdpauSurfaceColumnRhs3.set_expand(True)
+	
+	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnLhs)
+	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs1)
+	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs2)
+	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs3)
+
+
+#	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
+#	treeSurfaceVideoLimits = Gtk.TreeView.new_with_model(surfaceVideoStore)
+#	treeSurfaceVideoLimits.set_property("enable-grid-lines",1)
+
+#	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
+
+	surfaceVideoScrollbar = create_scrollbar(vdpauSurfaceColumnView)
 	surfaceGrid.attach(surfaceVideoScrollbar,0,0,1,1)
 
 	
@@ -310,25 +366,35 @@ def vdpauinfo(tab2):
 	videoMixerGrid = createSubTab(videoMixerTab,notebook,"Video Mixer")
 	videoMixerGrid.set_row_spacing(20)
 
-	videoMixerFeatureStore = Gtk.TreeStore(str,str,str,str)
-	treeVideoMixerFeature = Gtk.TreeView.new_with_model(videoMixerFeatureStore)
-	treeVideoMixerFeature.set_property("enable-grid-lines", 1)
-	treeVideoMixerFeature.set_enable_search(True)
-
-	for i, column_title in enumerate(videoMixerFeatureTitle):
-		videoMixerrenderer = Gtk.CellRendererText()
-		column = Gtk.TreeViewColumn(column_title, videoMixerrenderer, text=i)
-		column.add_attribute(videoMixerrenderer, "background", 2)
-		column.set_sort_column_id(i)
-		column.set_resizable(True)
-		column.set_reorderable(True)
-		if i > 0:
-			column.add_attribute(videoMixerrenderer, "foreground", 3)
-		treeVideoMixerFeature.set_property("can-focus", False)
-		treeVideoMixerFeature.append_column(column)
-
+	videoMixerColumnView = Gtk.ColumnView()
+	videoMixerColumnView.props.show_row_separators = True
+	videoMixerColumnView.props.show_column_separators = False
 	
-	videoMixerFeatureScrollbar = create_scrollbar(treeVideoMixerFeature)
+	factory_video_mixer = Gtk.SignalListItemFactory()
+	factory_video_mixer.connect("setup",setup_expander)
+	factory_video_mixer.connect("bind",bind_expander)
+	
+	factory_video_mixer_value = Gtk.SignalListItemFactory()
+	factory_video_mixer_value.connect("setup",setup)
+	factory_video_mixer_value.connect("bind",bind1)
+
+	videoMixerSelection = Gtk.SingleSelection()
+	videoMixerFeatureStore = Gio.ListStore.new(ExpandDataObject2)
+	
+	videoMixerModel = Gtk.TreeListModel.new(videoMixerFeatureStore,False,True,add_tree_node2)
+	videoMixerSelection.set_model(videoMixerModel)
+	
+	videoMixerColumnView.set_model(videoMixerSelection)
+	
+	videoMixerColumnLhs = Gtk.ColumnViewColumn.new("Name",factory_video_mixer)
+	videoMixerColumnLhs.set_resizable(True)
+	videoMixerColumnRhs1 = Gtk.ColumnViewColumn.new("Supported",factory_video_mixer_value)
+	videoMixerColumnRhs1.set_expand(True)
+	
+	videoMixerColumnView.append_column(videoMixerColumnLhs)
+	videoMixerColumnView.append_column(videoMixerColumnRhs1)
+	
+	videoMixerFeatureScrollbar = create_scrollbar(videoMixerColumnView)
 	videoMixerGrid.attach(videoMixerFeatureScrollbar,0,0,1,1)
 
 
