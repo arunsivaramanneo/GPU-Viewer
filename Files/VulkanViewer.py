@@ -296,20 +296,19 @@ def Vulkan(tab2):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
 
         createMainFile(Filenames.vulkan_device_features_file,fetch_device_features_command)
-        featureList = Gtk.StringList()
-        featureDropdown.set_model(featureList)
-        featureList.append("Show All Device Features")
+        featureList.remove_all()
+        featureList.append(DataObject("Show All Device Features",""))
         with open(Filenames.vulkan_device_features_file, "r") as file:
             for line in file:
                 if "Vk" in line:
                     text = line[:-2]
-                    featureList.append(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")))
+                    featureList.append(DataObject(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")),""))
 
     def selectFeature(dropdown, _pspec):
         selected =dropdown.props.selected_item
         feature = ""
         if selected is not None:
-            feature = selected.props.string
+            feature = selected.column1
 
         fetch_device_features_all_command = "cat %s | awk '/==/{flag=1;next} flag' | awk '{sub(/^[ \t]+/, 'True'); print }' | grep =" %(Filenames.vulkan_device_features_file)
         fetch_device_features_selected_command = "cat %s | awk '/%s/{flag=1;next}/^Vk*/{flag=0}flag' | awk '/--/{flag=1 ; next} flag' | grep = | sort " %(Filenames.vulkan_device_features_file,feature)
@@ -389,18 +388,17 @@ def Vulkan(tab2):
 
         createMainFile(Filenames.vulkan_device_format_types_buffer_count_file,fetch_vulkan_device_format_type_buffer_count_command)  
 
-        FormatsList = Gtk.StringList()
-        FormatsDropDown.set_model(FormatsList)
-        FormatsList.append("Show All Device Formats")
+        FormatsList.remove_all()
+        FormatsList.append(DataObject("Show All Device Formats",""))
         with open(Filenames.vulkan_device_formats_types_file,"r") as file:
             for line in file:
-                FormatsList.append(((line.replace("FORMAT_","")).strip("\n")).strip("\t"))
+                FormatsList.append(DataObject(((line.replace("FORMAT_","")).strip("\n")).strip("\t"),""))
 
     def selectFormats(dropdown,_pspec):
         selected =dropdown.props.selected_item
         selected_Format = ""
         if selected is not None:
-            selected_Format = selected.props.string
+            selected_Format = selected.column1
 
         valueFormats = copyContentsFromFile(Filenames.vulkan_device_formats_types_file)
         valueFormatsCount = copyContentsFromFile(Filenames.vulkan_device_format_types_count_file)
@@ -1166,6 +1164,15 @@ def Vulkan(tab2):
         search_text_widget = properties_dropdown_search.get_text()
         return search_text_widget.upper() in item.column1.upper()
 
+    def _do_filter_features_dropdown_view(item, filter_list_model):
+        search_text_widget = features_dropdown_search.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
+    def _do_filter_formats_dropdown_view(item, filter_list_model):
+        search_text_widget = formats_dropdown_search.get_text()
+        return search_text_widget.upper() in item.column1.upper()
+
+
 
     def radcall(combo,dummy):
         text = combo.props.selected
@@ -1389,10 +1396,20 @@ def Vulkan(tab2):
     filterSortFeatureListStore.set_filter(filter_features)
     featureSelection.set_model(filterSortFeatureListStore)
     featuresColumnView.set_model(featureSelection)
-    
 
+    factory_features_dropdown_value = Gtk.SignalListItemFactory()
+    factory_features_dropdown_value.connect("setup",setup)
+    factory_features_dropdown_value.connect("bind",bind_column1)
+    
+    featureList = Gio.ListStore.new(DataObject)
+    filterFeaturesStoreDropdown = Gtk.FilterListModel(model=featureList)
+    filter_features_dropdown = Gtk.CustomFilter.new(_do_filter_features_dropdown_view, filterFeaturesStoreDropdown)
+    filterFeaturesStoreDropdown.set_filter(filter_features_dropdown)
  #   featureList  = Gtk.StringList()
-    featureDropdown = Gtk.DropDown()
+    featureDropdown = Gtk.DropDown(model=filterFeaturesStoreDropdown,factory=factory_features_dropdown_value)
+    featureDropdown.set_enable_search(True)
+    features_dropdown_search = _get_search_entry_widget(featureDropdown)
+    features_dropdown_search.connect('search-changed',_on_search_method_changed,filter_features_dropdown)
  #   featureDropdown.set_model(featureList)
     featureDropdown.connect('notify::selected-item',selectFeature)
     featureSearchEntry = Gtk.SearchEntry()
@@ -1454,10 +1471,20 @@ def Vulkan(tab2):
 
     # ------------Creating the Formats Tab --------------------------------------------------
 
-    FormatsList = Gtk.StringList()
-    FormatsDropDown = Gtk.DropDown()
-    FormatsDropDown.set_model(FormatsList)
+    factory_formats_dropdown_value = Gtk.SignalListItemFactory()
+    factory_formats_dropdown_value.connect("setup",setup)
+    factory_formats_dropdown_value.connect("bind",bind_column1)
+
+    FormatsList = Gio.ListStore.new(DataObject)
+    filterFormatStoreDropdown = Gtk.FilterListModel(model=FormatsList)
+    filter_formats_dropdown = Gtk.CustomFilter.new(_do_filter_formats_dropdown_view, filterFormatStoreDropdown)
+    filterFormatStoreDropdown.set_filter(filter_formats_dropdown)
+    FormatsDropDown = Gtk.DropDown(model=filterFormatStoreDropdown,factory=factory_formats_dropdown_value)
+    FormatsDropDown.set_model(filterFormatStoreDropdown)
     FormatsDropDown.connect('notify::selected-item',selectFormats)
+    FormatsDropDown.set_enable_search(True)
+    formats_dropdown_search = _get_search_entry_widget(FormatsDropDown)
+    formats_dropdown_search.connect('search-changed',_on_search_method_changed,filter_formats_dropdown)
     FormatsTab = Gtk.Box(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
