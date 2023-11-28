@@ -8,16 +8,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk,GObject,Gio,Adw
 Adw.init()
 
-from Common import setBackgroundColor, setColumns, createSubTab, create_scrollbar, createSubFrame, \
-    colorTrueFalse, getDriverVersion, getVulkanVersion, getDeviceSize, refresh_filter, getRamInGb, fetchImageFromUrl, getFormatValue
-
-
-decoderTitle = ["Decoder Name","Level","Macroblocks","Width","Height"]
-videoMixerFeatureTitle = ["Name","Supported"]
-surfaceVideoTitle = ["Surface","Width","Height","Types"]
-surfaceOutputTitle = ["Output Surface","Width","Height","Types"]
-SurfaceBitmapTitle = ["Bitmap Surface","Width","Height"]
-vdpauinfoTitle = ["VDPAU Information","Details"]
+from Common import setBackgroundColor, createSubTab, create_scrollbar
 
 class DataObject(GObject.GObject):
     def __init__(self, column1: str,column2: str,column3: str,column4: str,column5: str):
@@ -341,7 +332,7 @@ def vdpauinfo(tab2):
 	vdpauSurfaceColumnRhs1.set_expand(True)
 	vdpauSurfaceColumnRhs2 = Gtk.ColumnViewColumn.new("Height",factory_surface_limits_value2)
 	vdpauSurfaceColumnRhs2.set_expand(True)
-	vdpauSurfaceColumnRhs3 = Gtk.ColumnViewColumn.new("Width",factory_surface_limits_value3)
+	vdpauSurfaceColumnRhs3 = Gtk.ColumnViewColumn.new("Types",factory_surface_limits_value3)
 	vdpauSurfaceColumnRhs3.set_expand(True)
 	
 	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnLhs)

@@ -233,15 +233,16 @@ def Vulkan(tab2):
     #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
         createMainFile(Filenames.vulkan_device_properties_file,fetch_device_properties_command)
         
-        propertiesList = Gtk.StringList()
-        propertiesDropdown.set_model(propertiesList)
-        propertiesList.append("Show All Device Properties")
+    #    propertiesList = Gtk.StringList()
+    #    propertiesDropdown.set_model(propertiesList)
+        propertiesList.remove_all()
+        propertiesList.append(DataObject("Show All Device Properties",""))
         with open(Filenames.vulkan_device_properties_file, "r") as file1:
             for i, line in enumerate(file1):
                 if "Vk" in line:
                     text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
                     text = text1[:-1]
-                    propertiesList.append(text.strip("\n"))
+                    propertiesList.append(DataObject(text.strip("\n"),""))
 
 
     def Limits(GPUname):
@@ -923,7 +924,7 @@ def Vulkan(tab2):
         selected =dropdown.props.selected_item
         property = ""
         if selected is not None:
-            property = selected.props.string
+            property = selected.column1
 
 
         fetch_device_properties_filter_properties_command = "cat %s | awk '/./' " %(Filenames.vulkan_device_properties_file)
@@ -1121,7 +1122,13 @@ def Vulkan(tab2):
 
         TreeGroups.expand_all()
 
-
+    def _get_search_entry_widget(dropdown):
+        popover = dropdown.get_last_child()
+        box = popover.get_child()
+        box2 = box.get_first_child()
+        search_entry = box2.get_first_child() # Gtk.SearchEntry
+        return search_entry
+    
     def _on_search_method_changed(search_entry,filterColumn):
         filterColumn.changed(Gtk.FilterChange.DIFFERENT)
 
@@ -1154,6 +1161,10 @@ def Vulkan(tab2):
     def _do_filter_formats_view(item, filter_list_model):
         search_text_widget = formatSearchEntry.get_text()
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
+    def _do_filter_properties_dropdown_view(item, filter_list_model):
+        search_text_widget = properties_dropdown_search.get_text()
+        return search_text_widget.upper() in item.column1.upper()
 
 
     def radcall(combo,dummy):
@@ -1311,12 +1322,24 @@ def Vulkan(tab2):
     propertiesColumnView.append_column(propertiesColumnLhs)
     propertiesColumnView.append_column(propertiesColumnRhs)
 
+    factory_properties_dropdown_value = Gtk.SignalListItemFactory()
+    factory_properties_dropdown_value.connect("setup",setup)
+    factory_properties_dropdown_value.connect("bind",bind_column1)
+
     propertiesTab = Gtk.Box(spacing=10)
     propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
     propertiesGrid.set_row_spacing(5)
-    propertiesList = Gtk.StringList()
-    propertiesDropdown = Gtk.DropDown()
-    propertiesDropdown.set_model(propertiesList)
+#    propertiesList = Gtk.StringList()
+
+    propertiesList = Gio.ListStore.new(DataObject)
+    filterPropertiesStoreDropdown = Gtk.FilterListModel(model=propertiesList)
+    filter_properties_dropdown = Gtk.CustomFilter.new(_do_filter_properties_dropdown_view, filterPropertiesStoreDropdown)
+    filterPropertiesStoreDropdown.set_filter(filter_properties_dropdown)
+    propertiesDropdown = Gtk.DropDown(model = filterPropertiesStoreDropdown,factory=factory_properties_dropdown_value)
+    propertiesDropdown.set_enable_search(True)
+    properties_dropdown_search = _get_search_entry_widget(propertiesDropdown)
+    properties_dropdown_search.connect('search-changed',_on_search_method_changed,filter_properties_dropdown)
+ #   propertiesDropdown.set_model(propertiesList)
     propertiesDropdown.connect('notify::selected-item',selectProperties)
     setMargin(propertiesDropdown,2,1,2)
 #    propertiesGrid.add(propertiesCombo)

@@ -40,9 +40,7 @@ if Path(Filenames.gpu_viewer_folder_path).exists():
         message_window_frame.set_child(message_grid)
         setMargin(label,5,10,0)
         message_grid.attach(label,0,0,20,1)
-    #    label2 = Gtk.Label(label="Do you want to run this Command Now ?")
-    #    setMargin(label2,5,25,10)
-     #   message_grid.attach_next_to(label2,label,Gtk.PositionType.BOTTOM,1,10)
+        
         message_button_OK = Gtk.Button.new_with_label("OK")
         message_button_OK.connect("clicked",quit)
     #    message_button_CANCEL = Gtk.Button.new_with_label("No")
