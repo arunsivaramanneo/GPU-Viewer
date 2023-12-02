@@ -13,7 +13,10 @@ import os
 from pathlib import Path
 
 gi.require_version('Gtk','4.0')
-from gi.repository import Gtk, Pango, Gdk,Gio,GLib
+gi.require_version(namespace='Adw', version='1')
+from gi.repository import Gtk, Pango, Gdk,Gio,GLib,Adw
+
+Adw.init()
 
 from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile,on_light_action_actived,on_dark_action_actived
 from VulkanViewer import Vulkan
@@ -25,7 +28,7 @@ from aboutPage import about_page
 Title1 = "About GPU-Viewer v2.0"
 
 if Path(Filenames.gpu_viewer_folder_path).exists():
-
+    
     def show_message(app):
         message_window = Gtk.ApplicationWindow(application=app)
         message_grid = Gtk.Grid()
@@ -64,12 +67,13 @@ else:
     #    setScreenSize(gtk, const.WIDTH_RATIO, const.HEIGHT_RATIO1)
         
         notebook = Gtk.Notebook()
-        win.set_child(notebook)
+        win.set_content(notebook)
 
         if isVulkanSupported():
             vulkanTab = create_tab(notebook,const.VULKAN_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
             page = notebook.get_page(vulkanTab)
             page.set_property("tab-expand",True)
+            vulkanTab.add_css_class(css_class='compact')
             t2 = threading.Thread(target=Vulkan, args=(vulkanTab,))
             t2.start()
             t2.join()
@@ -105,7 +109,7 @@ else:
         t3.join()   
 
         print(time.time()-T1)
-        win.connect("close-request",quit)
+    #    win.connect("close-request",quit)
     #    gtk.mainLoop()
 
 
@@ -151,9 +155,15 @@ else:
         return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
 
     def on_activate(app):
-        win = Gtk.ApplicationWindow(application=app)
-        headerbar = Gtk.HeaderBar.new()
-        win.set_titlebar(headerbar)
+        win = Adw.ApplicationWindow(application=app)
+        headerbar = Adw.HeaderBar.new()
+        headerbar.add_css_class(css_class='compact')
+
+        adw_toolbar_view = Adw.ToolbarView.new()
+        win.set_content(adw_toolbar_view)
+
+        adw_toolbar_view.add_top_bar(headerbar)
+    #    win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.0")
 
         light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
@@ -184,9 +194,10 @@ else:
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         win.present()
-        main(win)  # Program starts here
+        win.connect("close-request",quit)
+        main(adw_toolbar_view)  # Program starts here
 
-    app = Gtk.Application(application_id='io.github.arunsivaramanneo.GPUViewer')
+    app = Adw.Application(application_id='io.github.arunsivaramanneo.GPUViewer')
     app.connect('activate', on_activate)
 
     app.run(None)   

@@ -44,6 +44,7 @@ textview > border {
   border-width: 2px;
   background-image: linear-gradient(#333333,#333333);
   background-color: #353839;
+  border-style: none none none none;
   color: white;
   font-weight: bold;
 }
@@ -96,7 +97,8 @@ headerbar {
   background-image: none;
   background-color: #333333;
   font-size: medium;
-  line-height: 1.2px;
+  border-style: none none none none;
+
 }
 
 /*************
@@ -117,7 +119,7 @@ headerbar {
 
 notebook {
   border: 2px solid #171717;
-  border-style: solid none solid solid;
+  border-style: none none none none;
   background-color: #2C2C2C;
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
@@ -365,7 +367,7 @@ listview > row :hover {
   font-weight: bolder;
   font-style: oblique;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
-  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+
 }
 
 

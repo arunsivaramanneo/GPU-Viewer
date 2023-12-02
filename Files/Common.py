@@ -476,12 +476,18 @@ def bind1(widget, item):
     row = item.get_item()
     obj = row.get_item()
     if "true" in obj.data2: 
+        label.remove_css_class(css_class='false')
         label.add_css_class(css_class='true')
+        label.set_label(obj.data2)
     elif "false" in obj.data2:
+        label.remove_css_class(css_class='true')
         label.add_css_class(css_class='false')
+        label.set_label(obj.data2)
     else:
+        label.remove_css_class(css_class='false')
+        label.remove_css_class(css_class='true')
         label.add_css_class(css_class='nothing')
-    label.set_label(obj.data2)
+        label.set_label(obj.data2)
 
 
 class ExpandDataObject2(GObject.GObject):

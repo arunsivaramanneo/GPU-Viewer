@@ -48,17 +48,17 @@ textview > border {
 }
 
 .close{
-  color: #fff;
+  color: #171717;
   font-size: small;
   font-weight: bold;
 }
 .minimize{
-  color: #fff;
+  color: #171717;
   font-size: small;
   font-weight: bold;
 }
 .maximize{
-  color: #fff;
+  color: #171717;
   font-size: small;
   font-weight: bold;
 }

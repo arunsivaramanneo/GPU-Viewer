@@ -83,9 +83,11 @@ def bind_column2(widget, item):
     label = item.get_child()
     obj = item.get_item()
     if "true" in obj.column2:
+        label.remove_css_class(css_class='false')
         label.add_css_class(css_class='true')
         label.set_label(obj.column2)
     elif "false" in obj.column2:
+        label.remove_css_class(css_class='true')
         label.add_css_class(css_class='false')
         label.set_label(obj.column2)
     else:
