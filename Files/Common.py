@@ -226,19 +226,6 @@ def bind(widget, item,column):
     label = item.get_child()
     obj = item.get_item()
     label.set_label(obj.column)
-
-def setColumnFrameBuffer(TreeFB, Title):
-    for i, column_title in enumerate(Title):
-
-        FBrenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, FBrenderer, text=i)
-        column.add_attribute(FBrenderer, "background", len(Title))
-        if i < len(Title) - 1:
-            FBrenderer.set_alignment(0.5, 0.5)
-            column.set_alignment(0.5)
-        column.set_property("min-width", 40)
-        TreeFB.set_property("can-focus", False)
-        TreeFB.append_column(column)
         
 def createSearchEntry(store_filter):
     entry = Gtk.SearchEntry()
@@ -256,41 +243,8 @@ def getDeviceSize(size):
     return sizeMB
 
 
-def searchStore(TreeGLExt, grid3, refresh_filter):
-    frameSearch = Gtk.Frame()
-    entry = Gtk.SearchEntry()
-    entry.set_placeholder_text("Type here to filter extensions.....")
-    entry.connect("search-changed", refresh_filter)
-    frameSearch.add(entry)
-    scrollable_treelist2 = createScrollbar(TreeGLExt)
-    grid3.attach(frameSearch, 0, 0, 1, 1)
-    grid3.attach_next_to(scrollable_treelist2, frameSearch, Gtk.PositionType.BOTTOM, 1, 1)
-
-
 def refresh_filter(self, store_filter):
     store_filter.refilter()
-
-def create_drop_down(string_list_items):
-    drop_down_ui_string = f"""<interface>
-    <object class="GtkDropDown" id="drop-down">
-        <property name="model">
-        <object class="GtkStringList" id="string-list">x`
-            <items>
-            {string_list_items}
-            </items>
-        </object>
-        </property>
-        <property name="enable-search">true</property>
-        <property name="expression">
-        <lookup type="GtkStringObject" name="string"></lookup>
-        </property>
-    </object>
-    </interface>"""
-
-    builder = Gtk.Builder.new_from_string(drop_down_ui_string, -1)
-    drop_down = builder.get_object("drop-down")
-
-    return drop_down
 
 
 def appendLimitsRHS(filename, temp):
@@ -476,10 +430,12 @@ def bind1(widget, item):
     row = item.get_item()
     obj = row.get_item()
     if "true" in obj.data2: 
+        label.remove_css_class(css_class='nothing')
         label.remove_css_class(css_class='false')
         label.add_css_class(css_class='true')
         label.set_label(obj.data2)
     elif "false" in obj.data2:
+        label.remove_css_class(css_class='nothing')
         label.remove_css_class(css_class='true')
         label.add_css_class(css_class='false')
         label.set_label(obj.data2)

@@ -4,8 +4,9 @@ import Filenames
 import subprocess
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk,GObject,Gio
-from Common import  setBackgroundColor, create_scrollbar, createSubTab, setColumnFrameBuffer,getScreenSize,setup
+gi.require_version(namespace='Adw', version='1')
+from gi.repository import Gtk,GObject,Gio,Adw
+from Common import  setBackgroundColor, create_scrollbar, createSubTab,getScreenSize,setup
 
 FrameBufferToolTip = ["Visual ID", "Visual Depth", "Visual Type", "Transparency", "Buffer Size", "level", "Render Type",
                       "Double Buffer", "Stereo", "Red Colorbuffer Size", "Green Colorbuffer Size",
@@ -201,13 +202,20 @@ def bind26(widget, item):
     label.set_label(obj.data26)
 
 def FrameBuffer(button):
-    FBWin = Gtk.Window()
+    FBWin = Adw.Window()
     FBWin.set_title("GLX Frame Buffer Configuration")
+    headerbar = Adw.HeaderBar.new()
+    headerbar.add_css_class(css_class='compact')
+
+    adw_toolbar_view = Adw.ToolbarView.new()
+    FBWin.set_content(adw_toolbar_view)
+
+    adw_toolbar_view.add_top_bar(headerbar)
     #   FBWin.set_size_request(1000, 500)
  #   setScreenSize(FBWin, const.WIDTH_RATIO, const.HEIGHT_RATIO2)
 
     FBNotebook = Gtk.Notebook()
-    FBWin.set_child(FBNotebook)
+    adw_toolbar_view.set_content(FBNotebook)
 
 #    FBGLX_Store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str,
 #                                str,

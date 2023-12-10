@@ -12,7 +12,7 @@ Adw.init()
 import const
 import Filenames
 import subprocess
-from Common import copyContentsFromFile, getGpuImage,setColumns,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,createSearchEntry,getLogo
+from Common import copyContentsFromFile, getGpuImage,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo
 
 
 class DataObject(GObject.GObject):
@@ -1155,7 +1155,7 @@ def Vulkan(tab2):
 
     def _do_filter_layers_view(item, filter_list_model):
         search_text_widget = layerSearchEntry.get_text()
-        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper() or search_text_widget.upper() in item.data3.upper() or search_text_widget.upper() in item.data4.upper() or search_text_widget.upper() in item.data5.upper()
 
 
     def _do_filter_formats_view(item, filter_list_model):
@@ -1905,7 +1905,7 @@ def Vulkan(tab2):
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
 
     availableDevices = Gtk.Label()
-    setMargin(availableDevices,280,10,10)
+    setMargin(availableDevices,300,10,10)
     gpu_image = Gtk.Image()
     availableDevices.set_text("Available Device(s) :")
     DevicesGrid.attach(availableDevices, 10, 2, 20, 1)

@@ -12,7 +12,7 @@ from gi.repository import Gtk,Gio,GObject,Adw
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setColumns,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,refresh_filter,appendLimitsRHS
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,appendLimitsRHS
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -149,11 +149,19 @@ def OpenGL(tab):
 
         createMainFile(Filenames.opengl_core_limits_lhs_file,Filenames.fetch_opengl_core_limits_lhs_command)
 
-        LimitsWin = Gtk.Window()
+        LimitsWin = Adw.Window()
         LimitsWin.set_title("OpenGL Hardware Limits")
+        headerbar = Adw.HeaderBar.new()
+        headerbar.add_css_class(css_class='compact')
+
+        adw_toolbar_view = Adw.ToolbarView.new()
+        LimitsWin.set_content(adw_toolbar_view)
+
+        adw_toolbar_view.add_top_bar(headerbar)
+
         LimitsNotebook = Gtk.Notebook()
         LimitsNotebook.set_property('tab-pos',Gtk.PositionType.LEFT) 
-        LimitsWin.set_child(LimitsNotebook)
+        adw_toolbar_view.set_content(LimitsNotebook)
         LimitsCoreTab = Gtk.Box(spacing=10)
         LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
