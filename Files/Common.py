@@ -429,12 +429,12 @@ def bind1(widget, item):
     label = item.get_child()
     row = item.get_item()
     obj = row.get_item()
-    if "true" in obj.data2: 
+    if "true" in obj.data2 or "Yes" in obj.data2: 
         label.remove_css_class(css_class='nothing')
         label.remove_css_class(css_class='false')
         label.add_css_class(css_class='true')
         label.set_label(obj.data2)
-    elif "false" in obj.data2:
+    elif "false" in obj.data2 or "No" in obj.data2:
         label.remove_css_class(css_class='nothing')
         label.remove_css_class(css_class='true')
         label.add_css_class(css_class='false')

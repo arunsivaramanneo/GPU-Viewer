@@ -5,9 +5,9 @@ import Filenames
 
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk
+from gi.repository import Gtk,Gio
 
-from Common import copyContentsFromFile, createSubTab, create_scrollbar, setColumns, setBackgroundColor,setMargin, createSearchEntry, createMainFile, fetchContentsFromCommand
+from Common import setup_expander, createSubTab, create_scrollbar, bind_expander, setBackgroundColor,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -28,6 +28,7 @@ def openCL(tab):
         value = 0
         if selected is not None:
             value = dropdown.props.selected
+
         getDeviceDetails(value)
         getDeviceMemoryImageDetails(value)
         getDeviceVectorDetails(value)
@@ -74,25 +75,24 @@ def openCL(tab):
 
         oclPlatformDetailsLHS = fetchContentsFromCommand(Filenames.fetch_platform_details_lhs_command)
         oclPlatformDetailsRHS = fetchContentsFromCommand(Filenames.fetch_platform_details_rhs_command)
-        platformDetails_Store.clear()
-        platformDetailsTreeView.set_model(platformDetails_Store)
+        platformDetails_Store.remove_all()
 
         for i in range(len(oclPlatformDetailsLHS)):
-            platformDetailsTreeView.expand_all()
             background_color = setBackgroundColor(i)
             if "Extensions" in oclPlatformDetailsLHS[i] and "suffix" not in oclPlatformDetailsLHS[i]:
                 if "Version" in oclPlatformDetailsLHS[i]:
                     continue
                 oclPlatformExtensions = oclPlatformDetailsRHS[i].split(' ')
                 oclPlatformExtensions = list(filter(None,oclPlatformExtensions))
-                iter = platformDetails_Store.append(None, [oclPlatformDetailsLHS[i].strip('\n'),
-                                                           str(len(oclPlatformExtensions)), const.BGCOLOR3])
+                toprow = ExpandDataObject(oclPlatformDetailsLHS[i].strip('\n'),
+                                                           str(len(oclPlatformExtensions)))
                 for j in range(len(oclPlatformExtensions)):
-                    background_color = setBackgroundColor(j)
-                    platformDetails_Store.append(iter, [oclPlatformExtensions[j].strip('\n'), " ", background_color])
+                    iter = ExpandDataObject(oclPlatformExtensions[j].strip('\n'), " ")
+                    toprow.children.append(iter)
             else:
-                platformDetails_Store.append(None, [oclPlatformDetailsLHS[i].strip('\n'),
-                                                    oclPlatformDetailsRHS[i].strip('\n'), background_color])
+                toprow = ExpandDataObject(oclPlatformDetailsLHS[i].strip('\n'),
+                                                    oclPlatformDetailsRHS[i].strip('\n'))
+            platformDetails_Store.append(toprow)
 
     def getDeviceDetails(value):
 
@@ -107,6 +107,7 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
+
         fetch_device_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred | grep -v Available" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
         fetch_device_extensions_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions|Available/'" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
         
@@ -119,8 +120,8 @@ def openCL(tab):
         oclDeviceDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_details_lhs_command)
         oclDeviceDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_details_rhs_command)
 
-        DeviceDetails_Store.clear()
-        DeviceDetailsTreeView.set_model(DeviceDetails_Store)
+
+        DeviceDetails_Store.remove_all()
         fgcolor = []
 
         for i in range(len(oclDeviceDetailsRHS)):
@@ -132,54 +133,46 @@ def openCL(tab):
                 fgcolor.append(const.COLOR3)
 
         for i in range(len(oclDeviceDetailsLHS)):
-            DeviceDetailsTreeView.expand_all()
             if "    " in oclDeviceDetailsLHS[i]:
                 oclDeviceDetailsLHS[i] = oclDeviceDetailsLHS[i].strip("  ")
-                DeviceDetails_Store.append(iter,
-                                           [oclDeviceDetailsLHS[i].strip('\n'), oclDeviceDetailsRHS[i].strip('\n'),
-                                            setBackgroundColor(i), fgcolor[i]])
+                iter = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'), oclDeviceDetailsRHS[i].strip('\n'))
+                toprow.children.append(iter)
             else:
                 if "Number of devices" in oclDeviceDetailsLHS[i]:
                     oclDeviceDetailsLHS[i] = "  Number of devices"
                     oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
                 if "OpenCL" in oclDeviceDetailsLHS[i] and ("versions" in oclDeviceDetailsLHS[i] or "features" in oclDeviceDetailsLHS[i]):
-                    iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
-                                                             "", setBackgroundColor(i),
-                                                             fgcolor[i]])
+                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
                     if "versions" in oclDeviceDetailsLHS[i]:
-                        DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
-                                                    const.COLOR3])
+                        iter  = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
+                    #    toprow.children.append(iter)
                     if "features" in oclDeviceDetailsLHS[i]:
-                        DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
-                                                    const.COLOR3])
-                    continue
+                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
+                        toprow.children.append(iter)
+#                    continue
                 if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
+                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
+                    print(oclDeviceDetailsRHS[i])
                     if "OpenCL" in oclDeviceDetailsRHS[i]:
-                        DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3], setBackgroundColor(i),
-                                                    const.COLOR3])
+                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
+                        toprow.children.append(iter)
                     else:
-                        DeviceDetails_Store.append(iter,
-                                                   [oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2], setBackgroundColor(i),
-                                                    const.COLOR3])
+                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
+                        toprow.children.append(iter)
                     continue
                 if "Extensions" in oclDeviceDetailsLHS[i]:
                     oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(" ")
                     oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
-                    iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
-                                                             str(len(oclDeviceExtenstions)).strip('\n'),
-                                                             const.BGCOLOR3, fgcolor[i]])
+                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),str(len(oclDeviceExtenstions)).strip('\n'))
                     for j in range(len(oclDeviceExtenstions)):
-                        DeviceDetailsTreeView.expand_all()
-                        DeviceDetails_Store.append(iter,
-                                                   [oclDeviceExtenstions[j].strip('\n'), " ", setBackgroundColor(j),
-                                                    '#fff'])
+                        iter = ExpandDataObject(oclDeviceExtenstions[j].strip('\n'), " ")
+                        toprow.children.append(iter)
                 else:
-                    iter = DeviceDetails_Store.append(None, [oclDeviceDetailsLHS[i].strip('\n'),
-                                                             oclDeviceDetailsRHS[i].strip('\n'), setBackgroundColor(i),
-                                                             fgcolor[i]])
+                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
+                                                             oclDeviceDetailsRHS[i].strip('\n'))
+            DeviceDetails_Store.append(toprow)
+
+
 
 
     def getDeviceMemoryImageDetails(value):
@@ -254,7 +247,6 @@ def openCL(tab):
     def getDeviceVectorDetails(value):
 
         value2 = platform_dropdown.props.selected
-
         oclPlatformslocal = []
         oclPlatformslocal = oclPlatformslocal + oclPlatforms
         oclPlatformslocal.append("BLANK")
@@ -272,35 +264,38 @@ def openCL(tab):
 
         oclDeviceVectorDetailsLHS = [i.strip('\n') for i in oclDeviceVectorDetailsLHS]
         oclDeviceVectorDetailsRHS = [i.strip('\n') for i in oclDeviceVectorDetailsRHS]
-        DeviceVector_store.clear()
-        DeviceVectorTreeview.set_model(DeviceVector_store)
-        fgcolor = []
-
-        for i in range(len(oclDeviceVectorDetailsRHS)):
-            if "Yes" in oclDeviceVectorDetailsRHS[i]:
-                fgcolor.append("GREEN")
-            elif "No" in oclDeviceVectorDetailsRHS[i] and "None" not in oclDeviceVectorDetailsRHS[i]:
-                fgcolor.append("RED")
-            else:
-                fgcolor.append(const.COLOR3)
-
+        DeviceVector_store.remove_all()
+        iter = None
         for i in range(len(oclDeviceVectorDetailsLHS)):
-            DeviceVectorTreeview.expand_all()
             if "    " in oclDeviceVectorDetailsLHS[i]:
-                DeviceVectorTreeview.expand_all()
                 if "Correctly-rounded divide and sqrt operations" in oclDeviceVectorDetailsLHS[i]:
                     oclDeviceVectorDetailsLHS[i] = "    Correctly-rounded divide and sqrt operations"
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i][
                                                    len(oclDeviceVectorDetailsLHS[i]):].strip(' ')
-                oclDeviceVectorDetailsLHS[i] = oclDeviceVectorDetailsLHS[i].strip("  ")
-                DeviceVector_store.append(iter, [oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i],
-                                                 setBackgroundColor(i), fgcolor[i]])
+                #    oclDeviceVectorDetailsLHS[i] = oclDeviceVectorDetailsLHS[i].strip("  ")
+                iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
+                toprow.children.append(iter)
+        #            iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
+        #            toprow.children.append(iter)
+                 #   DeviceVector_store.append(toprow)
+          #      else:
+         #           print(oclDeviceVectorDetailsLHS[i])
+                #    DeviceVector_store.append(toprow)
+        #            iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
+        #            toprow.children.append(iter)
+        #            continue
+            #    DeviceVector_store.append(toprow)
+            #    continue
             else:
                 if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
                     oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
-                iter = DeviceVector_store.append(None, [oclDeviceVectorDetailsLHS[i].strip('\n'),
-                                                        oclDeviceVectorDetailsRHS[i].strip('\n'), const.BGCOLOR3,
-                                                        fgcolor[i]])
+                if iter == None:
+                    toprow = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'))
+                else:
+                    DeviceVector_store.append(toprow)
+                    toprow = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'))
+        DeviceVector_store.append(toprow)
+            
 
     def getDeviceQueueExecutionCapabilities(value):
 
@@ -392,27 +387,69 @@ def openCL(tab):
     platformDetailsTab = Gtk.Box(spacing=10)
     platformDetailsGrid = createSubTab(platformDetailsTab, oclNotebook, "Platform Details")
 
-    platformDetails_Store = Gtk.TreeStore(str, str, str)
-    platformDetailsTreeView = Gtk.TreeView.new_with_model(platformDetails_Store)
-    platformDetailsTreeView.set_property("enable-grid-lines", 1)
-#    platformDetailsTreeView.set_property("enable-tree-lines", True)
+    platformColumnView = Gtk.ColumnView()
+    platformColumnView.props.show_row_separators = True
+    platformColumnView.props.show_column_separators = False
 
-    setColumns(platformDetailsTreeView, platformDetailsHeader, const.MWIDTH, 0.0)
+    factory_platform = Gtk.SignalListItemFactory()
+    factory_platform.connect("setup",setup_expander)
+    factory_platform.connect("bind",bind_expander)
 
-    platformScrollbar = create_scrollbar(platformDetailsTreeView)
+    factory_platform_value = Gtk.SignalListItemFactory()
+    factory_platform_value.connect("setup",setup)
+    factory_platform_value.connect("bind",bind1)
+
+    platformSelection = Gtk.SingleSelection()
+    platformDetails_Store = Gio.ListStore.new(ExpandDataObject)
+
+    platformModel = Gtk.TreeListModel.new(platformDetails_Store,False,True,add_tree_node)
+    platformSelection.set_model(platformModel)
+
+    platformColumnView.set_model(platformSelection)
+
+    platformColumnLhs = Gtk.ColumnViewColumn.new("Platform Information",factory_platform)
+    platformColumnLhs.set_resizable(True)
+    platformColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_platform_value)
+    platformColumnRhs.set_expand(True)
+
+    platformColumnView.append_column(platformColumnLhs)
+    platformColumnView.append_column(platformColumnRhs)
+
+    platformScrollbar = create_scrollbar(platformColumnView)
     platformDetailsGrid.attach(platformScrollbar,0,0,1,1)
 
     DeviceDetailsTab = Gtk.Box(spacing=10)
     DeviceDetailsGrid = createSubTab(DeviceDetailsTab, oclNotebook, "Device Details")
 
-    DeviceDetails_Store = Gtk.TreeStore(str, str, str, str)
-    DeviceDetailsTreeView = Gtk.TreeView.new_with_model(DeviceDetails_Store)
-    DeviceDetailsTreeView.set_property("enable-grid-lines", 1)
-#    DeviceDetailsTreeView.set_property("enable-tree-lines", True)
+    deviceColumnView = Gtk.ColumnView()
+    deviceColumnView.props.show_row_separators = True
+    deviceColumnView.props.show_column_separators = False
 
-    setOclColumns(DeviceDetailsTreeView, deviceDetailsHeader)
+    factory_devices = Gtk.SignalListItemFactory()
+    factory_devices.connect("setup",setup_expander)
+    factory_devices.connect("bind",bind_expander)
 
-    DeviceDetailsScrollbar = create_scrollbar(DeviceDetailsTreeView)
+    factory_devices_value = Gtk.SignalListItemFactory()
+    factory_devices_value.connect("setup",setup)
+    factory_devices_value.connect("bind",bind1)
+
+    deviceSelection = Gtk.SingleSelection()
+    DeviceDetails_Store = Gio.ListStore.new(ExpandDataObject)
+
+    deviceModel = Gtk.TreeListModel.new(DeviceDetails_Store,False,True,add_tree_node)
+    deviceSelection.set_model(deviceModel)
+
+    deviceColumnView.set_model(deviceSelection)
+
+    deviceColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_devices)
+    deviceColumnLhs.set_resizable(True)
+    deviceColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_devices_value)
+    deviceColumnRhs.set_expand(True)
+
+    deviceColumnView.append_column(deviceColumnLhs)
+    deviceColumnView.append_column(deviceColumnRhs)
+
+    DeviceDetailsScrollbar = create_scrollbar(deviceColumnView)
 
     DeviceDetailsGrid.attach(DeviceDetailsScrollbar,0,0,1,1)
 
@@ -458,14 +495,36 @@ def openCL(tab):
     DeviceVectorTab = Gtk.Box(spacing=10)
     DeviceVectorGrid = createSubTab(DeviceVectorTab, oclNotebook, "Device Vector Details")
 
-    DeviceVector_store = Gtk.TreeStore(str, str, str, str)
-    DeviceVectorTreeview = Gtk.TreeView.new_with_model(DeviceVector_store)
-    DeviceVectorTreeview.set_property("enable-grid-lines", 1)
-#    DeviceVectorTreeview.set_property("enable-tree-lines", True)
+    deviceVectorColumnView = Gtk.ColumnView()
+    deviceVectorColumnView.props.show_row_separators = True
+    deviceVectorColumnView.props.show_column_separators = False
 
-    setOclColumns(DeviceVectorTreeview, deviceMemoryImageHeader)
+    factory_device_vector = Gtk.SignalListItemFactory()
+    factory_device_vector.connect("setup",setup_expander)
+    factory_device_vector.connect("bind",bind_expander)
 
-    DeviceVectorScrollbar = create_scrollbar(DeviceVectorTreeview)
+    factory_device_vector_value = Gtk.SignalListItemFactory()
+    factory_device_vector_value.connect("setup",setup)
+    factory_device_vector_value.connect("bind",bind1)
+
+    deviceVectorSelection = Gtk.SingleSelection()
+    DeviceVector_store = Gio.ListStore.new(ExpandDataObject)
+
+    deviceVectorModel = Gtk.TreeListModel.new(DeviceVector_store,False,True,add_tree_node)
+    deviceVectorSelection.set_model(deviceVectorModel)
+
+    deviceVectorColumnView.set_model(deviceVectorSelection)
+
+    deviceVectorColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_device_vector)
+    deviceVectorColumnLhs.set_resizable(True)
+    deviceVectorColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_device_vector_value)
+    deviceVectorColumnRhs.set_expand(True)
+
+    deviceVectorColumnView.append_column(deviceVectorColumnLhs)
+    deviceVectorColumnView.append_column(deviceVectorColumnRhs)
+
+
+    DeviceVectorScrollbar = create_scrollbar(deviceVectorColumnView)
     DeviceVectorGrid.attach(DeviceVectorScrollbar,0,0,1,1)
 
     # The Platform Drop Down
