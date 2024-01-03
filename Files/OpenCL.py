@@ -122,16 +122,8 @@ def openCL(tab):
 
 
         DeviceDetails_Store.remove_all()
-        fgcolor = []
 
-        for i in range(len(oclDeviceDetailsRHS)):
-            if "Yes" in oclDeviceDetailsRHS[i]:
-                fgcolor.append("GREEN")
-            elif "No" in oclDeviceDetailsRHS[i] and "None" not in oclDeviceDetailsRHS[i]:
-                fgcolor.append("RED")
-            else:
-                fgcolor.append(const.COLOR3)
-
+        iter = None
         for i in range(len(oclDeviceDetailsLHS)):
             if "    " in oclDeviceDetailsLHS[i]:
                 oclDeviceDetailsLHS[i] = oclDeviceDetailsLHS[i].strip("  ")
@@ -142,36 +134,45 @@ def openCL(tab):
                     oclDeviceDetailsLHS[i] = "  Number of devices"
                     oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
                 if "OpenCL" in oclDeviceDetailsLHS[i] and ("versions" in oclDeviceDetailsLHS[i] or "features" in oclDeviceDetailsLHS[i]):
-                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
                     if "versions" in oclDeviceDetailsLHS[i]:
+                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
                         iter  = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
-                    #    toprow.children.append(iter)
+                        toprow.children.append(iter)
                     if "features" in oclDeviceDetailsLHS[i]:
-                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
-                        toprow.children.append(iter)
-#                    continue
-                if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
-                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
-                    print(oclDeviceDetailsRHS[i])
-                    if "OpenCL" in oclDeviceDetailsRHS[i]:
-                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
-                        toprow.children.append(iter)
-                    else:
+                        DeviceDetails_Store.append(toprow)
+                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
                         iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
                         toprow.children.append(iter)
                     continue
+                if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
+                #    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
+                    if "OpenCL" in oclDeviceDetailsRHS[i]:
+                        
+                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
+                        toprow.children.append(iter)
+                        continue
+                    else:
+                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
+                        toprow.children.append(iter)
+                        continue
                 if "Extensions" in oclDeviceDetailsLHS[i]:
                     oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(" ")
                     oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
+                    DeviceDetails_Store.append(toprow)
                     toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),str(len(oclDeviceExtenstions)).strip('\n'))
                     for j in range(len(oclDeviceExtenstions)):
                         iter = ExpandDataObject(oclDeviceExtenstions[j].strip('\n'), " ")
                         toprow.children.append(iter)
                 else:
-                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
+                    if iter == None:
+                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
                                                              oclDeviceDetailsRHS[i].strip('\n'))
-            DeviceDetails_Store.append(toprow)
-
+                        DeviceDetails_Store.append(toprow)
+                    else:
+                        DeviceDetails_Store.append(toprow)
+                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
+                                                             oclDeviceDetailsRHS[i].strip('\n'))
+        DeviceDetails_Store.append(toprow)
 
 
 
@@ -197,52 +198,38 @@ def openCL(tab):
         oclDeviceMemoryImageDetailsLHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsLHS]
         oclDeviceMemoryImageDetailsRHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsRHS]
 
-        DeviceMemoryImage_store.clear()
-        DeviceMemoryImageTreeview.set_model(DeviceMemoryImage_store)
-        fgcolor = []
-
-        for i in range(len(oclDeviceMemoryImageDetailsRHS)):
-            if "Yes" in oclDeviceMemoryImageDetailsRHS[i]:
-                fgcolor.append("GREEN")
-            elif "No" in oclDeviceMemoryImageDetailsRHS[i] and "None" not in oclDeviceMemoryImageDetailsRHS[i]:
-                fgcolor.append("RED")
-            else:
-                fgcolor.append(const.COLOR3)
-
+        DeviceMemoryImage_store.remove_all()
+        iter = None
         for i in range(len(oclDeviceMemoryImageDetailsLHS)):
-            DeviceMemoryImageTreeview.expand_all()
             if "    " in oclDeviceMemoryImageDetailsLHS[i]:
                 if "Base address alignment for 2D image buffers" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceMemoryImageDetailsLHS[i] = "    Base address alignment for 2D image buffers"
                     oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][
                                                         len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
-                DeviceMemoryImageTreeview.expand_all()
                 oclDeviceMemoryImageDetailsLHS[i] = oclDeviceMemoryImageDetailsLHS[i].strip("  ")
-                DeviceMemoryImage_store.append(iter, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
-                                                      oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
-                                                      setBackgroundColor(i), fgcolor[i]])
+             #   DeviceMemoryImage_store.append(toprow)
+                iter = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
+                toprow.children.append(iter)
             else:
                 if oclDeviceMemoryImageDetailsLHS[i] in oclDeviceMemoryImageDetailsRHS[i]:
                     oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][
                                                         len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
-                    iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
-                                                                 oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
-                                                                 const.BGCOLOR3, fgcolor[i]])
+                 #   toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
                 elif "Built-in" in oclDeviceMemoryImageDetailsLHS[i]:
                     oclDeviceKernels = oclDeviceMemoryImageDetailsRHS[i].split(';')
-                    iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
-                                                                 str(len(oclDeviceKernels) - 1).strip('\n'),
-                                                                 setBackgroundColor(i), fgcolor[i]])
+                    toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),str(len(oclDeviceKernels) - 1).strip('\n'))
                     for j in range(len(oclDeviceKernels) - 1):
-                        DeviceMemoryImageTreeview.expand_all()
-                        DeviceMemoryImage_store.append(iter,
-                                                       [oclDeviceKernels[j].strip('\n'), " ", setBackgroundColor(j),
-                                                        '#fff'])
+                        iter = ExpandDataObject(oclDeviceKernels[j].strip('\n'), " ")
+                        toprow.children.append(iter)
                 else:
-                    iter = DeviceMemoryImage_store.append(None, [oclDeviceMemoryImageDetailsLHS[i].strip('\n'),
-                                                                 oclDeviceMemoryImageDetailsRHS[i].strip('\n'),
-                                                                 setBackgroundColor(i), fgcolor[i]])
-
+                    if iter == None and "Shared" not in oclDeviceMemoryImageDetailsLHS[i]:
+                        toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
+                        DeviceMemoryImage_store.append(toprow)
+                    else:
+                        DeviceMemoryImage_store.append(toprow)
+                        toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
+                #    DeviceMemoryImage_store.append(toprow)
+        DeviceMemoryImage_store.append(toprow)
 
     def getDeviceVectorDetails(value):
 
@@ -458,18 +445,35 @@ def openCL(tab):
     DeviceMemoryImageTab = Gtk.Box(spacing=10)
     DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory & Image Details")
 
-    DeviceMemoryImage_store = Gtk.TreeStore(str, str, str, str)
-    DeviceMemoryImage_filter = DeviceMemoryImage_store.filter_new()
-    DeviceMemoryImageTreeview = Gtk.TreeView.new_with_model(DeviceMemoryImage_store)
-    DeviceMemoryImageTreeview.set_property("enable-grid-lines", 1)
+    deviceMemoryImageColumnView = Gtk.ColumnView()
+    deviceMemoryImageColumnView.props.show_row_separators = True
+    deviceMemoryImageColumnView.props.show_column_separators = False
 
- #   DeviceMemoryImageTreeview.set_property("enable-tree-lines", True)
+    factory_devices_memory_image = Gtk.SignalListItemFactory()
+    factory_devices_memory_image.connect("setup",setup_expander)
+    factory_devices_memory_image.connect("bind",bind_expander)
 
-    setOclColumns(DeviceMemoryImageTreeview, deviceMemoryImageHeader)
+    factory_devices_memory_image_value = Gtk.SignalListItemFactory()
+    factory_devices_memory_image_value.connect("setup",setup)
+    factory_devices_memory_image_value.connect("bind",bind1)
 
- #   searchEntry = createSearchEntry(DeviceMemoryImage_filter)
- #   DeviceMemoryImageGrid.attach(searchEntry,0,0,1,1)
-    DeviceMemoryImageScrollbar = create_scrollbar(DeviceMemoryImageTreeview)
+    deviceMemoryImageSelection = Gtk.SingleSelection()
+    DeviceMemoryImage_store = Gio.ListStore.new(ExpandDataObject)
+
+    deviceMemoryImageModel = Gtk.TreeListModel.new(DeviceMemoryImage_store,False,True,add_tree_node)
+    deviceMemoryImageSelection.set_model(deviceMemoryImageModel)
+
+    deviceMemoryImageColumnView.set_model(deviceMemoryImageSelection)
+
+    deviceMemoryImageColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_devices_memory_image)
+    deviceMemoryImageColumnLhs.set_resizable(True)
+    deviceMemoryImageColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_devices_value)
+    deviceMemoryImageColumnRhs.set_expand(True)
+
+    deviceMemoryImageColumnView.append_column(deviceMemoryImageColumnLhs)
+    deviceMemoryImageColumnView.append_column(deviceMemoryImageColumnRhs)
+
+    DeviceMemoryImageScrollbar = create_scrollbar(deviceMemoryImageColumnView)
     DeviceMemoryImageGrid.attach(DeviceMemoryImageScrollbar,0,0,1,1)
 
  #   DeviceMemoryImage_filter.set_visible_func(searchTreeEntry, data=DeviceMemoryImageTreeview)
