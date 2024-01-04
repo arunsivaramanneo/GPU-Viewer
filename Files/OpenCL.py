@@ -222,7 +222,7 @@ def openCL(tab):
                         iter = ExpandDataObject(oclDeviceKernels[j].strip('\n'), " ")
                         toprow.children.append(iter)
                 else:
-                    if iter == None and "Shared" not in oclDeviceMemoryImageDetailsLHS[i]:
+                    if iter == None:
                         toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
                         DeviceMemoryImage_store.append(toprow)
                     else:
@@ -306,46 +306,37 @@ def openCL(tab):
         oclDeviceQueueExecutionDetailsLHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsLHS]
         oclDeviceQueueExecutionDetailsRHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsRHS]
 
-        DeviceQueueExecution_store.clear()
-        DeviceQueueExecutionTreeView.set_model(DeviceQueueExecution_store)
-        fgcolor = []
-
-        for i in range(len(oclDeviceQueueExecutionDetailsRHS)):
-            if "Yes" in oclDeviceQueueExecutionDetailsRHS[i]:
-                fgcolor.append("GREEN")
-            elif "No" in oclDeviceQueueExecutionDetailsRHS[i] and "None" not in oclDeviceQueueExecutionDetailsRHS[i]:
-                fgcolor.append("RED")
-            else:
-                fgcolor.append(const.COLOR3)
-
+        DeviceQueueExecution_store.remove_all()
+        iter = None
         for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
-            DeviceQueueExecutionTreeView.expand_all()
             if "    " in oclDeviceQueueExecutionDetailsLHS[i] and "0x" not in oclDeviceQueueExecutionDetailsRHS[i]:
                 oclDeviceQueueExecutionDetailsLHS[i] = oclDeviceQueueExecutionDetailsLHS[i].strip("  ")
-                DeviceQueueExecution_store.append(iter, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
-                                                         oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),
-                                                         setBackgroundColor(i), fgcolor[i]])
+                iter = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
+                toprow.children.append(iter)
             else:
                 if "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" not in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
                     oclDeviceKernels = oclDeviceQueueExecutionDetailsRHS[i].split(';')
-                    iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
-                                                                    str(len(oclDeviceKernels) ).strip('\n'),
-                                                                    setBackgroundColor(i), fgcolor[i]])
+                    toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),str(len(oclDeviceKernels) ).strip('\n'))
                     for j in range(len(oclDeviceKernels)):
-                        DeviceQueueExecutionTreeView.expand_all()
-                        DeviceQueueExecution_store.append(iter,
-                                                          [oclDeviceKernels[j].strip('\n'), " ", setBackgroundColor(j),
-                                                           '#fff'])
+                        iter = ExpandDataObject(oclDeviceKernels[j].strip('\n'), " ")
+                        toprow.children.append(iter)
                 elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
-                    iter = DeviceQueueExecution_store.append(None,[oclDeviceQueueExecutionDetailsLHS[i],"",setBackgroundColor(i),fgcolor[i]])
-                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2],setBackgroundColor(i),fgcolor[i]])
+                    DeviceQueueExecution_store.append(toprow)
+                    toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i],"")
+                    iter = ExpandDataObject(oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2])
+                    toprow.children.append(iter)
                 elif "0x" in oclDeviceQueueExecutionDetailsRHS[i]:
-                    DeviceQueueExecution_store.append(iter,[oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2],setBackgroundColor(i),fgcolor[i]])
+                    iter = ExpandDataObject(oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2])
+                    toprow.children.append(iter)
                     continue
                 else:
-                    iter = DeviceQueueExecution_store.append(None, [oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),
-                                                                    oclDeviceQueueExecutionDetailsRHS[i].strip('\n'),
-                                                                    setBackgroundColor(i), fgcolor[i]])
+                    if iter == None:
+                        toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
+                    #    DeviceQueueExecution_store.append(toprow)
+                    else:
+                        DeviceQueueExecution_store.append(toprow)
+                        toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
+        DeviceQueueExecution_store.append(toprow)
 
     def selectPlatform(dropdown,dummy):
         selected =dropdown.props.selected_item
@@ -484,14 +475,35 @@ def openCL(tab):
     DeviceQueueExecutionGrid = createSubTab(DeviceQueueExecutionTab, oclNotebook,
                                             "Device Queue & Execution Capabilities")
 
-    DeviceQueueExecution_store = Gtk.TreeStore(str, str, str, str)
-    DeviceQueueExecutionTreeView = Gtk.TreeView.new_with_model(DeviceQueueExecution_store)
-    DeviceQueueExecutionTreeView.set_property("enable-grid-lines", 1)
- #   DeviceQueueExecutionTreeView.set_property("enable-tree-lines", True)
+    deviceQueueExecutionColumnView = Gtk.ColumnView()
+    deviceQueueExecutionColumnView.props.show_row_separators = True
+    deviceQueueExecutionColumnView.props.show_column_separators = False
 
-    setOclColumns(DeviceQueueExecutionTreeView, deviceMemoryImageHeader)
+    factory_devices_queue_execution = Gtk.SignalListItemFactory()
+    factory_devices_queue_execution.connect("setup",setup_expander)
+    factory_devices_queue_execution.connect("bind",bind_expander)
 
-    DeviceQueueExecutionScrollbar = create_scrollbar(DeviceQueueExecutionTreeView)
+    factory_devices_queue_execution_value = Gtk.SignalListItemFactory()
+    factory_devices_queue_execution_value.connect("setup",setup)
+    factory_devices_queue_execution_value.connect("bind",bind1)
+
+    deviceQueueExecutionSelection = Gtk.SingleSelection()
+    DeviceQueueExecution_store = Gio.ListStore.new(ExpandDataObject)
+
+    deviceQueueExectionModel = Gtk.TreeListModel.new(DeviceQueueExecution_store,False,True,add_tree_node)
+    deviceQueueExecutionSelection.set_model(deviceQueueExectionModel)
+
+    deviceQueueExecutionColumnView.set_model(deviceQueueExecutionSelection)
+
+    deviceQueueExectionColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_devices_queue_execution)
+    deviceQueueExectionColumnLhs.set_resizable(True)
+    deviceQueueExectionColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_devices_queue_execution_value)
+    deviceQueueExectionColumnRhs.set_expand(True)
+
+    deviceQueueExecutionColumnView.append_column(deviceQueueExectionColumnLhs)
+    deviceQueueExecutionColumnView.append_column(deviceQueueExectionColumnRhs)
+
+    DeviceQueueExecutionScrollbar = create_scrollbar(deviceQueueExecutionColumnView)
     DeviceQueueExecutionGrid.attach(DeviceQueueExecutionScrollbar,0,0,1,1)
 
     # Device Vector Details
