@@ -164,7 +164,7 @@ else:
 
         adw_toolbar_view.add_top_bar(headerbar)
     #    win.set_titlebar(headerbar)
-        win.set_title("GPU-Viewer v2.0")
+        win.set_title("GPU-Viewer v2.3")
 
         light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
         light_action.connect("activate", on_light_action_actived,win)

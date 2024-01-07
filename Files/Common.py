@@ -370,6 +370,8 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.X11_logo,32,28, True)
     elif "KDE" in line:
         logo_pixbuf = fetchImageFromUrl(const.Kde_logo,32,28, True)
+    elif "Rhino" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Rhino_Linux_logo,32,28, True)
     else:
         logo_pixbuf = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,32,28,True)
     return logo_pixbuf

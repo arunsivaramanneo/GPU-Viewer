@@ -144,6 +144,7 @@ Ubuntu_Budgie_logo = "../Images/Ubuntu_Budgie.png"
 Ubuntu_Studio_logo = "../Images/Ubuntu_Studio.png"
 RebornOS_logo = "../Images/RebornOS_Icon.png"
 NixOS_logo = "../Images/NixOS.png"
+Rhino_Linux_logo = "../Images/Rhino_Linux.png"
 
 AMD_logo = "../Images/AMD_logo.png"
 #Radeon_logo = "../Images/AMD_Radeon.svg"
