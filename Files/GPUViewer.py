@@ -66,44 +66,59 @@ else:
         gtk = MyGtk("GPU-VIEWER")
     #    setScreenSize(gtk, const.WIDTH_RATIO, const.HEIGHT_RATIO1)
         
-        notebook = Gtk.Notebook()
+    #    notebook = Gtk.Notebook()
+     #   win.set_content(notebook)
+        notebook = Adw.ViewStack.new() 
         win.set_content(notebook)
 
+        stack_switcher = Adw.ViewSwitcher.new()
+        stack_switcher.set_stack(stack=notebook)
+        stack_switcher.set_policy(0)
+        notebook.add_css_class(css_class='spacer')
+    #    win.set_content(stack_switcher)
+        headerbar = Adw.HeaderBar.new()
+        headerbar.add_css_class(css_class='compact')
+
+        win.add_top_bar(headerbar)
+        headerbar.set_title_widget(title_widget=stack_switcher)
+    
+
         if isVulkanSupported():
-            vulkanTab = create_tab(notebook,const.VULKAN_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
-            page = notebook.get_page(vulkanTab)
-            page.set_property("tab-expand",True)
+            vulkanTab = create_tab(notebook,"vulkan", "Vulkan", const.ICON_HEIGHT, False)
+    #        page = notebook.get_page(vulkanTab)
+    #        page.set_property("tab-expand",True)
             vulkanTab.add_css_class(css_class='compact')
             t2 = threading.Thread(target=Vulkan, args=(vulkanTab,))
             t2.start()
             t2.join()
 
         if isOpenglSupported():
-            openGlTab = create_tab(notebook,const.OPEN_GL_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
-            page = notebook.get_page(openGlTab)
-            page.set_property("tab-expand",True)
+            openGlTab = create_tab(notebook,"Opengl", "OpenGL", const.ICON_HEIGHT, False)
+     #       page = notebook.get_page(openGlTab)
+     #       page.set_property("tab-expand",True)
+            openGlTab.add_css_class(css_class="compact")
             t1 = threading.Thread(target=OpenGL, args=(openGlTab,))
             t1.start()
             t1.join()
 
         if isOpenclSupported():
-            openclTab = create_tab(notebook,const.OPEN_CL_PNG, const.ICON_WIDTH, const. ICON_HEIGHT, False)
+            openclTab = create_tab(notebook,"OpenCL", "OpenCL", const. ICON_HEIGHT, False)
             page = notebook.get_page(openclTab)
-            page.set_property("tab-fill",True)
-            page.set_property("tab-expand",True)
+    #        page.set_property("tab-fill",True)
+    #        page.set_property("tab-expand",True)
             t4 = threading.Thread(target=openCL, args=(openclTab,))
             t4.start()
             t4.join()
 
         if isVdpauinfoSupported():
-            vdpauTab = create_tab(notebook,const.VDPAU_CL_PNG, const.ICON_WIDTH, const. ICON_HEIGHT, False)
-            page_vdpau = notebook.get_page(vdpauTab)
-            page_vdpau.set_property("tab-expand",True)
+            vdpauTab = create_tab(notebook,"applications-multimedia", "VDPAU", const. ICON_HEIGHT, False)
+    #        page_vdpau = notebook.get_page(vdpauTab)
+    #        page_vdpau.set_property("tab-expand",True)
             vdpauinfo(vdpauTab)
 
-        aboutTab = create_tab(notebook,const.ABOUT_US_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, False)
-        page = notebook.get_page(aboutTab)
-        page.set_property("tab-expand",True)
+        aboutTab = create_tab(notebook,"applications-other", "About", const.ICON_HEIGHT, False)
+   #     page = notebook.get_page(aboutTab)
+   #     page.set_property("tab-expand",True)
         t3 = threading.Thread(target=about_page, args=(aboutTab,))
         t3.start()
         t3.join()   
@@ -156,29 +171,16 @@ else:
 
     def on_activate(app):
         win = Adw.ApplicationWindow(application=app)
-        headerbar = Adw.HeaderBar.new()
-        headerbar.add_css_class(css_class='compact')
 
         adw_toolbar_view = Adw.ToolbarView.new()
         win.set_content(adw_toolbar_view)
 
-        adw_toolbar_view.add_top_bar(headerbar)
+     #   adw_toolbar_view.add_top_bar(headerbar)
     #    win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v2.3")
 
-        light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
-        light_action.connect("activate", on_light_action_actived,win)
-        win.add_action(light_action) # (self window) == win in MENU_XML
-        
-        dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
-        dark_action.connect("activate", on_dark_action_actived,win)
-        win.add_action(dark_action) # (self window) == win in MENU_XML
 
-        menubutton = Gtk.MenuButton.new()
-        menubutton.set_icon_name("open-menu-symbolic") 
-        menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
-        menubutton.set_menu_model(menu)
-        headerbar.pack_end(menubutton)
+        
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:
@@ -191,6 +193,9 @@ else:
         provider = Gtk.CssProvider.new()
         fname = Gio.file_new_for_path('gtk_test.css')
         provider.load_from_file(fname)
+        theme = Gtk.IconTheme.get_for_display(display)
+        theme.add_resource_path("../Images")
+
         Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         win.present()

@@ -31,8 +31,9 @@ class MyGtk(Gtk.Window):
 
 def create_tab(notebook,icon_url,icon_width,icon_height,aspect_ratio):
     tab = Gtk.Box(orientation=1,spacing=10)
-    tab_icon = fetchImageFromUrl(icon_url,icon_width,icon_height,aspect_ratio)
-    notebook.append_page(tab,Gtk.Picture.new_for_pixbuf(tab_icon))
+ #   tab_icon = fetchImageFromUrl(icon_url,icon_width,icon_height,aspect_ratio)
+    notebook.add_titled_with_icon(child=tab, name=icon_width, title=icon_width,icon_name=icon_url)
+#    notebook.append_page(tab,Gtk.Picture.new_for_pixbuf(tab_icon))
     return tab
 
 #getting Ram Details in GB
@@ -436,7 +437,7 @@ def bind1(widget, item):
         label.remove_css_class(css_class='false')
         label.add_css_class(css_class='true')
         label.set_label(obj.data2)
-    elif "false" in obj.data2 or "No" in obj.data2:
+    elif "false" in obj.data2 or "No" in obj.data2 and "None" not in obj.data2:
         label.remove_css_class(css_class='nothing')
         label.remove_css_class(css_class='true')
         label.add_css_class(css_class='false')

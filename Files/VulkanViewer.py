@@ -1447,7 +1447,7 @@ def Vulkan(tab2):
     deviceExtensionColumn.set_resizable(True)
     extensionColumnView.append_column(deviceExtensionColumn)
 
-    extensionRevisionColumn = Gtk.ColumnViewColumn.new("Extension Revision")
+    extensionRevisionColumn = Gtk.ColumnViewColumn.new("Revision")
     extensionRevisionColumn.set_factory(factory2)
     extensionRevisionColumn.set_expand(True)
     extensionColumnView.append_column(extensionRevisionColumn)
@@ -1713,7 +1713,7 @@ def Vulkan(tab2):
     instanceExtensionColumn.set_resizable(True)
     instanceExtensionColumnView.append_column(instanceExtensionColumn)
 
-    instanceExtensionRevisionColumn = Gtk.ColumnViewColumn.new("Extension Revision")
+    instanceExtensionRevisionColumn = Gtk.ColumnViewColumn.new("Revision")
     instanceExtensionRevisionColumn.set_factory(factory2)
     instanceExtensionRevisionColumn.set_expand(True)
     instanceExtensionColumnView.append_column(instanceExtensionRevisionColumn)
