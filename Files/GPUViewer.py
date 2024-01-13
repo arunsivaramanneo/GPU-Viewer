@@ -116,7 +116,7 @@ else:
     #        page_vdpau.set_property("tab-expand",True)
             vdpauinfo(vdpauTab)
 
-        aboutTab = create_tab(notebook,"applications-other", "About", const.ICON_HEIGHT, False)
+        aboutTab = create_tab(notebook,"about-us", "About", const.ICON_HEIGHT, False)
    #     page = notebook.get_page(aboutTab)
    #     page.set_property("tab-expand",True)
         t3 = threading.Thread(target=about_page, args=(aboutTab,))
