@@ -191,7 +191,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_test.css')
+        fname = Gio.file_new_for_path('gtk_test_1.css')
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)
         theme.add_resource_path("../Images")

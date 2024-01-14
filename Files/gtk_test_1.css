@@ -5,8 +5,8 @@
  window{
   border-radius: 12px;
   background-image: none;
-  background-color: #F3F2ED;
-  color: black;
+  background-color: #FFFFFF;
+  color: rgba(0, 0, 0, 0.87);;
   border: 1px solid #171717;
   border-style: solid solid none none;
   background-image: none;
@@ -16,50 +16,45 @@ frame{
   border-style: none none none none ;
 }
 treeview {
-  background-color: #F3F2ED;
-  color: black;
+  background-color: #FFFFFF;
+  color: rgba(0, 0, 0, 0.87);;
   border: 2px solid #171717;
   border-style: solid solid none solid;
   border-radius: 6px;
 }
 grid{
-  background-color: #F3F2ED;
-  color: black;
+  background-color: #FFFFFF;
+  color: rgba(0, 0, 0, 0.87);;
   border: 2px solid #171717;
   border-style: none;
 }
 
-box{
-  background-color: #F3F2ED;
-  color: black;
-}
-
 textview > border {
-  background-color: #2c2c2c;
+  background-color: #FFFFFF;
 }
 
 .titlebar box{
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
-  background-image: linear-gradient(#333333,#333333);
-  background-color: #333333;
-  color: white;
+  border-top: 2px;
+  border-width: 2px;
+  border-style: none none none none;
+  color: rgba(0, 0, 0, 0.87);;
   font-weight: bold;
-  font-size: small;
 }
 
 .close{
-  color: #171717;
-  font-size: small;
+  color: rgba(0, 0, 0, 0.87);;
+  font-size: 28px;
   font-weight: bold;
 }
 .minimize{
-  color: #171717;
-  font-size: small;
+  color: rgba(0, 0, 0, 0.87);;
+  font-size: 28px;
   font-weight: bold;
 }
 .maximize{
-  color: #171717;
-  font-size: small;
+  color: rgba(0, 0, 0, 0.87);;
+  font-size: 28px;
   font-weight: bold;
 }
 .close:hover {
@@ -67,15 +62,8 @@ textview > border {
 }
 
 .close:focus {
-  color: #fff;
+  color: #000;
   text-decoration: none;
-}
-
-headerbar {
-  background-image: none;
-  background-color: #333333;
-  font-size: medium;
-  line-height: 1.2px;
 }
 
 .false {
@@ -87,12 +75,24 @@ headerbar {
 }
 
 .nothing{
-  color: #171717;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+image{
+  padding: 0px;
+  
 }
 
 .parent{
-  font-weight: 500;
-  }
+font-weight: 500;
+}
+headerbar {
+  background-image: none;
+  background-color: #FFFFFF;
+  font-size: medium;
+  border-style: none none none none;
+  color: rgba(0, 0, 0, 0.87);
+}
 
 /*************
  * Notebooks *
@@ -106,14 +106,14 @@ headerbar {
   outline: none;
   border-radius: 9px;
   box-shadow: none;
-  color: black;
+  color: rgba(0, 0, 0, 0.87);;
   font-weight: 500;
 }
 
 notebook {
-  border: 2px solid #F3F2ED;
-  border-style: solid none solid solid;
-  background-color: #F3F2ED;
+  border: 2px solid #171717;
+  border-style: none none none none;
+  background-color: #FFFFFF;
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
@@ -124,11 +124,9 @@ notebook {
     margin-bottom: 6px;
     margin-right: 6px;
     padding-bottom: 8px ;
-    background-color: #F3F2ED;
-    color: black;
+    background-color: #FFFFFF;
+    color: rgba(0, 0, 0, 0.87);;
     font-weight: 600;
-    border: 2px solid #F3F2ED;
-    border-style: solid solid solid solid;
     box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
   }
   notebook > header > tabs > tab:hover {
@@ -141,13 +139,13 @@ notebook {
 
 notebook > header tab:checked {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
-  box-shadow: inset 0 0 0 2px #F3F2ED;
-  background-color: #F0EAD6;
+  box-shadow: inset 0 0 0 2px #fafbfc;
+  background-color: #FFFFFF;
   background-clip: padding-box;
   border-style: solid;
   color: #d43c50;
   font-weight: bolder;
-  border: 2px solid #F3F2ED;
+  border: 2px solid #171717;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -156,18 +154,22 @@ notebook > header tab:checked {
  *************/
 
 button.text-button {
-  color: #464853;
+  color: #FFFFFF;
   font-weight: 600;
-  background-image: linear-gradient(#F2D2BD,#ffda89);
+  background-image: radial-gradient(farthest-side, #333333 0%, rgba(51, 51, 51, 0) 0%);
+  background-color: #333333;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 9px;
+  border-radius: 12px;
 }
 
+button.text-button:checked{
+  color: #d43c50;
+  border-radius: 9px;
+}
 button.text-button:hover {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
-  background-color: bisque;
 }
 
 button.text-button:disabled{
@@ -180,11 +182,11 @@ button.text-button:disabled{
 }
 
 button.combo{
-  -gtk-icon-source: -gtk-icontheme("go-down-symbolic");
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
   min-height: 16px;
   min-width: 16px;
   background-image: none;
-  background-color: #2C2C2C;
+  background-color: #FFFFFF;
   outline: none;
 }
 
@@ -193,8 +195,8 @@ button.combo:only-child {
   border-radius: 6px;
   font-weight: 550;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
-  box-shadow: inset 0 0 0 2px #F3F2ED;
-  background-color: #2C2C2C;
+  box-shadow: inset 0 0 0 2px #fafbfc;
+  background-color: #FFFFFF;
   color: rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
@@ -207,17 +209,17 @@ button.combo:hover{
 }
 
 button.dropdown{
-  background-color: #2C2C2C;
+  background-color: #FFFFFF;
 }
 
 popover.background > arrow,
 popover.background > contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
-  background-color: #F3F2ED;
+  background-color: #FFFFFF;
   background-clip: border-box;
   border-radius: 12px;
-  color: #F3F2ED;
+  color:  rgba(0, 0, 0, 0.87);
   border: 2px solid #171717;
 }
 
@@ -227,7 +229,7 @@ popover.background modelbutton {
   min-width: 56px;
   padding: 3px 9px;
   border-radius: 6px;
-  color: black;
+  color: rgba(0, 0, 0, 0.87);;
   font: initial;
   text-shadow: none;
   box-shadow: none;
@@ -236,7 +238,7 @@ popover.background modelbutton {
 
 popover.background modelbutton:hover {
   transition: none;
-  background-color: #F3F2ED;
+  background-color: #ffffff;
   color: #333333;
 }
 
@@ -257,7 +259,7 @@ scrollbar > range > trough > slider {
   border: 4px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
-  background-color: #464853;
+  background-color: rgba(0, 0, 0, 0.87);
   box-shadow: none;
   outline: none;
 }
@@ -270,22 +272,19 @@ entry {
   caret-color: currentColor;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  background-color: #F3F2ED;
-  color: black;
+  background-color: #C0C0C0;
+  color: rgba(0, 0, 0, 0.87);
   outline: none;
   border-style: solid;
-  border-color: #171717;
-  border: 2px solid #171717;
 }
 
 entry.search {
   border-radius: 12px;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   border-style: solid;
-  border:2px solid;
-  background-color: #F3F2ED;
-  border-color: #F3F2ED;
-  color: black;
+  background-color: #C0C0C0;
+  border-color: #333333;
+  color: rgba(0, 0, 0, 0.87);;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   box-shadow: inset 0 0 0 2px #333333;
 }
@@ -301,7 +300,7 @@ header{
   padding: 6px 12px;
   border-width: 1px;
   border-color: transparent;
-  background-color: #F3F2ED;
+  background-color: #FFFFFF;
   border-style: none none none none;
   outline: none;
   background-clip: padding-box;
@@ -310,23 +309,19 @@ header{
   font-weight: 500;
 }
 
-label{
-  padding: 0px;
-}
 
 columnview.view > header > button,
 treeview.view > header > button {
   min-height: 0;
   min-width: 0;
-  padding: 3px 6px;
   font-weight: bold;
-  color: #6b6d75;
-  background-color: #F3F2ED;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #FFFFFF;
   background-image: none;
-  border-style: none none none none;
-  border: 0px solid #F3F2ED;
+  border-style: none none solid none;
+  border: 0px solid #333333;
   border-radius: 0;
-  border-image: linear-gradient(to bottom, #2c2c2c 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #2c2c2c 80%) 0 1 0 0/0 1px 0 0 stretch;
+  border-image: linear-gradient(to bottom, #FFFFFF 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #FFFFFF 80%) 0 1 0 0/0 1px 0 0 stretch;
 }
 
 columnview.view:selected,
@@ -337,14 +332,14 @@ treeview.view:selected {
 }
 
 listview {
-  background-image: linear-gradient(#F3F2ED,#F3F2ED);
-  background-color: #F3F2ED;
+  background-image: linear-gradient(#FFFFFF,#FFFFFF);
+  background-color: #FFFFFF;
   border-radius: 0px;
 }
 
 dropdown > button {
-  -gtk-icon-source: -gtk-icontheme("go-down-symbolic");
-  background-image: linear-gradient(#F3F2ED,#F3F2ED);
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  background-image: linear-gradient(#FFFFFF,#FFFFFF);
   border-radius: 12px;
   border-style: solid;
   border: 2px solid rgba(0, 0, 0, 0.87);
@@ -361,9 +356,10 @@ listview > row :hover {
   border-style: none none none none;
   outline: transparent;
   background-color: rgba(0,0,0,0);
-  color: #171717;
   font-weight: bolder;
   font-style: oblique;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
+
 }
 
 
@@ -377,12 +373,29 @@ popover.background listview > row {
 }
 
 treeview {
-  border-color: #F3F2ED;
+  border-color: #FFFFFF;
   border-style: solid;
   border-width: 2px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
+
 columnview {
-  color: #171717;
+  border-color: #FFFFFF;
+  color: rgba(0, 0, 0, 0.87);;
   border-style: solid;
+}
+columnview.view.expander,
+treeview.view.expander {
+  min-width: 16px;
+  min-height: 16px;
+  -gtk-icon-source: -gtk-icontheme("pan-end-symbolic");
+  color: rgba(255, 255, 255, 0.7);
+}
+stack{
+  min-width: 16px;
+}
+viewswitcher {
+  min-width: 10px;
+  border-radius: 12px;
+  font-weight: 900;
 }
