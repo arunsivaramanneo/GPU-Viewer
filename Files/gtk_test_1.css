@@ -43,17 +43,17 @@ textview > border {
 }
 
 .close{
-  color: rgba(0, 0, 0, 0.87);;
+  color: #ffffff;
   font-size: 28px;
   font-weight: bold;
 }
 .minimize{
-  color: rgba(0, 0, 0, 0.87);;
+  color: #ffffff;
   font-size: 28px;
   font-weight: bold;
 }
 .maximize{
-  color: rgba(0, 0, 0, 0.87);;
+  color:#ffffff;
   font-size: 28px;
   font-weight: bold;
 }
@@ -62,7 +62,7 @@ textview > border {
 }
 
 .close:focus {
-  color: #000;
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -88,10 +88,10 @@ font-weight: 500;
 }
 headerbar {
   background-image: none;
-  background-color: #FFFFFF;
+  background-color: #333333;
   font-size: medium;
   border-style: none none none none;
-  color: rgba(0, 0, 0, 0.87);
+  color: #ffffff
 }
 
 /*************
