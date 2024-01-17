@@ -2,7 +2,7 @@ import gi
 import const
 import Filenames
 import subprocess
-from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4
+from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4,setMargin
 
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk,GObject,Gio,Adw
@@ -281,6 +281,7 @@ def vdpauinfo(tab2):
 
 #	setColumns(treeDecoder, decoderTitle, 300, 0.0)
 	decoderSearchEntry = Gtk.SearchEntry()
+	setMargin(decoderSearchEntry,0,5,0)
 	decoderSearchEntry.set_property("placeholder_text","Type here to filter.....")
 	decoderSearchEntry.connect("search-changed", _on_search_method_changed,filter_decoder)
 
