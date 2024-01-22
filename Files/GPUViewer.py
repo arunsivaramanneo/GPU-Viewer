@@ -68,8 +68,11 @@ else:
         
     #    notebook = Gtk.Notebook()
      #   win.set_content(notebook)
+
+        adw_toolbar_view = Adw.ToolbarView.new()
+        win.set_content(adw_toolbar_view)
         notebook = Adw.ViewStack.new() 
-        win.set_content(notebook)
+        adw_toolbar_view.set_content(notebook)
 
         stack_switcher = Adw.ViewSwitcher.new()
         stack_switcher.set_stack(stack=notebook)
@@ -79,7 +82,21 @@ else:
         headerbar = Adw.HeaderBar.new()
         headerbar.add_css_class(css_class='compact')
 
-        win.add_top_bar(headerbar)
+        light_action = Gio.SimpleAction.new("about", None) # look at MENU_XML win.quit
+        light_action.connect("activate", on_light_action_actived,win)
+        win.add_action(light_action) # (self window) == win in MENU_XML
+        
+        dark_action = Gio.SimpleAction.new("quit", None) # look at MENU_XML win.about
+        dark_action.connect("activate", on_dark_action_actived,win)
+        win.add_action(dark_action) # (self window) == win in MENU_XML
+
+        menubutton = Gtk.MenuButton.new()
+        menubutton.set_icon_name("open-menu-symbolic") 
+        menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
+        menubutton.set_menu_model(menu)
+        headerbar.pack_end(menubutton)
+
+        adw_toolbar_view.add_top_bar(headerbar)
         headerbar.set_title_widget(title_widget=stack_switcher)
     
 
@@ -172,15 +189,10 @@ else:
     def on_activate(app):
         win = Adw.ApplicationWindow(application=app)
 
-        adw_toolbar_view = Adw.ToolbarView.new()
-        win.set_content(adw_toolbar_view)
-
      #   adw_toolbar_view.add_top_bar(headerbar)
     #    win.set_titlebar(headerbar)
-        win.set_title("GPU-Viewer v2.3")
+        win.set_title("GPU-Viewer v3.0")
 
-
-        
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:
@@ -191,7 +203,7 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_test_1.css')
+        fname = Gio.file_new_for_path('gtk_test.css')
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)
         theme.add_resource_path("../Images")
@@ -200,7 +212,7 @@ else:
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         win.present()
         win.connect("close-request",quit)
-        main(adw_toolbar_view)  # Program starts here
+        main(win)  # Program starts here
 
     app = Adw.Application(application_id='io.github.arunsivaramanneo.GPUViewer')
     app.connect('activate', on_activate)
