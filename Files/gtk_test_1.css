@@ -238,8 +238,8 @@ popover.background modelbutton {
 
 popover.background modelbutton:hover {
   transition: none;
-  background-color: #ffffff;
-  color: #333333;
+  background-color: #333333;
+  color: #FFFFFF;
 }
 
 .osd popover.background > arrow,

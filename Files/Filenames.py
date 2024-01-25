@@ -191,6 +191,7 @@ vdpauinfo_output_file = "/tmp/gpu-viewer/vdpauinfo.txt"
 
 #---------------------------------------------- Themes Folder ----------------------------------------------------------------------------------------------------
 
+fetch_theme_preference = "gsettings get org.gnome.desktop.interface color-scheme"
 Orchis_gtk_theme_folder = "/usr/share/themes/Orchis"
 Materia_gtk_theme_folder = "/usr/share/themes/Materia"
 Roboto_font_folder = "/usr/share/fonts/truetype/roboto"

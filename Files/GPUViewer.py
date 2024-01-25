@@ -101,7 +101,7 @@ else:
     
 
         if isVulkanSupported():
-            vulkanTab = create_tab(notebook,"vulkan", "Vulkan", const.ICON_HEIGHT, False)
+            vulkanTab = create_tab(notebook,"Vulkan", "Vulkan", const.ICON_HEIGHT, False)
     #        page = notebook.get_page(vulkanTab)
     #        page.set_property("tab-expand",True)
             vulkanTab.add_css_class(css_class='compact')
@@ -110,7 +110,7 @@ else:
             t2.join()
 
         if isOpenglSupported():
-            openGlTab = create_tab(notebook,"Opengl", "OpenGL", const.ICON_HEIGHT, False)
+            openGlTab = create_tab(notebook,"OpenGL", "OpenGL", const.ICON_HEIGHT, False)
      #       page = notebook.get_page(openGlTab)
      #       page.set_property("tab-expand",True)
             openGlTab.add_css_class(css_class="compact")
@@ -203,7 +203,18 @@ else:
             win.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         display = Gtk.Widget.get_display(win)
         provider = Gtk.CssProvider.new()
-        fname = Gio.file_new_for_path('gtk_test.css')
+        try:
+            p = subprocess.Popen(Filenames.fetch_theme_preference,stdout= subprocess.PIPE,stderr = subprocess.PIPE,shell=True,text=True)
+            prefer_theme = p.communicate()[0]
+        except NameError:
+            print("Command not found")
+        if "prefer-dark"  in prefer_theme:
+            fname = Gio.file_new_for_path('gtk_test.css')
+        if "default" in prefer_theme:
+            fname = Gio.file_new_for_path('gtk_test_1.css')
+        else:
+            fname = Gio.file_new_for_path('gtk_test.css')
+
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)
         theme.add_resource_path("../Images")
