@@ -12,7 +12,7 @@ from gi.repository import Gtk,Gio,GObject,Adw
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,appendLimitsRHS
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -556,17 +556,26 @@ def OpenGL(tab):
 # ------------------------------------ creating the OpenGL extension ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     frame_extension = Gtk.Frame()
-    opengl_box.append(frame_extension)
+    adw_toolbar_view = Adw.ToolbarView.new()
+    opengl_box.append(adw_toolbar_view)
     grid_extension = Gtk.Grid()
-    frame_extension.set_child(grid_extension)
-    extensions_notebook = Gtk.Notebook()
-    grid_extension.attach(extensions_notebook,0,0,1,1)
+ #   adw_toolbar_view.set_content(grid_extension)
+
+#    extensions_notebook = Gtk.Notebook()
+    extensions_notebook = Adw.ViewStack.new()
+    adw_toolbar_view.set_content(extensions_notebook)
+ #   grid_extension.attach(extensions_notebook,0,0,1,1)
 
     opengl_extension_logo = fetchImageFromUrl(const.OPEN_GL_PNG,250,50,False)
-    opengl_extension_box = Gtk.Box(orientation=1,spacing=10)
-    extensions_notebook.append_page(opengl_extension_box,Gtk.Picture.new_for_pixbuf(opengl_extension_logo))
-    page1 = extensions_notebook.get_page(opengl_extension_box)
-    page1.set_property("tab-expand",True)
+    opengl_extension_box = create_tab(extensions_notebook,"OpenGL", "OpenGL", const.ICON_HEIGHT, False)
+ #   extensions_notebook.append_page(opengl_extension_box,Gtk.Picture.new_for_pixbuf(opengl_extension_logo))
+ #   page1 = extensions_notebook.get_page(opengl_extension_box)
+ #   page1.set_property("tab-expand",True)
+    
+    extensions_switcher = Adw.ViewSwitcher.new()
+    extensions_switcher.set_stack(stack=extensions_notebook)
+    extensions_switcher.set_policy(1)
+    adw_toolbar_view.add_top_bar(extensions_switcher)
 
     grid_opengl_extension = Gtk.Grid()
     opengl_extension_box.append(grid_opengl_extension)
@@ -652,10 +661,10 @@ def OpenGL(tab):
     openglESExtensionColumnView.set_model(openglESExtensionsSelection)
 
     opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
-    opengl_es_extension_box = Gtk.Box(orientation=1,spacing=10)
-    extensions_notebook.append_page(opengl_es_extension_box,Gtk.Picture.new_for_pixbuf(opengl_es_extension_logo))
-    extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
-    extensions_page2.set_property("tab-expand",True)
+    opengl_es_extension_box = create_tab(extensions_notebook,"OpenGL_ES", "OpenGLES", const.ICON_HEIGHT, False)
+#    extensions_notebook.append_page(opengl_es_extension_box,Gtk.Picture.new_for_pixbuf(opengl_es_extension_logo))
+#    extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
+ #   extensions_page2.set_property("tab-expand",True)
 
     grid_opengl_es_extension = Gtk.Grid()
     opengl_es_extension_box.append(grid_opengl_es_extension)
@@ -724,10 +733,10 @@ def OpenGL(tab):
      #   egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
 
         egl_extension_logo = fetchImageFromUrl(const.EGL_PNG,200,50,False)
-        egl_extension_box = Gtk.Box(orientation=1,spacing=10)
-        extensions_notebook.append_page(egl_extension_box,Gtk.Picture.new_for_pixbuf(egl_extension_logo))
-        extensions_page3 = extensions_notebook.get_page(egl_extension_box)
-        extensions_page3.set_property("tab-expand",True)
+        egl_extension_box = create_tab(extensions_notebook,"Egl_logo","EGL",10,True)
+   #     extensions_notebook.append_page(egl_extension_box,Gtk.Picture.new_for_pixbuf(egl_extension_logo))
+    #    extensions_page3 = extensions_notebook.get_page(egl_extension_box)
+    #    extensions_page3.set_property("tab-expand",True)
 
         grid_egl_extension = Gtk.Grid()
         egl_extension_box.append(grid_egl_extension)

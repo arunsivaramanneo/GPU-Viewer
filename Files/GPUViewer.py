@@ -76,7 +76,7 @@ else:
 
         stack_switcher = Adw.ViewSwitcher.new()
         stack_switcher.set_stack(stack=notebook)
-        stack_switcher.set_policy(0)
+        stack_switcher.set_policy(1)
         notebook.add_css_class(css_class='spacer')
     #    win.set_content(stack_switcher)
         headerbar = Adw.HeaderBar.new()
