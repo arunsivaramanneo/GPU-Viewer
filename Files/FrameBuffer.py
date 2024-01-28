@@ -6,7 +6,7 @@ import subprocess
 gi.require_version("Gtk", "4.0")
 gi.require_version(namespace='Adw', version='1')
 from gi.repository import Gtk,GObject,Gio,Adw
-from Common import  setBackgroundColor, create_scrollbar, createSubTab,getScreenSize,setup
+from Common import  setBackgroundColor, create_scrollbar, createSubTab,getScreenSize,setup,create_tab
 
 FrameBufferToolTip = ["Visual ID", "Visual Depth", "Visual Type", "Transparency", "Buffer Size", "level", "Render Type",
                       "Double Buffer", "Stereo", "Red Colorbuffer Size", "Green Colorbuffer Size",
@@ -214,8 +214,12 @@ def FrameBuffer(button):
     #   FBWin.set_size_request(1000, 500)
  #   setScreenSize(FBWin, const.WIDTH_RATIO, const.HEIGHT_RATIO2)
 
-    FBNotebook = Gtk.Notebook()
+    FBNotebook = Adw.ViewStack.new()
+    FBNotebook_stack_switcher = Adw.ViewSwitcher.new()
+    FBNotebook_stack_switcher.set_stack(stack=FBNotebook)
+    FBNotebook_stack_switcher.set_policy(1)
     adw_toolbar_view.set_content(FBNotebook)
+    headerbar.set_title_widget(title_widget=FBNotebook_stack_switcher)
 
 #    FBGLX_Store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str, str,
 #                                str,
@@ -224,10 +228,12 @@ def FrameBuffer(button):
 #    TreeFBGLX.set_enable_search(True)
 #    TreeFBGLX.set_property("enable-grid-lines", 3)
 
-    FBGLXTab = Gtk.Box(spacing=10)
-    FBGLXGrid = createSubTab(FBGLXTab, FBNotebook, "GLX Visuals")
-    FBConfigTab = Gtk.Box(spacing=10)
-    FBConfigGrid = createSubTab(FBConfigTab, FBNotebook, "GLX FBConfigs")
+    FBGLXTab = create_tab(FBNotebook,"settings","GLX Visuals",20,True)
+    FBGLXGrid = Gtk.Grid()
+    FBGLXTab.append(FBGLXGrid)
+    FBConfigTab = create_tab(FBNotebook,"settings","GLX FBConfigs",20,True)
+    FBConfigGrid = Gtk.Grid()
+    FBConfigTab.append(FBConfigGrid)
 
     button.set_sensitive(False)
 
@@ -467,7 +473,7 @@ def FrameBuffer(button):
         background_color = setBackgroundColor(i)
         FBGLX_Store.append(DataObject(list_glx_visuals[i][0],list_glx_visuals[i][1],list_glx_visuals[i][2],list_glx_visuals[i][3],list_glx_visuals[i][4],list_glx_visuals[i][5],list_glx_visuals[i][6],list_glx_visuals[i][7],list_glx_visuals[i][8],list_glx_visuals[i][9],list_glx_visuals[i][10],list_glx_visuals[i][11],list_glx_visuals[i][12],list_glx_visuals[i][13],list_glx_visuals[i][14],list_glx_visuals[i][15],list_glx_visuals[i][16],list_glx_visuals[i][17],list_glx_visuals[i][18],list_glx_visuals[i][19],list_glx_visuals[i][20],list_glx_visuals[i][21],list_glx_visuals[i][22],list_glx_visuals[i][23],list_glx_visuals[i][24],list_glx_visuals[i][25]))
     label1 = "%d GLX Visuals" % (len(list_glx_visuals) - 1)
-    FBNotebook.set_tab_label(FBGLXTab, Gtk.Label(label=label1))
+#    FBNotebook.set_tab_label(FBGLXTab, Gtk.Label(label=label1))
 
 #    setColumnFrameBuffer(TreeFBGLX, const.FRAMEBUFFERLIST)
 
@@ -702,7 +708,7 @@ def FrameBuffer(button):
             list_fb_configs[i].insert(6, ".")
         FBConfig_Store.append(DataObject(list_fb_configs[i][0],list_fb_configs[i][1],list_fb_configs[i][2],list_fb_configs[i][3],list_fb_configs[i][4],list_fb_configs[i][5],list_fb_configs[i][6],list_fb_configs[i][7],list_fb_configs[i][8],list_fb_configs[i][9],list_fb_configs[i][10],list_fb_configs[i][11],list_fb_configs[i][12],list_fb_configs[i][13],list_fb_configs[i][14],list_fb_configs[i][15],list_fb_configs[i][16],list_fb_configs[i][17],list_fb_configs[i][18],list_fb_configs[i][19],list_fb_configs[i][20],list_fb_configs[i][21],list_fb_configs[i][22],list_fb_configs[i][23],list_fb_configs[i][24],list_fb_configs[i][25]))
     label2 = "%d  GLX FBConfigs" % (len(list_fb_configs) - 1)
-    FBNotebook.set_tab_label(FBConfigTab, Gtk.Label(label=label2))
+#    FBNotebook.set_tab_label(FBConfigTab, Gtk.Label(label=label2))
 
 #    setColumnFrameBuffer(TreeFBConfig, const.FRAMEBUFFERLIST)
 

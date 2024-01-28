@@ -159,11 +159,15 @@ def OpenGL(tab):
 
         adw_toolbar_view.add_top_bar(headerbar)
 
-        LimitsNotebook = Gtk.Notebook()
-        LimitsNotebook.set_property('tab-pos',Gtk.PositionType.LEFT) 
+        LimitsNotebook = Adw.ViewStack.new()
+        limits_stack_switcher = Adw.ViewSwitcher.new()
+        limits_stack_switcher.set_policy(1)
+        limits_stack_switcher.set_stack(stack=LimitsNotebook)
+        headerbar.set_title_widget(title_widget=limits_stack_switcher)
+    #    LimitsNotebook.set_property('tab-pos',Gtk.PositionType.LEFT) 
         adw_toolbar_view.set_content(LimitsNotebook)
-        LimitsCoreTab = Gtk.Box(spacing=10)
-        LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
+        LimitsCoreTab = create_tab(LimitsNotebook,"settings","Core",20,True)
+    #    LimitsNotebook.append_page(LimitsCoreTab,Gtk.Label(label="\tCore\t"))
         LimitsCoreFrame = Gtk.Frame()
         limitsList = Gtk.StringList()
         limitsDropDown =Gtk.DropDown()
@@ -231,8 +235,8 @@ def OpenGL(tab):
 
         createMainFile(Filenames.opengl_compat_limits_lhs_file,Filenames.fetch_opengl_compat_limits_lhs_command)
 
-        LimitsCompatTab = Gtk.Box(spacing=10)
-        LimitsNotebook.append_page(LimitsCompatTab,Gtk.Label(label="    Compat.\t"))
+        LimitsCompatTab = create_tab(LimitsNotebook,"settings","Compat.",20,True)
+    #    LimitsNotebook.append_page(LimitsCompatTab,Gtk.Label(label="    Compat.\t"))
         LimitsCompatFrame = Gtk.Frame()
         LimitsCompat_List = Gtk.StringList()
         limitsCompatDropDown = Gtk.DropDown()
