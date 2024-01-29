@@ -128,7 +128,7 @@ else:
             t4.join()
 
         if isVdpauinfoSupported():
-            vdpauTab = create_tab(notebook,"applications-multimedia", "VDPAU", const. ICON_HEIGHT, False)
+            vdpauTab = create_tab(notebook,"media-playback-start", "VDPAU", const. ICON_HEIGHT, False)
     #        page_vdpau = notebook.get_page(vdpauTab)
     #        page_vdpau.set_property("tab-expand",True)
             vdpauinfo(vdpauTab)
