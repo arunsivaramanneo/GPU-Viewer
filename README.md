@@ -8,15 +8,16 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK4. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![Screenshot from 2023-07-18 21-29-32](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/ebd8e397-7d21-4119-a6a0-196cf81f86c0)
+![Screenshot from 2024-01-31 06-45-26](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/56a1b9cf-2883-4777-9c3e-d4aad6743174)
 
-![Screenshot from 2023-07-18 21-29-42](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/cf9525ac-efa1-4372-a011-fd45793921bc)
+![Screenshot from 2024-01-31 06-45-35](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/20fee795-b6bc-4860-b37f-73361208d4ad)
 
-![Screenshot from 2023-07-18 21-29-54](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/3cdd34a6-8e0d-451f-8b47-1643428917d8)
+![Screenshot from 2024-01-31 06-45-46](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/0c916b85-a791-47b6-b6e0-3d068b4efc48)
 
-![Screenshot from 2023-07-18 21-30-00](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/19066f11-8e9b-45f6-b31b-9800b685098a)
+![Screenshot from 2024-01-31 06-45-54](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/78ce9e77-0e1c-4a29-88f1-45241ef8f732)
 
-![Screenshot from 2023-07-18 21-30-05](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/927e5553-9a5f-4c28-8335-beb955711abd)
+![Screenshot from 2024-01-31 06-46-00](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/92622490-61c3-457a-8f4e-8f4295e799fa)
+
 
 
 ## INSTALLATION STEPS
@@ -25,7 +26,7 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 23.04(Lunar)/Ubuntu 23.10(Mantic)/Ubuntu 22.04 (Jammy)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 24.04(Noble)/Ybuntu 23.10(Mantic)/Ubuntu 23.04(Lunar)/Ubuntu 22.04 (Jammy)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
