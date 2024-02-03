@@ -145,6 +145,7 @@ Ubuntu_Studio_logo = "../Images/Ubuntu_Studio.png"
 RebornOS_logo = "../Images/RebornOS_Icon.png"
 NixOS_logo = "../Images/NixOS.png"
 Rhino_Linux_logo = "../Images/Rhino_Linux.png"
+Steam_OS_logo = "../Images/Steam_icon_logo.png"
 
 AMD_logo = "../Images/AMD_logo.png"
 #Radeon_logo = "../Images/AMD_Radeon.svg"

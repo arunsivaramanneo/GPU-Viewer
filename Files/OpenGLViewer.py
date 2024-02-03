@@ -75,6 +75,7 @@ def bind_column1(widget, item):
     label = item.get_child()
     obj = item.get_item()
     label.set_text(obj.column1)
+    label.add_css_class(css_class='parent')
 
 def bind_column2(widget, item):
     """bind data from the store object to the widget"""
@@ -665,7 +666,7 @@ def OpenGL(tab):
     openglESExtensionColumnView.set_model(openglESExtensionsSelection)
 
     opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
-    opengl_es_extension_box = create_tab(extensions_notebook,"OpenGL_ES", "OpenGLES", const.ICON_HEIGHT, False)
+    opengl_es_extension_box = create_tab(extensions_notebook,"OpenGL_ES", "OpenGL|ES", const.ICON_HEIGHT, False)
 #    extensions_notebook.append_page(opengl_es_extension_box,Gtk.Picture.new_for_pixbuf(opengl_es_extension_logo))
 #    extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
  #   extensions_page2.set_property("tab-expand",True)

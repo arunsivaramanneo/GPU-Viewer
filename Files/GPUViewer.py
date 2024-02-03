@@ -213,7 +213,7 @@ else:
         if "default" in prefer_theme:
             fname = Gio.file_new_for_path('gtk_test_1.css')
         else:
-            fname = Gio.file_new_for_path('gtk_test.css')
+            fname = Gio.file_new_for_path('gtk_test_1.css')
 
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)
