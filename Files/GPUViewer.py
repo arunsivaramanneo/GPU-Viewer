@@ -210,10 +210,10 @@ else:
             print("Command not found")
         if "prefer-dark"  in prefer_theme:
             fname = Gio.file_new_for_path('gtk_test.css')
-        if "default" in prefer_theme:
+        elif "default" in prefer_theme:
             fname = Gio.file_new_for_path('gtk_test_1.css')
         else:
-            fname = Gio.file_new_for_path('gtk_test_1.css')
+            fname = Gio.file_new_for_path('gtk_test.css')
 
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)
