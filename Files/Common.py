@@ -243,11 +243,6 @@ def getDeviceSize(size):
         sizeMB = str(format(sizeMB, '.2f')) + " GB"
     return sizeMB
 
-
-def refresh_filter(self, store_filter):
-    store_filter.refilter()
-
-
 def appendLimitsRHS(filename, temp):
     LimitsRHS = []
     LimitRHSValue = []
@@ -373,6 +368,8 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Kde_logo,32,28, True)
     elif "Rhino" in line:
         logo_pixbuf = fetchImageFromUrl(const.Rhino_Linux_logo,32,28, True)
+    elif "Steam" in line:
+        logo_pixbuf = fetchImageFromUrl(const.Steam_OS_logo,32,28, True)
     else:
         logo_pixbuf = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,32,28,True)
     return logo_pixbuf
