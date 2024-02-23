@@ -25,14 +25,17 @@ def openCL(tab):
 
     def selectDevice(dropdown,dummy):
         selected =dropdown.props.selected_item
+        DeviceDetails_Store.remove_all()
+        DeviceMemoryImage_store.remove_all()
+        DeviceVector_store.remove_all()
+        DeviceQueueExecution_store.remove_all()
         value = 0
         if selected is not None:
             value = dropdown.props.selected
-
-        getDeviceDetails(value)
-        getDeviceMemoryImageDetails(value)
-        getDeviceVectorDetails(value)
-        getDeviceQueueExecutionCapabilities(value)
+            getDeviceDetails(value)
+            getDeviceMemoryImageDetails(value)
+            getDeviceVectorDetails(value)
+            getDeviceQueueExecutionCapabilities(value)
 
     def getDeviceNames(value):
         
@@ -121,7 +124,7 @@ def openCL(tab):
         oclDeviceDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_details_rhs_command)
 
 
-        DeviceDetails_Store.remove_all()
+    #    DeviceDetails_Store.remove_all()
 
         iter = None
         for i in range(len(oclDeviceDetailsLHS)):
@@ -198,7 +201,7 @@ def openCL(tab):
         oclDeviceMemoryImageDetailsLHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsLHS]
         oclDeviceMemoryImageDetailsRHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsRHS]
 
-        DeviceMemoryImage_store.remove_all()
+    #    DeviceMemoryImage_store.remove_all()
         iter = None
         for i in range(len(oclDeviceMemoryImageDetailsLHS)):
             if "    " in oclDeviceMemoryImageDetailsLHS[i]:
@@ -347,13 +350,6 @@ def openCL(tab):
         getPlatfromDetails(value)
 
     #    os.system("rm /tmp/gpu-viewer/ocl*.txt")
-
-    def searchTreeEntry(model,iter,Tree):
-        search_query = searchEntry.get_text().lower()
-        for i in range(Tree.get_n_columns()):
-            value = model.get_value(iter, i).lower()
-        if search_query in value:
-                return True
 
     mainGrid = Gtk.Grid()
     mainGrid.set_row_spacing(10)
@@ -593,7 +589,7 @@ def openCL(tab):
 
     numberOfPlatforms = Gtk.Label()
     setMargin(numberOfPlatforms,30,10,10)
-    numberOfPlatforms.set_label("No. of Platforms :")
+    numberOfPlatforms.set_label("Number of Platforms :")
     platformGrid.attach_next_to(numberOfPlatforms, platform_dropdown, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfPlatformsEntry = Gtk.Entry()
@@ -604,7 +600,7 @@ def openCL(tab):
 
     numberOfDevices = Gtk.Label()
     setMargin(numberOfDevices,30,10,10)
-    numberOfDevices.set_label("No. Of Devices :")
+    numberOfDevices.set_label("Number Of Devices :")
     platformGrid.attach_next_to(numberOfDevices, Devices_dropdown, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfDevicesEntry.set_max_length(2)
