@@ -4,6 +4,7 @@
     <launchable type="desktop-id">io.github.arunsivaramanneo.GPUViewer.desktop</launchable>
     <name>GPU-Viewer</name>
     <summary>A front-end to glxinfo, vulkaninfo, clinfo and es2_info</summary>
+    <developer_name>Arun Sivaraman</developer_name>
     <description>
         <p>
             This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK4. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work.
@@ -33,8 +34,9 @@
     </screenshots>
     <content_rating type="oars-1.1"/>
     <releases>
-        <release version="3.01" date="2023-02-05"/>
-        <release version="3.00" date="2023-02-04"/>
+        <release version="3.02" date="2024-02-15">
+        <release version="3.01" date="2024-02-05"/>
+        <release version="3.00" date="2024-02-04"/>
         <release version="2.32" date="2023-11-05"/>
         <release version="2.30" date="2023-07-24"/>
         <release version="2.29" date="2023-05-24"/>
