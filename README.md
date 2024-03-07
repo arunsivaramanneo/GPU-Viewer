@@ -18,8 +18,16 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 ![Screenshot from 2024-01-31 06-46-00](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/92622490-61c3-457a-8f4e-8f4295e799fa)
 
+## Testimonials
+
+### Softpedia
+
+#### "GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate." - Review by Vladimir Ciobica
 
 
+### Linux Magazine USA (Issue 254)
+
+#### "GPU-Viewer is a clever combindaton of pre-existing tools, including glxinfo, vulkaninfo and clinfo" - BY GRAHAM MORRISON
 ## INSTALLATION STEPS
 
 **Those who are cloning and installing the application through install file, please note the application will work with vulkan tools 1.2.141 or higher, for anything below please use the PPA to install the latest stable version. Working on Integrating the latest vulkan tools to the installation**
