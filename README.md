@@ -8,29 +8,30 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK4. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-![Screenshot from 2024-01-31 06-45-26](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/56a1b9cf-2883-4777-9c3e-d4aad6743174)
+![Screenshot from 2024-03-09 21-06-11](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/cec08c23-9fd6-44bc-8e51-056dcd7be9d5)
 
-![Screenshot from 2024-01-31 06-45-35](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/20fee795-b6bc-4860-b37f-73361208d4ad)
+![Screenshot from 2024-03-09 21-06-14](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/51a93de6-d74d-4620-9d12-a7140844e243)
 
-![Screenshot from 2024-01-31 06-45-46](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/0c916b85-a791-47b6-b6e0-3d068b4efc48)
+![Screenshot from 2024-03-09 21-06-16](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/81aa12fd-9b94-482d-ad7b-b36ac4b9028d)
 
-![Screenshot from 2024-01-31 06-45-54](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/78ce9e77-0e1c-4a29-88f1-45241ef8f732)
+![Screenshot from 2024-03-09 21-06-19](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/84144b67-f64e-41ee-affc-0d1639bca8c5)
 
-![Screenshot from 2024-01-31 06-46-00](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/92622490-61c3-457a-8f4e-8f4295e799fa)
+![Screenshot from 2024-03-09 21-06-21](https://github.com/arunsivaramanneo/GPU-Viewer/assets/30646692/7f39ae14-da4a-47b7-a6e8-b9cd6037783d)
 
 ## Testimonials
 
 ### Softpedia
 
-#### "GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate." - Review by Vladimir Ciobica
+#### "_GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate._" - Review by Vladimir Ciobica
 
 
 ### Linux Magazine USA (Issue 254)
 
-#### "GPU-Viewer is a clever combindaton of pre-existing tools, including glxinfo, vulkaninfo and clinfo" - BY GRAHAM MORRISON
+#### "_GPU-Viewer is a clever combination of pre-existing tools, including glxinfo, vulkaninfo and clinfo_" - BY GRAHAM MORRISON
+
 ## INSTALLATION STEPS
 
-**Those who are cloning and installing the application through install file, please note the application will work with vulkan tools 1.2.141 or higher, for anything below please use the PPA to install the latest stable version. Working on Integrating the latest vulkan tools to the installation**
+**Those who are cloning and installing the application through install file, please note the application will work with vulkan tools 1.2.141 or higher, for anything below please use the PPA to install the latest stable version.**
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
@@ -83,18 +84,14 @@ The installer should be able to take care of this dependency in Debian based dis
 1. Requires Python3 to run this Application, works only on linux Operating system
 2. For Vulkan Tab to work, nvidia, Mesa and AMD vulkan enabled drivers should be installed along with vulkan-utils
 3. For OpenCL Tab to work, install clinfo along with OpenCL drivers for your respective GPU's
+4. The Latest version of the application works only for Ubuntu Version 23.10 or above as it needs Libadwaita Version 1.4 or above
 
-## KNOWN ISSUES
-
-1. Minor UI issues.
-2. The Extensions drop down menu in OpenGL tab will not render well if there are too many items, users may see a big empty space at the start. This is a GTK issue (https://github.com/arunsivaramanneo/GPU-Viewer/issues/9)
-3. The Application does not render well under dark themes.
 
 ## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 23.04
-2. Desktop : Gnome 42
-3. Kernel : 5.15.x-xx
+1. Operating System : Ubuntu 24.04
+2. Desktop : Gnome 46
+3. Kernel : 6.18.x-xx
 4. IDE : VSCode
 
 
