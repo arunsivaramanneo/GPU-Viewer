@@ -303,7 +303,7 @@ def OpenGL(tab):
             button.set_sensitive(True)
         LimitsWin.connect("close-request",button_enable)
         screen_width,screen_height = getScreenSize()
-        LimitsWin.set_size_request(int(screen_width) * const.WIDTH_RATIO2,640)
+        LimitsWin.set_size_request(960,640)
 
         LimitsWin.present()
 
