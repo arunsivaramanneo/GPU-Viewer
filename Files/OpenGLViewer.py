@@ -12,7 +12,7 @@ from gi.repository import Gtk,Gio,GObject,Adw
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,setBackgroundColor,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -350,8 +350,6 @@ def OpenGL(tab):
         groupName = None
         with open(select_opengl_limits_file,"r") as file:
             for i, line in enumerate(file):
-                background_color = setBackgroundColor(k)
-                k += 1
        #         TreeLimits.expand_all()
                 text = opengl_limits_lhs[i].strip(' ')
                 if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:

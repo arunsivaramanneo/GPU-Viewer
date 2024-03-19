@@ -7,7 +7,7 @@ gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk,Gio
 
-from Common import setup_expander, createSubTab, create_scrollbar, bind_expander, setBackgroundColor,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node
+from Common import setup_expander, createSubTab, create_scrollbar, bind_expander,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -81,7 +81,6 @@ def openCL(tab):
         platformDetails_Store.remove_all()
 
         for i in range(len(oclPlatformDetailsLHS)):
-            background_color = setBackgroundColor(i)
             if "Extensions" in oclPlatformDetailsLHS[i] and "suffix" not in oclPlatformDetailsLHS[i]:
                 if "Version" in oclPlatformDetailsLHS[i]:
                     continue
@@ -605,16 +604,3 @@ def openCL(tab):
 
     numberOfDevicesEntry.set_max_length(2)
     platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
-
-
-
-def setOclColumns(Treeview, Title):
-    for i, column_title in enumerate(Title):
-        renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, renderer, text=i)
-        column.add_attribute(renderer, "background", len(Title))
-        if i == 1:
-            column.add_attribute(renderer, "foreground", len(Title) + 1)
-        column.set_property("min-width", const.MWIDTH)
-        Treeview.set_property("can-focus", False)
-        Treeview.append_column(column)

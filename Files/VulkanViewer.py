@@ -12,7 +12,7 @@ Adw.init()
 import const
 import Filenames
 import subprocess
-from Common import copyContentsFromFile, getGpuImage,create_scrollbar,setBackgroundColor, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo
+from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo
 
 
 class DataObject(GObject.GObject):

@@ -6,7 +6,7 @@ import subprocess
 gi.require_version("Gtk", "4.0")
 gi.require_version(namespace='Adw', version='1')
 from gi.repository import Gtk,GObject,Gio,Adw
-from Common import  setBackgroundColor, create_scrollbar, createSubTab,getScreenSize,setup,create_tab
+from Common import  create_scrollbar, createSubTab,getScreenSize,setup,create_tab
 
 FrameBufferToolTip = ["Visual ID", "Visual Depth", "Visual Type", "Transparency", "Buffer Size", "level", "Render Type",
                       "Double Buffer", "Stereo", "Red Colorbuffer Size", "Green Colorbuffer Size",
@@ -464,7 +464,6 @@ def FrameBuffer(button):
     frameBufferColumnView.set_model(frameBufferSelection)
     
     for i in range(len(list_glx_visuals) - 1):
-        background_color = setBackgroundColor(i)
         FBGLX_Store.append(DataObject(list_glx_visuals[i][0],list_glx_visuals[i][1],list_glx_visuals[i][2],list_glx_visuals[i][3],list_glx_visuals[i][4],list_glx_visuals[i][5],list_glx_visuals[i][6],list_glx_visuals[i][7],list_glx_visuals[i][8],list_glx_visuals[i][9],list_glx_visuals[i][10],list_glx_visuals[i][11],list_glx_visuals[i][12],list_glx_visuals[i][13],list_glx_visuals[i][14],list_glx_visuals[i][15],list_glx_visuals[i][16],list_glx_visuals[i][17],list_glx_visuals[i][18],list_glx_visuals[i][19],list_glx_visuals[i][20],list_glx_visuals[i][21],list_glx_visuals[i][22],list_glx_visuals[i][23],list_glx_visuals[i][24],list_glx_visuals[i][25]))
     label1 = "%d GLX Visuals" % (len(list_glx_visuals) - 1)
 #    FBNotebook.set_tab_label(FBGLXTab, Gtk.Label(label=label1))
@@ -699,7 +698,6 @@ def FrameBuffer(button):
     frameBufferConfigColumnView.set_model(frameBufferConfigSelection)
 
     for i in range(len(list_fb_configs) - 1):
-        background_color = setBackgroundColor(i)
         if list_fb_configs[i][6] == "r" or list_fb_configs[i][6] == "c":
             pass
         else:

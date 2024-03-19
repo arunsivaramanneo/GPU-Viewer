@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk,GObject,Gio,Adw
 Adw.init()
 
-from Common import setBackgroundColor, createSubTab, create_scrollbar
+from Common import createSubTab, create_scrollbar
 
 class DataObject(GObject.GObject):
     def __init__(self, column1: str,column2: str,column3: str,column4: str,column5: str):

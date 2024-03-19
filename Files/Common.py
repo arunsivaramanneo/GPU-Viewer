@@ -78,14 +78,6 @@ def createMainFile(filename,command):
         process = subprocess.Popen(command,shell=True,stdout=file,universal_newlines=True)
         process.communicate()
 
-# Setting the background color for rows
-def setBackgroundColor(i):
-    if i % 2 == 0:
-        background_color = const.BGCOLOR1
-    else:
-        background_color = const.BGCOLOR2
-    return background_color
-
 def on_light_action_actived(self, action, win,param=None):
     display = Gtk.Widget.get_display(win)
     provider = Gtk.CssProvider.new()
@@ -119,18 +111,6 @@ def createSubTab(Tab, notebook, label):
     return Grid
 
 
-# Setting Columns in TreeView
-def setColumns(Treeview, Title, MWIDTH, align):
-    for i, column_title in enumerate(Title):
-        renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(column_title, renderer, text=i)
-        column.set_alignment(align)
-        column.add_attribute(renderer, "background", len(Title))
-        column.set_property("min-width", MWIDTH)
-        Treeview.set_property("can-focus", False)
-        Treeview.append_column(column)
-
-
 # adding Scrollbar to the Treeview
 
 def create_scrollbar(widget):
@@ -141,16 +121,6 @@ def create_scrollbar(widget):
     scrollbar.set_visible(True)
     scrollbar.set_child(widget)
     return scrollbar
-
-
-# creating subFrame in Vulkan Tab
-
-def createSubFrame(Tab):
-    Frame = Gtk.Frame()
-    Tab.add(Frame)
-    grid = Gtk.Grid()
-    Frame.add(grid)
-    return grid
 
 
 def colorTrueFalse(filename, text):
