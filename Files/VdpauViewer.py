@@ -91,7 +91,7 @@ def vdpauinfo(tab2):
 
 		toprow = ExpandDataObject2("Bitmap Surface","","","","")
 		for i,line in enumerate(vdpau_surface_bitmap_limits):
-			iter = ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),"",setBackgroundColor(i))
+			iter = ExpandDataObject2(line.split()[0].strip('\n'),line.split()[1].strip('\n'),line.split()[2].strip('\n'),"","")
 			toprow.children.append(iter)
 		surfaceVideoStore.append(toprow)
 
