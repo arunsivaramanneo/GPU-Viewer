@@ -1323,7 +1323,7 @@ def Vulkan(tab2):
 
     propertiesColumnView.set_model(propertiesSelection)
 
-    propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Limits",factory_properties)
+    propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Properties",factory_properties)
     propertiesColumnLhs.set_resizable(True)
     propertiesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_properties_value)
     propertiesColumnRhs.set_expand(True)
@@ -1654,7 +1654,7 @@ def Vulkan(tab2):
 
     queuesColumnView.set_model(queueSelection)
 
-    queueColumnLhs = Gtk.ColumnViewColumn.new("Memory Heaps",factory_queues)
+    queueColumnLhs = Gtk.ColumnViewColumn.new("Queue Properties",factory_queues)
     queueColumnLhs.set_resizable(True)
     queueColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_queues_value)
     queueColumnRhs.set_expand(True)
