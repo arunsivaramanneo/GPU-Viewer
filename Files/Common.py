@@ -262,6 +262,8 @@ def getLogo(line):
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,28, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
+    elif "COSMIC" in line:
+        logo_pixbuf  = fetchImageFromUrl(const.cosmic_logo,32,28, True)
     elif "Budgie" in line and "Ubuntu" in line:
         logo_pixbuf = fetchImageFromUrl(const.Ubuntu_Budgie_logo,32,28, True)
     elif "Studio" in line and "Ubuntu" in line:

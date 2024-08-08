@@ -30,12 +30,20 @@ Title1 = "About GPU-Viewer v2.0"
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
     def show_message(app):
+        dialog = Gtk.AlertDialog()
+        dialog.set_modal(False)
+        dialog.set_message('gpu-viewer is already running')
+        dialog.set_detail('If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again')
+    #    dialog.set_default_button(0)
+        dialog.set_cancel_button(1)
+        dialog.choose(None,None,None,None)
+    #    dialog.show()
         message_window = Gtk.ApplicationWindow(application=app)
         message_grid = Gtk.Grid()
         message_window.set_title("gpu-viewer application is already running")
         message_window.set_default_size(480,120)
         message_window.set_resizable(False)
-        message_window.present()
+    #    message_window.present()
         message_window_frame = Gtk.Frame()
         setMargin(message_window_frame,5,5,10)
         label = Gtk.Label(label="If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")

@@ -173,6 +173,7 @@ Fluxbox_logo = "../Images/Fluxbox-logo.svg"
 Sway_logo = "../Images/Sway_Tree.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
+cosmic_logo = "../Images/cosmic.png"
 
 Gnome_logo = "../Images/Gnome_Dark.png"
 
