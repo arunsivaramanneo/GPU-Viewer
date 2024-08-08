@@ -260,6 +260,8 @@ def getGpuImage(line):
 def getLogo(line):
     if "Ubuntu" in line and "Gnome" not in line:
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,28, True)
+    elif "Nobara" in line:
+        logo_pixbuf  = fetchImageFromUrl(const.Nobara_OS_logo,32,28, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
     elif "COSMIC" in line:

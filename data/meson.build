@@ -19,3 +19,5 @@ install_data('../Images/about-us.png',
   install_dir: get_option('datadir') / 'icons/hicolor/512x512/apps')
 install_data('../Images/vdpauinfo.png',
   install_dir: get_option('datadir') / 'icons/hicolor/512x512/apps')
+install_data('../Images/settings.png',  
+  install_dir: get_option('datadir') / 'icons/hicolor/512x512/apps')
