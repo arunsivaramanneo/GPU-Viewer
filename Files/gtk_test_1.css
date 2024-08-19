@@ -4,34 +4,33 @@
  
  window{
   border-radius: 12px;
-  background-image: none;
-  background-color: #dddddd;
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border: 1px solid #171717;
   border-style: solid solid none none;
-  background-image: none;
 }
 
 frame{
   border-style: none none none none ;
 }
-treeview {
-  background-color: #dddddd;
+columview {
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border: 2px solid #171717;
   border-style: solid solid none solid;
   border-radius: 6px;
 }
 grid{
-  background-image: linear-gradient(#dddddd,#dddddd);
-  background-color: #dddddd;
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
-  border: 2px solid #171717;
   border-style: none;
 }
 
 textview > border {
-  background-color: #dddddd;
+  background-color: #dcdcdc;
 }
 
 .titlebar box{
@@ -44,17 +43,17 @@ textview > border {
 }
 
 .close{
-  color: #dddddd;
+  color: #dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
 .minimize{
-  color: #dddddd;
+  color: #dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
 .maximize{
-  color:#dddddd;
+  color:#dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
@@ -63,7 +62,7 @@ textview > border {
 }
 
 .close:focus {
-  color: #dddddd;
+  color: #dcdcdc;
   text-decoration: none;
 }
 
@@ -89,17 +88,17 @@ font-weight: 500;
 }
 headerbar {
   background-image: none;
-  background-color: #333333;
+  background-color:#2B2B2B;
   font-size: medium;
   border-style: none none none none;
-  color: #dddddd;
+  color: #dcdcdc;
 }
 
 /*************
  * Notebooks *
  *************/
  notebook > header tab {
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
@@ -115,19 +114,19 @@ headerbar {
 notebook {
   border: 2px solid #171717;
   border-style: none none none none;
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
   notebook > header > tabs > tab {
-    background-image: linear-gradient(#dddddd,#dddddd);
+    background-image: linear-gradient(#dcdcdc,#dcdcdc);
     min-height: 24px;
     min-width: 24px;
     padding-top: 8px;
     margin-bottom: 6px;
     margin-right: 6px;
     padding-bottom: 8px ;
-    background-color: #dddddd;
+    background-color: #dcdcdc;
     color: rgba(0, 0, 0, 0.87);
     font-weight: 600;
     box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
@@ -158,7 +157,7 @@ notebook > header tab:checked {
  *************/
 
 button.text-button {
-  color: #dddddd;
+  color: #dcdcdc;
   font-weight: 600;
   background-image: radial-gradient(farthest-side, #333333 0%, rgba(51, 51, 51, 0) 0%);
   background-color: #333333;
@@ -190,7 +189,7 @@ button.combo{
   min-height: 16px;
   min-width: 16px;
   background-image: none;
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   outline: none;
 }
 
@@ -200,7 +199,7 @@ button.combo:only-child {
   font-weight: 550;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
@@ -213,14 +212,14 @@ button.combo:hover{
 }
 
 button.dropdown{
-  background-color: #dddddd;
+  background-color: #dcdcdc;
 }
 
 popover.background > arrow,
 popover.background > contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   background-clip: border-box;
   border-radius: 12px;
   color:  rgba(0, 0, 0, 0.87);
@@ -243,7 +242,7 @@ popover.background modelbutton {
 popover.background modelbutton:hover {
   transition: none;
   background-color: #333333;
-  color: #dddddd;
+  color: #dcdcdc;
 }
 
 .osd popover.background > arrow,
@@ -269,30 +268,30 @@ scrollbar > range > trough > slider {
 }
 
 entry {
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   min-height: 36px;
   padding: 0 8px;
   border-spacing: 6px;
   border-radius: 6px;
+  border: none;
   caret-color: currentColor;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  background-color: #e0e0e0;
+  background-color: #fafbfc;
   color: rgba(0, 0, 0, 0.87);
   outline: none;
-  border-style: solid;
 }
 
 entry.search {
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   border-radius: 12px;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
-  border-style: solid;
   background-color: #e0e0e0;
-  border-color: #333333;
+  border: none;
   color: rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   box-shadow: inset 0 0 0 2px #333333;
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
 }
 
 entry:focus-within > text > placeholder {
@@ -300,35 +299,36 @@ entry:focus-within > text > placeholder {
 }
 
 header{
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
   padding: 6px 12px;
   border-width: 1px;
   border-color: transparent;
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   border-style: none none none none;
   outline: none;
   background-clip: padding-box;
   box-shadow: none;
+  color: #171717;
   font-weight: 500;
 }
 
 
 columnview.view > header > button,
 treeview.view > header > button {
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   min-height: 0;
   min-width: 0;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.87);
-  background-color: #dddddd;
+  background-color: #dcdcdc;
   background-image: none;
   border-style: none none solid none;
-  border: 0px solid #333333;
+  border: 1px solid #333333;
   border-radius: 0;
-  border-image: linear-gradient(to bottom, #dddddd 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #dddddd 80%) 0 1 0 0/0 1px 0 0 stretch;
+  border-image: linear-gradient(to bottom, #dcdcdc 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #dcdcdc 80%) 0 1 0 0/0 1px 0 0 stretch;
 }
 
 columnview.view:selected,
@@ -339,14 +339,14 @@ treeview.view:selected {
 }
 
 listview {
-  background-image: linear-gradient(#dddddd,#dddddd);
-  background-color: #dddddd;
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-color: #dcdcdc;
   border-radius: 0px;
 }
 
 dropdown > button {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-  background-image: linear-gradient(#dddddd,#dddddd);
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
   border-radius: 12px;
   border-style: solid;
   border: 2px solid rgba(0, 0, 0, 0.87);
@@ -380,17 +380,17 @@ popover.background listview > row {
 }
 
 treeview {
-  background-image: linear-gradient(#dddddd,#dddddd);
-  border-color: #dddddd;
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  border-color: #dcdcdc;
   border-style: solid;
   border-width: 2px;
   border-radius: 12px;
 }
 
 columnview {
-  background-image: linear-gradient(#dddddd,#dddddd);
-  background-color: #dddddd;
-  border-color: #dddddd;
+  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-color: #dcdcdc;
+  border-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border-style: solid;
 }
