@@ -8,8 +8,8 @@
   background-image: none;
   background-color: #2B2B2B;
   color: white;
-  border: 1px solid #171717;
-  border-style: solid solid none none;
+  border: 3px solid #171717;
+  border-style: solid solid solid solid;
   background-image: none;
 }
 
