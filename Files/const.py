@@ -8,7 +8,7 @@ ABOUT_US_PNG = "../Images/about-us.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
 
-OPEN_GL_PNG = "../Images/OpenGL.png"
+OPEN_GL_PNG = "../Images/Opengl-logo.svg"
 
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
@@ -34,7 +34,7 @@ INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
 AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon.png"
+AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
 
 AMD_RADEON_VEGA_LOGO_PNG = "../Images/radeon-vega.png"
 
