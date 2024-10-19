@@ -8,7 +8,7 @@ ABOUT_US_PNG = "../Images/about-us.png"
 
 VULKAN_PNG = "../Images/Vulkan.png"
 
-OPEN_GL_PNG = "../Images/Opengl-logo.svg"
+OPEN_GL_PNG = "../Images/OpenGL.png"
 
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
