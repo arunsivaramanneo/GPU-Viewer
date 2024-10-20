@@ -1,4 +1,4 @@
-Copyright © 2017-2024 Arun Sivaraman (<a href="arunsivaramanneo@gmail.com"><b>arunsivaramanneo@gmail.com</b></a>)
+<b>Copyright © 2017-2025 Arun Sivaraman </b> (<a href="arunsivaramanneo@gmail.com"><b>arunsivaramanneo@gmail.com</b></a>)
 
 <b>GPU Viewer is a FREE SOFTWARE: This program comes with ABSOLUTELY NO WARRANTY. </b>
 You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
@@ -14,13 +14,13 @@ The latest source code of this program can be found at
 
 This program uses:
     -  python 3 or higher
-    -  GTK4+ for the graphical user interface
+    -  GTK4+ and libadwaita for the graphical user interface
     -  The below commands are used to fetch the report
          - glxinfo(OpenGL Information)
          - vulkaninfo(Vulkan Information) 
          - clinfo(OpenCL Information)
          - es2_info(EGL Information)
-         - vdpauinfo(VDPAU Information) (Note : Supported on x11)
+         - vdpauinfo(VDPAU Information) (Note : Supported only on x11/Xwayland)
          - lscpu (CPU information)
          - lsb_release (Distro Information) 
          - XDG_CURRENT_DESKTOP (Desktop Information)
@@ -28,7 +28,7 @@ This program uses:
          - cat /proc/meminfo | awk '/Mem/' (Memory information)
          - uname -r (Kernel Information)
 
-If you find the project interesting enough, please consider making a <b>DONATION</b>. 
+If you find the project interesting enough, please consider making a <a href="https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q"><b>DONATION</b></a>. 
 Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.
 
 Trademarks

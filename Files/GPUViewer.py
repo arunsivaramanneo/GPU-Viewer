@@ -25,8 +25,6 @@ from OpenGLViewer import OpenGL
 from VdpauViewer import vdpauinfo
 from aboutPage import about_page
 
-Title1 = "About GPU-Viewer v2.0"
-
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
     def show_message(app):
@@ -72,16 +70,11 @@ else:
         mkdir_process = subprocess.Popen(Filenames.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
         mkdir_process.communicate()
         gtk = MyGtk("GPU-VIEWER")
-    #    setScreenSize(gtk, const.WIDTH_RATIO, const.HEIGHT_RATIO1)
-        
-    #    notebook = Gtk.Notebook()
-     #   win.set_content(notebook)
 
         adw_toolbar_view = Adw.ToolbarView.new()
         win.set_content(adw_toolbar_view)
         notebook = Adw.ViewStack.new() 
         adw_toolbar_view.set_content(notebook)
-
         stack_switcher = Adw.ViewSwitcher.new()
         stack_switcher.set_stack(stack=notebook)
         stack_switcher.set_policy(1)
@@ -106,6 +99,7 @@ else:
 
         adw_toolbar_view.add_top_bar(headerbar)
         headerbar.set_title_widget(title_widget=stack_switcher)
+        headerbar.set_show_end_title_buttons(True)
     
 
         if isVulkanSupported():
@@ -200,7 +194,7 @@ else:
      #   adw_toolbar_view.add_top_bar(headerbar)
     #    win.set_titlebar(headerbar)
         win.set_title("GPU-Viewer v3.0")
-
+        win.set_resizable(True)
 
         width,height = getScreenSize()
         if int(width) > 2160 and int(height) < 1440:

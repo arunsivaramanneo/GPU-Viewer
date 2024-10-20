@@ -1160,7 +1160,8 @@ def Vulkan(tab2):
 
     def _do_filter_formats_view(item, filter_list_model):
         search_text_widget = formatSearchEntry.get_text()
-        return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+        if search_text_widget.upper() in item.data.upper():
+            return item.data.upper()
 
     def _do_filter_properties_dropdown_view(item, filter_list_model):
         search_text_widget = properties_dropdown_search.get_text()
@@ -1479,14 +1480,14 @@ def Vulkan(tab2):
 
     FormatsList = Gio.ListStore.new(DataObject)
     filterFormatStoreDropdown = Gtk.FilterListModel(model=FormatsList)
-#    filter_formats_dropdown = Gtk.CustomFilter.new(_do_filter_formats_dropdown_view, filterFormatStoreDropdown)
-#    filterFormatStoreDropdown.set_filter(filter_formats_dropdown)
+    filter_formats_dropdown = Gtk.CustomFilter.new(_do_filter_formats_dropdown_view, filterFormatStoreDropdown)
+    filterFormatStoreDropdown.set_filter(filter_formats_dropdown)
     FormatsDropDown = Gtk.DropDown(model=filterFormatStoreDropdown,factory=factory_formats_dropdown_value)
     FormatsDropDown.set_model(filterFormatStoreDropdown)
     FormatsDropDown.connect('notify::selected-item',selectFormats)
-#    FormatsDropDown.set_enable_search(True)
-#    formats_dropdown_search = _get_search_entry_widget(FormatsDropDown)
-#    formats_dropdown_search.connect('search-changed',_on_search_method_changed,filter_formats_dropdown)
+    FormatsDropDown.set_enable_search(True)
+    formats_dropdown_search = _get_search_entry_widget(FormatsDropDown)
+    formats_dropdown_search.connect('search-changed',_on_search_method_changed,filter_formats_dropdown)
     FormatsTab = Gtk.Box(spacing=10)
     FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
     FormatsGrid.set_row_spacing(3)
