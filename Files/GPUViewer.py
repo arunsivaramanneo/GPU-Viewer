@@ -91,6 +91,9 @@ else:
         dark_action.connect("activate", on_dark_action_actived,win)
         win.add_action(dark_action) # (self window) == win in MENU_XML
 
+        icon_theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+        icon_theme.add_search_path(os.path.abspath("../icons"))
+
         menubutton = Gtk.MenuButton.new()
         menubutton.set_icon_name("open-menu-symbolic") 
         menu = Gtk.Builder.new_from_string(const.MENU_XML, -1).get_object("app-menu")
