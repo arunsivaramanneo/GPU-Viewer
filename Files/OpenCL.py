@@ -44,8 +44,8 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         fetch_device_names_command = "cat %s | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,oclPlatforms[value])
@@ -69,8 +69,8 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         fetch_platform_details_file_command = "cat %s | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./ " %(Filenames.opencl_output_file,oclPlatformslocal[value])
@@ -105,12 +105,12 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
 
-        fetch_device_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \/.*/' | grep -v Preferred | grep -v Available" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        fetch_device_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \\/.*/' | grep -v Preferred | grep -v Available" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
         fetch_device_extensions_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions|Available/'" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
         
         with open(Filenames.opencl_device_details_file,"w") as file:
@@ -187,8 +187,8 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         fetch_device_memory_and_image_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
@@ -241,11 +241,11 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        fetch_device_vector_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
+        fetch_device_vector_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \\/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
         createMainFile(Filenames.opencl_device_vector_file,fetch_device_vector_details_file_command)
 
         oclDeviceVectorDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_vector_details_lhs_command)
@@ -295,8 +295,8 @@ def openCL(tab):
         oclPlatformslocal.append("BLANK")
 
         for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\)") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
+            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
         fetch_device_queue_execution_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)

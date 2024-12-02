@@ -90,7 +90,6 @@ font-weight: 500;
 }
 headerbar {
   background-image: linear-gradient(#2B2B2B,#2B2B2B);
-  background-image: none;
   background-color: #2B2B2B;
   font-size: medium;
   border-style: none none none none;
