@@ -237,6 +237,8 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.NVIDIA_GTX_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "RTX" in line and "GeForce" in line:
         gpu_image = fetchImageFromUrl(const.NVIDIA_RTX_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
+    elif "NVIDIA" in line:
+        gpu_image = fetchImageFromUrl(const.NVIDIA_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)    
     elif "GeForce" in line and ("GTX" not in line or "RTX" not in line):
         gpu_image = fetchImageFromUrl(const.GEFORCE_PNG, const.ICON_WIDTH, const.ICON_HEIGHT, True)
     elif "CUDA" in line and ("GTX" not in line or "RTX" not in line):
@@ -255,6 +257,8 @@ def getGpuImage(line):
         gpu_image = fetchImageFromUrl(const.MESA_LOGO_PNG,100,const.ICON_HEIGHT, False)
     elif "Portable Computing Language" in line:
         gpu_image = fetchImageFromUrl(const.POCL_LOGO_PNG,100,const.ICON_HEIGHT, False)
+    else:
+        gpu_image = fetchImageFromUrl(const.TRANSPARENT_PIXBUF,100,const.ICON_HEIGHT, False)
     return gpu_image
 
 def getLogo(line):
