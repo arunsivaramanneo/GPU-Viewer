@@ -1,0 +1,436 @@
+/***************
+ * Base States *
+ ***************/
+ 
+ window{
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  border-radius: 12px;
+  background-image: none;
+  background-color: #2B2B2B;
+  color: white;
+  border: 3px solid #171717;
+  border-style: solid solid solid solid;
+  background-image: none;
+}
+
+.theme-b {
+  background: #447;
+  color: #bbd;
+}
+@media (prefers-color-scheme: light) {
+  .theme-b.adaptive {
+    background: #bcd;
+    color: #334;
+    outline: 5px dotted #000;
+  }
+}
+
+frame{
+  border-style: none none none none ;
+}
+treeview {
+  background-color: #2B2B2B;
+  color: white;
+  border: 2px solid #171717;
+  border-style: solid solid none solid;
+  border-radius: 6px;
+}
+grid{
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  background-color: #2B2B2B;
+  color: white;
+  border: 2px solid #171717;
+  border-style: none;
+}
+
+textview > border {
+  background-color: #2B2B2B;
+}
+
+.titlebar box{
+  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
+  border-top: 2px;
+  border-width: 2px;
+  border-style: none none none none;
+  color: white;
+  font-weight: bold;
+}
+
+.close{
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+.minimize{
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+.maximize{
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close:hover {
+  opacity: 1;
+}
+
+.close:focus {
+  color: #000;
+  text-decoration: none;
+}
+
+.false {
+  color: red;
+}
+
+.true {
+  color: green;
+}
+
+.nothing{
+  color: #ffffff;
+}
+
+image{
+  padding: 0px;
+  
+}
+
+.parent{
+font-weight: 500;
+}
+headerbar {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  background-color: #2B2B2B;
+  font-size: medium;
+  border-style: none none none none;
+  color: #ffffff;
+}
+
+/*************
+ * Notebooks *
+ *************/
+ notebook > header tab {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
+  min-height: 24px;
+  min-width: 24px;
+  padding: 3px 12px;
+  border-color: transparent;
+  outline: none;
+  border-radius: 9px;
+  box-shadow: none;
+  color: white;
+  font-weight: 500;
+}
+
+notebook {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  border: 2px solid #171717;
+  border-style: none none none none;
+  background-color: #2B2B2B;
+  border-radius: 9px;
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+}
+  notebook > header > tabs > tab {
+    background-image: linear-gradient(#2B2B2B,#2B2B2B);
+    min-height: 24px;
+    min-width: 24px;
+    padding-top: 8px;
+    margin-bottom: 6px;
+    margin-right: 6px;
+    padding-bottom: 8px ;
+    background-color: #2B2B2B;
+    color: white;
+    font-weight: 600;
+    box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
+  }
+  notebook > header > tabs > tab:hover {
+      box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+  }
+  
+  notebook > header > tabs > arrow:hover {
+    box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+  }
+
+notebook > header tab:checked {
+  background-image: linear-gradient(#171717,#171717);
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: inset 0 0 0 2px #fafbfc;
+  background-color: #171717;
+  background-clip: padding-box;
+  border-style: solid;
+  color: #d43c50;
+  font-weight: bolder;
+  border: 2px solid #171717;
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+/*************
+ * Button *
+ *************/
+ @keyframes needs-attention {
+  from {
+    background-image: radial-gradient(farthest-side, #E0E0E0 0%, rgba(224, 224, 224, 0) 0%);
+  }
+  to {
+    background-image: radial-gradient(farthest-side, #E0E0E0 95%, rgba(224, 224, 224, 0));
+  }
+}
+button.text-button {
+  color: #d43c50;
+  font-weight: 600;
+  background-color: #171717;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 12px;
+  box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+button.text-button:checked{
+  color: #d43c50;
+  border-radius: 9px;
+}
+button.text-button:hover {
+  box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+  outline: none;
+  background-color: #171717;
+}
+
+button.text-button:disabled{
+  box-shadow: none;
+  background-image: none;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.38);
+  filter: none;
+  opacity: 1;
+}
+
+button.combo{
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  min-height: 16px;
+  min-width: 16px;
+  background-image: none;
+  background-color: #2B2B2B;
+  outline: none;
+}
+
+button.combo:only-child {
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  border-radius: 6px;
+  font-weight: 550;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: inset 0 0 0 2px #fafbfc;
+  background-color: #2B2B2B;
+  color: rgba(0, 0, 0, 0.87);
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  outline: none;
+  border-style: solid;
+  border: 2px solid;
+}
+
+button.combo:hover{
+  box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+button.dropdown{
+  background-color: #2B2B2B;
+}
+
+popover.background > arrow,
+popover.background > contents {
+  transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
+  padding: 6px;
+  background-color: #2B2B2B;
+  background-clip: border-box;
+  border-radius: 12px;
+  color: #ffffff;
+  border: 2px solid #171717;
+}
+
+popover.background modelbutton {
+  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
+  min-height: 22px;
+  min-width: 56px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  color: white;
+  font: initial;
+  text-shadow: none;
+  box-shadow: none;
+  background: none;
+}
+
+popover.background modelbutton:hover {
+  transition: none;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.osd popover.background > arrow,
+.osd popover.background > contents, popover.background.touch-selection > arrow,
+popover.background.touch-selection > contents, popover.background.magnifier > arrow,
+popover.background.magnifier > contents, .osd {
+  color: rgba(0, 0, 0, 0.87);
+  background-clip: padding-box;
+  border-radius: 6px;
+  border: none;
+}
+
+
+scrollbar > range > trough > slider {
+  transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
+  min-width: 8px;
+  min-height: 8px;
+  border: 4px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  background-color: #FFFAEF;
+  box-shadow: none;
+  outline: none;
+}
+
+entry {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  min-height: 36px;
+  padding: 0 8px;
+  border-spacing: 6px;
+  border-radius: 6px;
+  caret-color: currentColor;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  background-color: #2B2B2B;
+  color: white;
+  outline: none;
+  border-style: solid;
+  border-color: #171717;
+  border: 2px solid #171717;
+}
+
+entry.search {
+  background-image: linear-gradient(#171717,#171717);
+  border-radius: 12px;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
+  border-style: solid;
+  border:2px solid;
+  background-color: #171717;
+  border-color: #333333;
+  color: white;
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 2px #333333;
+}
+
+entry:focus-within > text > placeholder {
+  opacity: 0;
+}
+
+header{
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
+  min-height: 24px;
+  min-width: 24px;
+  padding: 6px 12px;
+  border-width: 1px;
+  border-color: transparent;
+  background-color: #2B2B2B;
+  border-style: none none none none;
+  outline: none;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: #2B2B2B;
+  font-weight: 500;
+}
+
+
+columnview.view > header > button,
+treeview.view > header > button {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  min-height: 0;
+  min-width: 0;
+  font-weight: bold;
+  color: #fafbfc;
+  background-color: #2B2B2B;
+  background-image: none;
+  border-style: none none solid none;
+  border: 0px solid #333333;
+  border-radius: 0;
+  border-image: linear-gradient(to bottom, #2B2B2B 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #2B2B2B 80%) 0 1 0 0/0 1px 0 0 stretch;
+}
+
+columnview.view:selected,
+treeview.view:selected {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0px;
+}
+
+listview {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  background-color: #2B2B2B;
+  border-radius: 0px;
+}
+
+dropdown > button {
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  border-radius: 12px;
+  border-style: solid;
+  border: 2px solid rgba(0, 0, 0, 0.87);
+  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  font-weight: 550;
+}
+
+dropdown > button :only-child{
+  font-weight: 600;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
+}
+
+listview > row :hover {
+  border-style: none none none none;
+  outline: transparent;
+  background-color: rgba(0,0,0,0);
+  font-weight: bolder;
+  font-style: oblique;
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
+
+}
+
+
+popover.background listview > row {
+  padding: 4px 8px;
+  border: none;
+  margin: 0px;
+  outline: none;
+  border-style: none none none none;
+  background-color: transparent;
+}
+
+treeview {
+  border-color: #2B2B2B;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 12px;
+}
+
+columnview {
+  background-image: linear-gradient(#2B2B2B,#2B2B2B);
+  border-color: #2B2B2B;
+  color: white;
+  border-style: solid;
+}
+columnview.view.expander,
+treeview.view.expander {
+  min-width: 16px;
+  min-height: 16px;
+  -gtk-icon-source: -gtk-icontheme("pan-end-symbolic");
+  color: rgba(255, 255, 255, 0.7);
+}
+stack{
+  min-width: 16px;
+}
+viewswitcher {
+  min-width: 10px;
+  border-radius: 12px;
+  font-weight: 900;
+}

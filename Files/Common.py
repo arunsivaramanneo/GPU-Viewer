@@ -81,7 +81,7 @@ def createMainFile(filename,command):
 def on_light_action_actived(self, action, win,param=None):
     display = Gtk.Widget.get_display(win)
     provider = Gtk.CssProvider.new()
-    fname = Gio.file_new_for_path('gtk_test_1.css')
+    fname = Gio.file_new_for_path('gtk_light.css')
     provider.load_from_file(fname)
     Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -90,7 +90,7 @@ def on_light_action_actived(self, action, win,param=None):
 def on_dark_action_actived(self, action,win, param=None):
     display = Gtk.Widget.get_display(win)
     provider = Gtk.CssProvider.new()
-    fname = Gio.file_new_for_path('gtk_test.css')
+    fname = Gio.file_new_for_path('gtk_dark.css')
     provider.load_from_file(fname)
     Gtk.StyleContext.add_provider_for_display(display, provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)

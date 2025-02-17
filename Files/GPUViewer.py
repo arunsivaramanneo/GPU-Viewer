@@ -175,6 +175,13 @@ else:
         vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
         return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0
 
+    def isVulkanVideoSupported():
+        with open(Filenames.vulkaninfo_output_file,"w") as file:
+            vulkan_process = subprocess.Popen(Filenames.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
+            vulkan_process.wait()
+            vulkan_process.communicate()
+        vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
+        return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0        
 
     def quit(instance):
         unset_lc_all_process = subprocess.Popen(Filenames.unset_LC_ALL_conmand,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
@@ -196,7 +203,7 @@ else:
 
      #   adw_toolbar_view.add_top_bar(headerbar)
     #    win.set_titlebar(headerbar)
-        win.set_title("GPU-Viewer v3.0")
+        win.set_title("GPU-Viewer v3.12")
         win.set_resizable(True)
 
         width,height = getScreenSize()
@@ -214,11 +221,11 @@ else:
         except NameError:
             print("Command not found")
         if "prefer-dark"  in prefer_theme:
-            fname = Gio.file_new_for_path('gtk_test.css')
+            fname = Gio.file_new_for_path('gtk_dark.css')
         elif "default" in prefer_theme:
-            fname = Gio.file_new_for_path('gtk_test_1.css')
+            fname = Gio.file_new_for_path('gtk_light.css')
         else:
-            fname = Gio.file_new_for_path('gtk_test_1.css')
+            fname = Gio.file_new_for_path('gtk_dark.css')
 
         provider.load_from_file(fname)
         theme = Gtk.IconTheme.get_for_display(display)

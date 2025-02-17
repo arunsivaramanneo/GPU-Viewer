@@ -1897,6 +1897,43 @@ def Vulkan(tab2):
   #  GroupsScrollbar = create_scrollbar(TreeGroups)
   #  GroupsGrid.attach(GroupsScrollbar,0,0,1,1)
 
+
+    # ---------------------------- Creating Vkvideo Tab ----------------------------------------------------------
+
+
+    vkVideoTab = Gtk.Box(spacing=10)
+    vkVideoGrid = createSubTab(vkVideoTab,notebook,"Vulkan Video")
+
+    vkVideoColumnView = Gtk.ColumnView()
+    vkVideoColumnView.props.show_row_separators = True
+    vkVideoColumnView.props.show_column_separators = False
+
+    factory_vkVideo = Gtk.SignalListItemFactory()
+    factory_vkVideo.connect("setup",setup_expander)
+    factory_vkVideo.connect("bind",bind_expander)
+
+    factory_vkVideo_value = Gtk.SignalListItemFactory()
+    factory_vkVideo_value.connect("setup",setup)
+    factory_vkVideo_value.connect("bind",bind1)
+
+    vkVideoSelection = Gtk.SingleSelection()
+    vkVideoTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    vkVideoModel = Gtk.TreeListModel.new(vkVideoTab_Store,False,True,add_tree_node)
+    vkVideoSelection.set_model(vkVideoModel)
+
+    vkVideoColumnView.set_model(vkVideoSelection)
+
+    vkVideoColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideo)
+    vkVideoColumnLhs.set_resizable(True)
+    vkVideoColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_vkVideo_value)
+    vkVideoColumnRhs.set_expand(True)
+
+    vkVideoColumnView.append_column(vkVideoColumnLhs)
+    vkVideoColumnView.append_column(vkVideoColumnRhs)
+
+    vkVideoScrollbar = create_scrollbar(vkVideoColumnView)
+    vkVideoGrid.attach(vkVideoScrollbar,0,0,1,1)
     #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
 
     DevicesGrid = Gtk.Grid()
