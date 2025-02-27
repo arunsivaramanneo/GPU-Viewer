@@ -24,6 +24,7 @@ from OpenCL import openCL
 from OpenGLViewer import OpenGL
 from VdpauViewer import vdpauinfo
 from aboutPage import about_page
+from VulkanVideoViewer import VulkanVideo
 
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
@@ -131,6 +132,12 @@ else:
             t4 = threading.Thread(target=openCL, args=(openclTab,))
             t4.start()
             t4.join()
+
+        if isVulkanVideoSupported():
+            vulkanVideoTab = create_tab(notebook,"Vulkan-Video", "Vulkan Video", const. ICON_HEIGHT, False)
+    #        page_vdpau = notebook.get_page(vdpauTab)
+    #        page_vdpau.set_property("tab-expand",True)
+            VulkanVideo(vulkanVideoTab)
 
         if isVdpauinfoSupported():
             vdpauTab = create_tab(notebook,"vdpauinfo", "VDPAU", const. ICON_HEIGHT, False)

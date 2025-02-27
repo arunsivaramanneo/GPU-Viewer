@@ -63,6 +63,8 @@ NVIDIA_BANNER = "../Images/nvidia-banner.jpg"
 
 TWITTER_LOGO_PNG = "../Images/twitter-icon.png"
 
+VULKAN_VIDEO_PNG = "../Images/Vulkan-Video.png"
+
 DONATE_LOGO_PNG = "../Images/Donate.png"
 
 GITHUB_LOGO_PNG = "../Images/github.png"

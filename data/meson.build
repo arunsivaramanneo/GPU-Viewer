@@ -21,3 +21,5 @@ install_data('../Images/vdpauinfo.png',
   install_dir: get_option('datadir') / 'gpu-viewer/icons/hicolor/512x512/actions')
 install_data('../Images/settings.png',  
   install_dir: get_option('datadir') / 'gpu-viewer/icons/hicolor/512x512/actions')
+install_data('../Images/Vulkan-Video.png',  
+  install_dir: get_option('datadir') / 'gpu-viewer/icons/hicolor/512x512/actions')
