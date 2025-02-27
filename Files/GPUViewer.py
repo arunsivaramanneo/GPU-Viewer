@@ -18,7 +18,7 @@ from gi.repository import Gtk, Pango, Gdk,Gio,GLib,Adw
 
 Adw.init()
 
-from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile,on_light_action_actived,on_dark_action_actived
+from Common import getScreenSize,create_tab,MyGtk,setMargin, copyContentsFromFile,on_light_action_actived,on_dark_action_actived,fetchContentsFromCommand
 from VulkanViewer import Vulkan
 from OpenCL import openCL
 from OpenGLViewer import OpenGL
@@ -183,12 +183,7 @@ else:
         return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0
 
     def isVulkanVideoSupported():
-        with open(Filenames.vulkaninfo_output_file,"w") as file:
-            vulkan_process = subprocess.Popen(Filenames.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
-            vulkan_process.wait()
-            vulkan_process.communicate()
-        vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
-        return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0        
+        return  len(fetchContentsFromCommand("vulkaninfo | grep 'Video Profiles'")) > 0
 
     def quit(instance):
         unset_lc_all_process = subprocess.Popen(Filenames.unset_LC_ALL_conmand,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
