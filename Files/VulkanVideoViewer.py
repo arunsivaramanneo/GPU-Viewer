@@ -5,7 +5,7 @@ gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
 from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4,fetchContentsFromCommand
-
+from itertools import islice
 
 Adw.init()
 
@@ -20,11 +20,11 @@ def VulkanVideo(videoTab):
 
     def vProfiles(gpu):
         
-        vulkanProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./"%(gpu,gpu+1))
+        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ "%(gpu,gpu+1))
 
-        vkVideoTab_Store.remove_all()
+        vkVideoProfilesTab_Store.remove_all()
         
-        for i in vulkanProfiles:
+        for i in vulkanVideoProfiles:
             if "count" in i:
                 toprow = ExpandDataObject(i.replace("count =",''),"")
             elif '==' in i:
@@ -33,14 +33,40 @@ def VulkanVideo(videoTab):
                 iter = ExpandDataObject(i,"")
                 toprow.children.append(iter)
             
-        vkVideoTab_Store.append(toprow)
+        vkVideoProfilesTab_Store.append(toprow)
 
+    def vCapabilities(gpu):
 
+        vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ "%(gpu,gpu+1))
+
+        toprow = []; iter = None
+        for i in vulkanVideoCapabilities:
+            if "support" in i:
+                if iter == None:
+                    toprow = ExpandDataObject(i,"")
+                else:
+                    vkVideoCapabilitiesTab_Store.append(toprow)
+                    toprow = ExpandDataObject(i,"")
+                iter = i
+                continue
+            elif "Video Profile" in i or "Video Formats" in i:
+                iter1 = ExpandDataObject(i,"")
+                toprow.children.append(iter1)
+                continue
+            elif '----' in i or '==' in i:
+                continue
+            else:
+                iter2 = ExpandDataObject(i,"")
+                iter1.children.append(iter2)
+            #    continue
+                
+        vkVideoCapabilitiesTab_Store.append(toprow)
 
     def radcall(combo,dummy):
         text = combo.props.selected
         print(text)
         vProfiles(text)
+        vCapabilities(text)
 
         gpu_image = getGpuImage(gpu_list[text])
         image_renderer.set_pixbuf(gpu_image)
@@ -67,41 +93,117 @@ def VulkanVideo(videoTab):
     notebook.set_property("enable-popup", True)
     grid.attach(notebook, 0, 2, 1, 1)
 
+ # --------------------- Vulkan Video Profiles ---------------------------------------------------------------------
+
+    vkVideoProfilesTab = Gtk.Box(spacing=10)
+    vkVideoProfilesGrid = createSubTab(vkVideoProfilesTab,notebook,"Video Profiles")
+
+    vkVideoProfilesColumnView = Gtk.ColumnView()
+    vkVideoProfilesColumnView.props.show_row_separators = True
+    vkVideoProfilesColumnView.props.show_column_separators = False
+
+    factory_vkVideoProfiles = Gtk.SignalListItemFactory()
+    factory_vkVideoProfiles.connect("setup",setup_expander)
+    factory_vkVideoProfiles.connect("bind",bind_expander)
+
+    factory_vkVideoProfiles_value = Gtk.SignalListItemFactory()
+    factory_vkVideoProfiles_value.connect("setup",setup)
+    factory_vkVideoProfiles_value.connect("bind",bind1)
+
+    vkVideoProfilesSelection = Gtk.SingleSelection()
+    vkVideoProfilesTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    vkVideoModel = Gtk.TreeListModel.new(vkVideoProfilesTab_Store,False,True,add_tree_node)
+    vkVideoProfilesSelection.set_model(vkVideoModel)
+
+    vkVideoProfilesColumnView.set_model(vkVideoProfilesSelection)
+
+    vkVideoProfilesColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoProfiles)
+    vkVideoProfilesColumnLhs.set_resizable(True)
+    vkVideoProfilesColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoProfiles_value)
+    vkVideoProfilesColumnRhs.set_expand(True)
+
+    vkVideoProfilesColumnView.append_column(vkVideoProfilesColumnLhs)
+    vkVideoProfilesColumnView.append_column(vkVideoProfilesColumnRhs)
+
+    vkVideoProfilesScrollbar = create_scrollbar(vkVideoProfilesColumnView)
+    vkVideoProfilesGrid.attach(vkVideoProfilesScrollbar,0,0,1,1)
 
 
-    vkVideoTab = Gtk.Box(spacing=10)
-    vkVideoGrid = createSubTab(vkVideoTab,notebook,"Video Profiles")
+# -------------------- Vulkan Video Capabilities -------------------------------------------------------------------------------
 
-    vkVideoColumnView = Gtk.ColumnView()
-    vkVideoColumnView.props.show_row_separators = True
-    vkVideoColumnView.props.show_column_separators = False
 
-    factory_vkVideo = Gtk.SignalListItemFactory()
-    factory_vkVideo.connect("setup",setup_expander)
-    factory_vkVideo.connect("bind",bind_expander)
+    vkVideoCapabilitiesTab = Gtk.Box(spacing=10)
+    vkVideoCapabilitiesGrid = createSubTab(vkVideoCapabilitiesTab,notebook,"Video Capabilities")
 
-    factory_vkVideo_value = Gtk.SignalListItemFactory()
-    factory_vkVideo_value.connect("setup",setup)
-    factory_vkVideo_value.connect("bind",bind1)
+    vkVideoCapabilitiesColumnView = Gtk.ColumnView()
+    vkVideoCapabilitiesColumnView.props.show_row_separators = True
+    vkVideoCapabilitiesColumnView.props.show_column_separators = False
 
-    vkVideoSelection = Gtk.SingleSelection()
-    vkVideoTab_Store = Gio.ListStore.new(ExpandDataObject)
+    factory_vkVideoCapabilities = Gtk.SignalListItemFactory()
+    factory_vkVideoCapabilities.connect("setup",setup_expander)
+    factory_vkVideoCapabilities.connect("bind",bind_expander)
 
-    vkVideoModel = Gtk.TreeListModel.new(vkVideoTab_Store,False,True,add_tree_node)
-    vkVideoSelection.set_model(vkVideoModel)
+    factory_vkVideoCapabilities_value = Gtk.SignalListItemFactory()
+    factory_vkVideoCapabilities_value.connect("setup",setup)
+    factory_vkVideoCapabilities_value.connect("bind",bind1)
 
-    vkVideoColumnView.set_model(vkVideoSelection)
+    vkVideoCapabilitiesSelection = Gtk.SingleSelection()
+    vkVideoCapabilitiesTab_Store = Gio.ListStore.new(ExpandDataObject)
 
-    vkVideoColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideo)
-    vkVideoColumnLhs.set_resizable(True)
-    vkVideoColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideo_value)
-    vkVideoColumnRhs.set_expand(True)
+    vkVideoModel = Gtk.TreeListModel.new(vkVideoCapabilitiesTab_Store,False,True,add_tree_node)
+    vkVideoCapabilitiesSelection.set_model(vkVideoModel)
 
-    vkVideoColumnView.append_column(vkVideoColumnLhs)
-    vkVideoColumnView.append_column(vkVideoColumnRhs)
+    vkVideoCapabilitiesColumnView.set_model(vkVideoCapabilitiesSelection)
 
-    vkVideoScrollbar = create_scrollbar(vkVideoColumnView)
-    vkVideoGrid.attach(vkVideoScrollbar,0,0,1,1)
+    vkVideoCapabilitiesColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoCapabilities)
+    vkVideoCapabilitiesColumnLhs.set_resizable(True)
+    vkVideoCapabilitiesColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoCapabilities_value)
+    vkVideoCapabilitiesColumnRhs.set_expand(True)
+
+    vkVideoCapabilitiesColumnView.append_column(vkVideoCapabilitiesColumnLhs)
+    vkVideoCapabilitiesColumnView.append_column(vkVideoCapabilitiesColumnRhs)
+
+    vkVideoCapabilitiesScrollbar = create_scrollbar(vkVideoCapabilitiesColumnView)
+    vkVideoCapabilitiesGrid.attach(vkVideoCapabilitiesScrollbar,0,0,1,1)
+
+
+# -------------------- Vulkan Video Formats -------------------------------------------------------------------------------
+
+    vkVideoFormatsTab = Gtk.Box(spacing=10)
+    vkVideoFormatsGrid = createSubTab(vkVideoFormatsTab,notebook,"Video Formats")
+
+    vkVideoFormatsColumnView = Gtk.ColumnView()
+    vkVideoFormatsColumnView.props.show_row_separators = True
+    vkVideoFormatsColumnView.props.show_column_separators = False
+
+    factory_vkVideoFormats = Gtk.SignalListItemFactory()
+    factory_vkVideoFormats.connect("setup",setup_expander)
+    factory_vkVideoFormats.connect("bind",bind_expander)
+
+    factory_vkVideoFormats_value = Gtk.SignalListItemFactory()
+    factory_vkVideoFormats_value.connect("setup",setup)
+    factory_vkVideoFormats_value.connect("bind",bind1)
+
+    vkVideoFormatsSelection = Gtk.SingleSelection()
+    vkVideoFormatsTab_Store = Gio.ListStore.new(ExpandDataObject)
+
+    vkVideoModel = Gtk.TreeListModel.new(vkVideoFormatsTab_Store,False,True,add_tree_node)
+    vkVideoFormatsSelection.set_model(vkVideoModel)
+
+    vkVideoFormatsColumnView.set_model(vkVideoFormatsSelection)
+
+    vkVideoFormatsColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoFormats)
+    vkVideoFormatsColumnLhs.set_resizable(True)
+    vkVideoFormatsColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoFormats_value)
+    vkVideoFormatsColumnRhs.set_expand(True)
+
+    vkVideoFormatsColumnView.append_column(vkVideoFormatsColumnLhs)
+    vkVideoFormatsColumnView.append_column(vkVideoFormatsColumnRhs)
+
+    vkVideoFormatsScrollbar = create_scrollbar(vkVideoFormatsColumnView)
+    vkVideoFormatsGrid.attach(vkVideoFormatsScrollbar,0,0,1,1)
+
 
     DevicesGrid = Gtk.Grid()
 #    videoTab.append(DevicesGrid)
