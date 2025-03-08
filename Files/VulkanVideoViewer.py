@@ -20,15 +20,13 @@ def VulkanVideo(videoTab):
 
     def vProfiles(gpu):
         
-        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ "%(gpu,gpu+1))
+        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
 
         vkVideoProfilesTab_Store.remove_all()
         
         for i in vulkanVideoProfiles:
             if "count" in i:
                 toprow = ExpandDataObject(i.replace("count =",''),"")
-            elif '==' in i:
-                continue
             else:
                 iter = ExpandDataObject(i,"")
                 toprow.children.append(iter)
@@ -37,27 +35,40 @@ def VulkanVideo(videoTab):
 
     def vCapabilities(gpu):
 
-        vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ "%(gpu,gpu+1))
-
-        toprow = []; iter = None
+        vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
+        toprow = []; group = None
         for i in vulkanVideoCapabilities:
             if "support" in i:
-                if iter == None:
+                if group == None:
                     toprow = ExpandDataObject(i,"")
                 else:
                     vkVideoCapabilitiesTab_Store.append(toprow)
-                    toprow = ExpandDataObject(i,"")
-                iter = i
+                    toprow = ExpandDataObject(i.strip(""),"")
+                group = i
                 continue
             elif "Video Profile" in i or "Video Formats" in i:
-                iter1 = ExpandDataObject(i,"")
+                iter1 = ExpandDataObject(i.strip(" "),"")
                 toprow.children.append(iter1)
                 continue
-            elif '----' in i or '==' in i:
-                continue
-            else:
-                iter2 = ExpandDataObject(i,"")
+            elif "\t" in i and "\t\t" not in i:
+                iter2 = ExpandDataObject(i.strip("\t"),"")
                 iter1.children.append(iter2)
+                continue
+            elif "\t\t" in i and "\t\t\t" not in i:
+                iter3 = ExpandDataObject(i.strip("\t"),"")
+                iter2.children.append(iter3)
+                continue
+            elif "\t\t\t" in i and "\t\t\t\t" not in i:
+                iter4 = ExpandDataObject(i.strip("\t"),"")
+                iter3.children.append(iter4)
+                continue            
+            elif "\t\t\t\t" in i and "\t\t\t\t\t" not in i:
+                iter5 = ExpandDataObject(i.strip("\t"),"")
+                iter4.children.append(iter5)
+                continue    
+            else:
+                iter6 = ExpandDataObject(i.strip("\t"),"")
+                iter5.children.append(iter6)
             #    continue
                 
         vkVideoCapabilitiesTab_Store.append(toprow)
