@@ -1179,19 +1179,17 @@ def Vulkan(tab2):
 
     def radcall(combo,dummy):
         text = combo.props.selected
-        for i in range(len(gpu_list)):
-            if text == i:
-                Devices(text)
-                Limits(text)
-                Features(text)
-                Extensions(text)
-                Formats(text)
-                MemoryTypes(text)
-                Queues(text)
-                Surface(text)
+        Devices(text)
+        Limits(text)
+        Features(text)
+        Extensions(text)
+        Formats(text)
+        MemoryTypes(text)
+        Queues(text)
+        Surface(text)
        #         Groups(text)
-            gpu_image = getGpuImage(gpu_list[text])
-            image_renderer.set_pixbuf(gpu_image)
+        gpu_image = getGpuImage(gpu_list[text])
+        image_renderer.set_pixbuf(gpu_image)
         Instance()
 
 
