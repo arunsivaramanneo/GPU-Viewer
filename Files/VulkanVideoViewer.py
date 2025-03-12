@@ -20,16 +20,14 @@ def VulkanVideo(videoTab):
 
     def vProfiles(gpu):
         
-        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
+        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep support: "%(gpu,gpu+1))
 
         vkVideoProfilesTab_Store.remove_all()
-        
+        toprow = ExpandDataObject("Video Profiles: %s" %str(len(vulkanVideoProfiles)),"")
         for i in vulkanVideoProfiles:
-            if "count" in i:
-                toprow = ExpandDataObject(i.replace("count =",''),"")
-            else:
-                iter = ExpandDataObject(i,"")
-                toprow.children.append(iter)
+            iter = ExpandDataObject(i.replace(":",""),"")
+            
+            toprow.children.append(iter)
             
         vkVideoProfilesTab_Store.append(toprow)
 
@@ -37,6 +35,9 @@ def VulkanVideo(videoTab):
 
         vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
         toprow = []; group = None
+
+        vkVideoCapabilitiesTab_Store.remove_all()
+
         for i in vulkanVideoCapabilities:
             if "support" in i:
                 if group == None:
