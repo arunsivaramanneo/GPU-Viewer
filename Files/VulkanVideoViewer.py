@@ -36,15 +36,21 @@ def VulkanVideo(videoTab):
     def vDefinitions(gpu):
 
         vulkanVideoProfileDefinition = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
-        
+        vulkanVideoProfileDefinitionLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
+        vulkanVideoProfileDefinitionRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=,:].* | grep -o ' .*' "%(gpu,gpu+1))
 
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
         vulkanVideoProfiles.append("")
 
         vkVideoProfileDefinitionTab_Store.remove_all()
         toprow = []; group = None
-        j = 0
+        j = 0;i =0 ;k = 0
         for line in vulkanVideoProfileDefinition:
+            if '=' in line and "Video Profile Definition" not in line:
+                rhs = vulkanVideoProfileDefinitionRHS[k].replace('count =','')
+                k = k + 1
+            else:
+                rhs = ""
             if "Video Profile Definition" in line:
                 if group == None:
                     iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
@@ -52,43 +58,56 @@ def VulkanVideo(videoTab):
                     vkVideoProfileDefinitionTab_Store.append(iter1)
                     iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
                 j = j + 1
+                i = i + 1
                 group = line
                 continue
             elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(line.strip("\t"),"")
+                iter2 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
                 iter1.children.append(iter2)
+                i = i + 1
                 continue
             elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(line.strip("\t"),"")
+                iter3 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
                 iter2.children.append(iter3)
+                i = i + 1
                 continue
             elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(line.strip("\t"),"")
+                iter4 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
                 iter3.children.append(iter4)
+                i = i + 1
                 continue            
             elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(line.strip("\t"),"")
+                iter5 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
                 iter4.children.append(iter5)
+                i = i + 1
                 continue    
             else:
-                iter6 = ExpandDataObject(line.strip("\t"),"")
+                iter6 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
                 iter5.children.append(iter6)
-    #        #    continue
+                i = i + 1
+    #        #   continue
+            
                 
         vkVideoProfileDefinitionTab_Store.append(iter1)
 
     def vCapabitlies(gpu):
 
         vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
-        
+        vulkanVideoCapabilitiesLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
+        vulkanVideoCapabilitiesRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=,:].* | grep -o ' .*' "%(gpu,gpu+1))
 
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
         vulkanVideoProfiles.append("")
 
         vkVideoCapabilitiesTab_Store.remove_all()
         toprow = []; group = None
-        j = 0
+        j = 0;i = 0 ; k = 0
         for line in vulkanVideoCapabilities:
+            if '=' in line:
+                rhs = vulkanVideoCapabilitiesRHS[k].replace('count =','')
+                k = k + 1
+            else:
+                rhs = ""
             if "Video Profile Capabilities" in line:
                 if group == None:
                     iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
@@ -96,27 +115,33 @@ def VulkanVideo(videoTab):
                     vkVideoCapabilitiesTab_Store.append(iter1)
                     iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
                 j = j + 1
+                i = i + 1
                 group = line
                 continue
             elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(line.strip("\t"),"")
+                iter2 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
                 iter1.children.append(iter2)
+                i = i + 1
                 continue
             elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(line.strip("\t"),"")
+                iter3 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
                 iter2.children.append(iter3)
+                i = i + 1
                 continue
             elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(line.strip("\t"),"")
+                iter4 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
                 iter3.children.append(iter4)
+                i = i + 1
                 continue            
             elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(line.strip("\t"),"")
+                iter5 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
                 iter4.children.append(iter5)
+                i = i + 1
                 continue    
             else:
-                iter6 = ExpandDataObject(line.strip("\t"),"")
+                iter6 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
                 iter5.children.append(iter6)
+                i = i + 1
     #        #    continue
                 
         vkVideoCapabilitiesTab_Store.append(iter1)
@@ -124,16 +149,22 @@ def VulkanVideo(videoTab):
     def vFormats(gpu):
 
         vulkanVideoFormats = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' "%(gpu,gpu+1))
-        
+        vulkanVideoFormatsLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
+        vulkanVideoFormatsRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' | grep -o [=,:].* | grep -o ' .*' "%(gpu,gpu+1))
 
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
         vulkanVideoProfiles.append("")
 
         vkVideoFormatsTab_Store.remove_all()
         toprow = []; group = None
-        j = 1
+        j = 1;i = 0; k = 0;
         toprow = ExpandDataObject(vulkanVideoProfiles[0].replace("placeholder = ",""),"")
         for line in vulkanVideoFormats:
+            if '=' in line:
+                rhs = vulkanVideoFormatsRHS[k].replace('count =','')
+                k = k + 1
+            else:
+                rhs = ""
             if  line.strip(":") in vulkanVideoProfiles[j].replace("placeholder = ",""):
                 if group == None:
                     vkVideoFormatsTab_Store.append(toprow)
@@ -142,31 +173,38 @@ def VulkanVideo(videoTab):
                     vkVideoFormatsTab_Store.append(toprow)
                     toprow = ExpandDataObject(vulkanVideoProfiles[j].replace("placeholder = ",""),"")
                 j = j + 1
+                i = i + 1
                 group = line
                 continue
             elif "Video Formats" in line:
-                iter1 = ExpandDataObject(line.replace(":",""),"")
+                iter1 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 toprow.children.append(iter1)
+                i = i + 1
                 continue
             elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(line.strip("\t"),"")
+                iter2 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 iter1.children.append(iter2)
+                i = i + 1
                 continue
             elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(line.strip("\t"),"")
+                iter3 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 iter2.children.append(iter3)
+                i = i + 1
                 continue
             elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(line.strip("\t"),"")
+                iter4 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 iter3.children.append(iter4)
+                i = i + 1
                 continue            
             elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(line.strip("\t"),"")
+                iter5 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 iter4.children.append(iter5)
+                i = i + 1
                 continue    
             else:
-                iter6 = ExpandDataObject(line.strip("\t"),"")
+                iter6 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
                 iter5.children.append(iter6)
+                i = i + 1
     #        #    continue
                 
         vkVideoFormatsTab_Store.append(toprow)
@@ -268,7 +306,7 @@ def VulkanVideo(videoTab):
 
     vkVideoProfileDefinitionColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoProfileDefinition)
     vkVideoProfileDefinitionColumnLhs.set_resizable(True)
-    vkVideoProfileDefinitionColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoProfileDefinition_value)
+    vkVideoProfileDefinitionColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_vkVideoProfileDefinition_value)
     vkVideoProfileDefinitionColumnRhs.set_expand(True)
 
     vkVideoProfileDefinitionColumnView.append_column(vkVideoProfileDefinitionColumnLhs)
@@ -306,7 +344,7 @@ def VulkanVideo(videoTab):
 
     vkVideoCapabilitiesColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoCapabilities)
     vkVideoCapabilitiesColumnLhs.set_resizable(True)
-    vkVideoCapabilitiesColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoCapabilities_value)
+    vkVideoCapabilitiesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_vkVideoCapabilities_value)
     vkVideoCapabilitiesColumnRhs.set_expand(True)
 
     vkVideoCapabilitiesColumnView.append_column(vkVideoCapabilitiesColumnLhs)
@@ -343,7 +381,7 @@ def VulkanVideo(videoTab):
 
     vkVideoFormatsColumnLhs = Gtk.ColumnViewColumn.new("Details",factory_vkVideoFormats)
     vkVideoFormatsColumnLhs.set_resizable(True)
-    vkVideoFormatsColumnRhs = Gtk.ColumnViewColumn.new("",factory_vkVideoFormats_value)
+    vkVideoFormatsColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_vkVideoFormats_value)
     vkVideoFormatsColumnRhs.set_expand(True)
 
     vkVideoFormatsColumnView.append_column(vkVideoFormatsColumnLhs)
