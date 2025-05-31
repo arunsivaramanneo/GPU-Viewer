@@ -429,7 +429,7 @@ def openCL(tab):
     # Device Memory Details ...
 
     DeviceMemoryImageTab = Gtk.Box(spacing=10)
-    DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory & Image Details")
+    DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory  \n \t &\nImage Details")
 
     deviceMemoryImageColumnView = Gtk.ColumnView()
     deviceMemoryImageColumnView.props.show_row_separators = True
@@ -468,7 +468,7 @@ def openCL(tab):
 
     DeviceQueueExecutionTab = Gtk.Box(spacing=10)
     DeviceQueueExecutionGrid = createSubTab(DeviceQueueExecutionTab, oclNotebook,
-                                            "Device Queue & Execution Capabilities")
+                                            "Queue Capabilities  \n \t\t &\nExecution Capabilities")
 
     deviceQueueExecutionColumnView = Gtk.ColumnView()
     deviceQueueExecutionColumnView.props.show_row_separators = True
