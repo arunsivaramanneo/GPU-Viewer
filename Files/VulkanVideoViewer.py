@@ -211,7 +211,7 @@ def VulkanVideo(videoTab):
 
     def radcall(combo,dummy):
         text = combo.props.selected_item
-        for gpu in range(len(gpu_list)-1):
+        for gpu in range(len(gpu_list)):
             if gpu_list[gpu] in text.get_string():
                 vProfiles(gpu)
                 vDefinitions(gpu)
@@ -408,7 +408,7 @@ def VulkanVideo(videoTab):
     gpu_DropDown_list = Gtk.StringList()
     gpu_DropDown.set_model(gpu_DropDown_list)
     gpu_DropDown.connect('notify::selected-item',radcall)
-    for i in range(len(gpu_list)-1):
+    for i in range(len(gpu_list)):
         if (fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | grep 'Video Profiles'"%(i,i+1))):
             gpu_DropDown_list.append(gpu_list[i])
 
