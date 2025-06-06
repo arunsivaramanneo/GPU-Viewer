@@ -1,6 +1,16 @@
 ﻿# GPU-Viewer
 [![Donate](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)](https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q)
 
+## Testimonials
+
+### Softpedia
+
+#### "_GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate._" - Review by Vladimir Ciobica
+
+
+### Linux Magazine USA (Issue 254)
+
+#### "GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate." - BY GRAHAM MORRISON
 
 ### A front-end to glxinfo, vulkaninfo, clinfo and es2_info.
 
@@ -20,16 +30,6 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 ![Image](https://github.com/user-attachments/assets/55dc9395-7891-4190-bc04-44c936388b0b)
 
-## Testimonials
-
-### Softpedia
-
-#### "_GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate._" - Review by Vladimir Ciobica
-
-
-### Linux Magazine USA (Issue 254)
-
-#### "_GPU-Viewer is a clever combination of pre-existing tools, including glxinfo, vulkaninfo and clinfo_" - BY GRAHAM MORRISON
 
 ## INSTALLATION STEPS
 
@@ -91,9 +91,9 @@ The installer should be able to take care of this dependency in Debian based dis
 
 ## DEVELOPMENT/TEST ENVIRONMENT
 
-1. Operating System : Ubuntu 24.04
-2. Desktop : Gnome 46
-3. Kernel : 6.18.x-xx
+1. Operating System : Fedora 42
+2. Desktop : Gnome 48
+3. Kernel : 6.14.x-xx
 4. IDE : VSCode
 
 
