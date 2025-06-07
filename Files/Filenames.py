@@ -168,7 +168,7 @@ fetch_platform_details_rhs_command = "cat %s | grep -o Platform.* | awk '{gsub(/
 opencl_device_details_file = "/tmp/gpu-viewer/oclDeviceDetails.txt"
 
 fetch_device_details_lhs_command = "cat %s | awk '{gsub(/     .*/,'True');print}'" %(opencl_device_details_file)
-fetch_device_details_rhs_command = "cat %s | awk '{print substr($0,51,500);}'" %(opencl_device_details_file)
+fetch_device_details_rhs_command = "cat %s | awk '{print substr($0,51,10000);}'" %(opencl_device_details_file)
 
 opencl_device_memory_and_image_file = "/tmp/gpu-viewer/oclDeviceMemoryImageDetails.txt"
 
