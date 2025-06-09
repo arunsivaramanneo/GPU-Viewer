@@ -10,7 +10,9 @@
 
 ### Linux Magazine USA (Issue 254)
 
-#### "GPU-Viewer can potentially be a very useful application in the right hands. There's no denying the fact that it's not the most beginner-friendly application out there, but the fact that it manages to bundle three very complex CLI tools into one functional GUI is definitely something I appreciate." - BY GRAHAM MORRISON
+#### "_GPU-Viewer is a clever combination of pre-existing tools, including glxinfo, vulkaninfo and clinfo_" - BY GRAHAM MORRISON
+
+
 
 ### A front-end to glxinfo, vulkaninfo, clinfo and es2_info.
 
