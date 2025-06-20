@@ -21,16 +21,35 @@ def VulkanVideo(videoTab):
     def vProfiles(gpu):
         
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
-
-        vkVideoProfilesTab_Store.remove_all()
+        vulkanVideoProfilesUniq = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
-        for i in vulkanVideoProfiles:
-            if 'Video Profiles' in i:
-                toprow = ExpandDataObject(i.replace('count =',''),"")
-            else:
-                iter = ExpandDataObject(i.replace("placeholder =",""),"")
+        vkVideoProfilesTab_Store.remove_all()
+        vulkanVideoProfilesUniq.append("")
+        print(len(vulkanVideoProfilesUniq))
+        j = 0; k = 0 ; group = None
+        for line in vulkanVideoProfiles:
+            if 'Video Profiles' in line:
+                toprow = ExpandDataObject(line.replace('count =',''),"")
+                continue
+            if vulkanVideoProfilesUniq[j] in line and j <= len(vulkanVideoProfilesUniq) - 2:
+                print(vulkanVideoProfilesUniq[j])
+                iter = ExpandDataObject(vulkanVideoProfilesUniq[j].replace("placeholder =",""),"")
                 toprow.children.append(iter)
-            
+                iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
+                iter.children.append(iter2)
+                j = j + 1
+            else:
+                if vulkanVideoProfilesUniq[j] in line:
+                    iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
+                    iter.children.append(iter2)
+                    continue
+                else:
+                    iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
+                    iter.children.append(iter2)
+                #    iter.children.append(iter2)
+                    continue
+
+
         vkVideoProfilesTab_Store.append(toprow)
 
     def vDefinitions(gpu):
