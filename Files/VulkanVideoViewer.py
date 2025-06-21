@@ -21,7 +21,7 @@ def VulkanVideo(videoTab):
     def vProfiles(gpu):
         
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
-        vulkanVideoProfilesUniq = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
+        vulkanVideoProfilesUniq = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
         vulkanVideoProfilesCount = []
         for i in range(len(vulkanVideoProfilesUniq)):
