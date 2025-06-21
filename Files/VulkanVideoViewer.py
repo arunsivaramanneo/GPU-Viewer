@@ -23,17 +23,24 @@ def VulkanVideo(videoTab):
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
         vulkanVideoProfilesUniq = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
+        vulkanVideoProfilesCount = []
+        for i in range(len(vulkanVideoProfilesUniq)):
+            count = 0
+            for profile in vulkanVideoProfiles:
+                if vulkanVideoProfilesUniq[i] in profile:
+                    count = count + 1
+            vulkanVideoProfilesCount.append(count)
+
         vkVideoProfilesTab_Store.remove_all()
         vulkanVideoProfilesUniq.append("")
-        print(len(vulkanVideoProfilesUniq))
+
         j = 0; k = 0 ; group = None
         for line in vulkanVideoProfiles:
             if 'Video Profiles' in line:
                 toprow = ExpandDataObject(line.replace('count =',''),"")
                 continue
             if vulkanVideoProfilesUniq[j] in line and j <= len(vulkanVideoProfilesUniq) - 2:
-                print(vulkanVideoProfilesUniq[j])
-                iter = ExpandDataObject(vulkanVideoProfilesUniq[j].replace("placeholder =",""),"")
+                iter = ExpandDataObject(vulkanVideoProfilesUniq[j].replace("placeholder =","")+": %d" %vulkanVideoProfilesCount[j],"")
                 toprow.children.append(iter)
                 iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
                 iter.children.append(iter2)
@@ -62,7 +69,7 @@ def VulkanVideo(videoTab):
         vulkanVideoProfiles.append("")
 
         vkVideoProfileDefinitionTab_Store.remove_all()
-        toprow = []; group = None
+        group = None
         j = 0;i =0 ;k = 0
         for line in vulkanVideoProfileDefinition:
             if '=' in line and "Video Profile Definition" not in line:
