@@ -1292,7 +1292,14 @@ def Vulkan(tab2):
     limitsSearchEntry.set_property("placeholder_text","Type here to filter.....")
     limitsSearchEntry.connect("search-changed", _on_search_method_changed,filter_limits)
 #    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
-    limitsFrameSearch.set_child(limitsSearchEntry)
+    limitsSearchBar = Gtk.SearchBar()
+    limitsSearchBar.props.hexpand = True
+    limitsSearchBar.props.vexpand = False
+    limitsSearchBar.set_search_mode(False)
+    limitsSearchBar.connect_entry(limitsSearchEntry)
+    limitsSearchBar.set_child(limitsSearchEntry)
+    limitsSearchBar.set_key_capture_widget(notebook)
+    limitsFrameSearch.set_child(limitsSearchBar)
     LimitsGrid.attach(limitsFrameSearch,0,0,1,1)
     LimitsScrollbar = create_scrollbar(limitsColumnView)
     LimitsGrid.attach_next_to(LimitsScrollbar, limitsFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)

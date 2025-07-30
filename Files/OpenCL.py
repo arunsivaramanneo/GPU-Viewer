@@ -429,7 +429,7 @@ def openCL(tab):
     # Device Memory Details ...
 
     DeviceMemoryImageTab = Gtk.Box(spacing=10)
-    DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory  \n \t &\nImage Details")
+    DeviceMemoryImageGrid = createSubTab(DeviceMemoryImageTab, oclNotebook, "Device Memory  \n \t  &\nImage Details")
 
     deviceMemoryImageColumnView = Gtk.ColumnView()
     deviceMemoryImageColumnView.props.show_row_separators = True
