@@ -35,16 +35,19 @@ class SimpleApp(Adw.Application):
         super().__init__(application_id="com.example.SimpleApp", **kwargs)
         self.connect("activate", self.on_activate)    
 
-    def on_theme_button_clicked(self, button):
+    def _on_theme_toggled(self, switch, state):
         """
-        Handles the click event for the theme button to toggle between light and dark styles.
+        Callback to handle the theme switch state change.
+        It updates the Adw.StyleManager's color scheme based on the switch state.
         """
         style_manager = Adw.StyleManager.get_default()
-        if style_manager.get_color_scheme() == Adw.ColorScheme.PREFER_LIGHT:
-            style_manager.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
+        if state:
+            # Set to dark theme
+            style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
         else:
-            style_manager.set_color_scheme(Adw.ColorScheme.PREFER_LIGHT)
-            
+            # Set to light theme
+            style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+
     def on_activate(self, app):
         """
         Callback function for the 'activate' signal.
@@ -86,13 +89,29 @@ class SimpleApp(Adw.Application):
         self.header_bar = Adw.HeaderBar.new()
     #    self.header_bar.add_css_class(css_class="inline")
         # Set the view switcher as the custom title widget in the header bar
-        self.header_bar.set_title_widget(self.switcher)
 
-        theme_button = Gtk.Button.new()
-        theme_button.set_icon_name("display-dark-mode-symbolic")
-        theme_button.set_tooltip_text("Toggle light/dark theme")
-        theme_button.connect("clicked", self.on_theme_button_clicked)
-        self.header_bar.pack_end(theme_button)
+        theme_switch = Gtk.Switch.new()
+        theme_switch.set_valign(Gtk.Align.CENTER)
+        
+        # Get the current theme preference from Adw.StyleManager
+        style_manager = Adw.StyleManager.get_default()
+        prefer_dark_theme = style_manager.get_dark()
+        theme_switch.set_active(prefer_dark_theme)
+        
+        # Connect the switch's 'state-set' signal to a handler
+        theme_switch.connect("state-set", self._on_theme_toggled)
+
+        # Create an icon for the theme switch
+        theme_icon = Gtk.Image.new_from_icon_name("weather-clear-night-symbolic")
+        
+        # Create a box to hold the icon and the switch
+        theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
+        theme_box.set_halign(Gtk.Align.END)
+        theme_box.set_valign(Gtk.Align.CENTER)
+        theme_box.append(theme_icon)
+        theme_box.append(theme_switch)
+        self.header_bar.pack_end(theme_box)
+        self.header_bar.set_title_widget(self.switcher)
 
         
         # Create a main box to hold the header bar and the view stack

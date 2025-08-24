@@ -3,7 +3,7 @@ import gi
 gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
-from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
+from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw,GLib
 from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4
 
 
@@ -13,6 +13,13 @@ import const
 import Filenames
 import subprocess
 from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo
+
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    print("Warning: psutil library not found. Real-time CPU/RAM stats will not be displayed.")
 
 
 class DataObject(GObject.GObject):
@@ -237,14 +244,14 @@ def Vulkan(tab2):
         
     #    propertiesList = Gtk.StringList()
     #    propertiesDropdown.set_model(propertiesList)
-        propertiesList.remove_all()
-        propertiesList.append(DataObject("Show All Device Properties",""))
-        with open(Filenames.vulkan_device_properties_file, "r") as file1:
-            for i, line in enumerate(file1):
-                if "Vk" in line:
-                    text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
-                    text = text1[:-1]
-                    propertiesList.append(DataObject(text.strip("\n"),""))
+    #    propertiesList.remove_all()
+    #    propertiesList.append(DataObject("Show All Device Properties",""))
+    #    with open(Filenames.vulkan_device_properties_file, "r") as file1:
+    #        for i, line in enumerate(file1):
+    #            if "Vk" in line:
+    #                text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
+    #                text = text1[:-1]
+    #                propertiesList.append(DataObject(text.strip("\n"),""))
 
 
     def Limits(GPUname):
@@ -1175,40 +1182,101 @@ def Vulkan(tab2):
         search_text_widget = formats_dropdown_search.get_text()
         return search_text_widget.upper() in item.column1.upper()
 
-
+    def update_system_stats():
+        """
+        Updates the CPU, and RAM usage labels.
+        This function is called periodically by a GLib timeout.
+        """
+        if PSUTIL_AVAILABLE and cpu_label and ram_label:
+            # CPU and RAM usage as a percentage
+            cpu_percent = psutil.cpu_percent(interval=None) # Non-blocking call
+            ram_percent = psutil.virtual_memory().percent
+            cpu_label.set_label(f"CPU: {cpu_percent}%")
+            ram_label.set_label(f"RAM: {ram_percent}%")
+            
+        return True # Return True to keep the timeout running
 
     def radcall(combo,dummy):
         text = combo.props.selected
         Devices(text)
-        Limits(text)
-        Features(text)
-        Extensions(text)
-        Formats(text)
-        MemoryTypes(text)
-        Queues(text)
-        Surface(text)
+    #    Limits(text)
+    #    Features(text)
+    #    Extensions(text)
+    #    Formats(text)
+    #    MemoryTypes(text)
+    #    Queues(text)
+    #    Surface(text)
        #         Groups(text)
         gpu_image = getGpuImage(gpu_list[text])
         image_renderer.set_pixbuf(gpu_image)
-        Instance()
+    #    Instance()
 
 
     grid = Gtk.Grid()
     grid.set_row_spacing(10)
-    tab2.append(grid)
     DevicesFrame = Gtk.Frame()
     grid.attach(DevicesFrame,0,1,1,1)
 
-    notebook = Gtk.Notebook()
-    notebook.set_property("scrollable", True)
-    notebook.set_property("enable-popup", True)
-    grid.attach(notebook, 0, 2, 1, 1)
+
+    sidebar_store = Gtk.StringList.new([
+        "System Info", "Limits", "Properties", "Features", "Extensions", "Formats", "Memory Types", 
+        "Memory Heaps", "Queues", "Instance Extensions", "Instance Layers", "Surface"
+    ])
+
+    selection_model = Gtk.SingleSelection.new(sidebar_store)
+    selection_model.set_can_unselect(False)
+    
+    factory = Gtk.SignalListItemFactory.new()
+    def on_setup(factory, list_item):
+        label = Gtk.Label(xalign=0, hexpand=True)
+        label.set_margin_top(10)
+        label.set_margin_bottom(10)
+        # Add padding to the start and end of the labels
+        label.set_margin_start(10)
+        label.set_margin_end(10)
+        list_item.set_child(label)
+
+    def on_bind(factory, list_item):
+        label = list_item.get_child()
+        label.set_label(list_item.get_item().get_string())
+
+    # Corrected the function names in the connect calls
+    factory.connect("setup", on_setup)
+    factory.connect("bind", on_bind)
+    
+    list_view = Gtk.ListView(model=selection_model, factory=factory)
+
+    # Wrap the list view in a scrolled window to enable scrolling
+    scrolled_sidebar = Gtk.ScrolledWindow()
+    scrolled_sidebar.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    scrolled_sidebar.set_child(list_view)
+    
+    vulkan_content_stack = Gtk.Stack.new()
+    vulkan_content_stack.set_vexpand(True)
+    vulkan_content_stack.set_hexpand(True)
+
+    # Connect the sidebar selection to the content stack.
+    def on_sidebar_selection_changed(selection, position, items):
+        selected_item = selection.get_selected_item()
+        if selected_item:
+            title = selected_item.get_string()
+            vulkan_content_stack.set_visible_child_name(title.replace(" ", "_").lower())
+            print(f"Tab '{title}' was selected.")
+            
+    
+    selection_model.connect("selection-changed", on_sidebar_selection_changed)
+    
+    selection_model.set_selected(0)
+    
+    vulkan_split_view = Adw.NavigationSplitView.new()
+    vulkan_split_view.set_vexpand(True) # Added vertical expansion
+    vulkan_split_view.set_sidebar(Adw.NavigationPage.new(scrolled_sidebar, "Vulkan Sub-Tabs"))
+    vulkan_split_view.set_max_sidebar_width(15)
+    vulkan_split_view.set_content(Adw.NavigationPage.new(vulkan_content_stack, "Vulkan Content"))
 
     # ----------------Creating the Device Info Tab ------------
 
     DeviceTab = Gtk.Box(spacing=10)
-    DeviceGrid = createSubTab(DeviceTab, notebook, "Device")
-    DeviceGrid.set_row_spacing(3)
 
     deviceColumnView = Gtk.ColumnView()
     deviceColumnView.props.show_row_separators = True
@@ -1248,9 +1316,136 @@ def Vulkan(tab2):
     deviceColumnView.append_column(deviceColumnRhs2)
 
     DeviceScrollbar = create_scrollbar(deviceColumnView)
-    DeviceGrid.attach(DeviceScrollbar,0,0,1,1)
+#    DeviceGrid.attach(DeviceScrollbar,0,0,1,1)
+    DeviceTab.append(DeviceScrollbar)
 
-    # ------------ Creating the Limits Tab -------------------------------------------
+    propertiesColumnView = Gtk.ColumnView()
+    propertiesColumnView.props.show_row_separators = True
+    propertiesColumnView.props.show_column_separators = False
+
+    factory_properties = Gtk.SignalListItemFactory()
+    factory_properties.connect("setup",setup_expander)
+    factory_properties.connect("bind",bind_expander)
+
+    factory_properties_value = Gtk.SignalListItemFactory()
+    factory_properties_value.connect("setup",setup)
+    factory_properties_value.connect("bind",bind1)
+
+    propertiesSelection = Gtk.SingleSelection()
+    PropertiesTab_Store = Gio.ListStore.new(ExpandDataObject)
+    filterSortPropertiesStore = Gtk.FilterListModel(model=PropertiesTab_Store)
+    filter_properties = Gtk.CustomFilter.new(_do_filter_properties_view, filterSortPropertiesStore)
+    filterSortPropertiesStore.set_filter(filter_properties)
+
+    propertiesModel = Gtk.TreeListModel.new(filterSortPropertiesStore,False,True,add_tree_node)
+    propertiesSelection.set_model(propertiesModel)
+
+    propertiesColumnView.set_model(propertiesSelection)
+
+    propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Properties",factory_properties)
+    propertiesColumnLhs.set_resizable(True)
+    propertiesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_properties_value)
+    propertiesColumnRhs.set_expand(True)
+
+    propertiesColumnView.append_column(propertiesColumnLhs)
+    propertiesColumnView.append_column(propertiesColumnRhs)
+
+    factory_properties_dropdown_value = Gtk.SignalListItemFactory()
+    factory_properties_dropdown_value.connect("setup",setup)
+    factory_properties_dropdown_value.connect("bind",bind_column1)
+
+    propertiesTab = Gtk.Box(spacing=10)
+#    propertiesList = Gtk.StringList()
+
+    propertiesList = Gio.ListStore.new(DataObject)
+    filterPropertiesStoreDropdown = Gtk.FilterListModel(model=propertiesList)
+    filter_properties_dropdown = Gtk.CustomFilter.new(_do_filter_properties_dropdown_view, filterPropertiesStoreDropdown)
+    filterPropertiesStoreDropdown.set_filter(filter_properties_dropdown)
+    propertiesDropdown = Gtk.DropDown(model = filterPropertiesStoreDropdown,factory=factory_properties_dropdown_value)
+    propertiesDropdown.set_enable_search(True)
+    properties_dropdown_search = _get_search_entry_widget(propertiesDropdown)
+    properties_dropdown_search.connect('search-changed',_on_search_method_changed,filter_properties_dropdown)
+ #   propertiesDropdown.set_model(propertiesList)
+    propertiesDropdown.connect('notify::selected-item',selectProperties)
+    setMargin(propertiesDropdown,2,1,2)
+#    propertiesGrid.add(propertiesCombo)
+
+    propertySearchEntry = Gtk.SearchEntry()
+    propertySearchEntry.set_property("placeholder_text","Type here to filter.....")
+    propertySearchEntry.connect("search-changed", _on_search_method_changed,filter_properties)
+    propertiesScrollbar = create_scrollbar(propertiesColumnView)
+    propertiesTab.append(propertiesScrollbar)
+
+
+
+    for name in sidebar_store:
+        print(name.get_string())
+        if name.get_string() == "System Info":
+            vulkan_content_stack.add_titled(DeviceTab, "Limits","Limits")
+        if name.get_string() == "Properties":
+            vulkan_content_stack.add_titled(propertiesTab,"Properties","properties")
+
+    #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
+
+    DevicesGrid = Gtk.Grid()
+    DevicesGrid.set_row_spacing(10)
+#    DevicesGrid.set_column_spacing(20)
+    DevicesFrame.set_child(DevicesGrid)
+
+    gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
+
+    availableDevices = Gtk.Label()
+    setMargin(availableDevices,350,10,10)
+    gpu_image = Gtk.Image()
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
+    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
+
+    device_selection_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 12)
+    device_selection_box.set_halign(Gtk.Align.CENTER)
+    device_selection_box.set_margin_top(20)
+    device_selection_box.set_margin_bottom(20)
+
+    device_label = Gtk.Label(label="Available Device(s)")
+    device_label.set_margin_start(10)
+    device_label.set_margin_end(6)
+    
+    # --- End new code for text parsing for dropdown ---
+    
+    gpu_DropDown = Gtk.DropDown()
+    gpu_DropDown_list = Gtk.StringList()
+    gpu_DropDown.set_model(gpu_DropDown_list)
+    gpu_DropDown.set_margin_start(6)
+    gpu_DropDown.set_margin_end(10)
+    gpu_DropDown.add_css_class("raised")
+
+    gpu_DropDown.connect('notify::selected-item',radcall)
+    for i in gpu_list:
+        gpu_DropDown_list.append(i)
+    
+    # Add the label and dropdown to the selection box
+    device_selection_box.append(device_label)
+    device_selection_box.append(gpu_DropDown)
+
+    
+    # Connect the dropdown's selection change to our handler
+   # device_dropdown.connect("notify::selected", on_device_selected)
+
+    # Add real-time CPU and RAM usage labels
+    cpu_label = Gtk.Label(label="CPU: N/A")
+    ram_label = Gtk.Label(label="RAM: N/A")
+
+    # Add labels to the device selection box with some spacing
+    device_selection_box.append(image_renderer)
+    device_selection_box.append(cpu_label)
+    device_selection_box.append(ram_label)
+
+    # Start the periodic update for system stats
+    GLib.timeout_add_seconds(1, update_system_stats)
+    tab2.append(device_selection_box)
+    tab2.append(vulkan_split_view)
+
+
+def create_limits_column(_on_search_method_changed, _do_filter_limits_view, notebook):
     LimitsTab = Gtk.Box(spacing=10)
     LimitsGrid = createSubTab(LimitsTab, notebook, "Limits")
     LimitsGrid.set_row_spacing(3)
@@ -1303,632 +1498,5 @@ def Vulkan(tab2):
     LimitsGrid.attach(limitsFrameSearch,0,0,1,1)
     LimitsScrollbar = create_scrollbar(limitsColumnView)
     LimitsGrid.attach_next_to(LimitsScrollbar, limitsFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
-
-#    LimitsTab_Store_filter.set_visible_func(searchLimitsTree, data=TreeLimits)
-
-    propertiesColumnView = Gtk.ColumnView()
-    propertiesColumnView.props.show_row_separators = True
-    propertiesColumnView.props.show_column_separators = False
-
-    factory_properties = Gtk.SignalListItemFactory()
-    factory_properties.connect("setup",setup_expander)
-    factory_properties.connect("bind",bind_expander)
-
-    factory_properties_value = Gtk.SignalListItemFactory()
-    factory_properties_value.connect("setup",setup)
-    factory_properties_value.connect("bind",bind1)
-
-    propertiesSelection = Gtk.SingleSelection()
-    PropertiesTab_Store = Gio.ListStore.new(ExpandDataObject)
-    filterSortPropertiesStore = Gtk.FilterListModel(model=PropertiesTab_Store)
-    filter_properties = Gtk.CustomFilter.new(_do_filter_properties_view, filterSortPropertiesStore)
-    filterSortPropertiesStore.set_filter(filter_properties)
-
-    propertiesModel = Gtk.TreeListModel.new(filterSortPropertiesStore,False,True,add_tree_node)
-    propertiesSelection.set_model(propertiesModel)
-
-    propertiesColumnView.set_model(propertiesSelection)
-
-    propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Properties",factory_properties)
-    propertiesColumnLhs.set_resizable(True)
-    propertiesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_properties_value)
-    propertiesColumnRhs.set_expand(True)
-
-    propertiesColumnView.append_column(propertiesColumnLhs)
-    propertiesColumnView.append_column(propertiesColumnRhs)
-
-    factory_properties_dropdown_value = Gtk.SignalListItemFactory()
-    factory_properties_dropdown_value.connect("setup",setup)
-    factory_properties_dropdown_value.connect("bind",bind_column1)
-
-    propertiesTab = Gtk.Box(spacing=10)
-    propertiesGrid = createSubTab(propertiesTab, notebook, "Properties")
-    propertiesGrid.set_row_spacing(5)
-#    propertiesList = Gtk.StringList()
-
-    propertiesList = Gio.ListStore.new(DataObject)
-    filterPropertiesStoreDropdown = Gtk.FilterListModel(model=propertiesList)
-    filter_properties_dropdown = Gtk.CustomFilter.new(_do_filter_properties_dropdown_view, filterPropertiesStoreDropdown)
-    filterPropertiesStoreDropdown.set_filter(filter_properties_dropdown)
-    propertiesDropdown = Gtk.DropDown(model = filterPropertiesStoreDropdown,factory=factory_properties_dropdown_value)
-    propertiesDropdown.set_enable_search(True)
-    properties_dropdown_search = _get_search_entry_widget(propertiesDropdown)
-    properties_dropdown_search.connect('search-changed',_on_search_method_changed,filter_properties_dropdown)
- #   propertiesDropdown.set_model(propertiesList)
-    propertiesDropdown.connect('notify::selected-item',selectProperties)
-    setMargin(propertiesDropdown,2,1,2)
-#    propertiesGrid.add(propertiesCombo)
-
-    propertySearchEntry = Gtk.SearchEntry()
-    propertySearchEntry.set_property("placeholder_text","Type here to filter.....")
-    propertySearchEntry.connect("search-changed", _on_search_method_changed,filter_properties)
-    propertiesGrid.attach(propertySearchEntry,0,0,12,1)
-    propertiesGrid.attach_next_to(propertiesDropdown,propertySearchEntry,Gtk.PositionType.RIGHT,3,1)
-    propertiesScrollbar = create_scrollbar(propertiesColumnView)
-    propertiesGrid.attach_next_to(propertiesScrollbar, propertySearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
-
-#    SparseTab_Store_filter.set_visible_func(searchPropertiesTree, data=TreeSparse)
-
-    # -----------------Creating the Features Tab-----------------
-
-    FeatureTab = Gtk.Box(spacing=10)
-    FeaturesGrid = createSubTab(FeatureTab, notebook, "Features")
-    #   FeaturesGrid.set_row_spacing(3)
-
-    featuresColumnView = Gtk.ColumnView()
-    featuresColumnView.props.show_row_separators = True
-    featuresColumnView.props.single_click_activate = False
-    featuresColumnView.props.show_column_separators = False
-    factoryFeaturesLhs = Gtk.SignalListItemFactory()
-    factoryFeaturesLhs.connect("setup", setup)
-    factoryFeaturesLhs.connect("bind", bind_column1)
-    factoryFeaturesRhs = Gtk.SignalListItemFactory()
-    factoryFeaturesRhs.connect("setup", setup)
-    factoryFeaturesRhs.connect("bind", bind_column2)
-
-    featureColumn1 = Gtk.ColumnViewColumn.new("Device Features")
-    featureColumn1.set_factory(factoryFeaturesLhs)
-    featureColumn1.set_resizable(True)
-    featuresColumnView.append_column(featureColumn1)
-
-    featureColumn2 = Gtk.ColumnViewColumn.new("Value")
-    featureColumn2.set_factory(factoryFeaturesRhs)
-    featureColumn2.set_expand(True)
-    featuresColumnView.append_column(featureColumn2)
-
-
-    featureSelection = Gtk.SingleSelection()
-    FeatureTab_Store = Gio.ListStore.new(DataObject)
-    filterSortFeatureListStore = Gtk.FilterListModel(model=FeatureTab_Store)
-    filter_features = Gtk.CustomFilter.new(_do_filter_feature_view, filterSortFeatureListStore)
-    filterSortFeatureListStore.set_filter(filter_features)
-    featureSelection.set_model(filterSortFeatureListStore)
-    featuresColumnView.set_model(featureSelection)
-
-    factory_features_dropdown_value = Gtk.SignalListItemFactory()
-    factory_features_dropdown_value.connect("setup",setup)
-    factory_features_dropdown_value.connect("bind",bind_column1)
-    
-    featureList = Gio.ListStore.new(DataObject)
-    filterFeaturesStoreDropdown = Gtk.FilterListModel(model=featureList)
-    filter_features_dropdown = Gtk.CustomFilter.new(_do_filter_features_dropdown_view, filterFeaturesStoreDropdown)
-    filterFeaturesStoreDropdown.set_filter(filter_features_dropdown)
- #   featureList  = Gtk.StringList()
-    featureDropdown = Gtk.DropDown(model=filterFeaturesStoreDropdown,factory=factory_features_dropdown_value)
-    featureDropdown.set_enable_search(True)
-    features_dropdown_search = _get_search_entry_widget(featureDropdown)
-    features_dropdown_search.connect('search-changed',_on_search_method_changed,filter_features_dropdown)
- #   featureDropdown.set_model(featureList)
-    featureDropdown.connect('notify::selected-item',selectFeature)
-    featureSearchEntry = Gtk.SearchEntry()
-    featureSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    featureSearchEntry.connect("search-changed",_on_search_method_changed,filter_features)
-    FeaturesGrid.attach(featureSearchEntry,0,0,12,1)
-    setMargin(featureDropdown,2,1,2)
-    FeatureScrollbar = create_scrollbar(featuresColumnView)
-    FeaturesGrid.attach_next_to(FeatureScrollbar, featureSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
-    FeaturesGrid.attach_next_to(featureDropdown,featureSearchEntry,Gtk.PositionType.RIGHT,3,1)
-
-#    FeaturesTab_Store_filter.set_visible_func(searchFeaturesTree, data=TreeFeatures)
-
-    ExtensionTab = Gtk.Box(spacing=10)
-    ExtensionGrid = createSubTab(ExtensionTab, notebook, "Extensions")
-    ExtensionGrid.set_row_spacing(2)
-
-    extensionColumnView = Gtk.ColumnView()
-    extensionColumnView.props.show_row_separators = True
-    extensionColumnView.props.single_click_activate = False
-    extensionColumnView.props.show_column_separators = False
-    factory = Gtk.SignalListItemFactory()
-    factory.connect("setup", setup)
-    factory.connect("bind", bind_column1)
-    factory2 = Gtk.SignalListItemFactory()
-    factory2.connect("setup", setup)
-    factory2.connect("bind", bind_column2)
-    scrollable_extension = create_scrollbar(extensionColumnView)
-    ExtensionTab.append(ExtensionGrid)
-
-    deviceExtensionColumn = Gtk.ColumnViewColumn.new("Device Extensions")
-    deviceExtensionColumn.set_factory(factory)
-    deviceExtensionColumn.set_resizable(True)
-    extensionColumnView.append_column(deviceExtensionColumn)
-
-    extensionRevisionColumn = Gtk.ColumnViewColumn.new("Revision")
-    extensionRevisionColumn.set_factory(factory2)
-    extensionRevisionColumn.set_expand(True)
-    extensionColumnView.append_column(extensionRevisionColumn)
-
-    extensionSelection = Gtk.SingleSelection()
-    ExtensionTab_Store = Gio.ListStore.new(DataObject)
-    filterSortExtensionListStore = Gtk.FilterListModel(model=ExtensionTab_Store)
-    filter_extensions = Gtk.CustomFilter.new(_do_filter_extension_view, filterSortExtensionListStore)
-    filterSortExtensionListStore.set_filter(filter_extensions)
-    extensionSelection.set_model(filterSortExtensionListStore)
-    extensionColumnView.set_model(extensionSelection)
-
-
-    extensionFrameSearch = Gtk.Frame()
-    extensionSearchEntry = Gtk.SearchEntry()
-    extensionFrameSearch.set_child(extensionSearchEntry)
-    extensionSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    extensionSearchEntry.connect("search-changed", _on_search_method_changed,filter_extensions)
-    ExtensionGrid.attach(extensionFrameSearch,0,0,1,1)
- #   ExtensionScrollbar = create_scrollbar(TreeExtension)
-    ExtensionGrid.attach_next_to(scrollable_extension, extensionFrameSearch, Gtk.PositionType.BOTTOM, 1, 1)
-  #  ExtensionTab_store_filter.set_visible_func(searchExtensionTree, data=TreeExtension)
-
-    # ------------Creating the Formats Tab --------------------------------------------------
-
-    factory_formats_dropdown_value = Gtk.SignalListItemFactory()
-    factory_formats_dropdown_value.connect("setup",setup)
-    factory_formats_dropdown_value.connect("bind",bind_column1)
-
-    FormatsList = Gio.ListStore.new(DataObject)
-    filterFormatStoreDropdown = Gtk.FilterListModel(model=FormatsList)
-    filter_formats_dropdown = Gtk.CustomFilter.new(_do_filter_formats_dropdown_view, filterFormatStoreDropdown)
-    filterFormatStoreDropdown.set_filter(filter_formats_dropdown)
-    FormatsDropDown = Gtk.DropDown(model=filterFormatStoreDropdown,factory=factory_formats_dropdown_value)
-    FormatsDropDown.set_model(filterFormatStoreDropdown)
-    FormatsDropDown.connect('notify::selected-item',selectFormats)
-    FormatsDropDown.set_enable_search(True)
-    formats_dropdown_search = _get_search_entry_widget(FormatsDropDown)
-    formats_dropdown_search.connect('search-changed',_on_search_method_changed,filter_formats_dropdown)
-    FormatsTab = Gtk.Box(spacing=10)
-    FormatsGrid = createSubTab(FormatsTab, notebook, "Formats")
-    FormatsGrid.set_row_spacing(3)
-
-
-    formatsColumnView = Gtk.ColumnView()
-    formatsColumnView.props.show_row_separators = True
-    formatsColumnView.props.show_column_separators = False
-    formatsColumnView.props.single_click_activate - True
-
-    factory_formats = Gtk.SignalListItemFactory()
-    factory_formats.connect("setup",setup_expander)
-    factory_formats.connect("bind",bind_expander)
-
-    factory_formats_value1 = Gtk.SignalListItemFactory()
-    factory_formats_value1.connect("setup",setup)
-    factory_formats_value1.connect("bind",bind1)
-
-
-    factory_formats_value2 = Gtk.SignalListItemFactory()
-    factory_formats_value2.connect("setup",setup)
-    factory_formats_value2.connect("bind",bind2)
-
-
-    factory_formats_value3 = Gtk.SignalListItemFactory()
-    factory_formats_value3.connect("setup",setup)
-    factory_formats_value3.connect("bind",bind3)
-
-    formatsSelection = Gtk.SingleSelection()
-    FormatsTab_Store = Gio.ListStore.new(ExpandDataObject2)
-    filterSortFormatsStore = Gtk.FilterListModel(model=FormatsTab_Store)
-    filter_formats = Gtk.CustomFilter.new(_do_filter_formats_view, filterSortFormatsStore)
-    filterSortFormatsStore.set_filter(filter_formats)
-
-    formatsModel = Gtk.TreeListModel.new(filterSortFormatsStore,False,False,add_tree_node2)
-    formatsSelection.set_model(formatsModel)
-
-    formatsColumnView.set_model(formatsSelection)
-
-    formatColumnLhs = Gtk.ColumnViewColumn.new("Device Formats",factory_formats)
-    formatColumnLhs.set_resizable(True)
-    formatColumnLhs.set_expand(True)
-    formatColumnRhs1 = Gtk.ColumnViewColumn.new("linearTiling",factory_formats_value1)
-    formatColumnRhs1.set_expand(True)
-    formatColumnRhs2 = Gtk.ColumnViewColumn.new("optimalTiling",factory_formats_value2)
-    formatColumnRhs2.set_expand(True)
-    formatColumnRhs3 = Gtk.ColumnViewColumn.new("bufferFeatures",factory_formats_value3)
-    formatColumnRhs3.set_expand(True)
-
-
-    formatsColumnView.append_column(formatColumnLhs)
-    formatsColumnView.append_column(formatColumnRhs1)
-    formatsColumnView.append_column(formatColumnRhs2)
-    formatsColumnView.append_column(formatColumnRhs3)
-
-    formatSearchFrame = Gtk.Frame()
-    formatSearchEntry = Gtk.SearchEntry()
-    formatSearchFrame.set_child(formatSearchEntry)
-    formatSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    formatSearchEntry.connect("search-changed", _on_search_method_changed,filter_formats)
-    FormatsGrid.attach(formatSearchFrame,0,0,12,1)
-    FormatsScrollbar = create_scrollbar(formatsColumnView)
-    FormatsGrid.attach_next_to(FormatsScrollbar, formatSearchFrame, Gtk.PositionType.BOTTOM, 15, 1)
- #   FormatsGrid.attach_next_to(FormatsCombo,formatSearchFrame,Gtk.PositionType.RIGHT,1,1)
-    FormatsGrid.attach_next_to(FormatsDropDown,formatSearchFrame,Gtk.PositionType.RIGHT,3,1)
-
-
-#    FormatsTab_Store_filter.set_visible_func(searchFormatsTree, data=TreeFormats)
-
-        # ------------------------Memory Types & Heaps----------------------------------------------
-
-#    MemoryTab = Gtk.Box(spacing=10)
-    MemoryTypeTab = Gtk.Box(spacing=10)
-    MemoryTypeGrid = createSubTab(MemoryTypeTab, notebook, "Memory Types")
-    MemoryTypeGrid.set_row_spacing(3)
-
-    memoryTypesColumnView = Gtk.ColumnView()
-    memoryTypesColumnView.props.show_row_separators = True
-    memoryTypesColumnView.props.show_column_separators = False
-
-    factory_memory_types = Gtk.SignalListItemFactory()
-    factory_memory_types.connect("setup",setup_expander)
-    factory_memory_types.connect("bind",bind_expander)
-
-    factory_memory_types_value = Gtk.SignalListItemFactory()
-    factory_memory_types_value.connect("setup",setup)
-    factory_memory_types_value.connect("bind",bind1)
-
-    memoryTypesSelection = Gtk.SingleSelection()
-    MemoryTab_Store = Gio.ListStore.new(ExpandDataObject)
-
-    memoryTypesModel = Gtk.TreeListModel.new(MemoryTab_Store,False,True,add_tree_node)
-    memoryTypesSelection.set_model(memoryTypesModel)
-
-    memoryTypesColumnView.set_model(memoryTypesSelection)
-
-    memoryTypesColumnLhs = Gtk.ColumnViewColumn.new("Memory Types",factory_memory_types)
-    memoryTypesColumnLhs.set_resizable(True)
-    memoryTypesColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_memory_types_value)
-    memoryTypesColumnRhs.set_expand(True)
-
-    memoryTypesColumnView.append_column(memoryTypesColumnLhs)
-    memoryTypesColumnView.append_column(memoryTypesColumnRhs)
-
-    MemoryScrollbar = create_scrollbar(memoryTypesColumnView)
-    MemoryTypeGrid.attach(MemoryScrollbar,0,0,1,1)
-# -----------------------------------------------------------------------------------------------------------------------------------
-    MemoryHeapTab = Gtk.Box(spacing=10)
-    MemoryHeapGrid = createSubTab(MemoryHeapTab, notebook, "Memory Heap")
-    MemoryHeapGrid.set_row_spacing(3)
-    #HeapGrid = Gtk.Box(spacing=10)
-
-    heapsColumnView = Gtk.ColumnView()
-    heapsColumnView.props.show_row_separators = True
-    heapsColumnView.props.show_column_separators = False
-
-    factory_heaps = Gtk.SignalListItemFactory()
-    factory_heaps.connect("setup",setup_expander)
-    factory_heaps.connect("bind",bind_expander)
-
-    factory_heaps_value = Gtk.SignalListItemFactory()
-    factory_heaps_value.connect("setup",setup)
-    factory_heaps_value.connect("bind",bind1)
-
-    heapSelection = Gtk.SingleSelection()
-    HeapTab_Store = Gio.ListStore.new(ExpandDataObject)
-
-    heapModel = Gtk.TreeListModel.new(HeapTab_Store,False,True,add_tree_node)
-    heapSelection.set_model(heapModel)
-
-    heapsColumnView.set_model(heapSelection)
-
-    heapColumnLhs = Gtk.ColumnViewColumn.new("Memory Heaps",factory_heaps)
-    heapColumnLhs.set_resizable(True)
-    heapColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_heaps_value)
-    heapColumnRhs.set_expand(True)
-
-    heapsColumnView.append_column(heapColumnLhs)
-    heapsColumnView.append_column(heapColumnRhs)
-
-    HeapScrollbar = create_scrollbar(heapsColumnView)
-    MemoryHeapGrid.attach(HeapScrollbar,0,0,1,1)
-
-    # -------------------------Creating the Queues Tab -----------------------------------------------------
-
-    QueueTab = Gtk.Box(spacing=10)
-    QueueGrid = createSubTab(QueueTab, notebook, "Queue")
-
-    queuesColumnView = Gtk.ColumnView()
-    queuesColumnView.props.show_row_separators = True
-    queuesColumnView.props.show_column_separators = False
-
-    factory_queues = Gtk.SignalListItemFactory()
-    factory_queues.connect("setup",setup_expander)
-    factory_queues.connect("bind",bind_expander)
-
-    factory_queues_value = Gtk.SignalListItemFactory()
-    factory_queues_value.connect("setup",setup)
-    factory_queues_value.connect("bind",bind1)
-
-    queueSelection = Gtk.SingleSelection()
-    QueueTab_Store = Gio.ListStore.new(ExpandDataObject)
-
-    queueModel = Gtk.TreeListModel.new(QueueTab_Store,False,True,add_tree_node)
-    queueSelection.set_model(queueModel)
-
-    queuesColumnView.set_model(queueSelection)
-
-    queueColumnLhs = Gtk.ColumnViewColumn.new("Queue Properties",factory_queues)
-    queueColumnLhs.set_resizable(True)
-    queueColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_queues_value)
-    queueColumnRhs.set_expand(True)
-
-    queuesColumnView.append_column(queueColumnLhs)
-    queuesColumnView.append_column(queueColumnRhs)
-
-
- #   QueueTab_Store = Gtk.TreeStore(str, str, str, str)
- #   TreeQueue = Gtk.TreeView.new_with_model(QueueTab_Store)
- #   TreeQueue.set_property("enable-grid-lines", 1)
- #   TreeQueue.set_enable_search(True)
- #   TreeQueue.set_property("enable-tree-lines", True)
- #   for i, column_title in enumerate(QueueTitle):
-  #      Queuerenderer = Gtk.CellRendererText()
-#        Queuerenderer.set_alignment(0.5, 0.5)
-  #      column = Gtk.TreeViewColumn(column_title, Queuerenderer, text=i)
-#        column.set_alignment(0.5)
-  #      column.add_attribute(Queuerenderer, "background", 2)
-   #     column.set_resizable(True)
-   #     column.set_reorderable(True)
-   #     if i > 0:
-   #         column.add_attribute(Queuerenderer, "foreground", 3)
-   #     TreeQueue.set_property("can-focus", False)
-   #     TreeQueue.append_column(column)
-
-    QueueScrollbar = create_scrollbar(queuesColumnView)
-    QueueGrid.attach(QueueScrollbar,0,0,1,1)
-
-    # -------------------------Creating the Instances & Layers ---------------------------------------------
-
-#    InstanceTab = Gtk.Box(spacing=10)
-#    InstanceGrid = createSubTab(InstanceTab, notebook, "Instances & layers")
-#    InstanceNotebook = Gtk.Notebook()
-#    InstanceGrid.attach(InstanceNotebook,0,0,1,1)
-    InstanceExtTab = Gtk.Box(spacing=10)
-    InstanceExtGrid = createSubTab(InstanceExtTab, notebook, "Instance Extensions")
-    InstanceExtGrid.set_row_spacing(3)
-
-
-    instanceExtensionColumnView = Gtk.ColumnView()
-    instanceExtensionColumnView.props.show_row_separators = True
-    instanceExtensionColumnView.props.single_click_activate = False
-    instanceExtensionColumnView.props.show_column_separators = False
-    factory = Gtk.SignalListItemFactory()
-    factory.connect("setup", setup)
-    factory.connect("bind", bind_column1)
-    factory2 = Gtk.SignalListItemFactory()
-    factory2.connect("setup", setup)
-    factory2.connect("bind", bind_column2)
- #   scrollable_instanceExtension = create_scrollbar(instanceExtensionColumnView)
-#    ExtensionTab.append(ExtensionGrid)
-
-    instanceExtensionColumn = Gtk.ColumnViewColumn.new("Instance Extensions")
-    instanceExtensionColumn.set_factory(factory)
-    instanceExtensionColumn.set_resizable(True)
-    instanceExtensionColumnView.append_column(instanceExtensionColumn)
-
-    instanceExtensionRevisionColumn = Gtk.ColumnViewColumn.new("Revision")
-    instanceExtensionRevisionColumn.set_factory(factory2)
-    instanceExtensionRevisionColumn.set_expand(True)
-    instanceExtensionColumnView.append_column(instanceExtensionRevisionColumn)
-
-    instanceExtensionSelection = Gtk.SingleSelection()
-    InstanceTab_Store = Gio.ListStore.new(DataObject)
-    filterSortInstancesListStore = Gtk.FilterListModel(model=InstanceTab_Store)
-    filter_instances = Gtk.CustomFilter.new(_do_filter_instances_view, filterSortInstancesListStore)
-    filterSortInstancesListStore.set_filter(filter_instances)
-    instanceExtensionSelection.set_model(filterSortInstancesListStore)
-    instanceExtensionColumnView.set_model(instanceExtensionSelection)
-
- #   InstanceTab_Store = Gtk.ListStore(str, str, str)
-#    InstanceTab_Store_filter = InstanceTab_Store.filter_new()
-#    TreeInstance = Gtk.TreeView.new_with_model(InstanceTab_Store_filter)
- #   TreeInstance.set_property("enable-grid-lines", 1)
-#    TreeInstance.set_enable_search(True)
-
-#    setColumns(TreeInstance, InstanceTitle, 300, 0.0)
-
-    instanceSearchFrame = Gtk.Frame()
-    instanceSearchEntry = Gtk.SearchEntry()
-    instanceSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    instanceSearchEntry.connect("search-changed",_on_search_method_changed,filter_instances)
- #   instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
-    instanceSearchFrame.set_child(instanceSearchEntry)
-    InstanceExtGrid.attach(instanceSearchFrame,0,0,1,1)
-    InstanceScrollbar = create_scrollbar(instanceExtensionColumnView)
-    InstanceExtGrid.attach_next_to(InstanceScrollbar, instanceSearchFrame, Gtk.PositionType.BOTTOM, 1, 1)
-
-#    InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree, data=TreeInstance)
-
-    InstanceLayersTab = Gtk.Box(spacing=10)
-    InstanceLayersGrid = createSubTab(InstanceLayersTab, notebook, "Instance Layers")
-    InstanceLayersGrid.set_row_spacing(3)
-
-
-    layersColumnView = Gtk.ColumnView()
-    layersColumnView.props.show_row_separators = True
-    layersColumnView.props.show_column_separators = False
-
-    factory_layers = Gtk.SignalListItemFactory()
-    factory_layers.connect("setup",setup_expander)
-    factory_layers.connect("bind",bind_expander)
-
-    factory_layers_value1 = Gtk.SignalListItemFactory()
-    factory_layers_value1.connect("setup",setup)
-    factory_layers_value1.connect("bind",bind1)
-
-
-    factory_layers_value2 = Gtk.SignalListItemFactory()
-    factory_layers_value2.connect("setup",setup)
-    factory_layers_value2.connect("bind",bind2)
-
-
-    factory_layers_value3 = Gtk.SignalListItemFactory()
-    factory_layers_value3.connect("setup",setup)
-    factory_layers_value3.connect("bind",bind3)
-
-
-    factory_layers_value4 = Gtk.SignalListItemFactory()
-    factory_layers_value4.connect("setup",setup)
-    factory_layers_value4.connect("bind",bind4)
-
-    layerSelection = Gtk.SingleSelection()
-    LayerTab_Store = Gio.ListStore.new(ExpandDataObject2)
-    filterSortLayersStore = Gtk.FilterListModel(model=LayerTab_Store)
-    filter_layers = Gtk.CustomFilter.new(_do_filter_layers_view, filterSortLayersStore)
-    filterSortLayersStore.set_filter(filter_layers)
-
-    layersModel = Gtk.TreeListModel.new(filterSortLayersStore,False,False,add_tree_node2)
-    layerSelection.set_model(layersModel)
-
-    layersColumnView.set_model(layerSelection)
-
-    layerColumnLhs = Gtk.ColumnViewColumn.new("Layers",factory_layers)
-    layerColumnLhs.set_resizable(True)
-    layerColumnLhs.set_expand(True)
-    layerColumnRhs1 = Gtk.ColumnViewColumn.new("Vulkan Version",factory_layers_value1)
-    layerColumnRhs1.set_expand(True)
-    layerColumnRhs2 = Gtk.ColumnViewColumn.new("Layer Version",factory_layers_value2)
-    layerColumnRhs2.set_expand(True)
-    layerColumnRhs3 = Gtk.ColumnViewColumn.new("Extension Count",factory_layers_value3)
-    layerColumnRhs3.set_expand(True)
-    layerColumnRhs4 = Gtk.ColumnViewColumn.new("Description",factory_layers_value4)
-    layerColumnRhs4.set_expand(True)
-
-    layersColumnView.append_column(layerColumnLhs)
-    layersColumnView.append_column(layerColumnRhs1)
-    layersColumnView.append_column(layerColumnRhs2)
-    layersColumnView.append_column(layerColumnRhs3)
-    layersColumnView.append_column(layerColumnRhs4)
-
-
-#    LayerTab_Store = Gtk.TreeStore(str, str, str, str, str, str)
-#    LayerTab_Store_filter = LayerTab_Store.filter_new()
-#    TreeLayer = Gtk.TreeView.new_with_model(LayerTab_Store_filter)
-#    TreeLayer.set_property("enable-grid-lines", 1)
- #   TreeLayer.set_enable_search(TreeLayer)
- #   TreeLayer.set_property("enable-tree-lines",True)
-
- #   setColumns(TreeLayer, LayerTitle, 100, 0.0)
-
-    layerSearchFrame = Gtk.Frame()
-    layerSearchEntry = Gtk.SearchEntry()
-    layerSearchEntry.set_property("placeholder_text","Type here to filter.....")
-    layerSearchEntry.connect("search-changed",_on_search_method_changed,filter_layers)
-    layerSearchFrame.set_child(layerSearchEntry)
-    InstanceLayersGrid.attach(layerSearchFrame,0,0,1,1)
-    LayerScrollbar = create_scrollbar(layersColumnView)
-    InstanceLayersGrid.attach_next_to(LayerScrollbar, layerSearchFrame, Gtk.PositionType.BOTTOM, 1, 1)
-
-#    LayerTab_Store_filter.set_visible_func(searchInstanceLayersTree, data=TreeLayer)
-
-    # ------------------ Creating the Surface Tab --------------------------------------------------
-
-    SurfaceTab = Gtk.Box(spacing=10)
-    SurfaceGrid = createSubTab(SurfaceTab, notebook, "Surface")
-
-    surfaceColumnView = Gtk.ColumnView()
-    surfaceColumnView.props.show_row_separators = True
-    surfaceColumnView.props.show_column_separators = False
-
-    factory_surface = Gtk.SignalListItemFactory()
-    factory_surface.connect("setup",setup_expander)
-    factory_surface.connect("bind",bind_expander)
-
-    factory_surface_value = Gtk.SignalListItemFactory()
-    factory_surface_value.connect("setup",setup)
-    factory_surface_value.connect("bind",bind1)
-
-    surfaceSelection = Gtk.SingleSelection()
-    SurfaceTab_Store = Gio.ListStore.new(ExpandDataObject)
-
-    surfaceModel = Gtk.TreeListModel.new(SurfaceTab_Store,False,True,add_tree_node)
-    surfaceSelection.set_model(surfaceModel)
-
-    surfaceColumnView.set_model(surfaceSelection)
-
-    surfaceColumnLhs = Gtk.ColumnViewColumn.new("Surface Details",factory_surface)
-    surfaceColumnLhs.set_resizable(True)
-    surfaceColumnRhs = Gtk.ColumnViewColumn.new("Value",factory_surface_value)
-    surfaceColumnRhs.set_expand(True)
-
-    surfaceColumnView.append_column(surfaceColumnLhs)
-    surfaceColumnView.append_column(surfaceColumnRhs)
-
-    #SurfaceCombo = Gtk.ComboBoxText()
-    #SurfaceCombo.connect("changed", selectSurfaceType)
-    #SurfaceGrid.add(SurfaceCombo)
- #   SurfaceTab_Store = Gtk.TreeStore(str, str, str)
- #   TreeSurface = Gtk.TreeView.new_with_model(SurfaceTab_Store)
- #   TreeSurface.set_property("enable-grid-lines", 1)
- #   TreeSurface.set_property("enable-tree-lines", True)
-#    with open(Filenames.vulkaninfo_output_file, "r") as file1:
- #       for line in file1:
-  #          if "VkSurfaceCapabilities" in line:
-   #             for i, column_title in enumerate(SurfaceTitle):
-    #                Surfacerenderer = Gtk.CellRendererText()
-     #               column = Gtk.TreeViewColumn(column_title, Surfacerenderer, text=i)
-      #              column.add_attribute(Surfacerenderer, "background", 2)
-       #             column.set_property("min-width",const.MWIDTH)
-        #            TreeSurface.set_property("can-focus", False)
-         #           TreeSurface.append_column(column)
-
-    SurfaceScrollbar = create_scrollbar(surfaceColumnView)
-    SurfaceGrid.attach(SurfaceScrollbar,0,0,1,1)
-           #     break
-    
-    # ------------------------- Creating the Device Groups Tab ---------------------------------------
-
-  #  GroupsTab = Gtk.Box(spacing=10)
-  #  GroupsGrid = createSubTab(GroupsTab,notebook,"Groups")
-  #  Groups_Store = Gtk.TreeStore(str,str,str)
-  #  TreeGroups = Gtk.TreeView.new_with_model(Groups_Store)
-  #  TreeGroups.set_property("enable-grid-lines", 1)
-  #  TreeGroups.set_property("enable-tree-lines",True)
-  #  setColumns(TreeGroups,GroupsTitle,const.MWIDTH,0.0)
-  #  GroupsScrollbar = create_scrollbar(TreeGroups)
-  #  GroupsGrid.attach(GroupsScrollbar,0,0,1,1)
-
-
-    #--------------------------------------------------------- Fetching the device list ---------------------------------------------------------------------------------------------
-
-    DevicesGrid = Gtk.Grid()
-    DevicesGrid.set_row_spacing(10)
-#    DevicesGrid.set_column_spacing(20)
-    DevicesFrame.set_child(DevicesGrid)
-
-    gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
-
-    availableDevices = Gtk.Label()
-    setMargin(availableDevices,350,10,10)
-    gpu_image = Gtk.Image()
-    availableDevices.set_text("Available Device(s) :")
-    DevicesGrid.attach(availableDevices, 10, 2, 20, 1)
-    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
-    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
-    gpu_DropDown = Gtk.DropDown()
-    gpu_DropDown_list = Gtk.StringList()
-    gpu_DropDown.set_model(gpu_DropDown_list)
-    gpu_DropDown.connect('notify::selected-item',radcall)
-    for i in gpu_list:
-        gpu_DropDown_list.append(i)
-
-    setMargin(gpu_DropDown,30,10,10)
-    setMargin(image_renderer,30,10,10)
-    DevicesGrid.attach_next_to(gpu_DropDown,availableDevices,Gtk.PositionType.RIGHT,30,1)
-    DevicesGrid.attach_next_to(image_renderer,gpu_DropDown,Gtk.PositionType.RIGHT,30,1)
 #    DeviceGrid.attach_next_to(spinner,image_renderer,Gtk.PositionType.RIGHT,80,1)
 
