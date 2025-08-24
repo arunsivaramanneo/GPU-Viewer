@@ -11,8 +11,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk
 from vulkan_viewer import create_vulkan_tab_content
-import Filenames
-from Common import copyContentsFromFile
+import Filenames, const
+from Common import copyContentsFromFile,getScreenSize,create_tab
 
 # Define the main application class.
 # It inherits from Adw.Application, which provides a modern application shell.
@@ -32,7 +32,7 @@ class SimpleApp(Adw.Application):
     """
     def __init__(self, **kwargs):
         # Call the parent constructor, providing a unique application ID
-        super().__init__(application_id="com.example.SimpleApp", **kwargs)
+        super().__init__(application_id="io.github.arunsivaramanneo.GPUViewer", **kwargs)
         self.connect("activate", self.on_activate)    
 
     def _on_theme_toggled(self, switch, state):
@@ -55,28 +55,19 @@ class SimpleApp(Adw.Application):
         """
         # Create a new Adwaita ApplicationWindow
         self.window = Adw.ApplicationWindow.new(self)
-        self.window.set_title("Hello, Libadwaita!")
+        self.window.set_title("GPU-Viewer v3.2")
 
 
         # Set the application's default size to 800x800
-        display = Gdk.Display.get_default()
-        if display:
-            monitor = display.get_primary_monitor()
-            if monitor:
-                geometry = monitor.get_geometry()
-                screen_width = geometry.width
-                screen_height = geometry.height
-                
-                # Check for 4K resolution
-                if screen_width == 3840 and screen_height == 2160:
-                    new_width = int(screen_width * 0.4)
-                    new_height = int(screen_height * 0.6)
-                else:
-                    # Default size for other resolutions
-                    new_width = int(screen_width * 0.6)
-                    new_height = int(screen_height * 0.85)
-                
-                self.window.set_default_size(new_width, new_height)
+
+        width,height = getScreenSize()
+
+        if int(width) > 2160 and int(height) < 1440:
+            self.window.set_size_request(2160 * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+        elif int(width) > 2160 and int(height) > 1440:
+            self.window.set_size_request(2160 * const.WIDTH_RATIO ,1440 * const.HEIGHT_RATIO1)
+        else:
+            self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
 
         # Create a new Adwaita view stack to hold the different pages
         self.view_stack = Adw.ViewStack.new()
@@ -112,7 +103,6 @@ class SimpleApp(Adw.Application):
         theme_box.append(theme_switch)
         self.header_bar.pack_end(theme_box)
         self.header_bar.set_title_widget(self.switcher)
-
         
         # Create a main box to hold the header bar and the view stack
         main_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -130,11 +120,13 @@ class SimpleApp(Adw.Application):
             vulkan_box = create_vulkan_tab_content(self)
         
         # Create an icon for the first tab
+            icon1 = Gtk.Image.new_from_icon_name("Vulkan")
+            print(icon1.get_icon_name())
+
             icon1 = Gtk.Image.new_from_icon_name("document-send-symbolic")
 
         # Add the first page to the view stack, with a title and an icon
             self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
-        
         # Create the second page (tab content)
         page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         page2_box.set_halign(Gtk.Align.CENTER)

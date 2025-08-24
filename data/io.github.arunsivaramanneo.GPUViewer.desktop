@@ -9,4 +9,4 @@ Exec=gpu-viewer
 Terminal=false
 Categories=System;GTK;GNOME
 Keywords=GPU;Graphics;Vulkan;OpenGL;OpenCL;Mesa;AMD;Intel;NVIDIA:Radeon;Geforce
-StartupWMClass=GPUViewer.py
+StartupWMClass=gpu_viewer.py

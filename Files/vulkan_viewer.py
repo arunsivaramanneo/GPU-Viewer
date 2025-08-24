@@ -75,7 +75,7 @@ def bind_column1(widget, item):
     label = item.get_child()
     obj = item.get_item()
     label.set_text(obj.column1)
-    label.add_css_class(css_class='parent')
+    label.add_css_class(css_class='body')
 
 
 def bind_column2(widget, item):
@@ -245,6 +245,7 @@ def create_vulkan_tab_content(self):
                     text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
                     text = text1[:-1]
                     propertiesList.append(DataObject(text.strip("\n"),""))
+                    
     def selectProperties(dropdown, _pspec):
         selected =dropdown.props.selected_item
         property = ""
@@ -343,8 +344,6 @@ def create_vulkan_tab_content(self):
                     else:
                         #if "width" not in line and "height" not in line and "SUBGROUP" not in line and "RESOLVE" not in line and "SHADER_STAGE" not in line:
                         if "\t\t" not in line:
-                        #    iter2 = SparseTab_Store.append(iter,
-                         #                      [text.strip('\n'), value2[i].strip('\n'), background_color, fgColor[i]])
                             iter2 = ExpandDataObject((text.strip('\n')).replace("count",''), value2[i].strip('\n'))
                             toprow.children.append(iter2)
                         #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line:
@@ -1302,7 +1301,7 @@ def create_vulkan_tab_content(self):
 
         elif tab_name == "Limits":
 
-            limitsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,10)
+            limitsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
             limitsColumnView = Gtk.ColumnView()
             limitsColumnView.props.show_row_separators = True
             limitsColumnView.props.show_column_separators = False
@@ -1341,18 +1340,13 @@ def create_vulkan_tab_content(self):
             limitsSearchEntry = Gtk.SearchEntry()
             limitsSearchEntry.set_property("placeholder_text","Type here to filter.....")
             limitsSearchEntry.connect("search-changed", _on_search_method_changed,filter_limits)
-        #    limitsSearchEntry = createSearchEntry(LimitsTab_Store_filter)
-            limitsSearchBar = Gtk.SearchBar()
-            limitsSearchBar.props.hexpand = True
-            limitsSearchBar.props.vexpand = False
-            limitsSearchBar.set_search_mode(False)
-            limitsSearchBar.connect_entry(limitsSearchEntry)
-            limitsSearchBar.set_child(limitsSearchEntry)
-            limitsSearchBar.set_key_capture_widget(limitsColumnView)
+            limitsFrameSearch.set_child(limitsSearchEntry)
+            limitsSearchEntry.add_css_class(css_class="toolbar")
+            limitsSearchEntry.add_css_class(css_class="inline")
             LimitsScrollbar = create_scrollbar(limitsColumnView)
             limitsContentBox.append(limitsSearchEntry)
             limitsContentBox.append(LimitsScrollbar)
-
+            limitsContentBox.append(limitsFrameSearch)
             # Set up the signal handler for the gpu_dropdown to update the table
             
             # Update the table initially with the first selected item
@@ -1361,8 +1355,7 @@ def create_vulkan_tab_content(self):
 
         elif tab_name == "Features":
         
-            featureSearchDropdownBox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL,10)
-            featureContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            featureContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
             featuresColumnView = Gtk.ColumnView()
             featuresColumnView.props.show_row_separators = True
             featuresColumnView.props.single_click_activate = False
@@ -1428,7 +1421,7 @@ def create_vulkan_tab_content(self):
 
         elif tab_name == "Extensions":
 
-            extensionContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            extensionContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
             extensionColumnView = Gtk.ColumnView()
             extensionColumnView.props.show_row_separators = True
             extensionColumnView.props.single_click_activate = False
@@ -1474,7 +1467,6 @@ def create_vulkan_tab_content(self):
         
         elif tab_name == "Formats":
 
-            formatsSearchDropdownBox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL,10)
             factory_formats_dropdown_value = Gtk.SignalListItemFactory()
             factory_formats_dropdown_value.connect("setup",setup)
             factory_formats_dropdown_value.connect("bind",bind_column1)
