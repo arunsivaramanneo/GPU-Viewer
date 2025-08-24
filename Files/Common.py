@@ -409,17 +409,17 @@ def bind1(widget, item):
     obj = row.get_item()
     if "true" in obj.data2 or "Yes" in obj.data2: 
         label.remove_css_class(css_class='nothing')
-        label.remove_css_class(css_class='false')
-        label.add_css_class(css_class='true')
+        label.remove_css_class(css_class='error')
+        label.add_css_class(css_class='success')
         label.set_label(obj.data2)
     elif "false" in obj.data2 or "No" in obj.data2 and "None" not in obj.data2:
         label.remove_css_class(css_class='nothing')
-        label.remove_css_class(css_class='true')
-        label.add_css_class(css_class='false')
+        label.remove_css_class(css_class='success')
+        label.add_css_class(css_class='error')
         label.set_label(obj.data2)
     else:
-        label.remove_css_class(css_class='false')
-        label.remove_css_class(css_class='true')
+        label.remove_css_class(css_class='error')
+        label.remove_css_class(css_class='success')
         label.add_css_class(css_class='nothing')
         label.set_label(obj.data2)
 
@@ -460,9 +460,9 @@ def bind2(widget, item):
     row = item.get_item()
     obj = row.get_item()
     if "true" in obj.data3: 
-        label.add_css_class(css_class='true')
+        label.add_css_class(css_class='success')
     elif "false" in obj.data3:
-        label.add_css_class(css_class='false')
+        label.add_css_class(css_class='error')
     else:
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data3)
@@ -474,9 +474,9 @@ def bind3(widget, item):
     row = item.get_item()
     obj = row.get_item()
     if "true" in obj.data4: 
-        label.add_css_class(css_class='true')
+        label.add_css_class(css_class='success')
     elif "false" in obj.data4:
-        label.add_css_class(css_class='false')
+        label.add_css_class(css_class='error')
     else:
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data4)
@@ -488,9 +488,9 @@ def bind4(widget, item):
     row = item.get_item()
     obj = row.get_item()
     if "true" in obj.data5: 
-        label.add_css_class(css_class='true')
+        label.add_css_class(css_class='success')
     elif "false" in obj.data5:
-        label.add_css_class(css_class='false')
+        label.add_css_class(css_class='error')
     else:
         label.add_css_class(css_class='nothing')
     label.set_label(obj.data5)

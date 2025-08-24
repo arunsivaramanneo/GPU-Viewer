@@ -71,7 +71,7 @@ class SimpleApp(Adw.Application):
                 else:
                     # Default size for other resolutions
                     new_width = int(screen_width * 0.6)
-                    new_height = int(screen_height * 0.8)
+                    new_height = int(screen_height * 0.85)
                 
                 self.window.set_default_size(new_width, new_height)
 
@@ -84,6 +84,7 @@ class SimpleApp(Adw.Application):
 
         # Create a header bar
         self.header_bar = Adw.HeaderBar.new()
+    #    self.header_bar.add_css_class(css_class="inline")
         # Set the view switcher as the custom title widget in the header bar
         self.header_bar.set_title_widget(self.switcher)
 
@@ -113,7 +114,7 @@ class SimpleApp(Adw.Application):
             icon1 = Gtk.Image.new_from_icon_name("document-send-symbolic")
 
         # Add the first page to the view stack, with a title and an icon
-            self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", icon1.get_icon_name())
+            self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
         
         # Create the second page (tab content)
         page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)

@@ -896,8 +896,10 @@ def create_vulkan_tab_content(self):
         for i in range(len(vulkan_device_instance_lhs)):
             InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
 
-        label = "Instance Extensions (%d)" %len(vulkan_device_instance_lhs)
+        label = Gtk.Label.new("Instance Extensions (%d)" %len(vulkan_device_instance_lhs))
 #        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
+     #   row.set_header(label)
+
 
 
         #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
@@ -1113,9 +1115,11 @@ def create_vulkan_tab_content(self):
     
     # Add a top margin to create space between the header bar and the content
     h_box.set_margin_top(10)
+    h_box.set_margin_bottom(10)
+    h_box.set_margin_start(10)
 
     # Create the label for the devices
-    label = Gtk.Label.new("Available Device(s)")
+    label = Gtk.Label.new("Available Device(s) :")
     h_box.append(label)
 
     # Create a list with some dummy device names
@@ -1123,8 +1127,10 @@ def create_vulkan_tab_content(self):
     
     # Create the gpu_dropdown, populated from the list of strings
     gpu_Dropdown = Gtk.DropDown()
+    gpu_Dropdown.add_css_class(css_class="card")
     gpu_Dropdown_list = Gtk.StringList()
     gpu_Dropdown.set_model(gpu_Dropdown_list)
+    gpu_Dropdown.set_margin_start(10)
     h_box.append(gpu_Dropdown)
     
     for i in gpu_list:
@@ -1146,6 +1152,12 @@ def create_vulkan_tab_content(self):
     sidebar_listbox = Gtk.ListBox.new()
     sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
     sidebar_listbox.set_vexpand(True)
+    sidebar_listbox.add_css_class(css_class="boxed-list")
+    sidebar_listbox.add_css_class(css_class="toolbar")
+    sidebar_listbox.add_css_class(css_class="compact")
+
+
+#    sidebar_listbox.add_css_class(css_class="frame")
     # Set the show-separators property to False
     sidebar_listbox.set_show_separators(False)
     
@@ -1211,6 +1223,7 @@ def create_vulkan_tab_content(self):
             deviceColumnView.append_column(deviceColumnLhs)
             deviceColumnView.append_column(deviceColumnRhs1)
             deviceColumnView.append_column(deviceColumnRhs2)
+            deviceColumnView.add_css_class(css_class="toolbar")
 
             DeviceScrollbar = create_scrollbar(deviceColumnView)
 
@@ -1245,6 +1258,7 @@ def create_vulkan_tab_content(self):
             propertiesSelection.set_model(propertiesModel)
 
             propertiesColumnView.set_model(propertiesSelection)
+            propertiesColumnView.add_css_class(css_class="toolbar")
 
             propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Properties",factory_properties)
             propertiesColumnLhs.set_resizable(True)
@@ -1274,15 +1288,15 @@ def create_vulkan_tab_content(self):
         #    propertiesGrid.add(propertiesCombo)
 
             propertySearchEntry = Gtk.SearchEntry()
+            propertySearchEntry.add_css_class(css_class="toolbar")
+            propertySearchEntry.add_css_class(css_class="inline")
             propertySearchEntry.set_property("placeholder_text","Type here to filter.....")
             propertySearchEntry.connect("search-changed", _on_search_method_changed,filter_properties)
             propertiesScrollbar = create_scrollbar(propertiesColumnView)
 
-            propertiesSearchDropdownBox.append(propertiesDropdown)
-            propertiesSearchDropdownBox.append(propertySearchEntry)
-            propertiesContentBox.append(propertiesSearchDropdownBox)
+            propertiesContentBox.append(propertiesDropdown)
             propertiesContentBox.append(propertiesScrollbar)
-
+            propertiesContentBox.append(propertySearchEntry)
             content_box.append(propertiesContentBox)
         
 
@@ -1319,6 +1333,8 @@ def create_vulkan_tab_content(self):
 
             limitsColumnView.append_column(limitColumnLhs)
             limitsColumnView.append_column(limitColumnRhs)
+            limitsColumnView.add_css_class(css_class="toolbar")
+
 
 
             limitsFrameSearch = Gtk.Frame()
@@ -1376,6 +1392,8 @@ def create_vulkan_tab_content(self):
             filterSortFeatureListStore.set_filter(filter_features)
             featureSelection.set_model(filterSortFeatureListStore)
             featuresColumnView.set_model(featureSelection)
+            featuresColumnView.add_css_class(css_class="toolbar")
+
 
             factory_features_dropdown_value = Gtk.SignalListItemFactory()
             factory_features_dropdown_value.connect("setup",setup)
@@ -1395,15 +1413,16 @@ def create_vulkan_tab_content(self):
             
             featureFrameSearch = Gtk.Frame()
             featureSearchEntry = Gtk.SearchEntry()
+            featureSearchEntry.add_css_class(css_class="toolbar")
+            featureSearchEntry.add_css_class(css_class="inline")
             featureFrameSearch.set_child(featureSearchEntry)
             featureSearchEntry.set_property("placeholder_text","Type here to filter.....")
             featureSearchEntry.connect("search-changed",_on_search_method_changed,filter_features)
             setMargin(featureDropdown,2,1,2)
             FeatureScrollbar = create_scrollbar(featuresColumnView)
-            featureSearchDropdownBox.append(featureDropdown)
-            featureSearchDropdownBox.append(featureFrameSearch)
-            featureContentBox.append(featureSearchDropdownBox)
+            featureContentBox.append(featureDropdown)
             featureContentBox.append(FeatureScrollbar)
+            featureContentBox.append(featureFrameSearch)
 
             content_box.append(featureContentBox)
 
@@ -1439,15 +1458,18 @@ def create_vulkan_tab_content(self):
             filterSortExtensionListStore.set_filter(filter_extensions)
             extensionSelection.set_model(filterSortExtensionListStore)
             extensionColumnView.set_model(extensionSelection)
+            extensionColumnView.add_css_class(css_class="toolbar")
 
 
             extensionFrameSearch = Gtk.Frame()
             extensionSearchEntry = Gtk.SearchEntry()
+            extensionSearchEntry.add_css_class(css_class="toolbar")
+            extensionSearchEntry.add_css_class(css_class="toolbar")
             extensionFrameSearch.set_child(extensionSearchEntry)
             extensionSearchEntry.set_property("placeholder_text","Type here to filter.....")
             extensionSearchEntry.connect("search-changed", _on_search_method_changed,filter_extensions)
-            extensionContentBox.append(extensionFrameSearch)
             extensionContentBox.append(scrollable_extension)
+            extensionContentBox.append(extensionFrameSearch)
             content_box.append(extensionContentBox)
         
         elif tab_name == "Formats":
@@ -1502,6 +1524,8 @@ def create_vulkan_tab_content(self):
             formatsSelection.set_model(formatsModel)
 
             formatsColumnView.set_model(formatsSelection)
+            formatsColumnView.add_css_class(css_class="toolbar")
+
 
             formatColumnLhs = Gtk.ColumnViewColumn.new("Device Formats",factory_formats)
             formatColumnLhs.set_resizable(True)
@@ -1521,14 +1545,17 @@ def create_vulkan_tab_content(self):
 
             formatSearchFrame = Gtk.Frame()
             formatSearchEntry = Gtk.SearchEntry()
+            formatSearchEntry.add_css_class(css_class="toolbar")
+            formatSearchEntry.add_css_class(css_class="inline")
             formatSearchFrame.set_child(formatSearchEntry)
             formatSearchEntry.set_property("placeholder_text","Type here to filter.....")
             formatSearchEntry.connect("search-changed", _on_search_method_changed,filter_formats)
             formatsScrollbar = create_scrollbar(formatsColumnView)
-            formatsSearchDropdownBox.append(FormatsDropDown)
-            formatsSearchDropdownBox.append(formatSearchFrame)
-            formatsContentBox.append(formatsSearchDropdownBox)
+    #        formatsSearchDropdownBox.append(FormatsDropDown)
+    #        formatsSearchDropdownBox.append(formatSearchFrame)
+            formatsContentBox.append(FormatsDropDown)
             formatsContentBox.append(formatsScrollbar)
+            formatsContentBox.append(formatSearchFrame)
 
             content_box.append(formatsContentBox)
 
@@ -1562,14 +1589,14 @@ def create_vulkan_tab_content(self):
             memoryTypesColumnView.append_column(memoryTypesColumnLhs)
             memoryTypesColumnView.append_column(memoryTypesColumnRhs)
 
+            memoryTypesColumnView.add_css_class(css_class="toolbar")
+
+
             MemoryScrollbar = create_scrollbar(memoryTypesColumnView)
 
             content_box.append(MemoryScrollbar)
         # -----------------------------------------------------------------------------------------------------------------------------------
         elif tab_name == "Memory Heaps":
-
-            MemoryHeapTab = Gtk.Box(spacing=10)
-            #HeapGrid = Gtk.Box(spacing=10)
 
             heapsColumnView = Gtk.ColumnView()
             heapsColumnView.props.show_row_separators = True
@@ -1598,6 +1625,9 @@ def create_vulkan_tab_content(self):
 
             heapsColumnView.append_column(heapColumnLhs)
             heapsColumnView.append_column(heapColumnRhs)
+
+            heapsColumnView.add_css_class(css_class="toolbar")
+
 
             HeapScrollbar = create_scrollbar(heapsColumnView)
 
@@ -1633,6 +1663,9 @@ def create_vulkan_tab_content(self):
 
             queuesColumnView.append_column(queueColumnLhs)
             queuesColumnView.append_column(queueColumnRhs)
+
+            queuesColumnView.add_css_class(css_class="toolbar")
+
 
             QueueScrollbar = create_scrollbar(queuesColumnView)
 
@@ -1671,17 +1704,22 @@ def create_vulkan_tab_content(self):
             instanceExtensionSelection.set_model(filterSortInstancesListStore)
             instanceExtensionColumnView.set_model(instanceExtensionSelection)
 
+            instanceExtensionColumnView.add_css_class(css_class="toolbar")
+
+
             instanceSearchFrame = Gtk.Frame()
             instanceSearchEntry = Gtk.SearchEntry()
+            instanceSearchEntry.add_css_class(css_class="toolbar")
+            instanceSearchEntry.add_css_class(css_class="inline")
             instanceSearchEntry.set_property("placeholder_text","Type here to filter.....")
             instanceSearchEntry.connect("search-changed",_on_search_method_changed,filter_instances)
         #   instanceSearchEntry = createSearchEntry(InstanceTab_Store_filter)
             instanceSearchFrame.set_child(instanceSearchEntry)
             instanceScrollbar = create_scrollbar(instanceExtensionColumnView)
 
-            instanceContentBox.append(instanceSearchFrame)
             instanceContentBox.append(instanceScrollbar)
 
+            instanceContentBox.append(instanceSearchFrame)
             content_box.append(instanceContentBox)
 
         #    InstanceTab_Store_filter.set_visible_func(searchInstanceExtTree, data=TreeInstance)
@@ -1726,6 +1764,8 @@ def create_vulkan_tab_content(self):
             layerSelection.set_model(layersModel)
 
             layersColumnView.set_model(layerSelection)
+            layersColumnView.add_css_class(css_class="toolbar")
+
 
             layerColumnLhs = Gtk.ColumnViewColumn.new("Layers",factory_layers)
             layerColumnLhs.set_resizable(True)
@@ -1747,13 +1787,16 @@ def create_vulkan_tab_content(self):
 
             layerSearchFrame = Gtk.Frame()
             layerSearchEntry = Gtk.SearchEntry()
+            layerSearchEntry.add_css_class(css_class="toolbar")
+            layerSearchEntry.add_css_class(css_class="inline")
             layerSearchEntry.set_property("placeholder_text","Type here to filter.....")
             layerSearchEntry.connect("search-changed",_on_search_method_changed,filter_layers)
             layerSearchFrame.set_child(layerSearchEntry)
             layerScrollbar = create_scrollbar(layersColumnView)
 
-            instanceLayersContentBox.append(layerSearchFrame)
             instanceLayersContentBox.append(layerScrollbar)
+
+            instanceLayersContentBox.append(layerSearchFrame)
 
             content_box.append(instanceLayersContentBox)
 
@@ -1786,6 +1829,8 @@ def create_vulkan_tab_content(self):
 
             surfaceColumnView.append_column(surfaceColumnLhs)
             surfaceColumnView.append_column(surfaceColumnRhs)
+            surfaceColumnView.add_css_class(css_class="toolbar")
+
 
             SurfaceScrollbar = create_scrollbar(surfaceColumnView)
 
@@ -1807,6 +1852,7 @@ def create_vulkan_tab_content(self):
     gpu_image = Gtk.Image()
     gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
     image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
+    gpu_Dropdown.set_margin_end(10)
     h_box.append(image_renderer)
 
     on_gpu_dropdown_changed(gpu_Dropdown,dummy=0)
