@@ -490,11 +490,11 @@ def OpenGL(tab):
 
 #--------------------------------- Creating the OpenGL Information Tab ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    frame_opengl_info = Gtk.Frame()
+ #   frame_opengl_info = Gtk.Frame()
     opengl_box = Gtk.Box(orientation=1,spacing=10)
     setMargin(opengl_box,0,5,10)
     tab.append(opengl_box)
-    opengl_box.append(frame_opengl_info)
+#    opengl_box.append(frame_opengl_info)
 
     openglColumnView = Gtk.ColumnView()
     openglColumnView.props.show_row_separators = True
@@ -523,15 +523,13 @@ def OpenGL(tab):
     openglColumnView.set_model(openglSelection)
 
     opengl_info_scrollbar = create_scrollbar(openglColumnView)
-    frame_opengl_info.set_child(opengl_info_scrollbar)
+    opengl_box.append(opengl_info_scrollbar)
     opengl_info()
 
 #-------------------------------- Creating the show OpenGL Limits Limits------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    frame_opengl_buttons = Gtk.Frame()
-    opengl_box.append(frame_opengl_buttons)
     grid_opengl_buttons = Gtk.Grid()
-    frame_opengl_buttons.set_child(grid_opengl_buttons)
+    opengl_box.append(grid_opengl_buttons)
 
     opengl_limits_button = Gtk.Button.new_with_label("Show OpenGL Limits")
     opengl_limits_button.connect("clicked",clickme)
@@ -580,7 +578,7 @@ def OpenGL(tab):
     extensions_switcher.set_policy(1)
     adw_toolbar_view.add_top_bar(extensions_switcher)
 
-    grid_opengl_extension = Gtk.Grid()
+    grid_opengl_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
     opengl_extension_box.append(grid_opengl_extension)
 
     openglExtensionColumnView = Gtk.ColumnView()
@@ -605,12 +603,12 @@ def OpenGL(tab):
     openglExtensionsSelection.set_model(filterOpenglExtensionsListStore)
     openglExtensionColumnView.set_model(openglExtensionsSelection)
 
-    frame_search_gl =Gtk.Frame()
+#    frame_search_gl =Gtk.Frame()
     entry_gl = Gtk.SearchEntry()
     entry_gl.set_property("placeholder-text","Type here to filter extensions.....")
     entry_gl.connect("search-changed",_on_search_method_changed,filter_open_extensions)
     entry_gl.grab_focus()
-    frame_search_gl.set_child(entry_gl)
+ #   frame_search_gl.set_child(entry_gl)
 
 #---------------------------- Getting OpenGL Extensions -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     with open(Filenames.opengl_vendor_gl_extension_file,"w") as file:
@@ -630,12 +628,14 @@ def OpenGL(tab):
     
     vendor_dropdown_gl.connect('notify::selected-item', radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
     radcall2(vendor_dropdown_gl,0,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
-    setMargin(vendor_dropdown_gl,2,1,2)
+    setMargin(grid_opengl_extension,2,2,2)
    
-    grid_opengl_extension.attach(vendor_dropdown_gl,0,0,1,1)
-    grid_opengl_extension.attach_next_to(frame_search_gl,vendor_dropdown_gl,Gtk.PositionType.LEFT,150,1)
+    grid_opengl_extension.append(vendor_dropdown_gl)
     opengl_extension_scrollbar = create_scrollbar(openglExtensionColumnView)
-    grid_opengl_extension.attach_next_to(opengl_extension_scrollbar,frame_search_gl,Gtk.PositionType.BOTTOM,151,1)
+    entry_gl.add_css_class(css_class = "toolbar")
+    grid_opengl_extension.append(opengl_extension_scrollbar)
+    grid_opengl_extension.append(entry_gl)
+
 
 
 #--------------------------- creating OpenGL ES Extension tab -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -774,5 +774,5 @@ def OpenGL(tab):
         egl_extension_scrollbar = create_scrollbar(eglExtensionColumnView)
         grid_egl_extension.attach_next_to(egl_extension_scrollbar,frame_search_egl,Gtk.PositionType.BOTTOM,151,1)
 
-
+    return tab
     # ------------------------------------------- Search Text Box GL ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

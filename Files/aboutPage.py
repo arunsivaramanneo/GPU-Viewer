@@ -8,7 +8,7 @@ from Common import create_scrollbar,fetchImageFromUrl,getLinkButtonImg,setMargin
 
 Adw.init()
 
-title = "About GPU-Viewer v3.15"
+title = "About GPU-Viewer v3.20"
 
 import gi
 
@@ -108,3 +108,5 @@ def about_page(tab3):
     Contactbutton = getLinkButtonImg(Contactimg, const.EMAIL_LINK, const.TOOLTIP_CONTACT)
     setMargin(Contactbutton,100,5,5)
     grid.attach_next_to(Contactbutton, Githubbutton, Gtk.PositionType.RIGHT, 1, 1)
+
+    return tab3

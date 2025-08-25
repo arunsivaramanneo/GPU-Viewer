@@ -12,7 +12,9 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
-from Common import copyContentsFromFile,getScreenSize,create_tab
+from Common import copyContentsFromFile,getScreenSize
+from aboutPage import about_page
+from OpenGLViewer import OpenGL
 
 # Define the main application class.
 # It inherits from Adw.Application, which provides a modern application shell.
@@ -24,6 +26,15 @@ def isVulkanSupported():
         vulkan_process.communicate()
     vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
     return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0
+
+def isOpenglSupported():
+    with open(Filenames.opengl_outpuf_file, "w") as file:
+        opengl_process = subprocess.Popen(Filenames.opengl_output_command,shell=True,stdout= file,universal_newlines=True)
+        opengl_process.wait()
+        opengl_process.communicate()
+    opengl_output = copyContentsFromFile(Filenames.opengl_outpuf_file)
+    return len(opengl_output) > 10 and opengl_process.returncode == 0
+
 
 class SimpleApp(Adw.Application):
     """
@@ -121,26 +132,31 @@ class SimpleApp(Adw.Application):
         
         # Create an icon for the first tab
             icon1 = Gtk.Image.new_from_icon_name("Vulkan")
-            print(icon1.get_icon_name())
 
             icon1 = Gtk.Image.new_from_icon_name("document-send-symbolic")
 
         # Add the first page to the view stack, with a title and an icon
             self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
         # Create the second page (tab content)
+    #    page2_box.set_halign(Gtk.Align.CENTER)
+    #    page2_box.set_valign(Gtk.Align.CENTER)
+   #     label2 = Gtk.Label.new("This is the second tab!")
+    #    label2.set_css_classes(["title-1"])
+    #    page2_box.append(label2)
         page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-        page2_box.set_halign(Gtk.Align.CENTER)
-        page2_box.set_valign(Gtk.Align.CENTER)
-        label2 = Gtk.Label.new("This is the second tab!")
-        label2.set_css_classes(["title-1"])
-        page2_box.append(label2)
 
         # Create an icon for the second tab
-        icon2 = Gtk.Image.new_from_icon_name("camera-photo-symbolic")
+        if isOpenglSupported():
+            opengl_box = OpenGL(page2_box)
+            self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
+
+        page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
 
         # Add the second page to the view stack with a title and an icon
-        self.view_stack.add_titled_with_icon(page2_box, "page2", "Second Tab", icon2.get_icon_name())
-        
+        about_box = about_page(page3_box)
+        self.view_stack.add_titled_with_icon(about_box, "page3", "About Us", "about-us")
+
+
         # Show the window and all its children
         self.window.present()
 
