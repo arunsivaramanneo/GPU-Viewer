@@ -492,7 +492,7 @@ def OpenGL(tab):
 
  #   frame_opengl_info = Gtk.Frame()
     opengl_box = Gtk.Box(orientation=1,spacing=10)
-    setMargin(opengl_box,0,5,10)
+#    setMargin(opengl_box,0,0,1)
     tab.append(opengl_box)
 #    opengl_box.append(frame_opengl_info)
 
@@ -534,7 +534,9 @@ def OpenGL(tab):
     opengl_limits_button = Gtk.Button.new_with_label("Show OpenGL Limits")
     opengl_limits_button.connect("clicked",clickme)
     setMargin(opengl_limits_button,20,10,10)
-    grid_opengl_buttons.attach(opengl_limits_button,0,0,1,1)
+    opengl_limits_button.add_css_class(css_class = "suggested-action")
+    opengl_limits_button.add_css_class(css_class = "toolbar")
+    grid_opengl_buttons.attach(opengl_limits_button,0,0,1,1 )
 
 # ---------------------------------- Creating the Logo ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -550,6 +552,8 @@ def OpenGL(tab):
 
     opengl_framebuffer_button = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
     opengl_framebuffer_button.connect("clicked",FrameBuffer)
+    opengl_framebuffer_button.add_css_class(css_class = "suggested-action")
+    opengl_framebuffer_button.add_css_class(css_class = "toolbar")
 
     setMargin(opengl_framebuffer_button,100,10,10)
     grid_opengl_buttons.attach_next_to(opengl_framebuffer_button,vendor_pic_img,Gtk.PositionType.RIGHT,1,1)
@@ -669,7 +673,7 @@ def OpenGL(tab):
 #    extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
  #   extensions_page2.set_property("tab-expand",True)
 
-    grid_opengl_es_extension = Gtk.Grid()
+    grid_opengl_es_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
     opengl_es_extension_box.append(grid_opengl_es_extension)
 
  #   setColumns(tree_opengl_es_extension,Title,const.MWIDTH,0.0)
@@ -680,12 +684,11 @@ def OpenGL(tab):
     
     Vendor_ES,vesList = getVendorList(Filenames.opengl_vendor_es_extension_file)
 
-    frame_search_es =Gtk.Frame()
     entry_es = Gtk.SearchEntry()
     entry_es.set_property("placeholder-text","Type here to filter extensions.....")
     entry_es.connect("search-changed",_on_search_method_changed,filter_open_es_extensions)
+    entry_es.add_css_class(css_class = "toolbar")
     entry_es.grab_focus()
-    frame_search_es.set_child(entry_es)
 
     vendor_es_list = Gtk.StringList()
     vendor_dropdown_es = Gtk.DropDown()
@@ -696,10 +699,10 @@ def OpenGL(tab):
 
     radcall2(vendor_dropdown_es,0,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
     vendor_dropdown_es.connect("notify::selected-item", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
-    grid_opengl_es_extension.attach(vendor_dropdown_es,0,0,1,1)
-    grid_opengl_es_extension.attach_next_to(frame_search_es,vendor_dropdown_es,Gtk.PositionType.LEFT,150,1)
+    grid_opengl_es_extension.append(vendor_dropdown_es)
     opengl_es_extension_scrollbar = create_scrollbar(openglESExtensionColumnView)
-    grid_opengl_es_extension.attach_next_to(opengl_es_extension_scrollbar,frame_search_es,Gtk.PositionType.BOTTOM,151,1)
+    grid_opengl_es_extension.append(opengl_es_extension_scrollbar)
+    grid_opengl_es_extension.append(entry_es)
  #   opengl_extension_box.append(opengl_es_extension_scrollbar)
 
 
@@ -741,7 +744,7 @@ def OpenGL(tab):
     #    extensions_page3 = extensions_notebook.get_page(egl_extension_box)
     #    extensions_page3.set_property("tab-expand",True)
 
-        grid_egl_extension = Gtk.Grid()
+        grid_egl_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
         egl_extension_box.append(grid_egl_extension)
 
      #   setColumns(tree_egl_extension,Title,const.MWIDTH,0.0)
@@ -760,19 +763,18 @@ def OpenGL(tab):
             vendor_egl_list.append(Vendor_EGL[i])
         
         vendor_dropdown_egl.set_selected(0)
-        frame_search_egl =Gtk.Frame()
         entry_egl = Gtk.SearchEntry()
         entry_egl.set_property("placeholder-text","Type here to filter extensions.....")
         entry_egl.connect("search-changed",_on_search_method_changed,filter_egl_extensions)
+        entry_egl.add_css_class(css_class = "toolbar")
         entry_egl.grab_focus()
-        frame_search_egl.set_child(entry_egl)
 
         radcall2(vendor_dropdown_egl,0,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
         vendor_dropdown_egl.connect('notify::selected-item', radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
-        grid_egl_extension.attach(vendor_dropdown_egl,0,0,2,1)
-        grid_egl_extension.attach_next_to(frame_search_egl,vendor_dropdown_egl,Gtk.PositionType.LEFT,149,1)
+        grid_egl_extension.append(vendor_dropdown_egl)
         egl_extension_scrollbar = create_scrollbar(eglExtensionColumnView)
-        grid_egl_extension.attach_next_to(egl_extension_scrollbar,frame_search_egl,Gtk.PositionType.BOTTOM,151,1)
+        grid_egl_extension.append(egl_extension_scrollbar)
+        grid_egl_extension.append(entry_egl)
 
     return tab
     # ------------------------------------------- Search Text Box GL ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

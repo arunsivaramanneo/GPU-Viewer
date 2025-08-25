@@ -68,7 +68,6 @@ class SimpleApp(Adw.Application):
         self.window = Adw.ApplicationWindow.new(self)
         self.window.set_title("GPU-Viewer v3.2")
 
-
         # Set the application's default size to 800x800
 
         width,height = getScreenSize()
@@ -76,7 +75,7 @@ class SimpleApp(Adw.Application):
         if int(width) > 2160 and int(height) < 1440:
             self.window.set_size_request(2160 * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
         elif int(width) > 2160 and int(height) > 1440:
-            self.window.set_size_request(2160 * const.WIDTH_RATIO ,1440 * const.HEIGHT_RATIO1)
+            self.window.set_size_request(2160 * const.WIDTH_RATIO2 ,1440 * const.HEIGHT_RATIO1)
         else:
             self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
 
@@ -86,12 +85,12 @@ class SimpleApp(Adw.Application):
         # Create a view switcher that will display icons
         self.switcher = Adw.ViewSwitcher.new()
         self.switcher.set_stack(self.view_stack)
-
+        self.switcher.set_policy(1)
         # Create a header bar
         self.header_bar = Adw.HeaderBar.new()
     #    self.header_bar.add_css_class(css_class="inline")
         # Set the view switcher as the custom title widget in the header bar
-
+        self.header_bar.add_css_class(css_class="compact")
         theme_switch = Gtk.Switch.new()
         theme_switch.set_valign(Gtk.Align.CENTER)
         
@@ -113,7 +112,7 @@ class SimpleApp(Adw.Application):
         theme_box.append(theme_icon)
         theme_box.append(theme_switch)
         self.header_bar.pack_end(theme_box)
-        self.header_bar.set_title_widget(self.switcher)
+        self.header_bar.set_title_widget(title_widget=self.switcher)
         
         # Create a main box to hold the header bar and the view stack
         main_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
