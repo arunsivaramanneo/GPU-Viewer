@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Import necessary libraries.
-import sys
+import sys, os
 import gi
 import subprocess
 
@@ -94,6 +94,8 @@ class SimpleApp(Adw.Application):
         theme_switch = Gtk.Switch.new()
         theme_switch.set_valign(Gtk.Align.CENTER)
         
+        icon_theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
+        icon_theme.add_search_path(os.path.abspath("../Images"))
         # Get the current theme preference from Adw.StyleManager
         style_manager = Adw.StyleManager.get_default()
         prefer_dark_theme = style_manager.get_dark()
@@ -130,10 +132,6 @@ class SimpleApp(Adw.Application):
             vulkan_box = create_vulkan_tab_content(self)
         
         # Create an icon for the first tab
-            icon1 = Gtk.Image.new_from_icon_name("Vulkan")
-
-            icon1 = Gtk.Image.new_from_icon_name("document-send-symbolic")
-
         # Add the first page to the view stack, with a title and an icon
             self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
         # Create the second page (tab content)

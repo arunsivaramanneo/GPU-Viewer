@@ -1158,7 +1158,7 @@ def create_vulkan_tab_content(self):
 
 #    sidebar_listbox.add_css_class(css_class="frame")
     # Set the show-separators property to False
-    sidebar_listbox.set_show_separators(False)
+    sidebar_listbox.set_show_separators(True)
     
     # Add the tabs to the sidebar ListBox
     tabs = [
@@ -1865,6 +1865,8 @@ def create_vulkan_tab_content(self):
         content_stack.set_visible_child_name(child_name)
         
     sidebar_listbox.connect("row-activated", on_row_activated)
+    # Set a minimum width for the sidebar
+
 
     # Create the Adw.NavigationPage wrappers for the sidebar and content
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
