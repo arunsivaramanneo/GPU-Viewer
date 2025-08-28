@@ -604,3 +604,5 @@ def openCL(tab):
 
     numberOfDevicesEntry.set_max_length(2)
     platformGrid.attach_next_to(numberOfDevicesEntry, numberOfDevices, Gtk.PositionType.RIGHT, 1, 1)
+
+    return tab

@@ -396,3 +396,5 @@ def vdpauinfo(tab2):
 	videoSurfaceLimits()
 	VideoMixerFeature()
 	vdpauInformation()
+
+	return tab2

@@ -15,6 +15,8 @@ import Filenames, const
 from Common import copyContentsFromFile,getScreenSize
 from aboutPage import about_page
 from OpenGLViewer import OpenGL
+from OpenCL import openCL
+from VdpauViewer import vdpauinfo
 
 # Define the main application class.
 # It inherits from Adw.Application, which provides a modern application shell.
@@ -34,6 +36,22 @@ def isOpenglSupported():
         opengl_process.communicate()
     opengl_output = copyContentsFromFile(Filenames.opengl_outpuf_file)
     return len(opengl_output) > 10 and opengl_process.returncode == 0
+
+def isOpenclSupported():
+    with open(Filenames.opencl_output_file, "w") as file:
+        clinfo_process = subprocess.Popen(Filenames.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+        clinfo_process.wait()
+        clinfo_process.communicate()
+    clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
+    return len(clinfo_output) > 10 and clinfo_process.returncode == 0
+
+def isVdpauinfoSupported():
+    with open(Filenames.vdpauinfo_output_file, "w") as file:
+        vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+        vdpauinfo_process.wait()
+        vdpauinfo_process.communicate()
+    vdpauinfo_output = copyContentsFromFile(Filenames.vdpauinfo_output_file)
+    return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
 
 
 class SimpleApp(Adw.Application):
@@ -66,6 +84,7 @@ class SimpleApp(Adw.Application):
         """
         # Create a new Adwaita ApplicationWindow
         self.window = Adw.ApplicationWindow.new(self)
+        self.window.add_css_class(css_class="compact")
         self.window.set_title("GPU-Viewer v3.2")
 
         # Set the application's default size to 800x800
@@ -90,7 +109,7 @@ class SimpleApp(Adw.Application):
         self.header_bar = Adw.HeaderBar.new()
     #    self.header_bar.add_css_class(css_class="inline")
         # Set the view switcher as the custom title widget in the header bar
-        self.header_bar.add_css_class(css_class="compact")
+        self.header_bar.add_css_class(css_class="view")
         theme_switch = Gtk.Switch.new()
         theme_switch.set_valign(Gtk.Align.CENTER)
         
@@ -105,7 +124,7 @@ class SimpleApp(Adw.Application):
         theme_switch.connect("state-set", self._on_theme_toggled)
 
         # Create an icon for the theme switch
-        theme_icon = Gtk.Image.new_from_icon_name("weather-clear-night-symbolic")
+        theme_icon = Gtk.Image.new_from_icon_name("theme")
         
         # Create a box to hold the icon and the switch
         theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
@@ -146,6 +165,20 @@ class SimpleApp(Adw.Application):
         if isOpenglSupported():
             opengl_box = OpenGL(page2_box)
             self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
+
+
+        opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+
+        if isOpenclSupported():
+            opencl_content = openCL(opencl_box)
+            self.view_stack.add_titled_with_icon(opencl_content,"opencl_page","OpenCL","OpenCL")
+
+        vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        if isVdpauinfoSupported():
+            vdpau_content = vdpauinfo(vdpau_box)
+            self.view_stack.add_titled_with_icon(vdpau_content,"vdpau_page","VDPAU","VDPAU")
+
+
 
         page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
 

@@ -1153,7 +1153,7 @@ def create_vulkan_tab_content(self):
     sidebar_listbox.set_vexpand(True)
     sidebar_listbox.add_css_class(css_class="boxed-list")
     sidebar_listbox.add_css_class(css_class="toolbar")
-    sidebar_listbox.add_css_class(css_class="compact")
+
 
 
 #    sidebar_listbox.add_css_class(css_class="frame")
@@ -1162,7 +1162,7 @@ def create_vulkan_tab_content(self):
     
     # Add the tabs to the sidebar ListBox
     tabs = [
-        "System information", "Limits", "Properties", "Extensions",
+        "System Information", "Limits", "Properties", "Extensions",
         "Features", "Formats", "Memory Types", "Memory Heaps", "Queues",
         "Instance Extensions", "Instance Layers", "Surface"
     ]
@@ -1184,7 +1184,7 @@ def create_vulkan_tab_content(self):
         # Create a box for the content of this specific tab
         content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         
-        if tab_name == "System information":
+        if tab_name == "System Information":
             # Create a selection model from the new Gio.ListStore
             deviceColumnView = Gtk.ColumnView()
             deviceColumnView.props.show_row_separators = True
@@ -1258,6 +1258,8 @@ def create_vulkan_tab_content(self):
 
             propertiesColumnView.set_model(propertiesSelection)
             propertiesColumnView.add_css_class(css_class="toolbar")
+            propertiesColumnView.add_css_class(css_class="property")
+
 
             propertiesColumnLhs = Gtk.ColumnViewColumn.new("Device Properties",factory_properties)
             propertiesColumnLhs.set_resizable(True)
@@ -1279,6 +1281,7 @@ def create_vulkan_tab_content(self):
             filterPropertiesStoreDropdown.set_filter(filter_properties_dropdown)
             propertiesDropdown = Gtk.DropDown(model = filterPropertiesStoreDropdown,factory=factory_properties_dropdown_value)
             propertiesDropdown.set_enable_search(True)
+            propertiesDropdown.add_css_class(css_class="menu")
             properties_dropdown_search = _get_search_entry_widget(propertiesDropdown)
             properties_dropdown_search.connect('search-changed',_on_search_method_changed,filter_properties_dropdown)
         #   propertiesDropdown.set_model(propertiesList)
@@ -1865,6 +1868,8 @@ def create_vulkan_tab_content(self):
         content_stack.set_visible_child_name(child_name)
         
     sidebar_listbox.connect("row-activated", on_row_activated)
+    sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
+#    content_stack.set_visible_child_name("System Information")
     # Set a minimum width for the sidebar
 
 
