@@ -1153,7 +1153,7 @@ def create_vulkan_tab_content(self):
     sidebar_listbox.set_vexpand(True)
     sidebar_listbox.add_css_class(css_class="boxed-list")
     sidebar_listbox.add_css_class(css_class="toolbar")
-
+    sidebar_listbox.add_css_class(css_class="sidebar")
 
 
 #    sidebar_listbox.add_css_class(css_class="frame")

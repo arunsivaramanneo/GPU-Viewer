@@ -9,7 +9,7 @@ import subprocess
 # It ensures we are using the correct versions of the libraries.
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GObject,Gdk
+from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
 from Common import copyContentsFromFile,getScreenSize
@@ -86,6 +86,7 @@ class SimpleApp(Adw.Application):
         self.window = Adw.ApplicationWindow.new(self)
         self.window.add_css_class(css_class="compact")
         self.window.set_title("GPU-Viewer v3.2")
+        self.window.add_css_class(css_class="view")
 
         # Set the application's default size to 800x800
 
@@ -112,11 +113,13 @@ class SimpleApp(Adw.Application):
         self.header_bar.add_css_class(css_class="view")
         theme_switch = Gtk.Switch.new()
         theme_switch.set_valign(Gtk.Align.CENTER)
-        
+
         icon_theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
         icon_theme.add_search_path(os.path.abspath("../Images"))
+
         # Get the current theme preference from Adw.StyleManager
         style_manager = Adw.StyleManager.get_default()
+        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
         prefer_dark_theme = style_manager.get_dark()
         theme_switch.set_active(prefer_dark_theme)
         
@@ -139,6 +142,8 @@ class SimpleApp(Adw.Application):
         main_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         main_box.append(self.header_bar)
         main_box.append(self.view_stack)
+
+
 
         # Set the main box as the content of the window
         self.window.set_content(main_box)
@@ -176,7 +181,7 @@ class SimpleApp(Adw.Application):
         vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         if isVdpauinfoSupported():
             vdpau_content = vdpauinfo(vdpau_box)
-            self.view_stack.add_titled_with_icon(vdpau_content,"vdpau_page","VDPAU","VDPAU")
+            self.view_stack.add_titled_with_icon(vdpau_content,"vdpau_page","VDPAU","vdpauinfo")
 
 
 
