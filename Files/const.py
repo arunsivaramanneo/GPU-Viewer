@@ -13,8 +13,8 @@ if prefer_dark_theme:
   Gnome_logo = "../Images/Gnome_logo.png"
   LLVM_logo = "../Images/LLVM_Logo.png"
   LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
-  AMD_LOGO_PNG = "../Images/AMD.png"
   AMDRYZEN_LOGO_PNG = "../Images/amd-ryzen.png"
+  AMD_LOGO_PNG = "../Images/AMD_D.png"
 
 
 else:
@@ -184,7 +184,7 @@ Nobara_OS_logo = "../Images/nobara.png"
 
 #AMD_logo = "../Images/AMD_logo.png"
 #Radeon_logo = "../Images/AMD_Radeon.svg"
-Radeon_logo = "../Images/AMD_Radeon_graphics_logo.png"
+#Radeon_logo = "../Images/AMD_Radeon_graphics_logo.png"
 Nvidia_logo = "../Images/nvidia_logo.png"
 #LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"

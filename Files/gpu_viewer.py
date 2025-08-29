@@ -134,9 +134,9 @@ class SimpleApp(Adw.Application):
         theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
         theme_box.set_halign(Gtk.Align.END)
         theme_box.set_valign(Gtk.Align.CENTER)
-        theme_box.append(theme_icon)
-        theme_box.append(theme_switch)
-        self.header_bar.pack_end(theme_box)
+ #       theme_box.append(theme_icon)
+  #      theme_box.append(theme_switch)
+   #     self.header_bar.pack_end(theme_box)
         self.header_bar.set_title_widget(title_widget=self.switcher)
         
         # Create a main box to hold the header bar and the view stack
