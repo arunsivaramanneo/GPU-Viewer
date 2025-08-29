@@ -159,242 +159,300 @@ def vdpauinfo(tab2):
 		search_text_widget = decoderSearchEntry.get_text()
 		return search_text_widget.upper() in item.data.upper()
 
+	split_view_container = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+	split_view_container.set_vexpand(True)
+	split_view_container.set_hexpand(True)
+    
+    # Create a new NavigationSplitView
+	split_view = Adw.NavigationSplitView.new()
+	split_view.set_vexpand(True)
+	split_view.set_hexpand(True)
 
-	grid = Gtk.Grid()
-	tab2.append(grid)
-	DevicesFrame = Gtk.Frame()
-	grid.attach(DevicesFrame,0,0,1,1)
+    # Create the sidebar content using a Gtk.ListBox for tabs
+	sidebar_listbox = Gtk.ListBox.new()
+	sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+	sidebar_listbox.set_vexpand(True)
+	sidebar_listbox.add_css_class(css_class="boxed-list")
+	sidebar_listbox.add_css_class(css_class="toolbar")
 
-	notebook = Gtk.Notebook()
-	notebook.set_property("scrollable", True)
-	notebook.set_property("enable-popup", True)
-	grid.attach(notebook, 0, 2, 1, 1)
 
+#    sidebar_listbox.add_css_class(css_class="frame")
+    # Set the show-separators property to False
+	sidebar_listbox.set_show_separators(True)
+    
+    # Add the tabs to the sidebar ListBox
+	tabs = [
+        "VDPAU Information", "Decoder Capabilities", "Surface Limits", "Video Mixer"
+    ]
+
+	content_stack = Gtk.Stack.new()
+
+    # Create the content pages for each tab and add them to the stack
+	for tab_name in tabs:
+		row = Gtk.ListBoxRow()
+		label = Gtk.Label.new(tab_name)
+        # Add padding to the label inside the row
+		label.set_margin_top(10)
+		label.set_margin_bottom(10)
+		row.set_child(label)
+		sidebar_listbox.append(row)
+
+
+        # Create a box for the content of this specific tab
+		content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+
+		if tab_name == "VDPAU Information":
 # ------- VDPAU information -------------------------------
 
 
-	vdpauinfoTab = Gtk.Box(spacing=20)
-	vdpauinfoGrid = createSubTab(vdpauinfoTab,notebook, "VDPAU Information")
-	
-	vdpauinfoColumnView = Gtk.ColumnView()
-	vdpauinfoColumnView.props.show_row_separators = True
-	vdpauinfoColumnView.props.show_column_separators = False
-	
-	factory_vdpau = Gtk.SignalListItemFactory()
-	factory_vdpau.connect("setup",setup_expander)
-	factory_vdpau.connect("bind",bind_expander)
-	
-	factory_vdpau_value = Gtk.SignalListItemFactory()
-	factory_vdpau_value.connect("setup",setup)
-	factory_vdpau_value.connect("bind",bind1)
-	
-	vdpauSelection = Gtk.SingleSelection()
-	vdpauinfoStore = Gio.ListStore.new(ExpandDataObject)
-	
-	vdpauModel = Gtk.TreeListModel.new(vdpauinfoStore,False,True,add_tree_node)
-	vdpauSelection.set_model(vdpauModel)
-	
-	vdpauinfoColumnView.set_model(vdpauSelection)
-	
-	vdpauColumnLhs = Gtk.ColumnViewColumn.new("VDPAU Information",factory_vdpau)
-	vdpauColumnLhs.set_resizable(True)
-	vdpauColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_vdpau_value)
-	vdpauColumnRhs.set_expand(True)
+			vdpauinfoColumnView = Gtk.ColumnView()
+			vdpauinfoColumnView.props.show_row_separators = True
+			vdpauinfoColumnView.props.show_column_separators = False
+			
+			factory_vdpau = Gtk.SignalListItemFactory()
+			factory_vdpau.connect("setup",setup_expander)
+			factory_vdpau.connect("bind",bind_expander)
+			
+			factory_vdpau_value = Gtk.SignalListItemFactory()
+			factory_vdpau_value.connect("setup",setup)
+			factory_vdpau_value.connect("bind",bind1)
+			
+			vdpauSelection = Gtk.SingleSelection()
+			vdpauinfoStore = Gio.ListStore.new(ExpandDataObject)
+			
+			vdpauModel = Gtk.TreeListModel.new(vdpauinfoStore,False,True,add_tree_node)
+			vdpauSelection.set_model(vdpauModel)
+			
+			vdpauinfoColumnView.set_model(vdpauSelection)
+			
+			vdpauColumnLhs = Gtk.ColumnViewColumn.new("VDPAU Information",factory_vdpau)
+			vdpauColumnLhs.set_resizable(True)
+			vdpauColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_vdpau_value)
+			vdpauColumnRhs.set_expand(True)
 
-	
-	vdpauinfoColumnView.append_column(vdpauColumnLhs)
-	vdpauinfoColumnView.append_column(vdpauColumnRhs)
+			
+			vdpauinfoColumnView.append_column(vdpauColumnLhs)
+			vdpauinfoColumnView.append_column(vdpauColumnRhs)
 
-	
-#	vdpauinfoStore = Gtk.TreeStore(str,str,str)
-#	treeVdpauInfo = Gtk.TreeView.new_with_model(vdpauinfoStore)
-#	treeVdpauInfo.set_property("enable-grid-lines",1)
+			
+		#	vdpauinfoStore = Gtk.TreeStore(str,str,str)
+		#	treeVdpauInfo = Gtk.TreeView.new_with_model(vdpauinfoStore)
+		#	treeVdpauInfo.set_property("enable-grid-lines",1)
 
-#	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
+		#	setColumns(treeVdpauInfo,vdpauinfoTitle,300,0.0)
 
-	vdpauinfoScrollbar = create_scrollbar(vdpauinfoColumnView)
-	vdpauinfoGrid.attach(vdpauinfoScrollbar,0,0,1,1)
+			vdpauinfoScrollbar = create_scrollbar(vdpauinfoColumnView)
+			content_box.append(vdpauinfoScrollbar)
 
+		elif tab_name == "Decoder Capabilities":
 # ------- Decoder Capabilities ----------------------------
 	
-	decoderTab = Gtk.Box(spacing=20)
-	decoderGrid = createSubTab(decoderTab, notebook, "Decoder Capabilities")
+			decoderTab = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 
-	decoderInfoColumnView = Gtk.ColumnView()
-	decoderInfoColumnView.props.show_row_separators = True
-	decoderInfoColumnView.props.show_column_separators = False
-	
-	factory_decoder = Gtk.SignalListItemFactory()
-	factory_decoder.connect("setup",setup_expander)
-	factory_decoder.connect("bind",bind_expander)
-	
-	factory_decoder_value1 = Gtk.SignalListItemFactory()
-	factory_decoder_value1.connect("setup",setup)
-	factory_decoder_value1.connect("bind",bind1)
-	
+			decoderInfoColumnView = Gtk.ColumnView()
+			decoderInfoColumnView.props.show_row_separators = True
+			decoderInfoColumnView.props.show_column_separators = False
+			
+			factory_decoder = Gtk.SignalListItemFactory()
+			factory_decoder.connect("setup",setup_expander)
+			factory_decoder.connect("bind",bind_expander)
+			
+			factory_decoder_value1 = Gtk.SignalListItemFactory()
+			factory_decoder_value1.connect("setup",setup)
+			factory_decoder_value1.connect("bind",bind1)
+			
 
-	factory_decoder_value2 = Gtk.SignalListItemFactory()
-	factory_decoder_value2.connect("setup",setup)
-	factory_decoder_value2.connect("bind",bind2)
-
-
-	factory_decoder_value3 = Gtk.SignalListItemFactory()
-	factory_decoder_value3.connect("setup",setup)
-	factory_decoder_value3.connect("bind",bind3)
+			factory_decoder_value2 = Gtk.SignalListItemFactory()
+			factory_decoder_value2.connect("setup",setup)
+			factory_decoder_value2.connect("bind",bind2)
 
 
-	factory_decoder_value4 = Gtk.SignalListItemFactory()
-	factory_decoder_value4.connect("setup",setup)
-	factory_decoder_value4.connect("bind",bind4)
-
-	decoderSelection = Gtk.SingleSelection()
-	decoderStore = Gio.ListStore.new(ExpandDataObject2)
-	filterSortDecoderStore = Gtk.FilterListModel(model=decoderStore)
-	filter_decoder = Gtk.CustomFilter.new(_do_filter_decoder_view, filterSortDecoderStore)
-	filterSortDecoderStore.set_filter(filter_decoder)
-	
-	vdpauModel = Gtk.TreeListModel.new(filterSortDecoderStore,False,True,add_tree_node2)
-	decoderSelection.set_model(vdpauModel)
-	
-	decoderInfoColumnView.set_model(decoderSelection)
-	
-	decoderColumnLhs = Gtk.ColumnViewColumn.new("Decoder name",factory_decoder)
-	decoderColumnLhs.set_resizable(True)
-	decoderColumnRhs1 = Gtk.ColumnViewColumn.new("Level",factory_decoder_value1)
-	decoderColumnRhs1.set_expand(True)
-	decoderColumnRhs2 = Gtk.ColumnViewColumn.new("Macroblocks",factory_decoder_value2)
-	decoderColumnRhs2.set_expand(True)
-	decoderColumnRhs3 = Gtk.ColumnViewColumn.new("Width",factory_decoder_value3)
-	decoderColumnRhs3.set_expand(True)
-	decoderColumnRhs4 = Gtk.ColumnViewColumn.new("Height",factory_decoder_value4)
-	decoderColumnRhs4.set_expand(True)
-	
-	decoderInfoColumnView.append_column(decoderColumnLhs)
-	decoderInfoColumnView.append_column(decoderColumnRhs1)
-	decoderInfoColumnView.append_column(decoderColumnRhs2)
-	decoderInfoColumnView.append_column(decoderColumnRhs3)
-	decoderInfoColumnView.append_column(decoderColumnRhs4)
-
-#	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
-#	treeDecoder = Gtk.TreeView.new_with_model(decoderStore)
-#	treeDecoder.set_property("enable-grid-lines",1)
-
-#	setColumns(treeDecoder, decoderTitle, 300, 0.0)
-	decoderSearchEntry = Gtk.SearchEntry()
-	setMargin(decoderSearchEntry,0,5,0)
-	decoderSearchEntry.set_property("placeholder_text","Type here to filter.....")
-	decoderSearchEntry.connect("search-changed", _on_search_method_changed,filter_decoder)
-
-	decoderScrollbar = create_scrollbar(decoderInfoColumnView)
-	decoderGrid.attach(decoderSearchEntry,0,0,15,1)
-	decoderGrid.attach_next_to(decoderScrollbar, decoderSearchEntry, Gtk.PositionType.BOTTOM, 15, 1)
+			factory_decoder_value3 = Gtk.SignalListItemFactory()
+			factory_decoder_value3.connect("setup",setup)
+			factory_decoder_value3.connect("bind",bind3)
 
 
-# -------- Surface Limits -----------------------------------
+			factory_decoder_value4 = Gtk.SignalListItemFactory()
+			factory_decoder_value4.connect("setup",setup)
+			factory_decoder_value4.connect("bind",bind4)
 
-	surfaceTab = Gtk.Box(spacing=20)
-	surfaceGrid = createSubTab(surfaceTab,notebook,"Surface Limits")
+			decoderSelection = Gtk.SingleSelection()
+			decoderStore = Gio.ListStore.new(ExpandDataObject2)
+			filterSortDecoderStore = Gtk.FilterListModel(model=decoderStore)
+			filter_decoder = Gtk.CustomFilter.new(_do_filter_decoder_view, filterSortDecoderStore)
+			filterSortDecoderStore.set_filter(filter_decoder)
+			
+			vdpauModel = Gtk.TreeListModel.new(filterSortDecoderStore,False,True,add_tree_node2)
+			decoderSelection.set_model(vdpauModel)
+			
+			decoderInfoColumnView.set_model(decoderSelection)
+			
+			decoderColumnLhs = Gtk.ColumnViewColumn.new("Decoder name",factory_decoder)
+			decoderColumnLhs.set_resizable(True)
+			decoderColumnRhs1 = Gtk.ColumnViewColumn.new("Level",factory_decoder_value1)
+			decoderColumnRhs1.set_expand(True)
+			decoderColumnRhs2 = Gtk.ColumnViewColumn.new("Macroblocks",factory_decoder_value2)
+			decoderColumnRhs2.set_expand(True)
+			decoderColumnRhs3 = Gtk.ColumnViewColumn.new("Width",factory_decoder_value3)
+			decoderColumnRhs3.set_expand(True)
+			decoderColumnRhs4 = Gtk.ColumnViewColumn.new("Height",factory_decoder_value4)
+			decoderColumnRhs4.set_expand(True)
+			
+			decoderInfoColumnView.append_column(decoderColumnLhs)
+			decoderInfoColumnView.append_column(decoderColumnRhs1)
+			decoderInfoColumnView.append_column(decoderColumnRhs2)
+			decoderInfoColumnView.append_column(decoderColumnRhs3)
+			decoderInfoColumnView.append_column(decoderColumnRhs4)
 
-	vdpauSurfaceColumnView = Gtk.ColumnView()
-	vdpauSurfaceColumnView.props.show_row_separators = True
-	vdpauSurfaceColumnView.props.show_column_separators = False
-	
-	factory_surface_limits = Gtk.SignalListItemFactory()
-	factory_surface_limits.connect("setup",setup_expander)
-	factory_surface_limits.connect("bind",bind_expander)
-	
-	factory_surface_limits_value1 = Gtk.SignalListItemFactory()
-	factory_surface_limits_value1.connect("setup",setup)
-	factory_surface_limits_value1.connect("bind",bind1)
-	
+		#	decoderStore = Gtk.ListStore(str,str,str,str,str,str)
+		#	treeDecoder = Gtk.TreeView.new_with_model(decoderStore)
+		#	treeDecoder.set_property("enable-grid-lines",1)
 
-	factory_surface_limits_value2 = Gtk.SignalListItemFactory()
-	factory_surface_limits_value2.connect("setup",setup)
-	factory_surface_limits_value2.connect("bind",bind2)
+		#	setColumns(treeDecoder, decoderTitle, 300, 0.0)
+			decoderSearchEntry = Gtk.SearchEntry()
+			setMargin(decoderSearchEntry,0,5,0)
+			decoderSearchEntry.set_property("placeholder_text","Type here to filter.....")
+			decoderSearchEntry.connect("search-changed", _on_search_method_changed,filter_decoder)
 
-
-	factory_surface_limits_value3 = Gtk.SignalListItemFactory()
-	factory_surface_limits_value3.connect("setup",setup)
-	factory_surface_limits_value3.connect("bind",bind3)
-
-
-	vdpauSurfaceSelection = Gtk.SingleSelection()
-	surfaceVideoStore = Gio.ListStore.new(ExpandDataObject2)
-	
-	vdpauSurfaceModel = Gtk.TreeListModel.new(surfaceVideoStore,False,True,add_tree_node2)
-	vdpauSurfaceSelection.set_model(vdpauSurfaceModel)
-	
-	vdpauSurfaceColumnView.set_model(vdpauSurfaceSelection)
-	
-	vdpauSurfaceColumnLhs = Gtk.ColumnViewColumn.new("Suface",factory_surface_limits)
-	vdpauSurfaceColumnLhs.set_resizable(True)
-	vdpauSurfaceColumnLhs.set_expand(True)
-	vdpauSurfaceColumnRhs1 = Gtk.ColumnViewColumn.new("Width",factory_surface_limits_value1)
-	vdpauSurfaceColumnRhs1.set_expand(True)
-	vdpauSurfaceColumnRhs2 = Gtk.ColumnViewColumn.new("Height",factory_surface_limits_value2)
-	vdpauSurfaceColumnRhs2.set_expand(True)
-	vdpauSurfaceColumnRhs3 = Gtk.ColumnViewColumn.new("Types",factory_surface_limits_value3)
-	vdpauSurfaceColumnRhs3.set_expand(True)
-	
-	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnLhs)
-	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs1)
-	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs2)
-	vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs3)
+			decoderScrollbar = create_scrollbar(decoderInfoColumnView)
+			decoderTab.append(decoderScrollbar)
+			decoderTab.append(decoderSearchEntry)
 
 
-#	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
-#	treeSurfaceVideoLimits = Gtk.TreeView.new_with_model(surfaceVideoStore)
-#	treeSurfaceVideoLimits.set_property("enable-grid-lines",1)
+			content_box.append(decoderTab)
 
-#	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
+		elif tab_name == "Surface Limits":
+			# -------- Surface Limits -----------------------------------
 
-	surfaceVideoScrollbar = create_scrollbar(vdpauSurfaceColumnView)
-	surfaceGrid.attach(surfaceVideoScrollbar,0,0,1,1)
+			vdpauSurfaceColumnView = Gtk.ColumnView()
+			vdpauSurfaceColumnView.props.show_row_separators = True
+			vdpauSurfaceColumnView.props.show_column_separators = False
+			
+			factory_surface_limits = Gtk.SignalListItemFactory()
+			factory_surface_limits.connect("setup",setup_expander)
+			factory_surface_limits.connect("bind",bind_expander)
+			
+			factory_surface_limits_value1 = Gtk.SignalListItemFactory()
+			factory_surface_limits_value1.connect("setup",setup)
+			factory_surface_limits_value1.connect("bind",bind1)
+			
 
-	
-# -------- Video Mixer ---------------------------------------
-
-	videoMixerTab = Gtk.Box(spacing=20)
-	videoMixerGrid = createSubTab(videoMixerTab,notebook,"Video Mixer")
-	videoMixerGrid.set_row_spacing(20)
-
-	videoMixerColumnView = Gtk.ColumnView()
-	videoMixerColumnView.props.show_row_separators = True
-	videoMixerColumnView.props.show_column_separators = False
-	
-	factory_video_mixer = Gtk.SignalListItemFactory()
-	factory_video_mixer.connect("setup",setup_expander)
-	factory_video_mixer.connect("bind",bind_expander)
-	
-	factory_video_mixer_value = Gtk.SignalListItemFactory()
-	factory_video_mixer_value.connect("setup",setup)
-	factory_video_mixer_value.connect("bind",bind1)
-
-	videoMixerSelection = Gtk.SingleSelection()
-	videoMixerFeatureStore = Gio.ListStore.new(ExpandDataObject2)
-	
-	videoMixerModel = Gtk.TreeListModel.new(videoMixerFeatureStore,False,True,add_tree_node2)
-	videoMixerSelection.set_model(videoMixerModel)
-	
-	videoMixerColumnView.set_model(videoMixerSelection)
-	
-	videoMixerColumnLhs = Gtk.ColumnViewColumn.new("Name",factory_video_mixer)
-	videoMixerColumnLhs.set_resizable(True)
-	videoMixerColumnRhs1 = Gtk.ColumnViewColumn.new("Supported",factory_video_mixer_value)
-	videoMixerColumnRhs1.set_expand(True)
-	
-	videoMixerColumnView.append_column(videoMixerColumnLhs)
-	videoMixerColumnView.append_column(videoMixerColumnRhs1)
-	
-	videoMixerFeatureScrollbar = create_scrollbar(videoMixerColumnView)
-	videoMixerGrid.attach(videoMixerFeatureScrollbar,0,0,1,1)
+			factory_surface_limits_value2 = Gtk.SignalListItemFactory()
+			factory_surface_limits_value2.connect("setup",setup)
+			factory_surface_limits_value2.connect("bind",bind2)
 
 
+			factory_surface_limits_value3 = Gtk.SignalListItemFactory()
+			factory_surface_limits_value3.connect("setup",setup)
+			factory_surface_limits_value3.connect("bind",bind3)
 
+
+			vdpauSurfaceSelection = Gtk.SingleSelection()
+			surfaceVideoStore = Gio.ListStore.new(ExpandDataObject2)
+			
+			vdpauSurfaceModel = Gtk.TreeListModel.new(surfaceVideoStore,False,True,add_tree_node2)
+			vdpauSurfaceSelection.set_model(vdpauSurfaceModel)
+			
+			vdpauSurfaceColumnView.set_model(vdpauSurfaceSelection)
+			
+			vdpauSurfaceColumnLhs = Gtk.ColumnViewColumn.new("Suface",factory_surface_limits)
+			vdpauSurfaceColumnLhs.set_resizable(True)
+			vdpauSurfaceColumnLhs.set_expand(True)
+			vdpauSurfaceColumnRhs1 = Gtk.ColumnViewColumn.new("Width",factory_surface_limits_value1)
+			vdpauSurfaceColumnRhs1.set_expand(True)
+			vdpauSurfaceColumnRhs2 = Gtk.ColumnViewColumn.new("Height",factory_surface_limits_value2)
+			vdpauSurfaceColumnRhs2.set_expand(True)
+			vdpauSurfaceColumnRhs3 = Gtk.ColumnViewColumn.new("Types",factory_surface_limits_value3)
+			vdpauSurfaceColumnRhs3.set_expand(True)
+			
+			vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnLhs)
+			vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs1)
+			vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs2)
+			vdpauSurfaceColumnView.append_column(vdpauSurfaceColumnRhs3)
+
+
+		#	surfaceVideoStore = Gtk.TreeStore(str,str,str,str,str)
+		#	treeSurfaceVideoLimits = Gtk.TreeView.new_with_model(surfaceVideoStore)
+		#	treeSurfaceVideoLimits.set_property("enable-grid-lines",1)
+
+		#	setColumns(treeSurfaceVideoLimits,surfaceVideoTitle,300,0.0)
+
+			surfaceVideoScrollbar = create_scrollbar(vdpauSurfaceColumnView)
+
+			content_box.append(surfaceVideoScrollbar)
+		elif tab_name == "Video Mixer":
+			# -------- Video Mixer ---------------------------------------
+
+			videoMixerColumnView = Gtk.ColumnView()
+			videoMixerColumnView.props.show_row_separators = True
+			videoMixerColumnView.props.show_column_separators = False
+
+			factory_video_mixer = Gtk.SignalListItemFactory()
+			factory_video_mixer.connect("setup",setup_expander)
+			factory_video_mixer.connect("bind",bind_expander)
+
+			factory_video_mixer_value = Gtk.SignalListItemFactory()
+			factory_video_mixer_value.connect("setup",setup)
+			factory_video_mixer_value.connect("bind",bind1)
+
+			videoMixerSelection = Gtk.SingleSelection()
+			videoMixerFeatureStore = Gio.ListStore.new(ExpandDataObject2)
+
+			videoMixerModel = Gtk.TreeListModel.new(videoMixerFeatureStore,False,True,add_tree_node2)
+			videoMixerSelection.set_model(videoMixerModel)
+
+			videoMixerColumnView.set_model(videoMixerSelection)
+
+			videoMixerColumnLhs = Gtk.ColumnViewColumn.new("Name",factory_video_mixer)
+			videoMixerColumnLhs.set_resizable(True)
+			videoMixerColumnRhs1 = Gtk.ColumnViewColumn.new("Supported",factory_video_mixer_value)
+			videoMixerColumnRhs1.set_expand(True)
+
+			videoMixerColumnView.append_column(videoMixerColumnLhs)
+			videoMixerColumnView.append_column(videoMixerColumnRhs1)
+
+			videoMixerFeatureScrollbar = create_scrollbar(videoMixerColumnView)
+
+			content_box.append(videoMixerFeatureScrollbar)
+
+		content_stack.add_titled(content_box, tab_name.replace(" ", "-").lower(), tab_name)
+
+	sidebar_scrolled_window = Gtk.ScrolledWindow.new()
+	sidebar_scrolled_window.set_child(sidebar_listbox)
+
+    # Connect the listbox signal to change the stack page
+	def on_row_activated(listbox, row):
+		tab_label = row.get_child()
+		tab_name = tab_label.get_label()
+        
+        # The name for the stack child is the tab name, with spaces replaced by dashes and lowercase
+		child_name = tab_name.replace(" ", "-").lower()
+
+        # Set the visible child of the stack using its name
+		content_stack.set_visible_child_name(child_name)
+        
+	sidebar_listbox.connect("row-activated", on_row_activated)
+	sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
+#    content_stack.set_visible_child_name("System Information")
+    # Set a minimum width for the sidebar
+
+
+    # Create the Adw.NavigationPage wrappers for the sidebar and content
+	sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
+	content_page = Adw.NavigationPage.new(content_stack, "Content")
+    
+    # Set the sidebar and content for the split view using the new pages
+	split_view.set_sidebar(sidebar_page)
+	split_view.set_content(content_page)
+    
+    # Add the split view to its new container
+	split_view_container.append(split_view)
 
 	decoderCapabilities()
 	videoSurfaceLimits()
 	VideoMixerFeature()
 	vdpauInformation()
+
+	tab2.append(split_view_container)
 
 	return tab2

@@ -12,11 +12,12 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
-from Common import copyContentsFromFile,getScreenSize
+from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand
 from aboutPage import about_page
 from OpenGLViewer import OpenGL
 from OpenCL import openCL
 from VdpauViewer import vdpauinfo
+from VulkanVideoViewer import VulkanVideo
 
 # Define the main application class.
 # It inherits from Adw.Application, which provides a modern application shell.
@@ -52,6 +53,9 @@ def isVdpauinfoSupported():
         vdpauinfo_process.communicate()
     vdpauinfo_output = copyContentsFromFile(Filenames.vdpauinfo_output_file)
     return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
+
+def isVulkanVideoSupported():
+    return  len(fetchContentsFromCommand("vulkaninfo | grep 'Video Profiles'")) > 0
 
 
 class SimpleApp(Adw.Application):
@@ -178,6 +182,13 @@ class SimpleApp(Adw.Application):
         if isOpenclSupported():
             opencl_content = openCL(opencl_box)
             self.view_stack.add_titled_with_icon(opencl_content,"opencl_page","OpenCL","OpenCL")
+
+        vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        if isVulkanVideoSupported():
+            vulkan_video_content = VulkanVideo(vulkan_video_box)
+    #        page_vdpau = notebook.get_page(vdpauTab)
+    #        page_vdpau.set_property("tab-expand",True)
+            self.view_stack.add_titled_with_icon(vulkan_video_content,"vulkan_video_page","Vulkan Video","Vulkan-Video")
 
         vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         if isVdpauinfoSupported():
