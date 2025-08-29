@@ -1,4 +1,37 @@
 import os.path as Path
+import gi
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw, GObject,Gdk, Gio
+
+
+
+style_manager = Adw.StyleManager.get_default()
+prefer_dark_theme = style_manager.get_dark()
+
+if prefer_dark_theme:
+  AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+  Gnome_logo = "../Images/Gnome_logo.png"
+  LLVM_logo = "../Images/LLVM_Logo.png"
+  LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
+  AMD_LOGO_PNG = "../Images/AMD.png"
+  AMDRYZEN_LOGO_PNG = "../Images/amd-ryzen.png"
+
+
+else:
+  AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
+  Gnome_logo = "../Images/Gnome_Dark.png"
+  LLVM_logo = "../Images/LLVM-Logo.png"
+  LLVM_LOGO_SVG = "../Images/LLVM-Logo.png"
+  AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
+  AMD_LOGO_PNG = "../Images/AMD_logo.png"
+
+
+
+
+
+
+
+    
 
 GTK_CSS = "gtk.css"
 
@@ -32,9 +65,8 @@ INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
 
-AMD_LOGO_PNG = "../Images/AMD.png"
+#AMD_LOGO_PNG = "../Images/AMD.png"
 
-AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
 
 AMD_RADEON_VEGA_LOGO_PNG = "../Images/radeon-vega.png"
 
@@ -47,13 +79,13 @@ AMD_RADEON_Pro_LOGO_PNG = "../Images/AMD_Radeon_Pro.png"
 
 
 
-AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
+#AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
 
 POCL_LOGO_PNG = "../Images/pocl.png"
 
 CUDA_PNG = "../Images/Cuda.png"
 
-LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
+#LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
 
 MESA_LOGO_PNG = "../Images/mesa-logo.png"
 
@@ -150,11 +182,11 @@ Rhino_Linux_logo = "../Images/Rhino_Linux.png"
 Steam_OS_logo = "../Images/Steam_icon_logo.png"
 Nobara_OS_logo = "../Images/nobara.png"
 
-AMD_logo = "../Images/AMD_logo.png"
+#AMD_logo = "../Images/AMD_logo.png"
 #Radeon_logo = "../Images/AMD_Radeon.svg"
 Radeon_logo = "../Images/AMD_Radeon_graphics_logo.png"
 Nvidia_logo = "../Images/nvidia_logo.png"
-LLVM_logo = "../Images/LLVM-Logo.png"
+#LLVM_logo = "../Images/LLVM-Logo.png"
 Intel_logo = "../Images/Intel_logo.png"
 Mesa_logo = "../Images/mesa.png"
 #Ryzen_logo = "../Images/Ryzen.png"
@@ -178,7 +210,7 @@ Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
 cosmic_logo = "../Images/cosmic.png"
 
-Gnome_logo = "../Images/Gnome_Dark.png"
+#Gnome_logo = "../Images/Gnome_Dark.png"
 
 TOOLTIP_CONTACT = "Contact us"
 

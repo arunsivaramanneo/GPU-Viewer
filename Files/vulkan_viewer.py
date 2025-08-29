@@ -469,7 +469,8 @@ def create_vulkan_tab_content(self):
             for i in range(len(vulkan_device_extension_lhs)):
                 ExtensionTab_Store.append(DataObject(vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i]))
 
-            label = "Extensions (%d)" %len(vulkan_device_extensions_rhs)
+            label = "Device Extensions (%d)" %len(vulkan_device_extensions_rhs)
+            deviceExtensionColumn.set_title(label)
         #    notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
 
     def Formats(GPUname):
@@ -665,7 +666,8 @@ def create_vulkan_tab_content(self):
                 
 
 
-    #    labe1Format = "Formats (%d)" %len(valueFormats)
+        labe1Format = "Device Formats (%d)" %len(valueFormats)
+        formatColumnLhs.set_title(labe1Format)
     #    notebook.set_tab_label(FormatsTab,Gtk.Label(label = labe1Format))
 
 
@@ -794,9 +796,11 @@ def create_vulkan_tab_content(self):
         HeapTab_Store.append(toprow)
 
     #    TreeHeap.expand_all()
-    #    labe13 = "Memory Heaps (%d)" %(HCount)
+        labe13 = "Memory Heaps (%d)" %(HCount)
+        heapColumnLhs.set_title(labe13)
      #   notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
-    #    label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags),(HCount))
+        label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags))
+        memoryTypesColumnLhs.set_title(label2)
     #    notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
 
     def Queues(GPUname):
@@ -873,7 +877,8 @@ def create_vulkan_tab_content(self):
                     #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
         QueueTab_Store.append(toprow)           
     #    TreeQueue.expand_all()
-    #    label = "Queues (%d)" % len(vulkan_device_queue_counts)
+        label = "Queues (%d)" % len(vulkan_device_queue_counts)
+        queueColumnLhs.set_title(label)
     #    notebook.set_tab_label(QueueTab, Gtk.Label(label=label))
 
     def Instance():
@@ -925,6 +930,8 @@ def create_vulkan_tab_content(self):
 
         label = "Instance Extensions (%d)" % (len(vulkan_device_instance_lhs))
         label2 = "Instance Layers (%d)" %len(layer_names)
+        instanceExtensionColumn.set_title(label)
+        layerColumnLhs.set_title(label2)
     #    notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
     #    notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
         i = 0
@@ -1153,7 +1160,6 @@ def create_vulkan_tab_content(self):
     sidebar_listbox.set_vexpand(True)
     sidebar_listbox.add_css_class(css_class="boxed-list")
     sidebar_listbox.add_css_class(css_class="toolbar")
-    sidebar_listbox.add_css_class(css_class="sidebar")
 
 
 #    sidebar_listbox.add_css_class(css_class="frame")

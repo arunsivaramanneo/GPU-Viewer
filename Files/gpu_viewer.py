@@ -73,9 +73,11 @@ class SimpleApp(Adw.Application):
         if state:
             # Set to dark theme
             style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+
         else:
             # Set to light theme
             style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+
 
     def on_activate(self, app):
         """
@@ -119,7 +121,6 @@ class SimpleApp(Adw.Application):
 
         # Get the current theme preference from Adw.StyleManager
         style_manager = Adw.StyleManager.get_default()
-        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
         prefer_dark_theme = style_manager.get_dark()
         theme_switch.set_active(prefer_dark_theme)
         
