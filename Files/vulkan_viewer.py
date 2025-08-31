@@ -1051,18 +1051,38 @@ def create_vulkan_tab_content(self):
 
     def _do_filter_extension_view(item, filter_list_model):
         search_text_widget = extensionSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            deviceExtensionColumn.set_title("Device Extensions (%d)" %(current_count + 1))
+        else:
+            deviceExtensionColumn.set_title("Device Extensions (%d)" % current_count)
         return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
     
     def _do_filter_feature_view(item, filter_list_model):
         search_text_widget = featureSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            featureColumn1.set_title("Device Features")
+        else:
+            featureColumn1.set_title("Device Featres (%d)" % current_count)
         return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
     def _do_filter_instances_view(item, filter_list_model):
         search_text_widget = instanceSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            instanceExtensionColumn.set_title("Instance Extensions (%d)" %(current_count + 1))
+        else:
+            instanceExtensionColumn.set_title("Instance Extensions (%d)" % current_count)
         return search_text_widget.upper() in item.column1.upper() or search_text_widget.upper() in item.column2.upper()
 
     def _do_filter_limits_view(item, filter_list_model):
         search_text_widget = limitsSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            limitColumnLhs.set_title("Device Limits")
+        else:
+            limitColumnLhs.set_title("Device Limits (%d)" % current_count)
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
 
     def _do_filter_properties_view(item, filter_list_model):
@@ -1072,11 +1092,21 @@ def create_vulkan_tab_content(self):
 
     def _do_filter_layers_view(item, filter_list_model):
         search_text_widget = layerSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            layerColumnLhs.set_title("Instance Layers (%d)" %(current_count + 1))
+        else:
+            layerColumnLhs.set_title("Instance Layers (%d)" % current_count)
         return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper() or search_text_widget.upper() in item.data3.upper() or search_text_widget.upper() in item.data4.upper() or search_text_widget.upper() in item.data5.upper()
 
 
     def _do_filter_formats_view(item, filter_list_model):
         search_text_widget = formatSearchEntry.get_text()
+        current_count = filter_list_model.get_n_items()
+        if search_text_widget == "":
+            formatColumnLhs.set_title("Device Formats (%d)" %(current_count + 1))
+        else:
+            formatColumnLhs.set_title("Device Formats (%d)" % current_count)
         if search_text_widget.upper() in item.data.upper():
             return item.data.upper()
 
