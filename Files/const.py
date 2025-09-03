@@ -15,6 +15,10 @@ if prefer_dark_theme:
   LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
   AMDRYZEN_LOGO_PNG = "../Images/amd-ryzen.png"
   AMD_LOGO_PNG = "../Images/AMD_D.png"
+  GITHUB_LOGO_PNG = "../Images/github-white.png"
+  CONTACT_LOGO_PNG = "../Images/Contact-white.png"
+  BUG_LOGO_PNG = "../Images/bug-white.png"
+
 
 
 else:
@@ -24,6 +28,11 @@ else:
   LLVM_LOGO_SVG = "../Images/LLVM-Logo.png"
   AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
   AMD_LOGO_PNG = "../Images/AMD_logo.png"
+  GITHUB_LOGO_PNG = "../Images/github.png"
+  CONTACT_LOGO_PNG = "../Images/Contact.png"
+  BUG_LOGO_PNG = "../Images/Bug.svg"
+
+
 
 
 
@@ -99,21 +108,17 @@ VULKAN_VIDEO_PNG = "../Images/Vulkan-Video.png"
 
 DONATE_LOGO_PNG = "../Images/Donate.png"
 
-GITHUB_LOGO_PNG = "../Images/github.png"
 
 FAQ_LOGO_PNG = "../Images/faq-icon.png"
 
 LICENSE_LOGO_PNG = "../Images/GPL3.png"
 
-BUG_LOGO_PNG = "../Images/Bug.svg"
 
 LOG_LOGO_PNG = "../Images/Changelog.png"
 
 APP_LOGO_PNG = "../Images/GPU_Viewer.png"
 
 NVIDIA_LOGO_PNG = "../Images/Nvidia_logo.png"
-
-CONTACT_LOGO_PNG = "../Images/Contact.png"
 
 DISCORD_LOGO_PNG = "../Images/Discord.png"
 
