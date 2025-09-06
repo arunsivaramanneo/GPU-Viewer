@@ -36,6 +36,10 @@ def openCL(tab):
             getDeviceMemoryImageDetails(value)
             getDeviceVectorDetails(value)
             getDeviceQueueExecutionCapabilities(value)
+        
+            gpu_image = getGpuImage(selected.get_string())
+            image_renderer.set_pixbuf(gpu_image)
+
 
     def getDeviceNames(value):
         
@@ -642,6 +646,12 @@ def openCL(tab):
     setMargin(Devices_dropdown,20,10,10)
     Devices_dropdown.connect("notify::selected-item",selectDevice)
     h_box.append(Devices_dropdown)
+
+    gpu_image = Gtk.Image()
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
+    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
+    Devices_dropdown.set_margin_end(10)
+    h_box.append(image_renderer)
 
 #    platformGrid.attach_next_to(Devices_dropdown, AvailableDevices, Gtk.PositionType.RIGHT, 20, 1)
 
