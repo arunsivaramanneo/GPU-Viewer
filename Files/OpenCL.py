@@ -346,7 +346,6 @@ def openCL(tab):
 
     def selectPlatform(dropdown,dummy):
         selected =dropdown.props.selected_item
-        print(selected)
         value = 0
         if selected is not None:
             value = dropdown.props.selected
@@ -375,8 +374,8 @@ def openCL(tab):
     sidebar_listbox.set_show_separators(True)
 
     tabs = [
-        "Platform Information", "Device Information", "Device Memory  \n \t  &\nImage Information",
-        "Queue Capabilities  \n \t\t &\nExecution Capabilities", "Device Vector Information"
+        "Platform Information", "Device Information", "Device Memory  \n \t    &\nImage Information",
+        "Queue Capabilities\n \t\t&\nExecution Capabilities", "Device Vector Information"
     ]
 
 
@@ -462,7 +461,7 @@ def openCL(tab):
                 DeviceDetailsScrollbar = create_scrollbar(deviceColumnView)
 
                 content_box.append(DeviceDetailsScrollbar)
-        elif tab_name == "Device Memory  \n \t  &\nImage Information":
+        elif tab_name == "Device Memory  \n \t    &\nImage Information":
                 deviceMemoryImageColumnView = Gtk.ColumnView()
                 deviceMemoryImageColumnView.props.show_row_separators = True
                 deviceMemoryImageColumnView.props.show_column_separators = False
@@ -494,7 +493,7 @@ def openCL(tab):
                 DeviceMemoryImageScrollbar = create_scrollbar(deviceMemoryImageColumnView)
 
                 content_box.append(DeviceMemoryImageScrollbar)
-        elif tab_name == "Queue Capabilities  \n \t\t &\nExecution Capabilities":
+        elif tab_name == "Queue Capabilities\n \t\t&\nExecution Capabilities":
                 deviceQueueExecutionColumnView = Gtk.ColumnView()
                 deviceQueueExecutionColumnView.props.show_row_separators = True
                 deviceQueueExecutionColumnView.props.show_column_separators = False
@@ -648,7 +647,7 @@ def openCL(tab):
     h_box.append(Devices_dropdown)
 
     gpu_image = Gtk.Image()
-    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 50, 50)
     image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
     Devices_dropdown.set_margin_end(10)
     h_box.append(image_renderer)

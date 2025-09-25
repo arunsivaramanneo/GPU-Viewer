@@ -148,7 +148,7 @@ else:
             if int(width) > 2160 and int(height) < 1440:
                 self.window.set_size_request(2160 * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
             elif int(width) > 2160 and int(height) > 1440:
-                self.window.set_size_request(2160 * const.WIDTH_RATIO2 ,1440 * const.HEIGHT_RATIO1)
+                self.window.set_size_request(2160 * const.WIDTH_RATIO ,1440 * const.HEIGHT_RATIO1)
             else:
                 self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
 
