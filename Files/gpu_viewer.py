@@ -151,7 +151,24 @@ else:
                 self.window.set_size_request(2160 * const.WIDTH_RATIO ,1440 * const.HEIGHT_RATIO1)
             else:
                 self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
+    
+            provider = Gtk.CssProvider.new()
+            try:
+                p = subprocess.Popen(Filenames.fetch_theme_preference,stdout= subprocess.PIPE,stderr = subprocess.PIPE,shell=True,text=True)
+                prefer_theme = p.communicate()[0]
+            except NameError:
+                print("Command not found")
+            if "prefer-dark"  in prefer_theme:
+                fname = Gio.file_new_for_path('gtk_dark.css')
+            elif "default" in prefer_theme:
+                fname = Gio.file_new_for_path('gtk_light.css')
+            else:
+                fname = Gio.file_new_for_path('gtk-dark.css')
 
+            display = Gtk.Widget.get_display(self.window)
+            provider.load_from_file(fname)
+            Gtk.StyleContext.add_provider_for_display(display, provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
             # Create a new Adwaita view stack to hold the different pages
             self.view_stack = Adw.ViewStack.new()
 
