@@ -1189,7 +1189,9 @@ def create_vulkan_tab_content(self):
     sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
     sidebar_listbox.set_vexpand(True)
     sidebar_listbox.add_css_class(css_class="boxed-list")
-    sidebar_listbox.add_css_class(css_class="toolbar")
+    sidebar_listbox.add_css_class(css_class="card")
+#    sidebar_listbox.add_css_class(css_class="toolbar")
+    sidebar_listbox.add_css_class(css_class="sidebar")
 
 
 #    sidebar_listbox.add_css_class(css_class="frame")
@@ -1219,6 +1221,7 @@ def create_vulkan_tab_content(self):
 
         # Create a box for the content of this specific tab
         content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        content_box.add_css_class('linked')
         
         if tab_name == "System Information":
             # Create a selection model from the new Gio.ListStore
@@ -1269,7 +1272,8 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Properties":
 
 
-            propertiesContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            propertiesContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
+            propertiesContentBox.add_css_class('toolbar')
             propertiesSearchDropdownBox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL,10)
             propertiesColumnView = Gtk.ColumnView()
             propertiesColumnView.props.show_row_separators = True
@@ -1317,7 +1321,7 @@ def create_vulkan_tab_content(self):
             filterPropertiesStoreDropdown.set_filter(filter_properties_dropdown)
             propertiesDropdown = Gtk.DropDown(model = filterPropertiesStoreDropdown,factory=factory_properties_dropdown_value)
             propertiesDropdown.set_enable_search(True)
-            propertiesDropdown.add_css_class(css_class="menu")
+            propertiesDropdown.add_css_class(css_class="menu     ")
             properties_dropdown_search = _get_search_entry_widget(propertiesDropdown)
             properties_dropdown_search.connect('search-changed',_on_search_method_changed,filter_properties_dropdown)
         #   propertiesDropdown.set_model(propertiesList)
@@ -1341,6 +1345,7 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Limits":
 
             limitsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            limitsContentBox.add_css_class('toolbar')
             limitsColumnView = Gtk.ColumnView()
             limitsColumnView.props.show_row_separators = True
             limitsColumnView.props.show_column_separators = False
@@ -1395,6 +1400,7 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Features":
         
             featureContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
+            featureContentBox.add_css_class('toolbar')
             featuresColumnView = Gtk.ColumnView()
             featuresColumnView.props.show_row_separators = True
             featuresColumnView.props.single_click_activate = False
@@ -1461,6 +1467,7 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Extensions":
 
             extensionContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
+            extensionContentBox.add_css_class('toolbar')
             extensionColumnView = Gtk.ColumnView()
             extensionColumnView.props.show_row_separators = True
             extensionColumnView.props.single_click_activate = False
@@ -1520,7 +1527,8 @@ def create_vulkan_tab_content(self):
             FormatsDropDown.set_enable_search(True)
             formats_dropdown_search = _get_search_entry_widget(FormatsDropDown)
             formats_dropdown_search.connect('search-changed',_on_search_method_changed,filter_formats_dropdown)
-            formatsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            formatsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
+            formatsContentBox.add_css_class('toolbar')
 
             formatsColumnView = Gtk.ColumnView()
             formatsColumnView.props.show_row_separators = True
