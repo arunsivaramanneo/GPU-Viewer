@@ -1713,6 +1713,7 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Instance Extensions":
 
             instanceContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            instanceContentBox.add_css_class('toolbar')
 
             instanceExtensionColumnView = Gtk.ColumnView()
             instanceExtensionColumnView.props.show_row_separators = True
@@ -1765,6 +1766,7 @@ def create_vulkan_tab_content(self):
         elif tab_name == "Instance Layers":
 
             instanceLayersContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            instanceLayersContentBox.add_css_class('toolbar')
 
             layersColumnView = Gtk.ColumnView()
             layersColumnView.props.show_row_separators = True
