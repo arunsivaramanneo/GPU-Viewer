@@ -153,17 +153,12 @@ else:
                 self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
     
             provider = Gtk.CssProvider.new()
-            try:
-                p = subprocess.Popen(Filenames.fetch_theme_preference,stdout= subprocess.PIPE,stderr = subprocess.PIPE,shell=True,text=True)
-                prefer_theme = p.communicate()[0]
-            except NameError:
-                print("Command not found")
-            if "prefer-dark"  in prefer_theme:
+            style_manager = Adw.StyleManager.get_default()
+            prefer_dark_theme = style_manager.get_dark()
+            if prefer_dark_theme:
                 fname = Gio.file_new_for_path('gtk_dark.css')
-            elif "default" in prefer_theme:
-                fname = Gio.file_new_for_path('gtk_light.css')
             else:
-                fname = Gio.file_new_for_path('gtk-light.css')
+                fname = Gio.file_new_for_path('gtk_light.css')
 
             display = Gtk.Widget.get_display(self.window)
             provider.load_from_file(fname)

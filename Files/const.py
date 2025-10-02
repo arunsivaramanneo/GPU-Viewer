@@ -4,7 +4,6 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 
 
-
 style_manager = Adw.StyleManager.get_default()
 prefer_dark_theme = style_manager.get_dark()
 

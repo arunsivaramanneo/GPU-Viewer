@@ -1344,7 +1344,7 @@ def create_vulkan_tab_content(self):
 
         elif tab_name == "Limits":
 
-            limitsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
+            limitsContentBox = Gtk.Box.new(Gtk.Orientation.VERTICAL,1)
             limitsContentBox.add_css_class('toolbar')
             limitsColumnView = Gtk.ColumnView()
             limitsColumnView.props.show_row_separators = True
