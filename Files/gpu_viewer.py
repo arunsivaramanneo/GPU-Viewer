@@ -163,7 +163,7 @@ else:
             elif "default" in prefer_theme:
                 fname = Gio.file_new_for_path('gtk_light.css')
             else:
-                fname = Gio.file_new_for_path('gtk-dark.css')
+                fname = Gio.file_new_for_path('gtk-light.css')
 
             display = Gtk.Widget.get_display(self.window)
             provider.load_from_file(fname)

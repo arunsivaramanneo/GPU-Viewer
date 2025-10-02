@@ -227,6 +227,7 @@ button.combo:hover{
 
 button.dropdown{
   background-color: #dcdcdc;
+  color: #000;
 }
 
 popover.background > arrow,
