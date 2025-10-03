@@ -647,7 +647,7 @@ def openCL(tab):
     h_box.append(Devices_dropdown)
 
     gpu_image = Gtk.Image()
-    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 50, 50)
+    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
     image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
     Devices_dropdown.set_margin_end(10)
     h_box.append(image_renderer)

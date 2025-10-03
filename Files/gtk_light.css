@@ -56,6 +56,12 @@ textview > border {
   font-weight: bolder;
 
 }
+
+:link{
+  color: #245DDA;
+  background-color: transparent;
+  text-decoration: none;
+}
 .close{
   color: #dcdcdc;
   font-size: 28px;

@@ -1,4 +1,4 @@
-<b>Copyright © 2017-2025 Arun Sivaraman </b> (<a href="arunsivaramanneo@gmail.com"><b>arunsivaramanneo@gmail.com</b></a>)
+<b>Copyright © 2017-2025 Arun Sivaraman </b> (<a href="arunsivaramanneo@gmail.com"><b><u>arunsivaramanneo@gmail.com</u></b></a>)
 
 <b>GPU Viewer is a FREE SOFTWARE: This program comes with ABSOLUTELY NO WARRANTY. </b>
 You can redistribute it and/or modify it under the terms of the GNU General Public license as published by the free software Foundation, either version 3 of the license, or (at your Option) any later version.
@@ -10,7 +10,7 @@ The application helps in viewing/navigating the OpenGL, Vulkan, OpenCL, EGL and 
 Please do note that this project does not use any OpenGL,Vulkan or OpenCL programming languages. The entire application works as a wrapper on the glxinfo, vulkaninfo, clinfo, es2_info and vdpauinfo output.
 
 The latest source code of this program can be found at
-<a href="https://github.com/arunsivaramanneo/GPU-Viewer"><b>https://github.com/arunsivaramanneo/GPU-Viewer</b></a>
+<a href="https://github.com/arunsivaramanneo/GPU-Viewer"><b><u>https://github.com/arunsivaramanneo/GPU-Viewer</u></b></a>
 
 This program uses:
     -  python 3 or higher
@@ -28,7 +28,7 @@ This program uses:
          - cat /proc/meminfo | awk '/Mem/' (Memory information)
          - uname -r (Kernel Information)
 
-If you find the project interesting enough, please consider making a <a href="https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q"><b>DONATION</b></a>. 
+If you find the project interesting enough, please consider making a <a href="https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q"><b><u>DONATION</u></b></a>. 
 Even a small one would mean the world to me. More than a mere financial act, donate means that you simply believe in this project and want it to be better.
 
 Trademarks
