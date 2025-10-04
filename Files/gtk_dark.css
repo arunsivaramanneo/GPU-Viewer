@@ -42,6 +42,7 @@
 
 .sidebar > row:focus {
   font-weight: bolder;
+  color: #d43c50;
 
 }
 frame{
@@ -419,10 +420,13 @@ listview > row :hover {
 popover.background listview > row {
   padding: 4px 8px;
   border: none;
-  margin: 0px;
+  margin: 2px;
   outline: none;
   border-style: none none none none;
   background-color: transparent;
+}
+popover.background lisview > row::selection{
+  color: #d43c50;
 }
 
 treeview {

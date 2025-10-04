@@ -48,12 +48,11 @@ textview > border {
   border-style: none none none none;
   color: #fff;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-
-
 }
 
 .sidebar > row:focus {
   font-weight: bolder;
+  color: yellow;
 
 }
 
