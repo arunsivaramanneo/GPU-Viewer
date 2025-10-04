@@ -1,0 +1,203 @@
+id: io.github.arunsivaramanneo.GPUViewer
+runtime: org.freedesktop.Platform
+sdk: org.freedesktop.Sdk
+runtime-version: '21.08'
+finish-args:
+  - --device=dri
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+command: gpu-viewer
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - '*.a'
+  - '*.la'
+modules:
+  - name: gpu-viewer
+    buildsystem: meson
+    post-install:
+      # desktop-file-utils latest stable (0.26) doesn't support desktop file spec v1.5
+      - desktop-file-edit --set-key=Version --set-value=1.4 ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      - python -m compileall ${FLATPAK_DEST}/share/gpu-viewer/Files
+    sources:
+      - type: dir
+        path: .
+
+    modules:
+      - name: vulkan-tools
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DGLSLANG_INSTALL_DIR=/app
+          - -DVULKAN_HEADERS_INSTALL_DIR=/app
+          - -DCMAKE_BUILD_TYPE=Release
+        sources:
+          - type: archive
+            url: https://github.com/KhronosGroup/Vulkan-Tools/archive/v1.3.209/Vulkan-Tools-1.3.209.tar.gz
+            sha256: e7b8e4943b8040935365323362b1eefa8f4bd98b1517e92f86961b2a45ddbd60
+            x-checker-data:
+              type: anitya
+              project-id: 242111
+              stable-only: true
+              url-template: https://github.com/KhronosGroup/Vulkan-Tools/archive/v$version/Vulkan-Tools-$version.tar.gz
+        modules:
+          - name: vulkan-headers
+            buildsystem: cmake-ninja
+            sources:
+              - type: archive
+                url: https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.3.209/Vulkan-Headers-v1.3.209.tar.gz
+                sha256: 345011af2369963ef65eff2f678419efca728a3035741882d52f871bbd3575bd
+                x-checker-data:
+                  type: anitya
+                  project-id: 88835
+                  stable-only: true
+                  url-template: https://github.com/KhronosGroup/Vulkan-Headers/archive/v$version/Vulkan-Headers-v$version.tar.gz
+
+      - name: mesa-demos
+        config-opts:
+          - --bindir=/app/lib/mesa-demos
+          - --disable-osmesa
+        post-install:
+          - mv -v /app/lib/mesa-demos/*info /app/bin/
+        sources:
+          - type: archive
+            url: https://mesa.freedesktop.org/archive/demos/mesa-demos-8.4.0.tar.bz2
+            sha256: 01e99c94a0184e63e796728af89bfac559795fb2a0d6f506fa900455ca5fff7d
+            x-checker-data:
+              type: anitya
+              project-id: 16781
+              stable-only: true
+              url-template: https://mesa.freedesktop.org/archive/demos/mesa-demos-$version.tar.bz2
+        cleanup:
+          - /lib/mesa-demos
+
+        modules:
+          - name: freeglut
+            buildsystem: cmake-ninja
+            build-options:
+              cflags: -fcommon
+            config-opts:
+              - -DCMAKE_BUILD_TYPE=None
+              - -DFREEGLUT_BUILD_STATIC_LIBS=OFF
+              - -DOpenGL_GL_PREFERENCE=LEGACY
+            sources:
+              - type: archive
+                url: https://downloads.sourceforge.net/freeglut/freeglut-3.2.2.tar.gz
+                sha256: c5944a082df0bba96b5756dddb1f75d0cd72ce27b5395c6c1dde85c2ff297a50
+                x-checker-data:
+                  type: anitya
+                  project-id: 846
+                  stable-only: true
+                  url-template: https://downloads.sourceforge.net/freeglut/freeglut-$version.tar.gz
+            modules:
+              - name: glu
+                config-opts:
+                  - --disable-static
+                sources:
+                  - type: archive
+                    url: https://mesa.freedesktop.org/archive/glu/glu-9.0.2.tar.xz
+                    sha256: 6e7280ff585c6a1d9dfcdf2fca489251634b3377bfc33c29e4002466a38d02d4
+                    x-checker-data:
+                      type: anitya
+                      project-id: 13518
+                      stable-only: true
+                      url-template: https://mesa.freedesktop.org/archive/glu/glu-$version.tar.xz
+
+          - name: glew
+            no-autogen: true
+            make-args:
+              - GLEW_PREFIX=${FLATPAK_DEST}
+              - GLEW_DEST=${FLATPAK_DEST}
+              - LIBDIR=${FLATPAK_DEST}/lib
+              - CFLAGS.EXTRA:=${CFLAGS} -fPIC
+              - LDFLAGS.EXTRA=${LDFLAGS}
+            make-install-args:
+              - GLEW_PREFIX=${FLATPAK_DEST}
+              - GLEW_DEST=${FLATPAK_DEST}
+              - LIBDIR=${FLATPAK_DEST}/lib
+              - CFLAGS.EXTRA:=${CFLAGS} -fPIC
+              - LDFLAGS.EXTRA=${LDFLAGS}
+            sources:
+              - type: archive
+                url: https://downloads.sourceforge.net/project/glew/glew/2.2.0/glew-2.2.0.tgz
+                sha256: d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1
+                x-checker-data:
+                  type: anitya
+                  project-id: 7878
+                  stable-only: true
+                  url-template: https://downloads.sourceforge.net/project/glew/glew/$version/glew-$version.tgz
+
+      - name: clinfo
+        no-autogen: true
+        no-make-install: true
+        build-commands:
+          - install -Dm755 -t /app/bin/ clinfo
+        sources:
+          - type: archive
+            url: https://github.com/Oblomov/clinfo/archive/3.0.21.02.21/clinfo-3.0.21.02.21.tar.gz
+            sha256: e52f5c374a10364999d57a1be30219b47fb0b4f090e418f2ca19a0c037c1e694
+            x-checker-data:
+              type: anitya
+              project-id: 10503
+              stable-only: true
+              url-template: https://github.com/Oblomov/clinfo/archive/$version/clinfo-$version.tar.gz
+        modules:
+          - name: opencl-headers
+            buildsystem: cmake
+            config-opts:
+              - -DCMAKE_INSTALL_DATADIR=/app/lib
+            sources:
+              - type: archive
+                url: https://github.com/KhronosGroup/OpenCL-Headers/archive/v2022.01.04/OpenCL-Headers-v2022.01.04.tar.gz
+                sha256: 6e716e2b13fc8d363b40a165ca75021b102f9328e2b38f8054d7db5884de29c9
+                x-checker-data:
+                  type: anitya
+                  project-id: 223257
+                  stable-only: true
+                  url-template: https://github.com/KhronosGroup/OpenCL-Headers/archive/v$version/OpenCL-Headers-v$version.tar.gz
+
+      - name: pygobject
+        buildsystem: meson
+        sources:
+          - type: archive
+            url: https://gitlab.gnome.org/GNOME/pygobject/-/archive/3.42.0/pygobject-3.42.0.tar.gz
+            sha256: b4d40fcd6b61a918eb33a44c5cc59bfb1b32169c593948cc0d013712b4ff579e
+            x-checker-data:
+              type: anitya
+              project-id: 13158
+              stable-only: true
+              url-template: https://gitlab.gnome.org/GNOME/pygobject/-/archive/$version/pygobject-$version.tar.gz
+        modules:
+          - name: pycairo
+            buildsystem: meson
+            sources:
+              - type: archive
+                url: https://github.com/pygobject/pycairo/archive/v1.21.0/pycairo-v1.21.0.tar.gz
+                sha256: 5e88e718b58751c96aa496914dd1b6a0531488f501cedfb6cd40bb307d69b88c
+                x-checker-data:
+                  type: anitya
+                  project-id: 13166
+                  stable-only: true
+                  url-template: https://github.com/pygobject/pycairo/archive/v$version/pycairo-v$version.tar.gz
+
+      - name: vdpauinfo
+        sources:
+          - type: archive
+            url: https://gitlab.freedesktop.org/vdpau/vdpauinfo/-/archive/1.4/vdpauinfo-1.4.tar.gz
+            sha256: 52377604a4f27afdee67c85b62b66457a981747009c839953d3fba5c4c89cb66
+            x-checker-data:
+              type: anitya
+              project-id: 16031
+              stable-only: true
+              url-template: https://gitlab.freedesktop.org/vdpau/vdpauinfo/-/archive/$version/vdpauinfo-$version.tar.gz
+
+      - name: lsb-release-compat
+        buildsystem: simple
+        build-commands:
+          - make install PREFIX=/app
+        sources:
+          - type: git
+            url: https://gitlab.com/nanonyme/lsb-release-compat.git
+            branch: master
+            commit: f4f908b62dcc9cd081eb2a42b6ad7cf98db4bb10
