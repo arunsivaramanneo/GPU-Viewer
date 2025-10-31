@@ -1228,6 +1228,7 @@ def create_vulkan_tab_content(self):
             deviceColumnView = Gtk.ColumnView()
             deviceColumnView.props.show_row_separators = True
             deviceColumnView.props.show_column_separators = False
+            deviceColumnView.add_css_class('rich-list')
 
             factory_devices = Gtk.SignalListItemFactory()
             factory_devices.connect("setup",setup_expander)
