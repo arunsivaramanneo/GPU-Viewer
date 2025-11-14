@@ -268,6 +268,8 @@ def getLogo(line):
         logo_pixbuf  = fetchImageFromUrl(const.Nobara_OS_logo,32,28, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
+    elif "Fedora" in line:
+        logo_pixbuf = fetchImageFromUrl(const.fedora_logo,32,28, True)
     elif "COSMIC" in line:
         logo_pixbuf  = fetchImageFromUrl(const.cosmic_logo,32,28, True)
     elif "Budgie" in line and "Ubuntu" in line:
@@ -318,8 +320,6 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.AMD_logo,32,28, True)      
     elif "Intel" in line:
         logo_pixbuf = fetchImageFromUrl(const.Intel_logo,32,28, True)
-    elif "Fedora" in line:
-        logo_pixbuf = fetchImageFromUrl(const.fedora_logo,32,28, True)
     elif "Manjaro" in line:
         logo_pixbuf = fetchImageFromUrl(const.Manjaro_logo,32,28, True)
     elif "sway" in line or "Sway" in line:
