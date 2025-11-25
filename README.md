@@ -20,17 +20,13 @@
 
 This project aims to capture all the important details of glxinfo, vulkaninfo and clinfo in a GUI. The project is being developed using python 3 pygobject with GTK4. All the important details are extracted using glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and displayed in the front-end. There is no hard OpenGL Programming involved, until glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/900cbd5e-c188-4ce6-89c1-1b7b0ee73537" />
+Light Theme
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/3a835a34-f782-49da-9382-4c4784b572d4" />
+<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/1df5f790-9fa5-4f84-99d3-4f1171d9d6be" />
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/d62c26c2-e95f-4244-891b-676b2dd95413" />
+Dark theme
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/aba7723c-a2d5-46fd-baa4-6b9d9075721f" />
-
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/c7d9e577-fe92-42b8-8ad6-00033ce2c291" />
-
-![opengl hardware limits_007](https://user-images.githubusercontent.com/3064692/31833704-134bc328-b5e9-11e7-95fc-6bcf7ea39d07.png)
+<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/cc0e4832-7b7e-4df9-9e41-d528ec6ad3a7" />
 
 
 ## INSTALLATION STEPS
