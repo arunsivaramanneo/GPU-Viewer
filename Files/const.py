@@ -17,6 +17,7 @@ if prefer_dark_theme:
   GITHUB_LOGO_PNG = "../Images/github-white.png"
   CONTACT_LOGO_PNG = "../Images/Contact-white.png"
   BUG_LOGO_PNG = "../Images/bug-white.png"
+  cosmic_logo = "../Images/cosmic.png"
 
 
 
@@ -30,8 +31,7 @@ else:
   GITHUB_LOGO_PNG = "../Images/github.png"
   CONTACT_LOGO_PNG = "../Images/Contact.png"
   BUG_LOGO_PNG = "../Images/Bug.svg"
-
-
+  cosmic_logo  = "../Images/Cosmic_white.svg"
 
 
 
@@ -212,7 +212,6 @@ Fluxbox_logo = "../Images/Fluxbox-logo.svg"
 Sway_logo = "../Images/Sway_Tree.svg"
 Wayland_logo = "../Images/Wayland_Logo.svg"
 X11_logo = "../Images/X11_Logo.png"
-cosmic_logo = "../Images/cosmic.png"
 
 #Gnome_logo = "../Images/Gnome_Dark.png"
 

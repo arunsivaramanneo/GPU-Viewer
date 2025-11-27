@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg350"
+   width="229.02159"
+   height="150.01027"
+   viewBox="0 0 229.02159 150.01027"
+   sodipodi:docname="Cosmic_logo_neutral_+_gradient_mark.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs354">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath366">
+      <path
+         d="m 137.679,131.782 c -5.667,0 -10.279,-4.109 -10.279,-9.159 v 0 c 0,-5.051 4.612,-9.159 10.279,-9.159 v 0 h 116.219 c 5.667,0 10.278,4.108 10.278,9.159 v 0 c 0,5.05 -4.611,9.159 -10.278,9.159 v 0 z"
+         id="path364" />
+    </clipPath>
+    <linearGradient
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(136.77571,0,0,-136.77571,127.40062,122.62276)"
+       spreadMethod="pad"
+       id="linearGradient380">
+      <stop
+         style="stop-opacity:1;stop-color:#ffae02"
+         offset="0"
+         id="stop372" />
+      <stop
+         style="stop-opacity:1;stop-color:#ff972a"
+         offset="0.527933"
+         id="stop374" />
+      <stop
+         style="stop-opacity:1;stop-color:#fe7e57"
+         offset="0.999999"
+         id="stop376" />
+      <stop
+         style="stop-opacity:1;stop-color:#fe7e57"
+         offset="1"
+         id="stop378" />
+    </linearGradient>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath390">
+      <path
+         d="M 0,338 H 397 V 0 H 0 Z"
+         id="path388" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="namedview352"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="2.2788462"
+     inkscape:cx="114.53164"
+     inkscape:cy="76.13502"
+     inkscape:window-width="1920"
+     inkscape:window-height="1052"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g358">
+    <inkscape:page
+       x="0"
+       y="0"
+       id="page356"
+       width="229.02159"
+       height="150.01027"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <g
+     id="g358"
+     inkscape:groupmode="layer"
+     inkscape:label="Page 1"
+     transform="matrix(1.3333333,0,0,-1.3333333,-150.15613,301.29559)">
+    <g
+       id="g360">
+      <g
+         id="g362"
+         clip-path="url(#clipPath366)">
+        <g
+           id="g368">
+          <g
+             id="g370">
+            <path
+               d="m 137.679,131.782 c -5.667,0 -10.279,-4.109 -10.279,-9.159 v 0 c 0,-5.051 4.612,-9.159 10.279,-9.159 v 0 h 116.219 c 5.667,0 10.278,4.108 10.278,9.159 v 0 c 0,5.05 -4.611,9.159 -10.278,9.159 v 0 z"
+               style="fill:url(#linearGradient380);stroke:none"
+               id="path382" />
+          </g>
+        </g>
+      </g>
+    </g>
+    <g
+       id="g384">
+      <g
+         id="g386"
+         clip-path="url(#clipPath390)">
+        <g
+           id="g392"
+           transform="translate(278.9731,184.3507)">
+          <path
+             d="m 0,0 c 0,-18.063 -7.036,-30.65 -20.904,-36.183 -5.829,-2.32 -12.809,-3.508 -20.755,-3.508 h -24.709 c -5.142,0 -9.319,4.177 -9.319,9.32 0,2.58 1.039,4.901 2.728,6.59 1.69,1.689 4.01,2.729 6.591,2.729 h 15.891 c 24.394,0 29.926,4.511 29.926,19.622 0,18.806 -7.277,23.132 -22.723,23.132 h -79.827 c -15.687,0 -22.686,-4.437 -22.686,-23.132 0,-15.129 5.848,-19.622 29.908,-19.622 h 15.946 c 5.161,0 9.32,-4.177 9.32,-9.319 0,-2.581 -1.04,-4.902 -2.729,-6.591 -1.671,-1.689 -4.01,-2.729 -6.591,-2.729 h -24.765 c -7.964,0 -14.944,1.188 -20.755,3.508 -13.868,5.533 -20.903,18.12 -20.903,36.183 0,27.234 15.389,41.621 44.536,41.621 h 77.265 C -15.409,41.621 0,27.234 0,0"
+             style="fill:#2e2e2e;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path394" />
+        </g>
+        <g
+           id="g396"
+           transform="translate(284.3833,113.4642)">
+          <path
+             d="m 0,0 h -1.313 l -0.172,3.96 c -0.037,1.009 -0.037,1.542 0.018,2.285 H -1.485 L -3.274,0.8 H -4.455 L -6.416,6.226 H -6.435 C -6.378,5.521 -6.378,4.741 -6.416,3.96 L -6.568,0 h -1.256 l 0.304,7.425 h 1.846 l 1.809,-5.273 1.695,5.273 h 1.866 z m -8.511,6.302 h -2.322 V 0 h -1.352 v 6.302 h -2.437 V 7.425 H -8.3 Z"
+             style="fill:#2e2e2e;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path398" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
