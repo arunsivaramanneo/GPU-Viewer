@@ -394,6 +394,7 @@ dropdown > button {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
   background-image: linear-gradient(#2a2a2a,#2a2a2a);
   border-radius: 10px;
+  color: #fafbfc
   border-style: solid;
   border: 2px solid rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
