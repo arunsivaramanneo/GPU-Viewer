@@ -337,7 +337,7 @@ treeview.view > header > button {
   min-height: 0;
   min-width: 0;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.87);
+  color: #000
   background-color: #dcdcdc;
   background-image: none;
   border-style: none none solid none;

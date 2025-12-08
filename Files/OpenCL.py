@@ -52,7 +52,7 @@ def openCL(tab):
             oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
             oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
 
-        fetch_device_names_command = "cat %s | awk '/%s.*/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,oclPlatforms[value])
+        fetch_device_names_command = "cat %s | awk '/Platform #%s/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,str(value))
 
         Devices_list = Gtk.StringList()
         Devices_dropdown.set_model(Devices_list)
