@@ -265,7 +265,8 @@ popover.background > contents {
   background-clip: border-box;
   border-radius: 12px;
   color: #ffffff;
-  border: 2px solid #171717;
+  border: 3px solid rgba(0, 0, 0, 0.87);
+  border-style: none solid solid solid;
 }
 
 popover.background modelbutton {
@@ -394,9 +395,9 @@ dropdown > button {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
   background-image: linear-gradient(#191F1F,#191F1F);
   border-radius: 10px;
-  color: #fafbfc
+  color: #fafbfc;
   border-style: solid;
-  border: 2px solid rgba(0, 0, 0, 0.87);
+  border: 3px solid rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   font-weight: 550;
 }
@@ -407,7 +408,7 @@ dropdown > button :only-child{
 }
 
 listview > row :hover {
-  border-style: none none none none;
+  border-style: none solid none none;
   outline: transparent;
   background-color: rgba(0,0,0,0);
   font-weight: bolder;
@@ -419,7 +420,7 @@ listview > row :hover {
 
 popover.background listview > row {
   padding: 4px 8px;
-  border: none;
+  border: 2px solid #bbd;
   margin: 2px;
   outline: none;
   border-style: none none none none;
