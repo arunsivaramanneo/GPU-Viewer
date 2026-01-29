@@ -46,7 +46,8 @@ def get_gpu_stats(gpu_index=0):
 
     # Try AMD / Intel (sysfs)
     # Map gpu_index to cardN
-    card_path = f"/sys/class/drm/card{gpu_index}/device"
+    card_path = f"/sys/class/drm/card{gpu_index + 1}/device"
+    print(gpu_index)
     if os.path.isdir(card_path):
         try:
             # AMD Memory
