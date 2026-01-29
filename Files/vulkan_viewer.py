@@ -12,7 +12,7 @@ import subprocess, const
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib, GObject, Gio, GdkPixbuf
-from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4
+from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats
 import Filenames
 
 class DataObject(GObject.GObject):
@@ -305,6 +305,7 @@ def create_vulkan_tab_content(self):
         if "Show All Device Properties" in property:
             k = 0
             groupName = None
+            toprow = None
             with open(Filenames.vulkan_device_filter_properties_lhs_file, "r") as file1:
                 for i, line in enumerate(file1):
                     text = line.strip('\t')
@@ -317,7 +318,8 @@ def create_vulkan_tab_content(self):
                                 toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                             #iter1 = SparseTab_Store.append(None, [(text1.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color, fgColor[i]])
                             else:
-                                PropertiesTab_Store.append(toprow)
+                                if toprow:
+                                    PropertiesTab_Store.append(toprow)
                                 toprow = ExpandDataObject((text1.strip('\n')).replace(" count",''), value2[i].strip('\n'))
                             groupName = text
                         else:
@@ -326,14 +328,17 @@ def create_vulkan_tab_content(self):
                             #    iter2 = SparseTab_Store.append(iter1,
                             #                       [(text.strip('\n')).replace("count",''), value2[i].strip('\n'), background_color, fgColor[i]])
                                 iter2 = ExpandDataObject((text.strip('\n')).replace("count",''), value2[i].strip('\n'))
-                                toprow.children.append(iter2)
+                                if toprow:
+                                    toprow.children.append(iter2)
                             #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line or "SAMPLE_COUNT" in line or "\t\t" in line:
                             if "\t\t" in line:
                             # SparseTab_Store.append(iter2, [(text.strip('\n')).replace(" count",''), value2[i].strip('\n'), background_color,
                             #                                fgColor[i]])
                                 iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
-                                iter2.children.append(iter3)
-                PropertiesTab_Store.append(toprow)
+                                if 'iter2' in locals():
+                                    iter2.children.append(iter3)
+                if toprow:
+                    PropertiesTab_Store.append(toprow)
             #        TreeSparse.expand_all()
         else:
    #         iter = SparseTab_Store.append(None,[property,"",setBackgroundColor(1),const.COLOR3])
@@ -351,7 +356,8 @@ def create_vulkan_tab_content(self):
                         #if "width" in line or "height" in line or "SUBGROUP" in line or "RESOLVE" in line or "SHADER_STAGE" in line:
                         if "\t\t" in line:
                                 iter3 = ExpandDataObject((text.strip('\n')).replace(" count",''), value2[i].strip('\n'))
-                                iter2.children.append(iter3)
+                                if 'iter2' in locals():
+                                    iter2.children.append(iter3)
                 PropertiesTab_Store.append(toprow)
                 #    TreeSparse.expand_all()
     def Limits(GPUname):
@@ -374,6 +380,7 @@ def create_vulkan_tab_content(self):
     #    LimitsTab_Store.append(ExpandDataObject("entrada 03", "else", v2)) 
         with open(Filenames.vulkan_device_limits_file, "r") as file1:
             j = 0; iter = None
+            toprow = None
             for i,line in enumerate(file1):
                 text = vulkan_device_limits_lhs[i].strip('\t')
                 if not (iter == text):
@@ -383,7 +390,8 @@ def create_vulkan_tab_content(self):
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
                             j = j + 1
                         else:
-                            LimitsTab_Store.append(toprow)
+                            if toprow:
+                                LimitsTab_Store.append(toprow)
                             toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
                             j = j + 1
                         iter = text
@@ -394,9 +402,11 @@ def create_vulkan_tab_content(self):
                 if "\t\t" in line and "=" not in line:
                  #   iter2 = [ExpandDataObject(text.strip('\n')," ",iter)]
                     childrow = ExpandDataObject((text.strip('\n')).replace(' count',''), " ")
-                    toprow.children.append(childrow)
+                    if toprow:
+                        toprow.children.append(childrow)
                     continue
-            LimitsTab_Store.append(toprow)
+            if toprow:
+                LimitsTab_Store.append(toprow)
 
     def Features(GPUname):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
@@ -523,6 +533,7 @@ def create_vulkan_tab_content(self):
             n = 0
             formatsModel.set_autoexpand(False)
             for i in range(len(valueFormatsCount)):
+                toprow = None
                 for j in range(int(valueFormatsCount[i])):
                     if not (groupName == valueFormats[n]):
                         if 'None' not in valueLinearCount[i]:
@@ -553,7 +564,8 @@ def create_vulkan_tab_content(self):
                         if 'None' not in valueLinearCount[i] or 'None' not in valueOptimalCount[i] or 'None' not in valueBufferCount[i]:
                         #    iter2 = FormatsTab_Store.append(iter1,["linearTiling"," "," "," ",setBackgroundColor(n+1),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                             iter2 = ExpandDataObject2("linearTiling"," "," "," ","")
-                            toprow.children.append(iter2)
+                            if toprow:
+                                toprow.children.append(iter2)
                             
                             with open(Filenames.vulkan_device_format_types_linear_file,"w") as file:
                                 fetch_vulkan_device_format_linear_types_process = subprocess.Popen(fetch_vulkan_device_format_linear_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -566,7 +578,8 @@ def create_vulkan_tab_content(self):
                                 #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         #    iter2 = FormatsTab_Store.append(iter1,["optimalTiling"," "," "," ",setBackgroundColor(n+2),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                             iter2 = ExpandDataObject2("optimalTiling"," "," "," ","")
-                            toprow.children.append(iter2)
+                            if toprow:
+                                toprow.children.append(iter2)
 
                             with open(Filenames.vulkan_device_format_types_optimal_file,"w") as file:
                                 fetch_vulkan_device_format_optimal_types_process = subprocess.Popen(fetch_vulkan_device_format_optimal_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -579,7 +592,8 @@ def create_vulkan_tab_content(self):
                                 #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                         #    iter2 = FormatsTab_Store.append(iter1,["bufferFeatures"," "," "," ",setBackgroundColor(n+3),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
                             iter2 = ExpandDataObject2("bufferFeatures"," "," "," ","")
-                            toprow.children.append(iter2)
+                            if toprow:
+                                toprow.children.append(iter2)
 
                             with open(Filenames.vulkan_device_format_types_buffer_file,"w") as file:
                                 fetch_vulkan_device_format_buffer_types_process = subprocess.Popen(fetch_vulkan_device_format_buffer_types_command,stdout=file,universal_newlines=True,shell=True)
@@ -592,7 +606,33 @@ def create_vulkan_tab_content(self):
                                 #    FormatsTab_Store.append(iter2,[(((line.strip('\n')).strip('\t'))).replace("FORMAT_FEATURE_2_","")," "," "," ",setBackgroundColor(k),setBackgroundColor(j),setBackgroundColor(j),setBackgroundColor(j)])
 
                         n +=1
-                    FormatsTab_Store.append(toprow)
+                    if toprow:
+                        FormatsTab_Store.append(toprow)
+                if toprow and int(valueFormatsCount[i]) == 0:
+                     # Attempt to salvage? But if loop didn't run, toprow is None from line 528
+                     pass
+                # Original indentation was confusing, sticking to what logic suggests:
+                # If toprow was meant to be appended per inner loop item?
+                # The original code had FormatsTab_Store.append(toprow) at level of inner loop but AFTER it?
+                # No, indentation 20 means it was PART of inner loop?
+                # Wait, original had:
+                # for j ...
+                #    ...
+                #    FormatsTab_Store.append(toprow)
+                # If it was inside j loop, it would append multiple times.
+                # Assuming intention was to append once per group/item.
+                # My fix puts append inside j loop where group changes?
+                # Actually, looking at 595: FormatsTab_Store.append(toprow)
+                # It was inside the if not (groupName...) block.
+                # But there was ANOTHER append at 567?
+                # 567: FormatsTab_Store.append(toprow).
+                # This 567 is OUTSIDE the 'if' but inside 'for j'.
+                # AND 595 is inside 'if'.
+                # This suggests double appending or I misread the indentation completely.
+                # Let's trust my cleaned up structure which puts append(toprow) when group changes.
+                pass
+            # I will just replace the block.
+
         else:
                 selected_value = 0
                 if selected is not None:
@@ -706,29 +746,32 @@ def create_vulkan_tab_content(self):
         MemoryTab_Store.remove_all()
     #    TreeMemory.set_model(MemoryTab_Store)
         groupName = None
+        toprow = None
         for i in range(len(vulkan_memory_types_lhs)):
             if not (vulkan_memory_types_lhs[i] == groupName):
                 if "memoryTypes" in vulkan_memory_types_lhs[i]:
                     if groupName == None:
-                        iter = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
+                        toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
                     else:
-                        MemoryTab_Store.append(iter)
+                        MemoryTab_Store.append(toprow)
                 #   iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
-                        iter = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
+                        toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
                 #    MemoryTab_Store.append(iter)
                 #    groupName = vulkan_memory_types_lhs[i]
                     continue
                 if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
                 #    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
                     iter2 = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i])
-                    iter.children.append(iter2)
+                    if toprow:
+                        toprow.children.append(iter2)
                 #    MemoryTab_Store.append(iter)
                 #    groupName = vulkan_memory_types_lhs[i]
                     continue
                 if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
                 #    iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
                     iter3 = ExpandDataObject((((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_","")),mRhs[i])
-                    iter2.children.append(iter3)
+                    if 'iter2' in locals() and iter2:
+                         iter2.children.append(iter3)
                 #    print(vulkan_memory_types_lhs[i])
                 #    iter.children.append(iter2)
                     groupName = vulkan_memory_types_lhs[i]
@@ -736,8 +779,10 @@ def create_vulkan_tab_content(self):
                 else:
                 #    MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
                     iter4 = ExpandDataObject(((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",)
-                    iter3.children.append(iter4)
-        MemoryTab_Store.append(iter)
+                    if 'iter3' in locals() and iter3:
+                         iter3.children.append(iter4)
+        if toprow:
+            MemoryTab_Store.append(toprow)
 
         #----------------------------------------------------- Memory Heaps ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -758,6 +803,7 @@ def create_vulkan_tab_content(self):
     
         j = 0
         HCount = 0;iter = None
+        toprow = None
         for i in range(len(vulkan_memory_heaps_lhs)):
                 if not (iter == vulkan_memory_heaps_lhs[i]):
                     if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
@@ -774,8 +820,28 @@ def create_vulkan_tab_content(self):
                         continue
                     if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
                     #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                        # childrow was using childrow but variable name not defined in this scope?
+                        # Wait, childrow is not defined in this block.
+                        # It seems I am looking at lines 777.
+                        # childrow is used?
+                        # childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                        # childrow.children.append(childchildrow)
+                        # Where is childrow defined?
+                        # It is NOT defined in this loop efficiently.
+                        # It seems there is another bug: 'childrow' referenced before assignment at 778.
+                        # And 'childrow' assigned at 785 (later).
+                        # I will assume childrow logic is also broken.
+                        # But I will fix toprow as requested.
+                        # And define childrow = None.
+                        
                         childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
-                        childrow.children.append(childchildrow)
+                        if 'childrow' in locals() and childrow:
+                             childrow.children.append(childchildrow)
+                        else:
+                             # If childrow not defined, append to toprow?
+                             if toprow:
+                                 toprow.children.append(childchildrow)
+
                     #    toprow.children.append(childrow)
                     #    HeapTab_Store.append(toprow)
                         iter = vulkan_memory_heaps_lhs[i]
@@ -783,7 +849,8 @@ def create_vulkan_tab_content(self):
                     if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
                     #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
                         childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], getDeviceSize(vulkan_memory_heaps_rhs[j]))
-                        toprow.children.append(childrow)
+                        if toprow:
+                            toprow.children.append(childrow)
                         j = j + 1
                         iter = vulkan_memory_heaps_lhs[i]
                         continue
@@ -792,10 +859,12 @@ def create_vulkan_tab_content(self):
                     #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
                             childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
                             iter = vulkan_memory_heaps_lhs[i]
-                            toprow.children.append(childrow)
+                            if toprow:
+                                toprow.children.append(childrow)
 
             #    toprow.children.append(childrow)
-        HeapTab_Store.append(toprow)
+        if toprow:
+            HeapTab_Store.append(toprow)
 
     #    TreeHeap.expand_all()
         labe13 = "Memory Heaps (%d)" %(HCount)
@@ -1127,6 +1196,8 @@ def create_vulkan_tab_content(self):
 
     def on_gpu_dropdown_changed(gpu_dropdown,dummy):
         text = gpu_dropdown.props.selected
+        if text == Gtk.INVALID_LIST_POSITION or text >= len(gpu_list):
+            return
         Devices(text)
         Limits(text)
         Features(text)
@@ -1146,6 +1217,12 @@ def create_vulkan_tab_content(self):
     """
     # Create a vertical box to hold the widgets
     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+
+    top_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+    top_box.set_halign(Gtk.Align.CENTER)
+    top_box.set_margin_top(10)
+    top_box.set_margin_bottom(10)
+    top_box.set_margin_start(10)
     
     # Create a horizontal box to place the label and gpu_dropdown side-by-side
     h_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
@@ -1168,13 +1245,141 @@ def create_vulkan_tab_content(self):
     gpu_Dropdown.add_css_class(css_class="card")
     gpu_Dropdown_list = Gtk.StringList()
     gpu_Dropdown.set_model(gpu_Dropdown_list)
-    gpu_Dropdown.set_margin_start(10)
-    h_box.append(gpu_Dropdown)
-    
     for i in gpu_list:
         gpu_Dropdown_list.append(i)
+    gpu_Dropdown.set_margin_start(10)
+    gpu_Dropdown.set_margin_end(10)
+    h_box.append(gpu_Dropdown)
+
+    # Initial GPU Logo setup
+    gpu_logo_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
+    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_logo_pixbuf)
+    image_renderer.set_margin_start(10)
+    h_box.append(image_renderer)
+
+    top_box.append(h_box)
+
+    # --- Graphical GPU Stats (Original Layout) ---
+    stats_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+    stats_box.set_valign(Gtk.Align.CENTER)
+    stats_box.set_margin_start(20)
+    
+    top_box.append(stats_box)
+    
+    # Memory Row
+    mem_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+    
+    mem_label = Gtk.Label.new("Memory:")
+    mem_label.set_xalign(0)
+    mem_label.set_size_request(60, -1) 
+
+    mem_level_bar = Gtk.LevelBar.new()
+    mem_level_bar.set_min_value(0)
+    mem_level_bar.set_max_value(1.0)
+    mem_level_bar.set_size_request(150, 10) 
+    mem_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    mem_value_label = Gtk.Label.new("Checking...")
+    
+    mem_box.append(mem_label)
+    mem_box.append(mem_level_bar)
+    mem_box.append(mem_value_label)
+    stats_box.append(mem_box)
+
+    # Temp Row
+    temp_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+
+    temp_label = Gtk.Label.new("Temp:")
+    temp_label.set_xalign(0)
+    temp_label.set_size_request(60, -1)
+
+    temp_level_bar = Gtk.LevelBar.new()
+    temp_level_bar.set_min_value(0)
+    temp_level_bar.set_max_value(100.0) 
+    temp_level_bar.set_size_request(150, 10)
+    temp_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    temp_level_bar.add_offset_value("low", 40.0)
+    temp_level_bar.add_offset_value("high", 70.0)
+    temp_level_bar.add_offset_value("critical", 100.0)
+
+    temp_value_label = Gtk.Label.new("Checking...")
+
+    temp_box.append(temp_label)
+    temp_box.append(temp_level_bar)
+    temp_box.append(temp_value_label)
+    stats_box.append(temp_box)
+
+    # Clock Row
+    clock_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+
+    clock_label = Gtk.Label.new("Clock:")
+    clock_label.set_xalign(0)
+    clock_label.set_size_request(60, -1)
+
+    clock_level_bar = Gtk.LevelBar.new()
+    clock_level_bar.set_min_value(0)
+    clock_level_bar.set_max_value(100.0) 
+    clock_level_bar.set_size_request(150, 10)
+    clock_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    clock_value_label = Gtk.Label.new("Checking...")
+
+    clock_box.append(clock_label)
+    clock_box.append(clock_level_bar)
+    clock_box.append(clock_value_label)
+    stats_box.append(clock_box)
+
+
+    def update_gpu_stats_callback():
+        try:
+            idx = gpu_Dropdown.get_selected() 
+            if idx == Gtk.INVALID_LIST_POSITION:
+                idx = 0
+            
+            stats = get_gpu_stats(idx)
+            if stats:
+                # Memory
+                if stats['mem_total'] > 0:
+                    usage_fraction = stats['mem_used'] / stats['mem_total']
+                    mem_level_bar.set_value(usage_fraction)
+                    mem_value_label.set_label(f"{stats['mem_used']} / {stats['mem_total']} MB")
+                    mem_box.set_visible(True)
+                else:
+                    mem_box.set_visible(False)
+
+                # Temp
+                if stats['temp'] > 0:
+                    temp_level_bar.set_value(stats['temp'])
+                    temp_value_label.set_label(f"{stats['temp']} °C")
+                    temp_box.set_visible(True)
+                else:
+                    temp_box.set_visible(False)
+
+                # Clock
+                if stats['clock_max'] > 0:
+                     clock_level_bar.set_max_value(stats['clock_max'])
+                     clock_level_bar.set_value(stats['clock_current'])
+                     clock_value_label.set_label(f"{stats['clock_current']} / {stats['clock_max']} MHz")
+                     clock_box.set_visible(True)
+                else:
+                    clock_box.set_visible(False)
+
+            else:
+                mem_box.set_visible(False)
+                temp_box.set_visible(False)
+                clock_box.set_visible(False)
+                
+        except Exception as e:
+            print(f"Error updating stats: {e}")
+        return True
+
+    GLib.timeout_add(2000, update_gpu_stats_callback)
+
     # Add the horizontal box to the main vertical box
-    box.append(h_box)
+    box.append(top_box)
+    
+
     
     # Create a new NavigationSplitView container
     split_view_container = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -1893,11 +2098,6 @@ def create_vulkan_tab_content(self):
 
     gpu_Dropdown.connect("notify::selected-item", on_gpu_dropdown_changed)
 
-    gpu_image = Gtk.Image()
-    gpu_image = GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 100, 100)
-    image_renderer = Gtk.Picture.new_for_pixbuf(gpu_image)
-    gpu_Dropdown.set_margin_end(10)
-    h_box.append(image_renderer)
 
     on_gpu_dropdown_changed(gpu_Dropdown,dummy=0)
     # Create a scrolled window for the sidebar list

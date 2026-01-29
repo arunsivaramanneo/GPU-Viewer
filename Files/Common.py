@@ -9,7 +9,107 @@ gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw
 
+
+import os
+import glob
+
 Adw.init()
+
+def get_gpu_stats(gpu_index=0):
+    """
+    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max).
+    Returns a dictionary: {'mem_used': int (MB), 'mem_total': int (MB), 'temp': int (C), 
+                           'clock_current': int (MHz), 'clock_max': int (MHz)}
+    or None if failed.
+    """
+    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0}
+    
+    # Try NVIDIA first
+    try:
+        # Get all GPUs to ensure we map index correctly, though usually 0 is primary
+        nvidia_cmd = ["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,clocks.current.graphics,clocks.max.graphics", "--format=csv,noheader,nounits", "--id=" + str(gpu_index)]
+        # Use simple subprocess run to catch errors easily
+        result = subprocess.run(nvidia_cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            if output:
+                parts = output.split(',')
+                if len(parts) == 5:
+                    stats['mem_used'] = int(parts[0])
+                    stats['mem_total'] = int(parts[1])
+                    stats['temp'] = int(parts[2])
+                    stats['clock_current'] = int(parts[3])
+                    stats['clock_max'] = int(parts[4])
+                    return stats
+    except Exception:
+        pass
+
+    # Try AMD / Intel (sysfs)
+    # Map gpu_index to cardN
+    card_path = f"/sys/class/drm/card{gpu_index}/device"
+    if os.path.isdir(card_path):
+        try:
+            # AMD Memory
+            if os.path.exists(f"{card_path}/mem_info_vram_used"):
+                with open(f"{card_path}/mem_info_vram_used", 'r') as f:
+                    stats['mem_used'] = int(f.read().strip()) // (1024 * 1024)
+            
+            if os.path.exists(f"{card_path}/mem_info_vram_total"):
+                 with open(f"{card_path}/mem_info_vram_total", 'r') as f:
+                    stats['mem_total'] = int(f.read().strip()) // (1024 * 1024)
+
+            # Temperature
+            # Search for hwmon
+            hwmon_pattern = f"{card_path}/hwmon/hwmon*"
+            hwmons = glob.glob(hwmon_pattern)
+            if hwmons:
+                for hwmon in hwmons:
+                    temp_input = f"{hwmon}/temp1_input"
+                    if os.path.exists(temp_input):
+                         with open(temp_input, 'r') as f:
+                            stats['temp'] = int(f.read().strip()) // 1000
+                            break
+            
+            # Clock (AMD specific usually)
+            # Try pp_dpm_sclk first (shows list of clocks provided by driver, * marks current)
+            if os.path.exists(f"{card_path}/pp_dpm_sclk"):
+                with open(f"{card_path}/pp_dpm_sclk", 'r') as f:
+                    lines = f.readlines()
+                    max_clock = 0
+                    current_clock = 0
+                    for line in lines:
+                        # Format: "0: 300Mhz *"
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            clock_str = parts[1].replace('Mhz', '').replace('MHz', '')
+                            try:
+                                clock_val = int(clock_str)
+                                if clock_val > max_clock:
+                                    max_clock = clock_val
+                                if '*' in line:
+                                    current_clock = clock_val
+                            except ValueError:
+                                pass
+                    stats['clock_current'] = current_clock
+                    stats['clock_max'] = max_clock
+            
+            # Fallback for clock: current freq from hwmon if pp_dpm_sclk fails or simpler card
+            if stats['clock_current'] == 0 and hwmons:
+                 for hwmon in hwmons:
+                    freq_input = f"{hwmon}/freq1_input"
+                    if os.path.exists(freq_input):
+                         with open(freq_input, 'r') as f:
+                            stats['clock_current'] = int(f.read().strip()) // (1000 * 1000) # Hz to MHz
+                            break
+
+            if stats['mem_total'] > 0: # minimal validation
+                return stats
+        except Exception as e:
+            print(f"Error reading sysfs: {e}")
+            pass
+
+    return None
+
 
 
 class MyGtk(Gtk.Window):
