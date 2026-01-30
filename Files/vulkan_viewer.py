@@ -1239,6 +1239,7 @@ def create_vulkan_tab_content(self):
 
     # Create a list with some dummy device names
     gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
+    gpu_id_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_id_command)
     
     # Create the gpu_dropdown, populated from the list of strings
     gpu_Dropdown = Gtk.DropDown()
@@ -1269,7 +1270,7 @@ def create_vulkan_tab_content(self):
     # Memory Row
     mem_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
     
-    mem_label = Gtk.Label.new("Memory:")
+    mem_label = Gtk.Label.new("VRAM :")
     mem_label.set_xalign(0)
     mem_label.set_size_request(60, -1) 
 
@@ -1289,7 +1290,7 @@ def create_vulkan_tab_content(self):
     # Temp Row
     temp_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
 
-    temp_label = Gtk.Label.new("Temp:")
+    temp_label = Gtk.Label.new("Temp :")
     temp_label.set_xalign(0)
     temp_label.set_size_request(60, -1)
 
@@ -1313,7 +1314,7 @@ def create_vulkan_tab_content(self):
     # Clock Row
     clock_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
 
-    clock_label = Gtk.Label.new("Clock:")
+    clock_label = Gtk.Label.new("Clock :")
     clock_label.set_xalign(0)
     clock_label.set_size_request(60, -1)
 
@@ -1337,7 +1338,9 @@ def create_vulkan_tab_content(self):
             if idx == Gtk.INVALID_LIST_POSITION:
                 idx = 0
             
-            stats = get_gpu_stats(idx)
+            device_id = int(gpu_id_list[idx].strip(), 16)
+            num_devices = len(gpu_list)
+            stats = get_gpu_stats(device_id, num_devices)
             if stats:
                 # Memory
                 if stats['mem_total'] > 0:

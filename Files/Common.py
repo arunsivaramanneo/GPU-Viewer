@@ -15,7 +15,7 @@ import glob
 
 Adw.init()
 
-def get_gpu_stats(gpu_index=0):
+def get_gpu_stats(device_id, num_devices):
     """
     Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max).
     Returns a dictionary: {'mem_used': int (MB), 'mem_total': int (MB), 'temp': int (C), 
@@ -24,9 +24,29 @@ def get_gpu_stats(gpu_index=0):
     """
     stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0}
     
+    gpu_index = -1
+    # Loop and check each card file to find the matching device_id
+    for i in range(num_devices):
+        device_file_path = f"/sys/class/drm/card{i}/device/device"
+        if os.path.exists(device_file_path):
+            try:
+                with open(device_file_path, 'r') as f:
+                    # Convert hex value from file to number and compare with device_id
+                    sys_device_id = int(f.read().strip(), 16)
+                    if sys_device_id == device_id:
+                        gpu_index = i
+                        break
+            except (ValueError, OSError):
+                continue
+
+    if gpu_index == -1:
+        return None
+
     # Try NVIDIA first
     try:
         # Get all GPUs to ensure we map index correctly, though usually 0 is primary
+        # We use --id with the index found, but note that nvidia-smi index might differ from card index.
+        # However, following the instructions to use the found index.
         nvidia_cmd = ["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,clocks.current.graphics,clocks.max.graphics", "--format=csv,noheader,nounits", "--id=" + str(gpu_index)]
         # Use simple subprocess run to catch errors easily
         result = subprocess.run(nvidia_cmd, capture_output=True, text=True)
@@ -45,9 +65,8 @@ def get_gpu_stats(gpu_index=0):
         pass
 
     # Try AMD / Intel (sysfs)
-    # Map gpu_index to cardN
-    card_path = f"/sys/class/drm/card{gpu_index + 1}/device"
-    print(gpu_index)
+    # Use the found gpu_index
+    card_path = f"/sys/class/drm/card{gpu_index}/device"
     if os.path.isdir(card_path):
         try:
             # AMD Memory
