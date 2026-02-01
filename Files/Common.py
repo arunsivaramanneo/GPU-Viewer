@@ -17,12 +17,13 @@ Adw.init()
 
 def get_gpu_stats(device_id, num_devices):
     """
-    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max).
+    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power).
     Returns a dictionary: {'mem_used': int (MB), 'mem_total': int (MB), 'temp': int (C), 
-                           'clock_current': int (MHz), 'clock_max': int (MHz)}
+                           'clock_current': int (MHz), 'clock_max': int (MHz), 'usage': int (%),
+                           'fan_speed': int (%), 'power_usage': int (W)}
     or None if failed.
     """
-    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0}
+    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1}
     
     gpu_index = -1
     # Loop and check each card file to find the matching device_id
@@ -47,19 +48,31 @@ def get_gpu_stats(device_id, num_devices):
         # Get all GPUs to ensure we map index correctly, though usually 0 is primary
         # We use --id with the index found, but note that nvidia-smi index might differ from card index.
         # However, following the instructions to use the found index.
-        nvidia_cmd = ["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,clocks.current.graphics,clocks.max.graphics", "--format=csv,noheader,nounits", "--id=" + str(gpu_index)]
+        nvidia_cmd = ["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,clocks.current.graphics,clocks.max.graphics,utilization.gpu,fan.speed,power.draw", "--format=csv,noheader,nounits", "--id=" + str(gpu_index)]
         # Use simple subprocess run to catch errors easily
         result = subprocess.run(nvidia_cmd, capture_output=True, text=True)
         if result.returncode == 0:
             output = result.stdout.strip()
             if output:
                 parts = output.split(',')
-                if len(parts) == 5:
+                if len(parts) >= 6:
                     stats['mem_used'] = int(parts[0])
                     stats['mem_total'] = int(parts[1])
                     stats['temp'] = int(parts[2])
                     stats['clock_current'] = int(parts[3])
                     stats['clock_max'] = int(parts[4])
+                    stats['usage'] = int(parts[5])
+                    # Fan speed and power might not always be available
+                    if len(parts) >= 7 and parts[6].strip():
+                        try:
+                            stats['fan_speed'] = int(float(parts[6]))
+                        except (ValueError, IndexError):
+                            pass
+                    if len(parts) >= 8 and parts[7].strip():
+                        try:
+                            stats['power_usage'] = int(float(parts[7]))
+                        except (ValueError, IndexError):
+                            pass
                     return stats
     except Exception:
         pass
@@ -78,17 +91,45 @@ def get_gpu_stats(device_id, num_devices):
                  with open(f"{card_path}/mem_info_vram_total", 'r') as f:
                     stats['mem_total'] = int(f.read().strip()) // (1024 * 1024)
 
-            # Temperature
+            # Temperature, Fan, Power
             # Search for hwmon
             hwmon_pattern = f"{card_path}/hwmon/hwmon*"
             hwmons = glob.glob(hwmon_pattern)
             if hwmons:
                 for hwmon in hwmons:
+                    # Temperature
                     temp_input = f"{hwmon}/temp1_input"
                     if os.path.exists(temp_input):
                          with open(temp_input, 'r') as f:
                             stats['temp'] = int(f.read().strip()) // 1000
-                            break
+                    
+                    # Fan Speed (PWM)
+                    pwm_input = f"{hwmon}/pwm1"
+                    pwm_max_input = f"{hwmon}/pwm1_max"
+                    if os.path.exists(pwm_input):
+                        with open(pwm_input, 'r') as f:
+                            pwm_value = int(f.read().strip())
+                            # PWM is usually 0-255, convert to percentage
+                            pwm_max = 255
+                            if os.path.exists(pwm_max_input):
+                                try:
+                                    with open(pwm_max_input, 'r') as f_max:
+                                        pwm_max = int(f_max.read().strip())
+                                except:
+                                    pass
+                            stats['fan_speed'] = int((pwm_value / pwm_max) * 100)
+                    
+                    # Power Usage
+                    power_input = f"{hwmon}/power1_average"
+                    if os.path.exists(power_input):
+                        with open(power_input, 'r') as f:
+                            # Power is in microwatts, convert to watts
+                            stats['power_usage'] = int(f.read().strip()) // 1000000
+            
+            # GPU Usage (AMD specific)
+            if os.path.exists(f"{card_path}/gpu_busy_percent"):
+                with open(f"{card_path}/gpu_busy_percent", 'r') as f:
+                    stats['usage'] = int(f.read().strip())
             
             # Clock (AMD specific usually)
             # Try pp_dpm_sclk first (shows list of clocks provided by driver, * marks current)

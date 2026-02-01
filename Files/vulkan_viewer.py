@@ -1260,14 +1260,25 @@ def create_vulkan_tab_content(self):
 
     top_box.append(h_box)
 
-    # --- Graphical GPU Stats (Original Layout) ---
-    stats_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
-    stats_box.set_valign(Gtk.Align.CENTER)
-    stats_box.set_margin_start(20)
+    # --- Graphical GPU Stats (Split Layout: 3 left, 1 right) ---
+    # Create a horizontal container for stats
+    stats_container = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 20)
+    stats_container.set_valign(Gtk.Align.CENTER)
+    stats_container.set_margin_start(20)
     
-    top_box.append(stats_box)
+    # Left side: 3 stats (VRAM, Usage, Temp)
+    stats_box_left = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+    stats_box_left.set_valign(Gtk.Align.CENTER)
     
-    # Memory Row
+    # Right side: 1 stat (Clock)
+    stats_box_right = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+    stats_box_right.set_valign(Gtk.Align.START)
+    
+    stats_container.append(stats_box_left)
+    stats_container.append(stats_box_right)
+    top_box.append(stats_container)
+    
+    # Memory Row (Left side)
     mem_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
     
     mem_label = Gtk.Label.new("VRAM :")
@@ -1285,9 +1296,29 @@ def create_vulkan_tab_content(self):
     mem_box.append(mem_label)
     mem_box.append(mem_level_bar)
     mem_box.append(mem_value_label)
-    stats_box.append(mem_box)
+    stats_box_left.append(mem_box)
 
-    # Temp Row
+    # GPU Usage Row (Left side)
+    usage_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+    
+    usage_label = Gtk.Label.new("Usage :")
+    usage_label.set_xalign(0)
+    usage_label.set_size_request(60, -1)
+
+    usage_level_bar = Gtk.LevelBar.new()
+    usage_level_bar.set_min_value(0)
+    usage_level_bar.set_max_value(100.0)
+    usage_level_bar.set_size_request(150, 10)
+    usage_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    usage_value_label = Gtk.Label.new("Checking...")
+
+    usage_box.append(usage_label)
+    usage_box.append(usage_level_bar)
+    usage_box.append(usage_value_label)
+    stats_box_left.append(usage_box)
+
+    # Temp Row (Left side)
     temp_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
 
     temp_label = Gtk.Label.new("Temp :")
@@ -1309,9 +1340,9 @@ def create_vulkan_tab_content(self):
     temp_box.append(temp_label)
     temp_box.append(temp_level_bar)
     temp_box.append(temp_value_label)
-    stats_box.append(temp_box)
+    stats_box_left.append(temp_box)
 
-    # Clock Row
+    # Clock Row (Right side)
     clock_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
 
     clock_label = Gtk.Label.new("Clock :")
@@ -1329,7 +1360,47 @@ def create_vulkan_tab_content(self):
     clock_box.append(clock_label)
     clock_box.append(clock_level_bar)
     clock_box.append(clock_value_label)
-    stats_box.append(clock_box)
+    stats_box_right.append(clock_box)
+
+    # Fan Speed Row (Right side)
+    fan_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+
+    fan_label = Gtk.Label.new("Fan :")
+    fan_label.set_xalign(0)
+    fan_label.set_size_request(60, -1)
+
+    fan_level_bar = Gtk.LevelBar.new()
+    fan_level_bar.set_min_value(0)
+    fan_level_bar.set_max_value(100.0)
+    fan_level_bar.set_size_request(150, 10)
+    fan_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    fan_value_label = Gtk.Label.new("Checking...")
+
+    fan_box.append(fan_label)
+    fan_box.append(fan_level_bar)
+    fan_box.append(fan_value_label)
+    stats_box_right.append(fan_box)
+
+    # Power Usage Row (Right side)
+    power_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+
+    power_label = Gtk.Label.new("Power :")
+    power_label.set_xalign(0)
+    power_label.set_size_request(60, -1)
+
+    power_level_bar = Gtk.LevelBar.new()
+    power_level_bar.set_min_value(0)
+    power_level_bar.set_max_value(300.0)  # Typical max GPU power draw
+    power_level_bar.set_size_request(150, 10)
+    power_level_bar.set_valign(Gtk.Align.CENTER)
+    
+    power_value_label = Gtk.Label.new("Checking...")
+
+    power_box.append(power_label)
+    power_box.append(power_level_bar)
+    power_box.append(power_value_label)
+    stats_box_right.append(power_box)
 
 
     def update_gpu_stats_callback():
@@ -1351,27 +1422,54 @@ def create_vulkan_tab_content(self):
                 else:
                     mem_box.set_visible(False)
 
-                # Temp
-                if stats['temp'] > 0:
+                # GPU Usage (only show if available, -1 means not available)
+                if stats['usage'] >= 0:
+                    usage_level_bar.set_value(stats['usage'])
+                    usage_value_label.set_label(f"{stats['usage']} %")
+                    usage_box.set_visible(True)
+                else:
+                    usage_box.set_visible(False)
+
+                # Temp (show even if 0)
+                if stats['temp'] >= 0:
                     temp_level_bar.set_value(stats['temp'])
                     temp_value_label.set_label(f"{stats['temp']} °C")
                     temp_box.set_visible(True)
                 else:
                     temp_box.set_visible(False)
 
-                # Clock
-                if stats['clock_max'] > 0:
-                     clock_level_bar.set_max_value(stats['clock_max'])
+                # Clock (show even if 0)
+                if stats['clock_max'] >= 0:
+                     clock_level_bar.set_max_value(max(stats['clock_max'], 1))  # Avoid division by zero
                      clock_level_bar.set_value(stats['clock_current'])
                      clock_value_label.set_label(f"{stats['clock_current']} / {stats['clock_max']} MHz")
                      clock_box.set_visible(True)
                 else:
                     clock_box.set_visible(False)
 
+                # Fan Speed (only show if available, -1 means not available)
+                if stats['fan_speed'] >= 0:
+                    fan_level_bar.set_value(stats['fan_speed'])
+                    fan_value_label.set_label(f"{stats['fan_speed']} %")
+                    fan_box.set_visible(True)
+                else:
+                    fan_box.set_visible(False)
+
+                # Power Usage (only show if available, -1 means not available)
+                if stats['power_usage'] >= 0:
+                    power_level_bar.set_value(stats['power_usage'])
+                    power_value_label.set_label(f"{stats['power_usage']} W")
+                    power_box.set_visible(True)
+                else:
+                    power_box.set_visible(False)
+
             else:
                 mem_box.set_visible(False)
+                usage_box.set_visible(False)
                 temp_box.set_visible(False)
                 clock_box.set_visible(False)
+                fan_box.set_visible(False)
+                power_box.set_visible(False)
                 
         except Exception as e:
             print(f"Error updating stats: {e}")
