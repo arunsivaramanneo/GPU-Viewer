@@ -1,6 +1,8 @@
 ﻿# GPU-Viewer
 [![Donate](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)](https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q)
 
+Also checkout my new Project Goal UP - A Simple To Do List build with AI  - https://github.com/arunsivaramanneo/Goal-UP 
+
 ## Testimonials
 
 ### Softpedia
