@@ -43,40 +43,6 @@ def get_gpu_stats(device_id, num_devices):
     if gpu_index == -1:
         return None
 
-    # Try NVIDIA first
-    try:
-        # Get all GPUs to ensure we map index correctly, though usually 0 is primary
-        # We use --id with the index found, but note that nvidia-smi index might differ from card index.
-        # However, following the instructions to use the found index.
-        nvidia_cmd = ["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,clocks.current.graphics,clocks.max.graphics,utilization.gpu,fan.speed,power.draw", "--format=csv,noheader,nounits", "--id=" + str(gpu_index)]
-        # Use simple subprocess run to catch errors easily
-        result = subprocess.run(nvidia_cmd, capture_output=True, text=True)
-        if result.returncode == 0:
-            output = result.stdout.strip()
-            if output:
-                parts = output.split(',')
-                if len(parts) >= 6:
-                    stats['mem_used'] = int(parts[0])
-                    stats['mem_total'] = int(parts[1])
-                    stats['temp'] = int(parts[2])
-                    stats['clock_current'] = int(parts[3])
-                    stats['clock_max'] = int(parts[4])
-                    stats['usage'] = int(parts[5])
-                    # Fan speed and power might not always be available
-                    if len(parts) >= 7 and parts[6].strip():
-                        try:
-                            stats['fan_speed'] = int(float(parts[6]))
-                        except (ValueError, IndexError):
-                            pass
-                    if len(parts) >= 8 and parts[7].strip():
-                        try:
-                            stats['power_usage'] = int(float(parts[7]))
-                        except (ValueError, IndexError):
-                            pass
-                    return stats
-    except Exception:
-        pass
-
     # Try AMD / Intel (sysfs)
     # Use the found gpu_index
     card_path = f"/sys/class/drm/card{gpu_index}/device"
