@@ -26,7 +26,7 @@ else:
   Gnome_logo = "../Images/Gnome_Dark.png"
   LLVM_logo = "../Images/LLVM-Logo.png"
   LLVM_LOGO_SVG = "../Images/LLVM-Logo.png"
-  AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.png"
+  AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.svg"
   AMD_LOGO_PNG = "../Images/AMD_logo.png"
   GITHUB_LOGO_PNG = "../Images/github.png"
   CONTACT_LOGO_PNG = "../Images/Contact.png"
