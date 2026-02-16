@@ -1,39 +1,41 @@
 /***************
  * Base States *
  ***************/
- 
- window{
+
+window {
   border-radius: 12px;
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border: 2px solid #bbd;
   border-style: solid solid solid solid;
 }
 
-frame{
-  border-style: none none none none ;
+frame {
+  border-style: none none none none;
 }
+
 columview {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border: 2px solid #171717;
   border-style: solid solid none solid;
   border-radius: 6px;
 }
-grid{
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+
+grid {
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   background-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border-style: none;
 }
 
-textview > border {
+textview>border {
   background-color: #dcdcdc;
 }
 
-.titlebar box{
+.titlebar box {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
   border-top: 2px;
   border-width: 2px;
@@ -50,32 +52,36 @@ textview > border {
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
-.sidebar > row:focus {
+.sidebar>row:focus {
   font-weight: bolder;
   color: #ffff00;
 
 }
 
-:link{
+:link {
   color: #245DDA;
   background-color: transparent;
   text-decoration: none;
 }
-.close{
+
+.close {
   color: #dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
-.minimize{
+
+.minimize {
   color: #dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
-.maximize{
-  color:#dcdcdc;
+
+.maximize {
+  color: #dcdcdc;
   font-size: 28px;
   font-weight: bold;
 }
+
 .close:hover {
   opacity: 1;
 }
@@ -93,21 +99,22 @@ textview > border {
   color: green;
 }
 
-.nothing{
+.nothing {
   color: rgba(0, 0, 0, 0.87);
 }
 
-image{
+image {
   padding: 0px;
-  
+
 }
 
-.parent{
-font-weight: 500;
+.parent {
+  font-weight: 500;
 }
+
 headerbar {
   background-image: none;
-  background-color:#2B2B2B;
+  background-color: #2B2B2B;
   font-size: medium;
   border-style: none none none none;
   color: #dcdcdc;
@@ -116,8 +123,8 @@ headerbar {
 /*************
  * Notebooks *
  *************/
- notebook > header tab {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+notebook>header tab {
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
@@ -137,29 +144,31 @@ notebook {
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
-  notebook > header > tabs > tab {
-    background-image: linear-gradient(#dcdcdc,#dcdcdc);
-    min-height: 24px;
-    min-width: 24px;
-    padding-top: 8px;
-    margin-bottom: 6px;
-    margin-right: 6px;
-    padding-bottom: 8px ;
-    background-color: #dcdcdc;
-    color: rgba(0, 0, 0, 0.87);
-    font-weight: 600;
-    box-shadow:0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
-  }
-  notebook > header > tabs > tab:hover {
-      box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
-  }
-  
-  notebook > header > tabs > arrow:hover {
-    box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
-  }
 
-notebook > header tab:checked {
-  background-image: linear-gradient(#171717,#171717);
+notebook>header>tabs>tab {
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
+  min-height: 24px;
+  min-width: 24px;
+  padding-top: 8px;
+  margin-bottom: 6px;
+  margin-right: 6px;
+  padding-bottom: 8px;
+  background-color: #dcdcdc;
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 600;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+notebook>header>tabs>tab:hover {
+  box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+notebook>header>tabs>arrow:hover {
+  box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+notebook>header tab:checked {
+  background-image: linear-gradient(#171717, #171717);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
   background-color: #333333;
@@ -185,16 +194,17 @@ button.text-button {
   border-radius: 12px;
 }
 
-button.text-button:checked{
+button.text-button:checked {
   color: #d43c50;
   border-radius: 9px;
 }
+
 button.text-button:hover {
   box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
 }
 
-button.text-button:disabled{
+button.text-button:disabled {
   box-shadow: none;
   background-image: none;
   background-color: rgba(0, 0, 0, 0.04);
@@ -203,7 +213,7 @@ button.text-button:disabled{
   opacity: 1;
 }
 
-button.combo{
+button.combo {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
   min-height: 16px;
   min-width: 16px;
@@ -226,23 +236,23 @@ button.combo:only-child {
   border: 2px solid;
 }
 
-button.combo:hover{
+button.combo:hover {
   box-shadow: 0 6px 4px -1px rgba(0, 0, 0, 0.2), 0 6px 3px 0 rgba(0, 0, 0, 0.14), 0 6px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
-button.dropdown{
+button.dropdown {
   background-color: #dcdcdc;
   color: #000;
 }
 
-popover.background > arrow,
-popover.background > contents {
+popover.background>arrow,
+popover.background>contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
   background-color: #dcdcdc;
   background-clip: border-box;
   border-radius: 12px;
-  color:  rgba(0, 0, 0, 0.87);
+  color: rgba(0, 0, 0, 0.87);
   border: 2px solid #171717;
 }
 
@@ -265,17 +275,20 @@ popover.background modelbutton:hover {
   color: #dcdcdc;
 }
 
-.osd popover.background > arrow,
-.osd popover.background > contents, popover.background.touch-selection > arrow,
-popover.background.touch-selection > contents, popover.background.magnifier > arrow,
-popover.background.magnifier > contents, .osd {
+.osd popover.background>arrow,
+.osd popover.background>contents,
+popover.background.touch-selection>arrow,
+popover.background.touch-selection>contents,
+popover.background.magnifier>arrow,
+popover.background.magnifier>contents,
+.osd {
   color: rgba(0, 0, 0, 0.87);
   background-clip: padding-box;
   border-radius: 6px;
   border: none;
 }
 
-scrollbar > range > trough > slider {
+scrollbar>range>trough>slider {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1);
   min-width: 8px;
   min-height: 8px;
@@ -288,7 +301,7 @@ scrollbar > range > trough > slider {
 }
 
 entry {
-  background-image: linear-gradient(gray,gray);
+  background-image: linear-gradient(gray, gray);
   min-height: 36px;
   padding: 0 8px;
   caret-color: currentColor;
@@ -300,7 +313,7 @@ entry {
 }
 
 entry.search {
-  background-image: linear-gradient(#343d46,#343d46);
+  background-image: linear-gradient(#343d46, #343d46);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   background-color: #13576E;
   border-radius: 10px;
@@ -309,12 +322,12 @@ entry.search {
   box-shadow: inset 0 0px 2px 2px #343d46;
 }
 
-entry:focus-within > text > placeholder {
+entry:focus-within>text>placeholder {
   opacity: 0;
 }
 
-header{
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+header {
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
@@ -331,13 +344,13 @@ header{
 }
 
 
-columnview.view > header > button,
-treeview.view > header > button {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+columnview.view>header>button,
+treeview.view>header>button {
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   min-height: 0;
   min-width: 0;
   font-weight: bold;
-  color: #000
+  color: #000;
   background-color: #dcdcdc;
   background-image: none;
   border-style: none none solid none;
@@ -354,14 +367,14 @@ treeview.view:selected {
 }
 
 listview {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   background-color: #dcdcdc;
   border-radius: 0px;
 }
 
-dropdown > button {
+dropdown>button {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   border-radius: 10px;
   border-style: solid;
   border: 2px solid rgba(0, 0, 0, 0.87);
@@ -370,23 +383,23 @@ dropdown > button {
   color: #000;
 }
 
-dropdown > button :only-child{
+dropdown>button :only-child {
   font-weight: 600;
-  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-listview > row :hover {
+listview>row :hover {
   border-style: none none none none;
   outline: transparent;
-  background-color: rgba(0,0,0,0);
+  background-color: rgba(0, 0, 0, 0);
   font-weight: bolder;
   font-style: oblique;
-  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);  
+  transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
 
 }
 
 
-popover.background listview > row {
+popover.background listview>row {
   padding: 4px 8px;
   border: none;
   margin: 0px;
@@ -396,7 +409,7 @@ popover.background listview > row {
 }
 
 treeview {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   border-color: #dcdcdc;
   border-style: solid;
   border-width: 2px;
@@ -404,12 +417,13 @@ treeview {
 }
 
 columnview {
-  background-image: linear-gradient(#dcdcdc,#dcdcdc);
+  background-image: linear-gradient(#dcdcdc, #dcdcdc);
   background-color: #dcdcdc;
   border-color: #dcdcdc;
   color: rgba(0, 0, 0, 0.87);
   border-style: solid;
 }
+
 columnview.view.expander,
 treeview.view.expander {
   min-width: 16px;
@@ -417,9 +431,11 @@ treeview.view.expander {
   -gtk-icon-source: -gtk-icontheme("pan-end-symbolic");
   color: rgba(255, 255, 255, 0.7);
 }
-stack{
+
+stack {
   min-width: 16px;
 }
+
 viewswitcher {
   min-width: 10px;
   border-radius: 12px;
