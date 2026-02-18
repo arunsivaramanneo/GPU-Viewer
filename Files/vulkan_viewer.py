@@ -1196,17 +1196,16 @@ def create_vulkan_tab_content(self):
 
     def on_gpu_dropdown_changed(gpu_dropdown,dummy):
         text = gpu_dropdown.props.selected
-        for i in range(len(gpu_list)):
-            if gpu_list[i] == gpu_list[text]:
-                Devices(i)
-                Limits(i)
-                Features(i)
-                Extensions(i)
-                Formats(i)
-                MemoryTypes(i)
-                Queues(i)
-                Instance()
-                Surface(i)
+
+        Devices(text)
+        Limits(text)
+        Features(text)
+        Extensions(text)
+        Formats(text)
+        MemoryTypes(text)
+        Queues(text)
+        Instance()
+        Surface(text)
 
         gpu_image = getGpuImage(gpu_list[text])
         image_renderer.set_pixbuf(gpu_image)
