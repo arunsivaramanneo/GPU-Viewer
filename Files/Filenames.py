@@ -31,7 +31,7 @@ vulkan_device_info_rhs_file = "/tmp/gpu-viewer/VKDDeviceinfotempRHS.txt"
 
 vulkan_summary_command = "vulkaninfo --summary"
 
-fetch_device_name_command = " grep deviceName | grep -o  =.* | grep -o ' .*'"
+fetch_device_name_command = " grep deviceName | grep -o  =.* | grep -o ' .*' | uniq"
 fetch_device_id_command = " grep deviceID | grep -o  =.* | grep -o ' .*' | uniq"
 fetch_vendor_id_command = " grep vendorID | grep -o  =.* | grep -o ' .*' | uniq"
 

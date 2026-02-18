@@ -1196,17 +1196,17 @@ def create_vulkan_tab_content(self):
 
     def on_gpu_dropdown_changed(gpu_dropdown,dummy):
         text = gpu_dropdown.props.selected
-        if text == Gtk.INVALID_LIST_POSITION or text >= len(gpu_list):
-            return
-        Devices(text)
-        Limits(text)
-        Features(text)
-        Extensions(text)
-        Formats(text)
-        MemoryTypes(text)
-        Queues(text)
-        Instance()
-        Surface(text)
+        for i in range(len(gpu_list)):
+            if gpu_list[i] == gpu_list[text]:
+                Devices(i)
+                Limits(i)
+                Features(i)
+                Extensions(i)
+                Formats(i)
+                MemoryTypes(i)
+                Queues(i)
+                Instance()
+                Surface(i)
 
         gpu_image = getGpuImage(gpu_list[text])
         image_renderer.set_pixbuf(gpu_image)
@@ -1342,10 +1342,10 @@ def create_vulkan_tab_content(self):
     temp_box.append(temp_value_label)
     stats_box_left.append(temp_box)
 
-    # Clock Row (Right side)
+    # GPU Core Clock Usage Row (Right side)
     clock_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
 
-    clock_label = Gtk.Label.new("Clock :")
+    clock_label = Gtk.Label.new("Core :")
     clock_label.set_xalign(0)
     clock_label.set_size_request(60, -1)
 
@@ -1438,10 +1438,10 @@ def create_vulkan_tab_content(self):
                 else:
                     temp_box.set_visible(False)
 
-                # Clock (show even if 0)
-                if stats['clock_max'] >= 0:
-                     clock_level_bar.set_max_value(max(stats['clock_max'], 1))  # Avoid division by zero
-                     clock_level_bar.set_value(stats['clock_current'])
+                # GPU Core Clock Usage (show current vs max)
+                if stats['clock_max'] > 0:
+                     clock_usage_percent = int((stats['clock_current'] / stats['clock_max']) * 100)
+                     clock_level_bar.set_value(clock_usage_percent)
                      clock_value_label.set_label(f"{stats['clock_current']} / {stats['clock_max']} MHz")
                      clock_box.set_visible(True)
                 else:
