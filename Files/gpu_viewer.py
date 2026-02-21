@@ -12,7 +12,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
-from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand,setMargin
+from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand,setMargin,Config
 from aboutPage import about_page
 from OpenGLViewer import OpenGL
 from OpenCL import openCL
@@ -113,6 +113,7 @@ else:
         def __init__(self, **kwargs):
             # Call the parent constructor, providing a unique application ID
             super().__init__(application_id="io.github.arunsivaramanneo.GPUViewer", **kwargs)
+            self.config = Config()
             self.connect("activate", self.on_activate)    
 
         def _on_theme_toggled(self, switch, state):
@@ -121,13 +122,29 @@ else:
             It updates the Adw.StyleManager's color scheme based on the switch state.
             """
             style_manager = Adw.StyleManager.get_default()
+            self.config.set_theme_preference(state)
+            
             if state:
                 # Set to dark theme
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
-
+                fname = Gio.file_new_for_path('gtk_dark.css')
             else:
                 # Set to light theme
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+                fname = Gio.file_new_for_path('gtk_light.css')
+
+            # Reload CSS
+            display = Gtk.Widget.get_display(self.window)
+            provider = Gtk.CssProvider.new()
+            provider.load_from_file(fname)
+            Gtk.StyleContext.add_provider_for_display(display, provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+            # Update constants
+            const.update_theme_constants(state)
+            
+            # Refresh UI by re-creating tabs
+            self.refresh_tabs()
 
 
         def on_activate(self, app):
@@ -154,16 +171,22 @@ else:
     
             provider = Gtk.CssProvider.new()
             style_manager = Adw.StyleManager.get_default()
-            prefer_dark_theme = style_manager.get_dark()
+            prefer_dark_theme = self.config.get_theme_preference()
+            
             if prefer_dark_theme:
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
                 fname = Gio.file_new_for_path('gtk_dark.css')
             else:
+                style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
                 fname = Gio.file_new_for_path('gtk_light.css')
 
             display = Gtk.Widget.get_display(self.window)
             provider.load_from_file(fname)
             Gtk.StyleContext.add_provider_for_display(display, provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            
+            # Synchronize constants with the loaded preference
+            const.update_theme_constants(prefer_dark_theme)
             # Create a new Adwaita view stack to hold the different pages
             self.view_stack = Adw.ViewStack.new()
 
@@ -182,9 +205,7 @@ else:
             icon_theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
             icon_theme.add_search_path(os.path.abspath("../Images"))
 
-            # Get the current theme preference from Adw.StyleManager
             style_manager = Adw.StyleManager.get_default()
-            prefer_dark_theme = style_manager.get_dark()
             theme_switch.set_active(prefer_dark_theme)
 
             # Connect the switch's 'state-set' signal to a handler
@@ -197,9 +218,9 @@ else:
             theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
             theme_box.set_halign(Gtk.Align.END)
             theme_box.set_valign(Gtk.Align.CENTER)
-     #       theme_box.append(theme_icon)
-      #      theme_box.append(theme_switch)
-       #     self.header_bar.pack_end(theme_box)
+            # theme_box.append(theme_icon)
+            theme_box.append(theme_switch)
+            self.header_bar.pack_end(theme_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
 
             # Create a main box to hold the header bar and the view stack
@@ -212,32 +233,35 @@ else:
             # Set the main box as the content of the window
             self.window.set_content(main_box)
 
+            self.create_tabs()
+            self.window.connect("close-request",quit)
+            
+            self.show_window()
+
+        def refresh_tabs(self):
+            """Clears and re-creates all tabs in the view stack."""
+            child = self.view_stack.get_first_child()
+            while child:
+                next_child = child.get_next_sibling()
+                self.view_stack.remove(child)
+                child = next_child
+            self.create_tabs()
+
+        def create_tabs(self):
+            """Creates and adds all tabs to the view stack."""
             mkdir_process = subprocess.Popen(Filenames.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
             mkdir_process.communicate()
 
-            # Create the first page (tab content) by calling the new function
             if isVulkanSupported():
                 vulkan_box = create_vulkan_tab_content(self)
-
-            # Create an icon for the first tab
-            # Add the first page to the view stack, with a title and an icon
                 self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
-            # Create the second page (tab content)
-        #    page2_box.set_halign(Gtk.Align.CENTER)
-        #    page2_box.set_valign(Gtk.Align.CENTER)
-       #     label2 = Gtk.Label.new("This is the second tab!")
-        #    label2.set_css_classes(["title-1"])
-        #    page2_box.append(label2)
-            page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
 
-            # Create an icon for the second tab
+            page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             if isOpenglSupported():
                 opengl_box = OpenGL(page2_box)
                 self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
 
-
             opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-
             if isOpenclSupported():
                 opencl_content = openCL(opencl_box)
                 self.view_stack.add_titled_with_icon(opencl_content,"opencl_page","OpenCL","OpenCL")
@@ -245,8 +269,6 @@ else:
             vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             if isVulkanVideoSupported():
                 vulkan_video_content = VulkanVideo(vulkan_video_box)
-        #        page_vdpau = notebook.get_page(vdpauTab)
-        #        page_vdpau.set_property("tab-expand",True)
                 self.view_stack.add_titled_with_icon(vulkan_video_content,"vulkan_video_page","Vulkan Video","Vulkan-Video")
 
             vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
@@ -254,15 +276,11 @@ else:
                 vdpau_content = vdpauinfo(vdpau_box)
                 self.view_stack.add_titled_with_icon(vdpau_content,"vdpau_page","VDPAU","vdpauinfo")
 
-
-
             page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+            self.about_page_ui = about_page(page3_box)
+            self.view_stack.add_titled_with_icon(page3_box, "page3", "About Us", "about-us")
 
-            # Add the second page to the view stack with a title and an icon
-            about_box = about_page(page3_box)
-            self.view_stack.add_titled_with_icon(about_box, "page3", "About Us", "about-us")
-            self.window.connect("close-request",quit)
-
+        def show_window(self):
             # Show the window and all its children
             self.window.present()
 

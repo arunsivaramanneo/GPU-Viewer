@@ -4,34 +4,53 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 
 
-style_manager = Adw.StyleManager.get_default()
-prefer_dark_theme = style_manager.get_dark()
+def update_theme_constants(prefer_dark):
+    global AMDRADEON_LOGO_PNG, Gnome_logo, LLVM_logo, LLVM_LOGO_SVG, AMDRYZEN_LOGO_PNG
+    global AMD_LOGO_PNG, GITHUB_LOGO_PNG, CONTACT_LOGO_PNG, BUG_LOGO_PNG, cosmic_logo
+    global BGCOLOR1, BGCOLOR2, BGCOLOR3, COLOR1, COLOR2, COLOR3, OPEN_CL_PNG, Ryzen_logo, AMD_logo
+    
+    if prefer_dark:
+        AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
+        Gnome_logo = "../Images/Gnome_logo.png"
+        LLVM_logo = "../Images/LLVM_Logo.png"
+        LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
+        AMDRYZEN_LOGO_PNG = "../Images/amd-ryzen.png"
+        AMD_LOGO_PNG = "../Images/AMD_D.png"
+        AMD_logo = "../Images/AMD_D.png"
+        GITHUB_LOGO_PNG = "../Images/github-white.png"
+        CONTACT_LOGO_PNG = "../Images/Contact-white.png"
+        BUG_LOGO_PNG = "../Images/bug-white.png"
+        cosmic_logo = "../Images/cosmic.png"
+        OPEN_CL_PNG = "../Images/OpenCL.svg"
+        Ryzen_logo = "../Images/Ryzen.svg"
+        BGCOLOR1 = "#353839"
+        BGCOLOR2 = "#2D2E36"
+        BGCOLOR3 = "#171717"
+        COLOR1 = "GREEN"
+        COLOR2 = "RED"
+        COLOR3 = "#FFFFFF"
+    else:
+        AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
+        Gnome_logo = "../Images/Gnome_Dark.png"
+        LLVM_logo = "../Images/LLVM-Logo.svg"
+        LLVM_LOGO_SVG = "../Images/LLVM-Logo.svg"
+        AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.svg"
+        AMD_LOGO_PNG = "../Images/AMD_logo.png"
+        AMD_logo = "../Images/AMD_logo.png"
+        GITHUB_LOGO_PNG = "../Images/github.png"
+        CONTACT_LOGO_PNG = "../Images/Contact.png"
+        BUG_LOGO_PNG = "../Images/Bug.svg"
+        cosmic_logo = "../Images/Cosmic_white.svg"
+        OPEN_CL_PNG = "../Images/OpenCL_Dark.png"
+        Ryzen_logo = "../Images/Ryzen_Dark.svg"
+        BGCOLOR1 = "#e9edf6"
+        BGCOLOR2 = "#eeeeee"
+        BGCOLOR3 = "#ccc"
+        COLOR1 = "GREEN"
+        COLOR2 = "RED"
+        COLOR3 = "#333333"
 
-if prefer_dark_theme:
-  AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
-  Gnome_logo = "../Images/Gnome_logo.png"
-  LLVM_logo = "../Images/LLVM_Logo.png"
-  LLVM_LOGO_SVG = "../Images/LLVM_Logo.png"
-  AMDRYZEN_LOGO_PNG = "../Images/amd-ryzen.png"
-  AMD_LOGO_PNG = "../Images/AMD_D.png"
-  GITHUB_LOGO_PNG = "../Images/github-white.png"
-  CONTACT_LOGO_PNG = "../Images/Contact-white.png"
-  BUG_LOGO_PNG = "../Images/bug-white.png"
-  cosmic_logo = "../Images/cosmic.png"
-
-
-
-else:
-  AMDRADEON_LOGO_PNG = "../Images/AMDRadeon.png"
-  Gnome_logo = "../Images/Gnome_Dark.png"
-  LLVM_logo = "../Images/LLVM-Logo.svg"
-  LLVM_LOGO_SVG = "../Images/LLVM-Logo.svg"
-  AMDRYZEN_LOGO_PNG = "../Images/AMD_Ryzen.svg"
-  AMD_LOGO_PNG = "../Images/AMD_logo.png"
-  GITHUB_LOGO_PNG = "../Images/github.png"
-  CONTACT_LOGO_PNG = "../Images/Contact.png"
-  BUG_LOGO_PNG = "../Images/Bug.svg"
-  cosmic_logo  = "../Images/Cosmic_white.svg"
+update_theme_constants(False)
 
 
 
@@ -53,9 +72,7 @@ OPEN_GL_PNG = "../Images/OpenGL.png"
 
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
-#OPEN_CL_PNG = "../Images/OpenCL.png"
-
-OPEN_CL_PNG = "../Images/OpenCL_Dark.png"
+# OPEN_CL_PNG is dynamic
 
 EGL_PNG  = "../Images/Egl_logo.png"
 
@@ -186,17 +203,11 @@ Rhino_Linux_logo = "../Images/Rhino_Linux.png"
 Steam_OS_logo = "../Images/Steam_icon_logo.png"
 Nobara_OS_logo = "../Images/nobara.png"
 
-#AMD_logo = "../Images/AMD_logo.png"
-#Radeon_logo = "../Images/AMD_Radeon.svg"
-#Radeon_logo = "../Images/AMD_Radeon_graphics_logo.png"
-Nvidia_logo = "../Images/nvidia_logo.png"
-#LLVM_logo = "../Images/LLVM-Logo.png"
-Intel_logo = "../Images/Intel_logo.png"
-Mesa_logo = "../Images/mesa.png"
-#Ryzen_logo = "../Images/Ryzen.png"
-Intel_core_i7_logo = "../Images/intel-logo-core-i7.png"
-
-Ryzen_logo = "../Images/Ryzen_Dark.svg"
+# These logos are updated in update_theme_constants
+# Nvidia_logo, Intel_logo, Mesa_logo, Ryzen_logo are handled dynamically
+Mesa_logo = "../Images/mesa.png" # Mesa doesn't have a clear variant yet, keeping default
+Intel_logo = "../Images/Intel_logo.png" # Keeping default for now
+Nvidia_logo = "../Images/nvidia_logo.png" # Keeping default for now
 
 
 #------------------- Desktop logo--------------------------------------
@@ -237,28 +248,6 @@ HEIGHT_RATIO2 = 0.65
 
 MWIDTH = 350
 
-
-# .------------- Colors ---------------------
-
-#BGCOLOR1 = "#e9edf6"
-BGCOLOR1 = "#353839"
-
-#BGCOLOR2 = "#eeeeee"
-BGCOLOR2 = "#2D2E36"
-
-#BGCOLOR3 = "#ccc"
-#BGCOLOR3 = "#9FA3AC"
-BGCOLOR3 = "#171717"
-
-
-COLOR1 = "GREEN"
-
-COLOR2 = "RED"
-
-COLOR3 = "#FFFFFF"
-#COLOR3  = "#333333"
-
-FONT = "Noto Sans Regular"
 
 # ------------------------ theme Menu -----------------------------------------
 

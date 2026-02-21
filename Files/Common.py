@@ -12,6 +12,36 @@ from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw
 
 import os
 import glob
+import configparser
+
+class Config:
+    def __init__(self):
+        self.config_dir = os.path.expanduser("~/.config/gpu-viewer")
+        self.config_path = os.path.join(self.config_dir, "config.ini")
+        self.config = configparser.ConfigParser()
+        self.load()
+
+    def load(self):
+        if not os.path.exists(self.config_dir):
+            os.makedirs(self.config_dir)
+        if os.path.exists(self.config_path):
+            self.config.read(self.config_path)
+        else:
+            self.config["THEME"] = {"prefer_dark": "False"}
+            self.save()
+
+    def save(self):
+        with open(self.config_path, "w") as f:
+            self.config.write(f)
+
+    def get_theme_preference(self):
+        return self.config.getboolean("THEME", "prefer_dark", fallback=True)
+
+    def set_theme_preference(self, prefer_dark):
+        if "THEME" not in self.config:
+            self.config["THEME"] = {}
+        self.config["THEME"]["prefer_dark"] = str(prefer_dark)
+        self.save()
 
 Adw.init()
 

@@ -35,78 +35,89 @@ def bind(widget, item):
     obj = item.get_item()
     label.set_label(obj.column)
 
+class AboutPage(Gtk.Box):
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL)
+        self.grid = Gtk.Grid()
+        
+        title = "About GPU-Viewer v3.26"
+        self.column_view = Gtk.ColumnView()
+        self.column_view.props.show_row_separators = True
+        self.column_view.props.single_click_activate = False
+        self.column_view.props.show_column_separators = True
+        
+        factory = Gtk.SignalListItemFactory()
+        factory.connect("setup", setup)
+        factory.connect("bind", bind)
+        
+        scrollable_treelist1 = create_scrollbar(self.column_view)
+        self.append(scrollable_treelist1)
+        
+        aboutColumn = Gtk.ColumnViewColumn.new(title)
+        aboutColumn.set_resizable(True)
+        aboutColumn.set_expand(True)
+        aboutColumn.set_factory(factory)
+        self.column_view.append_column(aboutColumn)
+        
+        selection = Gtk.SingleSelection()
+        self.store = Gio.ListStore.new(DataObject)
+        selection.set_model(self.store)
+        self.column_view.set_model(selection)
+        
+        with open("../About_GPU_Viewer", "r") as file1:
+            for i, line in enumerate(file1):
+                self.store.append(DataObject(line.strip('\n')))
+        
+        self.append(self.grid)
+        
+        # Buttons with icons
+        self.log_button = Gtk.LinkButton.new_with_label(const.CHANGE_LOG_LINK)
+        self.log_button.set_tooltip_text(const.TOOLTIP_CHANGE_LOG)
+        setMargin(self.log_button, 10, 5, 5)
+        self.grid.attach(self.log_button, 0, 0, 1, 1)
+
+        self.license_button = Gtk.LinkButton.new_with_label(const.LICENSE_HTML_LINK)
+        self.license_button.set_tooltip_text(const.TOOLTIP_LICENSE)
+        setMargin(self.license_button, 100, 5, 5)
+        self.grid.attach_next_to(self.license_button, self.log_button, Gtk.PositionType.RIGHT, 1, 1)
+
+        self.faq_button = Gtk.LinkButton.new_with_label(const.FAQ_LINK)
+        self.faq_button.set_tooltip_text(const.TOOLTIP_FAQ)
+        setMargin(self.faq_button, 100, 5, 5)
+        self.grid.attach_next_to(self.faq_button, self.license_button, Gtk.PositionType.RIGHT, 1, 1)
+
+        self.report_button = Gtk.LinkButton.new_with_label(const.ISSUE_LINK)
+        self.report_button.set_tooltip_text(const.TOOLTIP_BUG)
+        setMargin(self.report_button, 100, 5, 5)
+        self.grid.attach_next_to(self.report_button, self.faq_button, Gtk.PositionType.RIGHT, 1, 1)
+
+        self.donate_button = Gtk.LinkButton.new_with_label(const.PAYPAL_LINK)
+        self.donate_button.set_tooltip_text(const.TOOLTIP_DONATE)
+        setMargin(self.donate_button, 100, 5, 5)
+        self.grid.attach_next_to(self.donate_button, self.report_button, Gtk.PositionType.RIGHT, 1, 1)
+
+        self.github_button = Gtk.LinkButton.new_with_label(const.GITHUB_LINK)
+        self.github_button.set_tooltip_text(const.TOOLTIP_GITHUB)
+        setMargin(self.github_button, 100, 5, 5)
+        self.grid.attach_next_to(self.github_button, self.donate_button, Gtk.PositionType.RIGHT, 1, 1)
+
+        self.contact_button = Gtk.LinkButton.new_with_label(const.EMAIL_LINK)
+        self.contact_button.set_tooltip_text(const.TOOLTIP_CONTACT)
+        setMargin(self.contact_button, 100, 5, 5)
+        self.grid.attach_next_to(self.contact_button, self.github_button, Gtk.PositionType.RIGHT, 1, 1)
+        
+        self.refresh_icons()
+
+    def refresh_icons(self):
+        self.log_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.LOG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.license_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.LICENSE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.faq_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.FAQ_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.report_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.BUG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.donate_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.DONATE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.github_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.GITHUB_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+        self.contact_button.set_child(Gtk.Picture.new_for_pixbuf(fetchImageFromUrl(const.CONTACT_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)))
+
 def about_page(tab3):
-    box = Gtk.Box(orientation=1)
-    grid = Gtk.Grid()
-    tab3.append(box)
-
-    column_view = Gtk.ColumnView()
-    column_view.props.show_row_separators = True
-    column_view.props.single_click_activate = False
-    column_view.props.show_column_separators = True
-    factory = Gtk.SignalListItemFactory()
-    factory.connect("setup", setup)
-    factory.connect("bind", bind)
-    scrollable_treelist1 = create_scrollbar(column_view)
-    box.append(scrollable_treelist1)
- #   box.append(sw)
- #   sw.set_child(column_view)
-
-    aboutColumn = Gtk.ColumnViewColumn.new(title)
-    aboutColumn.set_resizable(True)
-#    aboutColumn.set_fixed_width(5)
-    aboutColumn.set_expand(True)
-    aboutColumn.set_factory(factory)
-    column_view.append_column(aboutColumn)
-
-    selection = Gtk.SingleSelection()
-    
-    store = Gio.ListStore.new(DataObject)
-    
-    selection.set_model(store)
-    
-    column_view.set_model(selection)
-
-    with open("../About_GPU_Viewer", "r") as file1:
-        for i, line in enumerate(file1):
-            store.append(DataObject(line.strip('\n')))
-
-    box.append(grid)
-
-
-    Logimg = fetchImageFromUrl(const.LOG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Logbutton = getLinkButtonImg(Logimg, const.CHANGE_LOG_LINK, const.TOOLTIP_CHANGE_LOG)
-    setMargin(Logbutton,10,5,5)
-    grid.attach(Logbutton, 0, 0,1,1)
-
-    Licenseimg = fetchImageFromUrl(const.LICENSE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Licensebutton = getLinkButtonImg(Licenseimg, const.LICENSE_HTML_LINK, const.TOOLTIP_LICENSE)
-    setMargin(Licensebutton,100,5,5)
-    grid.attach_next_to(Licensebutton, Logbutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    Faqimg = fetchImageFromUrl(const.FAQ_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Faqbutton = getLinkButtonImg(Faqimg, const.FAQ_LINK, const.TOOLTIP_FAQ)
-    setMargin(Faqbutton,100,5,5)
-    grid.attach_next_to(Faqbutton, Licensebutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    Reportimg = fetchImageFromUrl(const.BUG_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Reportbutton = getLinkButtonImg(Reportimg, const.ISSUE_LINK, const.TOOLTIP_BUG)
-    setMargin(Reportbutton,100,5,5)
-    grid.attach_next_to(Reportbutton, Faqbutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    Donateimg = fetchImageFromUrl(const.DONATE_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Donatebutton = getLinkButtonImg(Donateimg, const.PAYPAL_LINK, const.TOOLTIP_DONATE)
-    setMargin(Donatebutton,100,5,5)
-    grid.attach_next_to(Donatebutton, Reportbutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    Githubimg = fetchImageFromUrl(const.GITHUB_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Githubbutton = getLinkButtonImg(Githubimg, const.GITHUB_LINK, const.TOOLTIP_GITHUB)
-    setMargin(Githubbutton,100,5,5)
-    grid.attach_next_to(Githubbutton, Donatebutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    Contactimg = fetchImageFromUrl(const.CONTACT_LOGO_PNG, const.ICON_WIDTH, const.ICON_HEIGHT2, True)
-    Contactbutton = getLinkButtonImg(Contactimg, const.EMAIL_LINK, const.TOOLTIP_CONTACT)
-    setMargin(Contactbutton,100,5,5)
-    grid.attach_next_to(Contactbutton, Githubbutton, Gtk.PositionType.RIGHT, 1, 1)
-
-    return tab3
+    page = AboutPage()
+    tab3.append(page)
+    return page

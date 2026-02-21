@@ -46,10 +46,11 @@ textview>border {
 
 .sidebar {
   transition: background-color 75ms cubic-bezier(0, 0, 0.2, 1), color 75ms cubic-bezier(0, 0, 0.2, 1);
-  background-color: #13576E;
+  background-image: linear-gradient(#1D252A, #1D252A);
   border-style: none none none none;
-  color: #fff;
+  color: #ffffff;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+
 }
 
 .sidebar>row:focus {
