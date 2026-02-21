@@ -116,22 +116,27 @@ else:
             self.config = Config()
             self.connect("activate", self.on_activate)    
 
-        def _on_theme_toggled(self, switch, state):
+        def _on_theme_toggled(self, button):
             """
-            Callback to handle the theme switch state change.
-            It updates the Adw.StyleManager's color scheme based on the switch state.
+            Callback to handle the theme button click.
+            It updates the Adw.StyleManager's color scheme and toggles the icon.
             """
             style_manager = Adw.StyleManager.get_default()
-            self.config.set_theme_preference(state)
+            current_state = self.config.get_theme_preference()
+            new_state = not current_state
             
-            if state:
+            self.config.set_theme_preference(new_state)
+            
+            if new_state:
                 # Set to dark theme
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
                 fname = Gio.file_new_for_path('gtk_dark.css')
+                self.theme_icon.set_from_icon_name("night-light-symbolic")
             else:
                 # Set to light theme
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
                 fname = Gio.file_new_for_path('gtk_light.css')
+                self.theme_icon.set_from_icon_name("display-brightness-symbolic")
 
             # Reload CSS
             display = Gtk.Widget.get_display(self.window)
@@ -141,7 +146,7 @@ else:
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
             # Update constants
-            const.update_theme_constants(state)
+            const.update_theme_constants(new_state)
             
             # Refresh UI by re-creating tabs
             self.refresh_tabs()
@@ -199,27 +204,26 @@ else:
         #    self.header_bar.add_css_class(css_class="inline")
             # Set the view switcher as the custom title widget in the header bar
             self.header_bar.add_css_class(css_class="view")
-            theme_switch = Gtk.Switch.new()
-            theme_switch.set_valign(Gtk.Align.CENTER)
+            self.theme_button = Gtk.Button.new()
+            self.theme_button.set_valign(Gtk.Align.CENTER)
+            self.theme_button.add_css_class("flat")
 
-            icon_theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
-            icon_theme.add_search_path(os.path.abspath("../Images"))
+            self.theme_icon = Gtk.Image.new()
+            if prefer_dark_theme:
+                self.theme_icon.set_from_icon_name("night-light-symbolic")
+            else:
+                self.theme_icon.set_from_icon_name("display-brightness-symbolic")
+            
+            self.theme_button.set_child(self.theme_icon)
 
-            style_manager = Adw.StyleManager.get_default()
-            theme_switch.set_active(prefer_dark_theme)
+            # Connect the button's 'clicked' signal
+            self.theme_button.connect("clicked", self._on_theme_toggled)
 
-            # Connect the switch's 'state-set' signal to a handler
-            theme_switch.connect("state-set", self._on_theme_toggled)
-
-            # Create an icon for the theme switch
-            theme_icon = Gtk.Image.new_from_icon_name("theme")
-
-            # Create a box to hold the icon and the switch
+            # Create a box to hold the button
             theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
             theme_box.set_halign(Gtk.Align.END)
             theme_box.set_valign(Gtk.Align.CENTER)
-            # theme_box.append(theme_icon)
-            theme_box.append(theme_switch)
+            theme_box.append(self.theme_button)
             self.header_bar.pack_end(theme_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
 
