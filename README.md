@@ -24,11 +24,13 @@ This project aims to capture all the important details of glxinfo, vulkaninfo an
 
 Light Theme
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/1df5f790-9fa5-4f84-99d3-4f1171d9d6be" />
+<img width="1907" height="1346" alt="Screenshot From 2026-02-27 17-49-05" src="https://github.com/user-attachments/assets/2c8145dd-1e93-4c53-b69b-aecff3ada902" />
+
 
 Dark theme
 
-<img width="1734" height="1346" alt="Image" src="https://github.com/user-attachments/assets/cc0e4832-7b7e-4df9-9e41-d528ec6ad3a7" />
+<img width="1907" height="1346" alt="Screenshot From 2026-02-27 17-49-14" src="https://github.com/user-attachments/assets/ee41b8b3-d3be-4a05-bf18-e1f4e3d78dd7" />
+
 
 
 ## INSTALLATION STEPS
@@ -37,7 +39,7 @@ Dark theme
 
 1. Before Downloading the files please see the Known issues mentioned below
 2. Ensure python is installed
-3. **Ubuntu 24.04(Noble)/Ybuntu 23.10(Mantic)/Ubuntu 23.04(Lunar)/Ubuntu 22.04 (Jammy)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA
+3. **Ubuntu 24.04(Noble)/Ybuntu 23.10(Mantic)/Ubuntu 23.04(Lunar)/Ubuntu 22.04 (Jammy)/Linux Mint 20.x/Linux Mint 19.x** users should be able to install this application using the below PPA (Not supporting anymore)
 
     * sudo add-apt-repository ppa:arunsivaraman/gpuviewer
     * sudo apt-get update
