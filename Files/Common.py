@@ -7,7 +7,7 @@ from pathlib import Path
 gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
-from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw
+from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw,GLib
 
 
 import os
@@ -16,7 +16,7 @@ import configparser
 
 class Config:
     def __init__(self):
-        self.config_dir = os.path.expanduser("~/.config/gpu-viewer")
+        self.config_dir = os.path.join(GLib.get_user_config_dir(), "gpu-viewer")
         self.config_path = os.path.join(self.config_dir, "config.ini")
         self.config = configparser.ConfigParser()
         self.load()
