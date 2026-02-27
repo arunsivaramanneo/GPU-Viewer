@@ -274,9 +274,12 @@ def VulkanVideo(videoTab):
     gpu_Dropdown.set_margin_start(10)
     h_box.append(gpu_Dropdown)
     
+    unique_gpus = []
     for i in range(len(gpu_list)):
         if (fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | grep 'Video Profiles'"%(i,i+1))):
-            gpu_Dropdown_list.append(gpu_list[i])
+            if gpu_list[i] not in unique_gpus:
+                unique_gpus.append(gpu_list[i])
+                gpu_Dropdown_list.append(gpu_list[i])
     # Add the horizontal box to the main vertical box
     videoTab.append(h_box)
     

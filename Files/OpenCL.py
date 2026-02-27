@@ -15,6 +15,7 @@ deviceMemoryImageHeader = ["Device Information ", "Details "]
 
 
 def openCL(tab):
+    gpu_index_map = []
     def getPlatformNames():
 
         createMainFile(Filenames.opencl_plaform_and_device_names_file,Filenames.fetch_platform_and_device_names_command)
@@ -32,10 +33,13 @@ def openCL(tab):
         value = 0
         if selected is not None:
             value = dropdown.props.selected
-            getDeviceDetails(value)
-            getDeviceMemoryImageDetails(value)
-            getDeviceVectorDetails(value)
-            getDeviceQueueExecutionCapabilities(value)
+            if value == Gtk.INVALID_LIST_POSITION:
+                value = 0
+            real_idx = gpu_index_map[value] if len(gpu_index_map) > value else value
+            getDeviceDetails(real_idx)
+            getDeviceMemoryImageDetails(real_idx)
+            getDeviceVectorDetails(real_idx)
+            getDeviceQueueExecutionCapabilities(real_idx)
         
             gpu_image = getGpuImage(selected.get_string())
             image_renderer.set_pixbuf(gpu_image)
@@ -63,8 +67,13 @@ def openCL(tab):
         numberOfDevicesEntry.set_text(str(len(oclDeviceNames)))
         numberOfDevicesEntry.set_editable(False)
 
-        for i in oclDeviceNames:
-            Devices_list.append(i)
+        gpu_index_map.clear()
+        unique_names = []
+        for i, name in enumerate(oclDeviceNames):
+            if name not in unique_names:
+                unique_names.append(name)
+                gpu_index_map.append(i)
+                Devices_list.append(name)
 
     def getPlatfromDetails(value):
 

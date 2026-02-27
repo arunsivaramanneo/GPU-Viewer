@@ -1195,7 +1195,11 @@ def create_vulkan_tab_content(self):
 
 
     def on_gpu_dropdown_changed(gpu_dropdown,dummy):
-        text = gpu_dropdown.props.selected
+        idx = gpu_dropdown.props.selected
+        if idx == Gtk.INVALID_LIST_POSITION:
+            idx = 0
+            
+        text = gpu_index_map[idx]
 
         Devices(text)
         Limits(text)
@@ -1245,8 +1249,14 @@ def create_vulkan_tab_content(self):
     gpu_Dropdown.add_css_class(css_class="card")
     gpu_Dropdown_list = Gtk.StringList()
     gpu_Dropdown.set_model(gpu_Dropdown_list)
-    for i in gpu_list:
-        gpu_Dropdown_list.append(i)
+    
+    gpu_index_map = []
+    unique_gpus = []
+    for i, gpu in enumerate(gpu_list):
+        if gpu not in unique_gpus:
+            unique_gpus.append(gpu)
+            gpu_index_map.append(i)
+            gpu_Dropdown_list.append(gpu)
     gpu_Dropdown.set_margin_start(10)
     gpu_Dropdown.set_margin_end(10)
     h_box.append(gpu_Dropdown)
@@ -1408,7 +1418,8 @@ def create_vulkan_tab_content(self):
             if idx == Gtk.INVALID_LIST_POSITION:
                 idx = 0
             
-            device_id = int(gpu_id_list[idx].strip(), 16)
+            real_idx = gpu_index_map[idx]
+            device_id = int(gpu_id_list[real_idx].strip(), 16)
             num_devices = len(gpu_list)
             stats = get_gpu_stats(device_id, num_devices)
             if stats:
