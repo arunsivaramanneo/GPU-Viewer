@@ -1,4 +1,5 @@
 #!/bin/sh
 
+export PYTHONSAFEPATH=1
 cd @datadir@/gpu-viewer/Files
 exec python3 gpu_viewer.py

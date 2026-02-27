@@ -5,7 +5,7 @@ Name=GPU-Viewer
 GenericName=Utility
 Comment=A front-end to glxinfo, vulkaninfo, clinfo and es2_info
 Icon=io.github.arunsivaramanneo.GPUViewer
-Exec=gpu-viewer
+Exec=env PYTHONSAFEPATH=1 gpu-viewer
 Terminal=false
 Categories=System;GTK;GNOME
 Keywords=GPU;Graphics;Vulkan;OpenGL;OpenCL;Mesa;AMD;Intel;NVIDIA:Radeon;Geforce
