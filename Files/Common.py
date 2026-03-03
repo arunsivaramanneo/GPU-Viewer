@@ -423,6 +423,8 @@ def getLogo(line):
         logo_pixbuf  = fetchImageFromUrl(const.Ubuntu_logo,32,28, True)
     elif "Nobara" in line:
         logo_pixbuf  = fetchImageFromUrl(const.Nobara_OS_logo,32,28, True)
+    elif "AnduinOS" in line:
+        logo_pixbuf  = fetchImageFromUrl(const.Anduinos_logo,32,28, True)
     elif "NixOS" in line:
         logo_pixbuf  = fetchImageFromUrl(const.NixOS_logo,32,28, True)
     elif "Fedora" in line:

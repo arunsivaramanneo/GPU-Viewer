@@ -202,6 +202,7 @@ NixOS_logo = "../Images/NixOS.png"
 Rhino_Linux_logo = "../Images/Rhino_Linux.png"
 Steam_OS_logo = "../Images/Steam_icon_logo.png"
 Nobara_OS_logo = "../Images/nobara.png"
+Anduinos_logo = "../Images/anduinos_logo.svg"
 
 # These logos are updated in update_theme_constants
 # Nvidia_logo, Intel_logo, Mesa_logo, Ryzen_logo are handled dynamically
