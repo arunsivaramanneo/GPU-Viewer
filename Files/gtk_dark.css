@@ -414,9 +414,9 @@ dropdown>button {
   border-radius: 10px;
   color: #fafbfc;
   border-style: solid;
-  border: 3px solid rgba(0, 0, 0, 0.87);
-  box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  font-weight: 550;
+  border: 3px solid #000;
+  box-shadow: 0 2px 2.4px -1px #000, 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+  font-weight: 600;
 }
 
 dropdown>button :only-child {
@@ -433,7 +433,9 @@ listview>row :hover {
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
 
 }
-
+label{
+  font-weight: 600;
+}
 
 popover.background listview>row {
   padding: 4px 8px;

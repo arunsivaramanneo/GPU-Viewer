@@ -246,6 +246,9 @@ button.dropdown {
   color: #000;
 }
 
+label{
+  font-weight: 600;
+}
 popover.background>arrow,
 popover.background>contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
