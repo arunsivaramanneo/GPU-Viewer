@@ -14,7 +14,7 @@ deviceDetailsHeader = ["Device Information ", "Details "]
 deviceMemoryImageHeader = ["Device Information ", "Details "]
 
 
-def openCL(tab):
+def openCL(self, tab):
     gpu_index_map = []
     def getPlatformNames():
 
@@ -389,6 +389,7 @@ def openCL(tab):
 
 
     content_stack = Gtk.Stack.new()
+    self.opencl_content_stack = content_stack
 
     # Create the content pages for each tab and add them to the stack
     for tab_name in tabs:

@@ -107,7 +107,7 @@ def bind_expander(widget, item):
     label.set_label(obj.data)
     label.add_css_class(css_class='parent')
 
-def OpenGL(tab):
+def OpenGL(self, tab):
 
     def opengl_info():
         fetch_opengl_information_command = "cat %s | grep string | grep -v glx" %(Filenames.opengl_outpuf_file)
@@ -568,6 +568,7 @@ def OpenGL(tab):
 
 #    extensions_notebook = Gtk.Notebook()
     extensions_notebook = Adw.ViewStack.new()
+    self.opengl_extensions_notebook = extensions_notebook
     adw_toolbar_view.set_content(extensions_notebook)
  #   grid_extension.attach(extensions_notebook,0,0,1,1)
 

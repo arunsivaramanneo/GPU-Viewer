@@ -2421,6 +2421,7 @@ def create_vulkan_tab_content(self):
     # Create the Adw.NavigationPage wrappers for the sidebar and content
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
     content_page = Adw.NavigationPage.new(content_stack, "Content")
+    self.vulkan_content_stack = content_stack
     
     # Set the sidebar and content for the split view using the new pages
     split_view.set_sidebar(sidebar_page)

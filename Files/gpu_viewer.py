@@ -11,6 +11,7 @@ os.chdir(script_dir)
 
 import gi
 import subprocess
+import shutil
 
 # This line is crucial for working with PyGObject.
 # It ensures we are using the correct versions of the libraries.
@@ -122,6 +123,121 @@ else:
             super().__init__(application_id="io.github.arunsivaramanneo.GPUViewer", **kwargs)
             self.config = Config()
             self.connect("activate", self.on_activate)    
+
+        def _on_save_button_clicked(self, button):
+            visible_child_name = self.view_stack.get_visible_child_name()
+            
+            source_file = None
+            default_name = "output.txt"
+            
+            if visible_child_name == "page1":
+                source_file = Filenames.vulkaninfo_output_file
+                default_name = "vulkaninfo.txt"
+                if hasattr(self, 'vulkan_content_stack'):
+                    vulkan_tab = self.vulkan_content_stack.get_visible_child_name()
+                    if vulkan_tab == "system-information":
+                        source_file = Filenames.vulkaninfo_output_file
+                        default_name = "vulkaninfo.txt"
+                    elif vulkan_tab == "device":
+                        source_file = Filenames.vulkan_device_info_file
+                        default_name = "deviceinfo.txt"
+                    elif vulkan_tab == "properties":
+                        source_file = Filenames.vulkan_device_properties_file
+                        default_name = "properties.txt"
+                    elif vulkan_tab == "limits":
+                        source_file = Filenames.vulkan_device_limits_file
+                        default_name = "limits.txt"
+                    elif vulkan_tab == "features":
+                        source_file = Filenames.vulkan_device_features_file
+                        default_name = "features.txt"
+                    elif vulkan_tab == "formats":
+                        source_file = Filenames.vulkan_device_formats_file
+                        default_name = "formats.txt"
+                    elif vulkan_tab == "memory-types":
+                        source_file = Filenames.vulkan_device_memory_types_file
+                        default_name = "memory_types.txt"
+                    elif vulkan_tab == "memory-heaps":
+                        source_file = Filenames.vulkan_device_memory_heaps_file
+                        default_name = "memory_heaps.txt"
+                    elif vulkan_tab == "queues":
+                        source_file = Filenames.vulkan_device_queues_file
+                        default_name = "queues.txt"
+                    elif vulkan_tab == "instance-extensions":
+                        source_file = Filenames.vulkan_device_extensions_file
+                        default_name = "extensions.txt"
+                    elif vulkan_tab == "instance-layers":
+                        source_file = Filenames.vulkan_device_layers_file
+                        default_name = "layers.txt"
+                    elif vulkan_tab == "surface":
+                        source_file = Filenames.vulkan_device_surface_file
+                        default_name = "surface.txt"
+
+            elif visible_child_name == "page2":
+                source_file = Filenames.opengl_outpuf_file
+                default_name = "glxinfo.txt"
+                if hasattr(self, 'opengl_extensions_notebook'):
+                    opengl_tab = self.opengl_extensions_notebook.get_visible_child_name()
+                    if opengl_tab == "opengl":
+                        pass
+                    elif opengl_tab == "opengl_es":
+                        source_file = Filenames.opengl_vendor_es_extension_file
+                        default_name = "opengl_es_extensions.txt"
+                    elif opengl_tab == "egl_logo":
+                        source_file = Filenames.egl_vendor_extension_file
+                        default_name = "egl_extensions.txt"
+
+            elif visible_child_name == "opencl_page":
+                source_file = Filenames.opencl_output_file
+                default_name = "clinfo.txt"
+                if hasattr(self, 'opencl_content_stack'):
+                    opencl_tab = self.opencl_content_stack.get_visible_child_name()
+                    if opencl_tab == "platform-information":
+                        source_file = Filenames.opencl_platform_details_file
+                        default_name = "platform_details.txt"
+                    elif opencl_tab == "device-information":
+                        source_file = Filenames.opencl_device_details_file
+                        default_name = "device_details.txt"
+                    elif opencl_tab and opencl_tab.startswith("device-memory"):
+                        source_file = Filenames.opencl_device_memory_and_image_file
+                        default_name = "memory_and_image_details.txt"
+                    elif opencl_tab and opencl_tab.startswith("queue-capabilities"):
+                        source_file = Filenames.opencl_device_queue_execution_details_file
+                        default_name = "queue_execution_details.txt"
+                    elif opencl_tab == "device-vector-information":
+                        source_file = Filenames.opencl_device_vector_file
+                        default_name = "vector_details.txt"
+
+            elif visible_child_name == "vdpau_page":
+                source_file = Filenames.vdpauinfo_output_file
+                default_name = "vdpauinfo.txt"
+            elif visible_child_name == "vulkan_video_page":
+                source_file = "/tmp/gpu-viewer/vulkan_video_info.txt"
+                default_name = "vulkan_video_info.txt"
+                with open(source_file, "w") as f:
+                    subprocess.run(["vulkaninfo", "--show-video-props"], stdout=f, universal_newlines=True)
+            else:
+                return
+            
+            if not source_file or not os.path.exists(source_file):
+                return
+
+            dialog = Gtk.FileChooserNative.new("Save Tab Output",
+                                               self.window,
+                                               Gtk.FileChooserAction.SAVE,
+                                               "Save",
+                                               "Cancel")
+            dialog.set_current_name(default_name)
+            
+            def on_response(native, response):
+                if response == Gtk.ResponseType.ACCEPT:
+                    file_out = native.get_file()
+                    if file_out:
+                        dest_path = file_out.get_path()
+                        if dest_path:
+                            shutil.copyfile(source_file, dest_path)
+                            
+            dialog.connect("response", on_response)
+            dialog.show()
 
         def _on_theme_button_clicked(self, button):
             """
@@ -239,12 +355,20 @@ else:
             # Connect the button's 'clicked' signal
             self.theme_button.connect("clicked", self._on_theme_button_clicked)
 
-            # Create a box to hold the button
-            theme_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
-            theme_box.set_halign(Gtk.Align.END)
-            theme_box.set_valign(Gtk.Align.CENTER)
-            theme_box.append(self.theme_button)
-            self.header_bar.pack_end(theme_box)
+            # Create the save button
+            self.save_button = Gtk.Button.new()
+            self.save_button.add_css_class("flat")
+            self.save_button.set_valign(Gtk.Align.CENTER)
+            self.save_button.set_icon_name("document-save-symbolic")
+            self.save_button.connect("clicked", self._on_save_button_clicked)
+
+            # Create a box to hold the buttons
+            header_buttons_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
+            header_buttons_box.set_halign(Gtk.Align.END)
+            header_buttons_box.set_valign(Gtk.Align.CENTER)
+            header_buttons_box.append(self.save_button)
+            header_buttons_box.append(self.theme_button)
+            self.header_bar.pack_end(header_buttons_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
 
             # Create a main box to hold the header bar and the view stack
@@ -282,12 +406,12 @@ else:
 
             page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             if isOpenglSupported():
-                opengl_box = OpenGL(page2_box)
+                opengl_box = OpenGL(self, page2_box)
                 self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
 
             opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             if isOpenclSupported():
-                opencl_content = openCL(opencl_box)
+                opencl_content = openCL(self, opencl_box)
                 self.view_stack.add_titled_with_icon(opencl_content,"opencl_page","OpenCL","OpenCL")
 
             vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
