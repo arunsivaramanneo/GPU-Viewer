@@ -1,9 +1,9 @@
-mkdir_output_command = ["mkdir /tmp/gpu-viewer"]
-rmdir_output_command = ["rm /tmp/gpu-viewer -r"]
-vulkaninfo_output_command = ["vulkaninfo --show-formats"]
-vdpauinfo_output_command = ["vdpauinfo"]
-clinfo_output_command = ["clinfo -a | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' "]
-opengl_output_command = ["glxinfo -s"]
+mkdir_output_command = "mkdir /tmp/gpu-viewer"
+rmdir_output_command = "rm /tmp/gpu-viewer -r"
+vulkaninfo_output_command = "vulkaninfo --show-formats"
+vdpauinfo_output_command = "vdpauinfo"
+clinfo_output_command = "clinfo -a | awk '/Number of platforms/{flag=1;print}/NULL.*/{flag=0}flag' "
+opengl_output_command = "glxinfo -s"
 fetch_vulkaninfo_ouput_command = "cat /tmp/gpu-viewer/vulkaninfo.txt |"
 
 fetch_screen_resolution_command = "xdpyinfo | awk '/dimensions/{print $2}'"

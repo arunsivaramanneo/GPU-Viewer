@@ -9,6 +9,7 @@
 import sys
 import gi
 import subprocess, const
+import threading
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib, GObject, Gio, GdkPixbuf
@@ -247,6 +248,9 @@ def create_vulkan_tab_content(self):
                     text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
                     text = text1[:-1]
                     propertiesList.append(DataObject(text.strip("\n"),""))
+        
+        # Hide spinner and show Properties content
+        hide_spinner_for_tab("Properties")
                     
     def selectProperties(dropdown, _pspec):
         selected =dropdown.props.selected_item
@@ -407,6 +411,9 @@ def create_vulkan_tab_content(self):
                     continue
             if toprow:
                 LimitsTab_Store.append(toprow)
+        
+        # Hide spinner and show content
+        hide_spinner_for_tab("Limits")
 
     def Features(GPUname):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
@@ -419,6 +426,9 @@ def create_vulkan_tab_content(self):
                 if "Vk" in line:
                     text = line[:-2]
                     featureList.append(DataObject(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")),""))
+        
+        # Hide spinner and show content
+        hide_spinner_for_tab("Features")
 
     def selectFeature(dropdown, _pspec):
         selected =dropdown.props.selected_item
@@ -483,6 +493,9 @@ def create_vulkan_tab_content(self):
 
             label = "Device Extensions (%d)" %len(vulkan_device_extensions_rhs)
             deviceExtensionColumn.set_title(label)
+            
+            # Hide spinner and show content
+            hide_spinner_for_tab("Extensions")
         #    notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
 
     def Formats(GPUname):
@@ -511,6 +524,9 @@ def create_vulkan_tab_content(self):
         with open(Filenames.vulkan_device_formats_types_file,"r") as file:
             for line in file:
                 FormatsList.append(DataObject(((line.replace("FORMAT_","")).strip("\n")).strip("\t"),""))
+        
+        # Hide spinner and show content
+        hide_spinner_for_tab("Formats")
 
     def selectFormats(dropdown,_pspec):
         selected =dropdown.props.selected_item
@@ -872,6 +888,10 @@ def create_vulkan_tab_content(self):
      #   notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
         label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags))
         memoryTypesColumnLhs.set_title(label2)
+        
+        # Hide spinners and show content
+        hide_spinner_for_tab("Memory Types")
+        hide_spinner_for_tab("Memory Heaps")
     #    notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
 
     def Queues(GPUname):
@@ -950,6 +970,9 @@ def create_vulkan_tab_content(self):
     #    TreeQueue.expand_all()
         label = "Queues (%d)" % len(vulkan_device_queue_counts)
         queueColumnLhs.set_title(label)
+        
+        # Hide spinner and show content
+        hide_spinner_for_tab("Queues")
     #    notebook.set_tab_label(QueueTab, Gtk.Label(label=label))
 
     def Instance():
@@ -1048,6 +1071,10 @@ def create_vulkan_tab_content(self):
                     #    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
                     #    j = j + 1
             LayerTab_Store.append(toprow)
+            
+            # Hide spinners and show content
+            hide_spinner_for_tab("Instance Extensions")
+            hide_spinner_for_tab("Instance Layers")
 
     def Surface(GPU):
 
@@ -1105,6 +1132,9 @@ def create_vulkan_tab_content(self):
                         iter4.children.append(iter5)
                     #    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
             SurfaceTab_Store.append(toprow)
+            
+            # Hide spinner and show content
+            hide_spinner_for_tab("Surface")
         #    TreeSurface.expand_all()
     
 
@@ -1201,18 +1231,96 @@ def create_vulkan_tab_content(self):
             
         text = gpu_index_map[idx]
 
+        # Reset and show the loading spinner
+        tabs_loading_count["count"] = 8  # Number of tabs being loaded in background
+        loading_spinner.set_spinning(True)
+        loading_spinner_box.set_visible(True)
+
+        # Load System Information immediately (Devices tab)
         Devices(text)
-        Limits(text)
-        Features(text)
-        Extensions(text)
-        Formats(text)
-        MemoryTypes(text)
-        Queues(text)
-        Instance()
-        Surface(text)
+
+        # Load other tabs in the background
+        def load_tabs_background():
+            try:
+                # Each function needs to be called on the main thread via GLib.idle_add
+                def call_limits():
+                    try:
+                        Limits(text)
+                    except Exception as e:
+                        print(f"Error loading Limits: {e}")
+                    return False
+                
+                def call_features():
+                    try:
+                        Features(text)
+                    except Exception as e:
+                        print(f"Error loading Features: {e}")
+                    return False
+                
+                def call_extensions():
+                    try:
+                        Extensions(text)
+                    except Exception as e:
+                        print(f"Error loading Extensions: {e}")
+                    return False
+                
+                def call_formats():
+                    try:
+                        Formats(text)
+                    except Exception as e:
+                        print(f"Error loading Formats: {e}")
+                    return False
+                
+                def call_memorytypes():
+                    try:
+                        MemoryTypes(text)
+                    except Exception as e:
+                        print(f"Error loading MemoryTypes: {e}")
+                    return False
+                
+                def call_queues():
+                    try:
+                        Queues(text)
+                    except Exception as e:
+                        print(f"Error loading Queues: {e}")
+                    return False
+                
+                def call_instance():
+                    try:
+                        Instance()
+                    except Exception as e:
+                        print(f"Error loading Instance: {e}")
+                    return False
+                
+                def call_surface():
+                    try:
+                        Surface(text)
+                    except Exception as e:
+                        print(f"Error loading Surface: {e}")
+                    return False
+                
+                # Schedule all UI updates on the main thread
+                GLib.idle_add(call_limits)
+                GLib.idle_add(call_features)
+                GLib.idle_add(call_extensions)
+                GLib.idle_add(call_formats)
+                GLib.idle_add(call_memorytypes)
+                GLib.idle_add(call_queues)
+                GLib.idle_add(call_instance)
+                GLib.idle_add(call_surface)
+            except Exception as e:
+                print(f"Error in background thread: {e}")
+            return False
+
+        # Schedule background loading on a thread to keep UI responsive
+        import threading
+        background_thread = threading.Thread(target=load_tabs_background)
+        background_thread.daemon = True
+        background_thread.start()
 
         gpu_image = getGpuImage(gpu_list[text])
-        image_renderer.set_pixbuf(gpu_image)
+        if gpu_image is not None:
+            image_renderer.set_pixbuf(gpu_image)
 
     """
     Creates the content for the first tab, featuring a label and a
@@ -1286,6 +1394,26 @@ def create_vulkan_tab_content(self):
     stats_container.append(stats_box_left)
     stats_container.append(stats_box_right)
     top_box.append(stats_container)
+    
+    # Create a loading spinner for showing tab loading progress
+    loading_spinner = Gtk.Spinner.new()
+    loading_spinner.set_halign(Gtk.Align.CENTER)
+    loading_spinner.set_valign(Gtk.Align.CENTER)
+    loading_spinner.set_size_request(50, 50)
+    loading_spinner.set_spinning(False)  # Initially hidden
+    loading_spinner_label = Gtk.Label.new("Loading tabs...")
+    loading_spinner_label.set_halign(Gtk.Align.CENTER)
+    
+    loading_spinner_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+    loading_spinner_box.set_halign(Gtk.Align.CENTER)
+    loading_spinner_box.set_valign(Gtk.Align.CENTER)
+    loading_spinner_box.set_margin_start(20)
+    loading_spinner_box.append(loading_spinner)
+    loading_spinner_box.append(loading_spinner_label)
+    top_box.append(loading_spinner_box)
+    
+    # Counter for tracking loaded tabs
+    tabs_loading_count = {"count": 0}
     
     # Memory Row (Left side)
     mem_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
@@ -1525,6 +1653,10 @@ def create_vulkan_tab_content(self):
     
     # Create the content view using a Gtk.Stack to switch pages
     content_stack = Gtk.Stack.new()
+    
+    # Dictionary to store spinners for each tab (for lazy loading UI)
+    tab_spinners = {}
+    tab_content_containers = {}
 
     # Create the content pages for each tab and add them to the stack
     for tab_name in tabs:
@@ -2204,8 +2336,61 @@ def create_vulkan_tab_content(self):
             content_box.set_valign(Gtk.Align.CENTER)
             content_box.append(content_label)
         
-        # Add the content box to the stack
-        content_stack.add_titled(content_box, tab_name.replace(" ", "-").lower(), tab_name)
+        # Create a wrapper container with spinner for lazy-loaded tabs
+        if tab_name != "System Information":
+            # Create an overlay to show spinner while loading
+            tab_wrapper = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+            tab_wrapper.set_vexpand(True)
+            tab_wrapper.set_hexpand(True)
+            
+            # Create a spinner widget
+            spinner = Gtk.Spinner()
+            spinner.set_spinning(True)
+            spinner.set_size_request(50, 50)
+            
+            # Create a centered container for the spinner
+            spinner_box = Gtk.CenterBox()
+            spinner_box.set_center_widget(spinner)
+            spinner_box.set_vexpand(True)
+            spinner_box.set_hexpand(True)
+            
+            # Initially hide the content and show the spinner
+            content_box.set_visible(False)
+            
+            # Add both spinner and content to wrapper
+            tab_wrapper.append(spinner_box)
+            tab_wrapper.append(content_box)
+            
+            # Store spinner and content references for later access
+            tab_spinners[tab_name] = spinner
+            tab_content_containers[tab_name] = (content_box, spinner_box)
+            
+            # Add the wrapper to the stack instead of content_box
+            content_stack.add_titled(tab_wrapper, tab_name.replace(" ", "-").lower(), tab_name)
+        else:
+            # System Information tab doesn't have spinner, add directly
+            content_stack.add_titled(content_box, tab_name.replace(" ", "-").lower(), tab_name)
+
+    # Function to hide spinner and show content for a specific tab
+    def hide_spinner_for_tab(tab_name):
+        if tab_name in tab_spinners and tab_name in tab_content_containers:
+            def update_ui():
+                spinner = tab_spinners[tab_name]
+                content_box, spinner_box = tab_content_containers[tab_name]
+                spinner.set_spinning(False)
+                spinner_box.set_visible(False)
+                content_box.set_visible(True)
+                
+                # Decrement loading counter and check if all tabs are done
+                tabs_loading_count["count"] -= 1
+                if tabs_loading_count["count"] <= 0:
+                    # All tabs have finished loading, hide the main loading spinner
+                    loading_spinner.set_spinning(False)
+                    loading_spinner_box.set_visible(False)
+                
+                return False
+            # Schedule UI update on main thread
+            GLib.idle_add(update_ui)
 
     gpu_Dropdown.connect("notify::selected-item", on_gpu_dropdown_changed)
 
