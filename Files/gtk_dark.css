@@ -445,9 +445,6 @@ popover.background listview>row {
   background-color: transparent;
 }
 
-popover.background lisview>row::selection {
-  color: #d43c50;
-}
 
 treeview {
   border-color: #222222;

@@ -1,3 +1,18 @@
+# Copyright (C) 2017-2026 Arun Sivaraman <arunsivaramanneo@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import sys
 import gi
 gi.require_version('Gtk','4.0')
@@ -23,7 +38,6 @@ def VulkanVideo(videoTab):
         vulkanVideoProfiles = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
         vulkanVideoProfilesUniq = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
-        print(vulkanVideoProfilesUniq)
         vulkanVideoProfilesCount = []
         for i in range(len(vulkanVideoProfilesUniq)):
             count = 0
