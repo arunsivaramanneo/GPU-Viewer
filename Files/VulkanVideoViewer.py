@@ -35,7 +35,7 @@ def VulkanVideo(videoTab):
 
     def vProfiles(gpu):
         
-        vulkanVideoProfiles = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
+        vulkanVideoProfiles = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}/Display.*/{flag=0}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
         vulkanVideoProfilesUniq = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
         vulkanVideoProfilesCount = []
@@ -189,9 +189,9 @@ def VulkanVideo(videoTab):
 
     def vFormats(gpu):
 
-        vulkanVideoFormats = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' "%(gpu,gpu+1))
-        vulkanVideoFormatsLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
-        vulkanVideoFormatsRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Video Profile Definition/{flag=0}flag'| awk '/./' | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+        vulkanVideoFormats = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' "%(gpu,gpu+1))
+        vulkanVideoFormatsLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
+        vulkanVideoFormatsRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
 
         vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
         vulkanVideoProfiles.append("")
