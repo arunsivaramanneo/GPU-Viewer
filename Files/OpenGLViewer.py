@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+import os
 import gi
 import const
 import Filenames
@@ -484,18 +485,6 @@ def OpenGL(self, tab):
     def _on_search_method_changed(search_entry,filterColumn):
         filterColumn.changed(Gtk.FilterChange.DIFFERENT)
 
-    def _do_filter_opengl_extension_view(item, filter_list_model):
-        search_text_widget = entry_gl.get_text()
-        return search_text_widget.upper() in item.column1.upper()
-
-    def _do_filter_opengl_es_extension_view(item, filter_list_model):
-        search_text_widget = entry_es.get_text()
-        return search_text_widget.upper() in item.column1.upper()
-
-    def _do_filter_egl_extension_view(item, filter_list_model):
-        search_text_widget = entry_egl.get_text()
-        return search_text_widget.upper() in item.column1.upper()
-
 # ------------------------------ Check es2_info Supported ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def es2_infoSupported():
@@ -503,18 +492,590 @@ def OpenGL(self, tab):
         es2_info_check_process.communicate()
         return es2_info_check_process.returncode == 0
 
-#--------------------------------- Creating the OpenGL Information Tab ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    def create_sidebar_row(label_text, sensitive=True, css_class=None):
+        row = Gtk.ListBoxRow()
+        label = Gtk.Label.new(label_text)
+        label.set_xalign(0)
+        label.set_margin_start(12)
+        label.set_margin_end(12)
+        label.set_margin_top(8)
+        label.set_margin_bottom(8)
+        if css_class:
+            label.add_css_class(css_class=css_class)
+        row.set_child(label)
+        row.set_sensitive(sensitive)
+        return row
 
- #   frame_opengl_info = Gtk.Frame()
-    opengl_box = Gtk.Box(orientation=1,spacing=10)
-#    setMargin(opengl_box,0,0,1)
+    def create_limits_page(core_file, core_lhs_file, compat_file, compat_lhs_file,
+                              core_label, compat_label,
+                              core_command, core_lhs_command,
+                              compat_command, compat_lhs_command):
+        if not os.path.exists(core_file) or not os.path.exists(core_lhs_file):
+            createMainFile(core_file, core_command)
+            createMainFile(core_lhs_file, core_lhs_command)
+
+        if not os.path.exists(compat_file) or not os.path.exists(compat_lhs_file):
+            createMainFile(compat_file, compat_command)
+            createMainFile(compat_lhs_file, compat_lhs_command)
+
+        limits_page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        limits_page.add_css_class('toolbar')
+
+        limitsList = Gtk.StringList()
+        limitsDropDown = Gtk.DropDown()
+        limitsDropDown.set_model(limitsList)
+
+        profile_group = Adw.ToggleGroup.new()
+        core_toggle = Adw.Toggle.new()
+        core_toggle.set_name("core")
+        profile_group.add(core_toggle)
+        compat_toggle = Adw.Toggle.new()
+        compat_toggle.set_name("compat")
+        profile_group.add(compat_toggle)
+
+        core_button = Gtk.ToggleButton.new_with_label("Core")
+        compat_button = Gtk.ToggleButton.new_with_label("Compatibility")
+        core_button.set_active(True)
+        core_button.set_valign(Gtk.Align.CENTER)
+        compat_button.set_valign(Gtk.Align.CENTER)
+
+        toggle_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        toggle_box.set_valign(Gtk.Align.CENTER)
+        toggle_box.append(core_button)
+        toggle_box.append(compat_button)
+
+        top_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+        top_box.set_hexpand(True)
+        top_box.append(limitsDropDown)
+        top_box.append(toggle_box)
+        limits_page.append(top_box)
+
+        limitsColumnView = Gtk.ColumnView()
+        limitsColumnView.props.show_row_separators = True
+        limitsColumnView.props.show_column_separators = False
+
+        factory_limits = Gtk.SignalListItemFactory()
+        factory_limits.connect("setup", setup_expander)
+        factory_limits.connect("bind", bind_expander)
+
+        factory_limits_value = Gtk.SignalListItemFactory()
+        factory_limits_value.connect("setup", setup)
+        factory_limits_value.connect("bind", bind1)
+
+        limitSelection = Gtk.SingleSelection()
+        limits_store = Gio.ListStore.new(ExpandDataObject)
+        limitModel = Gtk.TreeListModel.new(limits_store, False, True, add_tree_node)
+        limitSelection.set_model(limitModel)
+
+        limitsColumnView.set_model(limitSelection)
+        limitColumnLhs = Gtk.ColumnViewColumn.new("OpenGL Hardware Limits", factory_limits)
+        limitColumnLhs.set_resizable(True)
+        limitColumnRhs = Gtk.ColumnViewColumn.new("Value", factory_limits_value)
+        limitColumnRhs.set_expand(True)
+        limitsColumnView.append_column(limitColumnLhs)
+        limitsColumnView.append_column(limitColumnRhs)
+
+        current_mode = {"profile": "core", "file": core_file, "lhs": core_lhs_file, "label": core_label}
+
+        def load_limits_profile(profile):
+            if profile == "core":
+                createMainFile(core_file, core_command)
+                createMainFile(core_lhs_file, core_lhs_command)
+                current_mode["file"] = core_file
+                current_mode["lhs"] = core_lhs_file
+                current_mode["label"] = core_label
+            else:
+                createMainFile(compat_file, compat_command)
+                createMainFile(compat_lhs_file, compat_lhs_command)
+                current_mode["file"] = compat_file
+                current_mode["lhs"] = compat_lhs_file
+                current_mode["label"] = compat_label
+
+            new_model = Gtk.StringList()
+            new_model.append(current_mode["label"])
+            with open(current_mode["lhs"], "r") as file1:
+                for line in file1:
+                    if ":" in line:
+                        text = line[:-2]
+                        new_model.append(text.strip(" "))
+            limitsDropDown.set_model(new_model)
+            limitsDropDown.set_selected(0)
+            showLimits(limitsDropDown, 0, limits_store, limitsColumnView, current_mode["file"])
+
+        def sync_toggle_buttons(profile):
+            core_button.handler_block_by_func(on_core_toggled)
+            compat_button.handler_block_by_func(on_compat_toggled)
+            core_button.set_active(profile == "core")
+            compat_button.set_active(profile == "compat")
+            core_button.handler_unblock_by_func(on_core_toggled)
+            compat_button.handler_unblock_by_func(on_compat_toggled)
+
+        def on_profile_group_changed(group, pspec):
+            profile = group.get_active_name()
+            if not profile:
+                return
+            sync_toggle_buttons(profile)
+            load_limits_profile(profile)
+
+        def on_core_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("core")
+
+        def on_compat_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("compat")
+
+        core_button.connect("toggled", on_core_toggled)
+        compat_button.connect("toggled", on_compat_toggled)
+        profile_group.connect("notify::active-name", on_profile_group_changed)
+
+        load_limits_profile("core")
+
+        limitsDropDown.connect("notify::selected-item", showLimits, limits_store, limitsColumnView, current_mode["file"])
+        limits_page.append(create_scrollbar(limitsColumnView))
+        return limits_page
+
+    def create_framebuffer_page(visuals_command, fbconfig_command):
+        page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        page.add_css_class('toolbar')
+
+        def fetch_lines(command):
+            fetch_process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+            return [line for line in fetch_process.communicate()[0].splitlines() if line.strip()]
+
+        visuals_lines = fetch_lines(visuals_command)
+        fbconfig_lines = fetch_lines(fbconfig_command)
+
+        visuals_count = len(visuals_lines)
+        fbconfig_count = len(fbconfig_lines)
+
+        profile_group = Adw.ToggleGroup.new()
+        visuals_toggle = Adw.Toggle.new()
+        visuals_toggle.set_name("glx-visuals")
+        profile_group.add(visuals_toggle)
+        fbconfig_toggle = Adw.Toggle.new()
+        fbconfig_toggle.set_name("glx-fbconfig")
+        profile_group.add(fbconfig_toggle)
+
+        visuals_button = Gtk.ToggleButton.new_with_label(f"GLX Visuals ({visuals_count})")
+        fbconfig_button = Gtk.ToggleButton.new_with_label(f"GLX FBConfig ({fbconfig_count})")
+        visuals_button.set_active(True)
+        visuals_button.set_valign(Gtk.Align.CENTER)
+        fbconfig_button.set_valign(Gtk.Align.CENTER)
+
+        toggle_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        toggle_box.set_valign(Gtk.Align.CENTER)
+        toggle_box.append(visuals_button)
+        toggle_box.append(fbconfig_button)
+
+        page.append(toggle_box)
+
+        frameBufferColumnView = Gtk.ColumnView()
+        frameBufferColumnView.props.show_row_separators = True
+        frameBufferColumnView.props.show_column_separators = True
+        frameBufferColumnView.set_vexpand(True)
+        frameBufferColumnView.set_hexpand(True)
+
+        all_lines = visuals_lines + fbconfig_lines
+        max_columns = 0
+        for line in all_lines:
+            tokens = line.strip().split()
+            if len(tokens) > max_columns:
+                max_columns = len(tokens)
+
+        class FramebufferRow(GObject.GObject):
+            def __init__(self, values):
+                super(FramebufferRow, self).__init__()
+                for index, value in enumerate(values, start=1):
+                    setattr(self, f"data{index}", value)
+                for index in range(len(values) + 1, max_columns + 1):
+                    setattr(self, f"data{index}", "")
+
+        def make_bind(column_index):
+            def bind(widget, item):
+                label = item.get_child()
+                obj = item.get_item()
+                label.set_text(getattr(obj, f"data{column_index}", ""))
+            return bind
+
+        headings = const.FRAMEBUFFERLIST
+        if max_columns == 0:
+            factory_fb = Gtk.SignalListItemFactory()
+            factory_fb.connect("setup", setup)
+            factory_fb.connect("bind", bind_column1)
+            fbColumn = Gtk.ColumnViewColumn.new("Framebuffer Data", factory_fb)
+            fbColumn.set_expand(True)
+            frameBufferColumnView.append_column(fbColumn)
+
+            fb_selection = Gtk.SingleSelection()
+            fb_store = Gio.ListStore.new(DataObject2)
+            fb_selection.set_model(fb_store)
+            frameBufferColumnView.set_model(fb_selection)
+        else:
+            fb_selection = Gtk.SingleSelection()
+            fb_store = Gio.ListStore.new(FramebufferRow)
+            fb_selection.set_model(fb_store)
+            frameBufferColumnView.set_model(fb_selection)
+
+            for index in range(1, max_columns + 1):
+                factory = Gtk.SignalListItemFactory()
+                factory.connect("setup", setup)
+                factory.connect("bind", make_bind(index))
+                column_name = headings[index - 1] if index <= len(headings) else f"Column {index}"
+                column = Gtk.ColumnViewColumn.new(column_name, factory)
+                column.set_resizable(True)
+                if index == max_columns:
+                    column.set_expand(True)
+                frameBufferColumnView.append_column(column)
+
+        def populate_lines(lines):
+            fb_store.remove_all()
+            if max_columns == 0:
+                for line in lines:
+                    fb_store.append(DataObject2(line))
+            else:
+                for line in lines:
+                    tokens = line.strip().split()
+                    fb_store.append(FramebufferRow(tokens))
+
+        def set_active_profile(profile):
+            if profile == "glx-visuals":
+                populate_lines(visuals_lines)
+            else:
+                populate_lines(fbconfig_lines)
+
+        def sync_toggle_buttons(profile):
+            visuals_button.handler_block_by_func(on_visuals_toggled)
+            fbconfig_button.handler_block_by_func(on_fbconfig_toggled)
+            visuals_button.set_active(profile == "glx-visuals")
+            fbconfig_button.set_active(profile == "glx-fbconfig")
+            visuals_button.handler_unblock_by_func(on_visuals_toggled)
+            fbconfig_button.handler_unblock_by_func(on_fbconfig_toggled)
+
+        def on_group_changed(group, pspec):
+            profile = group.get_active_name()
+            if not profile:
+                return
+            sync_toggle_buttons(profile)
+            set_active_profile(profile)
+
+        def on_visuals_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("glx-visuals")
+
+        def on_fbconfig_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("glx-fbconfig")
+
+        visuals_button.connect("toggled", on_visuals_toggled)
+        fbconfig_button.connect("toggled", on_fbconfig_toggled)
+        profile_group.connect("notify::active-name", on_group_changed)
+
+        set_active_profile("glx-visuals")
+
+        page.append(create_scrollbar(frameBufferColumnView))
+        return page
+
+    def create_extensions_page():
+        page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        page.add_css_class('toolbar')
+
+        extensionColumnView = Gtk.ColumnView()
+        extensionColumnView.props.show_row_separators = True
+        extensionColumnView.props.single_click_activate = False
+        extensionColumnView.props.show_column_separators = False
+
+        factory_extension = Gtk.SignalListItemFactory()
+        factory_extension.connect("setup", setup)
+        factory_extension.connect("bind", bind_column1)
+
+        extensionColumn = Gtk.ColumnViewColumn.new("Extensions", factory_extension)
+        extensionColumn.set_expand(True)
+        extensionColumnView.append_column(extensionColumn)
+
+        extensionSelection = Gtk.SingleSelection()
+        extension_list = Gio.ListStore.new(DataObject2)
+
+        search_entry = Gtk.SearchEntry()
+        search_entry.set_property("placeholder-text", "Type here to filter extensions.....")
+        search_entry.add_css_class(css_class='toolbar')
+
+        def filter_func(item, filter_list_model):
+            search_text_widget = search_entry.get_text()
+            return search_text_widget.upper() in item.column1.upper()
+
+        filterExtensionListStore = Gtk.FilterListModel(model=extension_list)
+        filterExtensions = Gtk.CustomFilter.new(filter_func, filterExtensionListStore)
+        filterExtensionListStore.set_filter(filterExtensions)
+        extensionSelection.set_model(filterExtensionListStore)
+        extensionColumnView.set_model(extensionSelection)
+
+        vendor_list = Gtk.StringList()
+        vendor_dropdown = Gtk.DropDown()
+        vendor_dropdown.set_model(vendor_list)
+        setMargin(vendor_dropdown, 2, 1, 2)
+
+        current_type = {"name": "OpenGL", "file": Filenames.opengl_vendor_gl_extension_file}
+        opengl_profile = {"mode": "core"}
+
+        type_group = Adw.ToggleGroup.new()
+        opengl_type_toggle = Adw.Toggle.new()
+        opengl_type_toggle.set_name("OpenGL")
+        type_group.add(opengl_type_toggle)
+        opengles_type_toggle = Adw.Toggle.new()
+        opengles_type_toggle.set_name("OpenGL ES")
+        type_group.add(opengles_type_toggle)
+        egl_type_toggle = Adw.Toggle.new()
+        egl_type_toggle.set_name("EGL")
+        type_group.add(egl_type_toggle)
+
+        opengl_button = Gtk.ToggleButton.new_with_label("OpenGL")
+        opengles_button = Gtk.ToggleButton.new_with_label("OpenGL ES")
+        egl_button = Gtk.ToggleButton.new_with_label("EGL")
+        opengl_button.set_active(True)
+        opengl_button.set_valign(Gtk.Align.CENTER)
+        opengles_button.set_valign(Gtk.Align.CENTER)
+        egl_button.set_valign(Gtk.Align.CENTER)
+
+        type_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        type_box.set_valign(Gtk.Align.CENTER)
+        type_box.append(opengl_button)
+        type_box.append(opengles_button)
+        type_box.append(egl_button)
+        page.append(type_box)
+
+        profile_group = Adw.ToggleGroup.new()
+        core_profile_toggle = Adw.Toggle.new()
+        core_profile_toggle.set_name("core")
+        profile_group.add(core_profile_toggle)
+        compat_profile_toggle = Adw.Toggle.new()
+        compat_profile_toggle.set_name("compat")
+        profile_group.add(compat_profile_toggle)
+
+        core_button = Gtk.ToggleButton.new_with_label("Core")
+        compat_button = Gtk.ToggleButton.new_with_label("Compatibility")
+        core_button.set_active(True)
+        core_button.set_valign(Gtk.Align.CENTER)
+        compat_button.set_valign(Gtk.Align.CENTER)
+
+        profile_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        profile_box.set_valign(Gtk.Align.CENTER)
+        profile_box.append(core_button)
+        profile_box.append(compat_button)
+
+        vendor_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+        vendor_box.set_hexpand(True)
+        vendor_box.set_halign(Gtk.Align.START)
+        vendor_box.append(vendor_dropdown)
+        vendor_box.append(profile_box)
+
+        def prepare_opengl_extension_file(profile):
+            def write_lines(lines):
+                with open(Filenames.opengl_vendor_gl_extension_file, "w") as file:
+                    file.write("\n".join(lines))
+
+            def collect_section(start_marker, stop_markers):
+                lines = []
+                writing = False
+                with open(Filenames.opengl_outpuf_file, "r") as src:
+                    for raw_line in src:
+                        line = raw_line.strip()
+                        if writing and any(line.startswith(stop) for stop in stop_markers):
+                            break
+                        if writing:
+                            if line.startswith("GL_"):
+                                lines.append(line)
+                        elif line.startswith(start_marker):
+                            writing = True
+                return lines
+
+            if profile == "core":
+                lines = collect_section(
+                    "OpenGL core profile extensions:",
+                    ["OpenGL compatibility profile extensions:", "OpenGL extensions:", "OpenGL ES profile"]
+                )
+            else:
+                lines = collect_section(
+                    "OpenGL compatibility profile extensions:",
+                    ["OpenGL ES profile", "OpenGL core profile extensions:", "OpenGL extensions:"]
+                )
+                if not lines:
+                    lines = collect_section(
+                        "OpenGL extensions:",
+                        ["OpenGL ES profile"]
+                    )
+
+            write_lines(sorted(lines))
+
+        def prepare_type_file(type_name):
+            current_type["name"] = type_name
+            if type_name == "OpenGL":
+                current_type["file"] = Filenames.opengl_vendor_gl_extension_file
+                prepare_opengl_extension_file(opengl_profile["mode"])
+            elif type_name == "OpenGL ES":
+                current_type["file"] = Filenames.opengl_vendor_es_extension_file
+                with open(current_type["file"], "w") as file:
+                    fetch_process = subprocess.Popen(Filenames.fetch_opengl_es_vendor_extensions_command, shell=True, stdout=file, universal_newlines=True)
+                    fetch_process.communicate()
+            else:
+                current_type["file"] = Filenames.egl_vendor_extension_file
+                with open(current_type["file"], "w") as file:
+                    fetch_process = subprocess.Popen(Filenames.fetch_egl_vendor_extension_command, shell=True, stdout=file, universal_newlines=True)
+                    fetch_process.communicate()
+
+        def refresh_vendors():
+            VendorList, vendor_names = getVendorList(current_type["file"])
+            new_vendor_model = Gtk.StringList()
+            for item in VendorList:
+                new_vendor_model.append(item)
+            vendor_dropdown.set_model(new_vendor_model)
+            vendor_dropdown.set_selected(0)
+            return VendorList, vendor_names
+
+        current_vendors = {"names": []}
+
+        def update_extension_list():
+            VendorList, vendor_names = refresh_vendors()
+            current_vendors["names"] = vendor_names
+            radcall2(vendor_dropdown, 0, vendor_names, current_type["file"], extension_list, extensionColumnView, extension_list)
+            return VendorList, vendor_names
+
+        def set_profile_visibility(type_name):
+            profile_box.set_visible(type_name == "OpenGL")
+
+        def sync_type_buttons(type_name):
+            opengl_button.handler_block_by_func(on_opengl_toggled)
+            opengles_button.handler_block_by_func(on_opengles_toggled)
+            egl_button.handler_block_by_func(on_egl_toggled)
+            opengl_button.set_active(type_name == "OpenGL")
+            opengles_button.set_active(type_name == "OpenGL ES")
+            egl_button.set_active(type_name == "EGL")
+            opengl_button.handler_unblock_by_func(on_opengl_toggled)
+            opengles_button.handler_unblock_by_func(on_opengles_toggled)
+            egl_button.handler_unblock_by_func(on_egl_toggled)
+
+        def on_type_group_changed(group, pspec):
+            type_name = group.get_active_name()
+            if not type_name:
+                return
+            sync_type_buttons(type_name)
+            set_profile_visibility(type_name)
+            prepare_type_file(type_name)
+            update_extension_list()
+
+        def on_opengl_toggled(button):
+            if button.get_active():
+                type_group.set_active_name("OpenGL")
+
+        def on_opengles_toggled(button):
+            if button.get_active():
+                type_group.set_active_name("OpenGL ES")
+
+        def on_egl_toggled(button):
+            if button.get_active():
+                type_group.set_active_name("EGL")
+
+        def sync_profile_buttons(profile):
+            core_button.handler_block_by_func(on_core_toggled)
+            compat_button.handler_block_by_func(on_compat_toggled)
+            core_button.set_active(profile == "core")
+            compat_button.set_active(profile == "compat")
+            core_button.handler_unblock_by_func(on_core_toggled)
+            compat_button.handler_unblock_by_func(on_compat_toggled)
+
+        def on_profile_group_changed(group, pspec):
+            profile = group.get_active_name()
+            if not profile:
+                return
+            sync_profile_buttons(profile)
+            opengl_profile["mode"] = profile
+            if current_type["name"] == "OpenGL":
+                prepare_type_file("OpenGL")
+                update_extension_list()
+
+        def on_core_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("core")
+
+        def on_compat_toggled(button):
+            if button.get_active():
+                profile_group.set_active_name("compat")
+
+        opengl_button.connect("toggled", on_opengl_toggled)
+        opengles_button.connect("toggled", on_opengles_toggled)
+        egl_button.connect("toggled", on_egl_toggled)
+        type_group.connect("notify::active-name", on_type_group_changed)
+        type_group.set_active_name("OpenGL")
+
+        core_button.connect("toggled", on_core_toggled)
+        compat_button.connect("toggled", on_compat_toggled)
+        profile_group.connect("notify::active-name", on_profile_group_changed)
+        profile_group.set_active_name("core")
+
+        vendor_dropdown.connect('notify::selected-item', lambda dropdown, *_: radcall2(dropdown, 0, current_vendors["names"], current_type["file"], extension_list, extensionColumnView, extension_list))
+
+        prepare_type_file("OpenGL")
+        current_type["name"] = "OpenGL"
+        set_profile_visibility("OpenGL")
+        update_extension_list()
+
+        search_entry.connect("search-changed", _on_search_method_changed, filterExtensions)
+
+        page.append(vendor_box)
+        page.append(create_scrollbar(extensionColumnView))
+        page.append(search_entry)
+        return page
+
+    def on_row_activated(listbox, row):
+        tab_label = row.get_child()
+        tab_name = tab_label.get_label()
+        if not row.get_sensitive():
+            return
+        sidebar_target_names = {
+            "OpenGL Information": "opengl-information",
+            "OpenGL Limits": "opengl-limits",
+            "Framebuffer Configuration": "framebuffer-configuration",
+            "Extensions": "extensions",
+        }
+        child_name = sidebar_target_names.get(tab_name)
+        if child_name is not None:
+            content_stack.set_visible_child_name(child_name)
+
+    opengl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+    opengl_box.set_vexpand(True)
+    opengl_box.set_hexpand(True)
     tab.append(opengl_box)
-#    opengl_box.append(frame_opengl_info)
+
+    split_view = Adw.NavigationSplitView.new()
+    split_view.set_vexpand(True)
+    split_view.set_hexpand(True)
+
+    sidebar_listbox = Gtk.ListBox.new()
+    sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+    sidebar_listbox.set_vexpand(True)
+    sidebar_listbox.add_css_class(css_class="boxed-list")
+    sidebar_listbox.add_css_class(css_class="card")
+    sidebar_listbox.add_css_class(css_class="sidebar")
+    sidebar_listbox.set_show_separators(True)
+
+    content_stack = Gtk.Stack.new()
+    content_stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
+    content_stack.set_vexpand(True)
+    content_stack.set_hexpand(True)
+
+    info_page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+    info_page.set_vexpand(True)
+    info_page.set_hexpand(True)
+    info_page.set_halign(Gtk.Align.FILL)
+    info_page.set_valign(Gtk.Align.FILL)
 
     openglColumnView = Gtk.ColumnView()
     openglColumnView.props.show_row_separators = True
     openglColumnView.props.single_click_activate = False
     openglColumnView.props.show_column_separators = False
+    openglColumnView.set_vexpand(True)
+    openglColumnView.set_hexpand(True)
+
     factoryOpenglLhs = Gtk.SignalListItemFactory()
     factoryOpenglLhs.connect("setup", setup)
     factoryOpenglLhs.connect("bind", bind_column1)
@@ -524,6 +1085,7 @@ def OpenGL(self, tab):
 
     openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
     openglColumn1.set_factory(factoryOpenglLhs)
+    openglColumn1.set_expand(True)
     openglColumn1.set_resizable(True)
     openglColumnView.append_column(openglColumn1)
 
@@ -538,259 +1100,68 @@ def OpenGL(self, tab):
     openglColumnView.set_model(openglSelection)
 
     opengl_info_scrollbar = create_scrollbar(openglColumnView)
-    opengl_box.append(opengl_info_scrollbar)
+    opengl_info_scrollbar.set_vexpand(True)
+    opengl_info_scrollbar.set_hexpand(True)
+    opengl_info_scrollbar.set_valign(Gtk.Align.FILL)
+    opengl_info_scrollbar.set_min_content_height(440)
+    opengl_info_scrollbar.set_min_content_width(520)
+
+    info_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
+    info_box.set_hexpand(True)
+    info_box.set_vexpand(True)
+    info_box.append(opengl_info_scrollbar)
+    info_page.append(info_box)
+
     opengl_info()
 
-#-------------------------------- Creating the show OpenGL Limits Limits------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    limits_page = create_limits_page(
+        Filenames.opengl_core_limits_file,
+        Filenames.opengl_core_limits_lhs_file,
+        Filenames.opengl_compat_limits_file,
+        Filenames.opengl_compat_limits_lhs_file,
+        "Show All OpenGL Hardware Core Limits",
+        "Show All OpenGL Hardware Compatible Limits",
+        Filenames.fetch_opengl_core_limits_command,
+        Filenames.fetch_opengl_core_limits_lhs_command,
+        Filenames.fetch_opengl_compat_limits_command,
+        Filenames.fetch_opengl_compat_limits_lhs_command,
+    )
 
-    grid_opengl_buttons = Gtk.Grid()
-    opengl_box.append(grid_opengl_buttons)
+    glx_visuals_command = "cat %s  | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' " %(Filenames.opengl_outpuf_file)
+    glx_fbconfig_command = "cat %s | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' " %(Filenames.opengl_outpuf_file)
 
-    opengl_limits_button = Gtk.Button.new_with_label("Show OpenGL Limits")
-    opengl_limits_button.connect("clicked",clickme)
-    setMargin(opengl_limits_button,20,10,10)
-    opengl_limits_button.add_css_class(css_class = "suggested-action")
-    opengl_limits_button.add_css_class(css_class = "toolbar")
-    grid_opengl_buttons.attach(opengl_limits_button,0,0,1,1 )
+    framebuffer_page = create_framebuffer_page(glx_visuals_command, glx_fbconfig_command)
 
-# ---------------------------------- Creating the Logo ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    extensions_page = create_extensions_page()
 
-    fetch_gpu_renderer_command = "cat %s | grep renderer | grep -o :.* | grep -o ' .*'" %(Filenames.opengl_device_info_file)
-    fetch_gpu_renderer_process = subprocess.Popen(fetch_gpu_renderer_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-    gpu_renderer = fetch_gpu_renderer_process.communicate()[0].decode("utf-8")
-    vendorImg = getGpuImage(gpu_renderer)
-    vendor_pic_img = Gtk.Picture.new_for_pixbuf(vendorImg)
-    setMargin(vendor_pic_img,100,10,10)
-    grid_opengl_buttons.attach_next_to(vendor_pic_img,opengl_limits_button,Gtk.PositionType.RIGHT,1,1)
+    content_stack.add_titled(info_page, "opengl-information", "OpenGL Information")
+    content_stack.add_titled(limits_page, "opengl-limits", "OpenGL Limits")
+    content_stack.add_titled(framebuffer_page, "framebuffer-configuration", "Framebuffer Configuration")
+    content_stack.add_titled(extensions_page, "extensions", "Extensions")
 
-# ------------------------------------ Creating the show Framebuffer ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    sidebar_listbox.append(create_sidebar_row("OpenGL Information", True))
+    sidebar_listbox.append(create_sidebar_row("OpenGL Limits", True))
+    sidebar_listbox.append(create_sidebar_row("Framebuffer Configuration", True))
+    sidebar_listbox.append(create_sidebar_row("Extensions", True))
 
-    opengl_framebuffer_button = Gtk.Button.new_with_label("Show GLX Frame Buffer Configuration")
-    opengl_framebuffer_button.connect("clicked",FrameBuffer)
-    opengl_framebuffer_button.add_css_class(css_class = "suggested-action")
-    opengl_framebuffer_button.add_css_class(css_class = "toolbar")
+    sidebar_scrolled_window = Gtk.ScrolledWindow.new()
+    sidebar_scrolled_window.set_vexpand(True)
+    sidebar_scrolled_window.set_hexpand(True)
+    sidebar_scrolled_window.set_child(sidebar_listbox)
 
-    setMargin(opengl_framebuffer_button,100,10,10)
-    grid_opengl_buttons.attach_next_to(opengl_framebuffer_button,vendor_pic_img,Gtk.PositionType.RIGHT,1,1)
+    sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
+    content_page = Adw.NavigationPage.new(content_stack, "Content")
+    sidebar_page.set_vexpand(True)
+    sidebar_page.set_hexpand(True)
+    content_page.set_vexpand(True)
+    content_page.set_hexpand(True)
+    split_view.set_sidebar(sidebar_page)
+    split_view.set_content(content_page)
 
-# ------------------------------------ creating the OpenGL extension ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    opengl_box.append(split_view)
 
-    frame_extension = Gtk.Frame()
-    adw_toolbar_view = Adw.ToolbarView.new()
-    opengl_box.append(adw_toolbar_view)
-    grid_extension = Gtk.Grid()
- #   adw_toolbar_view.set_content(grid_extension)
-
-#    extensions_notebook = Gtk.Notebook()
-    extensions_notebook = Adw.ViewStack.new()
-    self.opengl_extensions_notebook = extensions_notebook
-    adw_toolbar_view.set_content(extensions_notebook)
- #   grid_extension.attach(extensions_notebook,0,0,1,1)
-
-    opengl_extension_logo = fetchImageFromUrl(const.OPEN_GL_PNG,250,50,False)
-    opengl_extension_box = create_tab(extensions_notebook,"OpenGL", "OpenGL", const.ICON_HEIGHT, False)
- #   extensions_notebook.append_page(opengl_extension_box,Gtk.Picture.new_for_pixbuf(opengl_extension_logo))
- #   page1 = extensions_notebook.get_page(opengl_extension_box)
- #   page1.set_property("tab-expand",True)
-    
-    extensions_switcher = Adw.ViewSwitcher.new()
-    extensions_switcher.set_stack(stack=extensions_notebook)
-    extensions_switcher.set_policy(1)
-    adw_toolbar_view.add_top_bar(extensions_switcher)
-
-    grid_opengl_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
-    opengl_extension_box.append(grid_opengl_extension)
-
-    openglExtensionColumnView = Gtk.ColumnView()
-    openglExtensionColumnView.props.show_row_separators = True
-    openglExtensionColumnView.props.single_click_activate = False
-    openglExtensionColumnView.props.show_column_separators = True
-    factoryOpenglExtensionLhs = Gtk.SignalListItemFactory()
-    factoryOpenglExtensionLhs.connect("setup", setup)
-    factoryOpenglExtensionLhs.connect("bind", bind_column1)
-
-    openglExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
-    openglExtensionsColumn1.set_factory(factoryOpenglExtensionLhs)
-    openglExtensionsColumn1.set_expand(True)
-    openglExtensionColumnView.append_column(openglExtensionsColumn1)
-
-
-    openglExtensionsSelection = Gtk.SingleSelection()
-    opengl_extension_list = Gio.ListStore.new(DataObject2)
-    filterOpenglExtensionsListStore = Gtk.FilterListModel(model=opengl_extension_list)
-    filter_open_extensions = Gtk.CustomFilter.new(_do_filter_opengl_extension_view, filterOpenglExtensionsListStore)
-    filterOpenglExtensionsListStore.set_filter(filter_open_extensions)
-    openglExtensionsSelection.set_model(filterOpenglExtensionsListStore)
-    openglExtensionColumnView.set_model(openglExtensionsSelection)
-
-#    frame_search_gl =Gtk.Frame()
-    entry_gl = Gtk.SearchEntry()
-    entry_gl.set_property("placeholder-text","Type here to filter extensions.....")
-    entry_gl.connect("search-changed",_on_search_method_changed,filter_open_extensions)
-    entry_gl.grab_focus()
- #   frame_search_gl.set_child(entry_gl)
-
-#---------------------------- Getting OpenGL Extensions -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    with open(Filenames.opengl_vendor_gl_extension_file,"w") as file:
-        fetch_vendor_gl_extension_process = subprocess.Popen(Filenames.fetch_opengl_vendor_extensions_command,shell=True,stdout=file,universal_newlines=True)
-        fetch_vendor_gl_extension_process.communicate()
-        fetch_vendor_glx_extension_process = subprocess.Popen(Filenames.fetch_openglx_vendor_extensions_command,shell=True,stdout=file,universal_newlines=True)
-        fetch_vendor_glx_extension_process.communicate()
-
-    Vendor_GL, vList = getVendorList(Filenames.opengl_vendor_gl_extension_file)
-
-    vendor_gl_list = Gtk.StringList()
-    vendor_dropdown_gl = Gtk.DropDown()
-    vendor_dropdown_gl.set_model(vendor_gl_list)
-
-    for i in range(len(Vendor_GL)):
-        vendor_gl_list.append(Vendor_GL[i])
-    
-    vendor_dropdown_gl.connect('notify::selected-item', radcall2,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
-    radcall2(vendor_dropdown_gl,0,vList,Filenames.opengl_vendor_gl_extension_file,opengl_extension_list,openglExtensionColumnView,opengl_extension_list)
-    setMargin(grid_opengl_extension,2,2,2)
-   
-    grid_opengl_extension.append(vendor_dropdown_gl)
-    opengl_extension_scrollbar = create_scrollbar(openglExtensionColumnView)
-    entry_gl.add_css_class(css_class = "toolbar")
-    grid_opengl_extension.append(opengl_extension_scrollbar)
-    grid_opengl_extension.append(entry_gl)
-
-
-
-#--------------------------- creating OpenGL ES Extension tab -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    openglESExtensionColumnView = Gtk.ColumnView()
-    openglESExtensionColumnView.props.show_row_separators = True
-    openglESExtensionColumnView.props.single_click_activate = False
-    openglESExtensionColumnView.props.show_column_separators = True
-    factoryOpenglESExtensionLhs = Gtk.SignalListItemFactory()
-    factoryOpenglESExtensionLhs.connect("setup", setup)
-    factoryOpenglESExtensionLhs.connect("bind", bind_column1)
-
-    openglESExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
-    openglESExtensionsColumn1.set_factory(factoryOpenglESExtensionLhs)
-    openglESExtensionsColumn1.set_expand(True)
-    openglESExtensionColumnView.append_column(openglESExtensionsColumn1)
-
-
-    openglESExtensionsSelection = Gtk.SingleSelection()
-    opengl_es_extension_list = Gio.ListStore.new(DataObject2)
-    filterOpenglESExtensionsListStore = Gtk.FilterListModel(model=opengl_es_extension_list)
-    filter_open_es_extensions = Gtk.CustomFilter.new(_do_filter_opengl_es_extension_view, filterOpenglESExtensionsListStore)
-    filterOpenglESExtensionsListStore.set_filter(filter_open_es_extensions)
-    openglESExtensionsSelection.set_model(filterOpenglESExtensionsListStore)
-    openglESExtensionColumnView.set_model(openglESExtensionsSelection)
-
-    opengl_es_extension_logo = fetchImageFromUrl(const.OPEN_GL_ES_PNG,250,50,False)
-    opengl_es_extension_box = create_tab(extensions_notebook,"OpenGL_ES", "OpenGL|ES", const.ICON_HEIGHT, False)
-#    extensions_notebook.append_page(opengl_es_extension_box,Gtk.Picture.new_for_pixbuf(opengl_es_extension_logo))
-#    extensions_page2 = extensions_notebook.get_page(opengl_es_extension_box)
- #   extensions_page2.set_property("tab-expand",True)
-
-    grid_opengl_es_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
-    opengl_es_extension_box.append(grid_opengl_es_extension)
-
- #   setColumns(tree_opengl_es_extension,Title,const.MWIDTH,0.0)
-
-    with open(Filenames.opengl_vendor_es_extension_file,"w") as file:
-        fetch_vendor_es_extension_process = subprocess.Popen(Filenames.fetch_opengl_es_vendor_extensions_command,shell=True,stdout=file,universal_newlines=True)
-        fetch_vendor_es_extension_process.communicate()
-    
-    Vendor_ES,vesList = getVendorList(Filenames.opengl_vendor_es_extension_file)
-
-    entry_es = Gtk.SearchEntry()
-    entry_es.set_property("placeholder-text","Type here to filter extensions.....")
-    entry_es.connect("search-changed",_on_search_method_changed,filter_open_es_extensions)
-    entry_es.add_css_class(css_class = "toolbar")
-    entry_es.grab_focus()
-
-    vendor_es_list = Gtk.StringList()
-    vendor_dropdown_es = Gtk.DropDown()
-    vendor_dropdown_es.set_model(vendor_es_list)
-    setMargin(vendor_dropdown_es,2,1,2)
-    for i in range(len(Vendor_ES)):
-        vendor_es_list.append(Vendor_ES[i])
-
-    radcall2(vendor_dropdown_es,0,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
-    vendor_dropdown_es.connect("notify::selected-item", radcall2,vesList,Filenames.opengl_vendor_es_extension_file,opengl_es_extension_list,openglESExtensionColumnView,openglESExtensionsSelection)
-    grid_opengl_es_extension.append(vendor_dropdown_es)
-    opengl_es_extension_scrollbar = create_scrollbar(openglESExtensionColumnView)
-    grid_opengl_es_extension.append(opengl_es_extension_scrollbar)
-    grid_opengl_es_extension.append(entry_es)
- #   opengl_extension_box.append(opengl_es_extension_scrollbar)
-
-
-    #------------------------------------- Creating EGL Extension -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    if es2_infoSupported():
-        eglExtensionColumnView = Gtk.ColumnView()
-        eglExtensionColumnView.props.show_row_separators = True
-        eglExtensionColumnView.props.single_click_activate = False
-        eglExtensionColumnView.props.show_column_separators = True
-        factoryEglExtensionLhs = Gtk.SignalListItemFactory()
-        factoryEglExtensionLhs.connect("setup", setup)
-        factoryEglExtensionLhs.connect("bind", bind_column1)
-
-        eglExtensionsColumn1 = Gtk.ColumnViewColumn.new("")
-        eglExtensionsColumn1.set_factory(factoryEglExtensionLhs)
-        eglExtensionsColumn1.set_expand(True)
-        eglExtensionColumnView.append_column(eglExtensionsColumn1)
-
-
-        eglExtensionsSelection = Gtk.SingleSelection()
-        egl_extension_list = Gio.ListStore.new(DataObject2)
-        filterEglExtensionsListStore = Gtk.FilterListModel(model=egl_extension_list)
-        filter_egl_extensions = Gtk.CustomFilter.new(_do_filter_egl_extension_view, filterEglExtensionsListStore)
-        filterEglExtensionsListStore.set_filter(filter_egl_extensions)
-        eglExtensionsSelection.set_model(filterEglExtensionsListStore)
-        eglExtensionColumnView.set_model(eglExtensionsSelection)
-
-    #    egl_extension_list = Gtk.ListStore(str,str)
-    #    egl_extension_list_filter = egl_extension_list.filter_new()
-    #    tree_egl_extension = Gtk.TreeView.new_with_model(egl_extension_list_filter)
-     #   tree_egl_extension.set_property("enable-grid-lines", 1)
-     #   tree_egl_extension.set_headers_visible(False)
-     #   egl_extension_list_filter.set_visible_func(searchTreeExtEGL)
-
-        egl_extension_logo = fetchImageFromUrl(const.EGL_PNG,200,50,False)
-        egl_extension_box = create_tab(extensions_notebook,"Egl_logo","EGL",10,True)
-   #     extensions_notebook.append_page(egl_extension_box,Gtk.Picture.new_for_pixbuf(egl_extension_logo))
-    #    extensions_page3 = extensions_notebook.get_page(egl_extension_box)
-    #    extensions_page3.set_property("tab-expand",True)
-
-        grid_egl_extension = Gtk.Box.new(Gtk.Orientation.VERTICAL,2)
-        egl_extension_box.append(grid_egl_extension)
-
-     #   setColumns(tree_egl_extension,Title,const.MWIDTH,0.0)
-
-        with open(Filenames.egl_vendor_extension_file,"w") as file:
-            fetch_vendor_egl_extension_process = subprocess.Popen(Filenames.fetch_egl_vendor_extension_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_vendor_egl_extension_process.communicate()
-
-        Vendor_EGL,veglList = getVendorList(Filenames.egl_vendor_extension_file)
-
-        vendor_egl_list = Gtk.StringList()
-        vendor_dropdown_egl = Gtk.DropDown()
-        vendor_dropdown_egl.set_model(vendor_egl_list)
-        setMargin(vendor_dropdown_egl,2,1,2)
-        for i in range(len(Vendor_EGL)):
-            vendor_egl_list.append(Vendor_EGL[i])
-        
-        vendor_dropdown_egl.set_selected(0)
-        entry_egl = Gtk.SearchEntry()
-        entry_egl.set_property("placeholder-text","Type here to filter extensions.....")
-        entry_egl.connect("search-changed",_on_search_method_changed,filter_egl_extensions)
-        entry_egl.add_css_class(css_class = "toolbar")
-        entry_egl.grab_focus()
-
-        radcall2(vendor_dropdown_egl,0,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
-        vendor_dropdown_egl.connect('notify::selected-item', radcall2,veglList,Filenames.egl_vendor_extension_file,egl_extension_list,eglExtensionColumnView,egl_extension_list)
-        grid_egl_extension.append(vendor_dropdown_egl)
-        egl_extension_scrollbar = create_scrollbar(eglExtensionColumnView)
-        grid_egl_extension.append(egl_extension_scrollbar)
-        grid_egl_extension.append(entry_egl)
+    sidebar_listbox.connect("row-activated", on_row_activated)
+    sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
+    content_stack.set_visible_child_name("opengl-information")
 
     return tab
-    # ------------------------------------------- Search Text Box GL ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

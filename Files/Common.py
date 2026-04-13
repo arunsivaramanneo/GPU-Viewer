@@ -23,11 +23,15 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw,GLib
+import cairo as _cairo
 
 
 import os
 import glob
 import configparser
+import math
+
+# Removed CircularGauge - reverting to LevelBar
 
 class Config:
     def __init__(self):
