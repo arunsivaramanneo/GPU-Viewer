@@ -221,7 +221,7 @@ button.text-button {
 }
 
 button.text-button:checked {
-  color: #dcdcdc;
+  color: #d43c50;
   border-radius: 9px;
 }
 

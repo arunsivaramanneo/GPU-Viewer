@@ -404,24 +404,34 @@ def OpenGL(self, tab):
             Limits_Store.append(toprow)
 
     def radcall2(dropdown,dummy,List,filename,Store,tree,filter):
-        selected =dropdown.props.selected_item
+        selected = dropdown.props.selected_item
         value = 0
         if selected is not None:
             value = dropdown.props.selected
-        
+
         GL_All = []
 
     #    List = copyContentsFromFile("/tmp/gpu-viewer/Vendor1.txt")
         List = [i.strip(' ') for i in List]
         List = [i.strip('\n ') for i in List]
-    #    List.insert(0, " ALL")
+
+        vendor_name = None
+        if isinstance(value, int) and 0 <= value < len(List):
+            vendor_name = List[value]
+        elif selected is not None:
+            vendor_name = selected.props.string if hasattr(selected, 'props') else str(selected)
+        elif List:
+            vendor_name = List[0]
+
+        if vendor_name is None:
+            return
+
         with open(filename, "r") as file1:
             for line in file1:
-                if List[int(value)] == "Total":
+                if vendor_name == "Total":
                     GL_All.append(line)
-                elif List[int(value)] != "Total":
-                    if "_%s_" % List[int(value)] in line:
-                        GL_All.append(line)
+                elif "_%s_" % vendor_name in line:
+                    GL_All.append(line)
 
         Store.remove_all()
     #    tree.set_model(filter)
@@ -430,10 +440,8 @@ def OpenGL(self, tab):
     #        if int(value) == i:
     #            frame4.set_label(List[i])
 
-        count = len(GL_All)
-        for i in range(count):
-            text = GL_All[i].strip(' ')
-            Store.append(DataObject2(text.strip('\n')))
+        for text in GL_All:
+            Store.append(DataObject2(text.strip(' \n')))
 
     def getVendorList(filename):
 
@@ -584,12 +592,14 @@ def OpenGL(self, tab):
                 current_mode["file"] = core_file
                 current_mode["lhs"] = core_lhs_file
                 current_mode["label"] = core_label
+                limitColumnLhs.set_title("OpenGL Hardware Core Limits")
             else:
                 createMainFile(compat_file, compat_command)
                 createMainFile(compat_lhs_file, compat_lhs_command)
                 current_mode["file"] = compat_file
                 current_mode["lhs"] = compat_lhs_file
                 current_mode["label"] = compat_label
+                limitColumnLhs.set_title("OpenGL Hardware Compatible Limits")
 
             new_model = Gtk.StringList()
             new_model.append(current_mode["label"])
@@ -818,6 +828,21 @@ def OpenGL(self, tab):
         current_type = {"name": "OpenGL", "file": Filenames.opengl_vendor_gl_extension_file}
         opengl_profile = {"mode": "core"}
 
+        def update_extension_header():
+            if current_type["name"] == "OpenGL":
+                if opengl_profile["mode"] == "core":
+                    extensionColumn.set_title("OpenGL Core Extensions")
+                else:
+                    extensionColumn.set_title("OpenGL Compatible Extensions")
+            elif current_type["name"] == "OpenGL ES":
+                extensionColumn.set_title("OpenGL ES Extensions")
+            elif current_type["name"] == "GLX":
+                extensionColumn.set_title("GLX Extensions")
+            elif current_type["name"] == "EGL":
+                extensionColumn.set_title("EGL Extensions")
+            else:
+                extensionColumn.set_title("Extensions")
+
         type_group = Adw.ToggleGroup.new()
         opengl_type_toggle = Adw.Toggle.new()
         opengl_type_toggle.set_name("OpenGL")
@@ -825,22 +850,28 @@ def OpenGL(self, tab):
         opengles_type_toggle = Adw.Toggle.new()
         opengles_type_toggle.set_name("OpenGL ES")
         type_group.add(opengles_type_toggle)
+        glx_type_toggle = Adw.Toggle.new()
+        glx_type_toggle.set_name("GLX")
+        type_group.add(glx_type_toggle)
         egl_type_toggle = Adw.Toggle.new()
         egl_type_toggle.set_name("EGL")
         type_group.add(egl_type_toggle)
 
         opengl_button = Gtk.ToggleButton.new_with_label("OpenGL")
         opengles_button = Gtk.ToggleButton.new_with_label("OpenGL ES")
+        glx_button = Gtk.ToggleButton.new_with_label("GLX")
         egl_button = Gtk.ToggleButton.new_with_label("EGL")
         opengl_button.set_active(True)
         opengl_button.set_valign(Gtk.Align.CENTER)
         opengles_button.set_valign(Gtk.Align.CENTER)
+        glx_button.set_valign(Gtk.Align.CENTER)
         egl_button.set_valign(Gtk.Align.CENTER)
 
         type_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
         type_box.set_valign(Gtk.Align.CENTER)
         type_box.append(opengl_button)
         type_box.append(opengles_button)
+        type_box.append(glx_button)
         type_box.append(egl_button)
         page.append(type_box)
 
@@ -917,11 +948,17 @@ def OpenGL(self, tab):
                 with open(current_type["file"], "w") as file:
                     fetch_process = subprocess.Popen(Filenames.fetch_opengl_es_vendor_extensions_command, shell=True, stdout=file, universal_newlines=True)
                     fetch_process.communicate()
+            elif type_name == "GLX":
+                current_type["file"] = Filenames.opengl_vendor_gl_extension_file
+                with open(current_type["file"], "w") as file:
+                    fetch_process = subprocess.Popen(Filenames.fetch_openglx_vendor_extensions_command, shell=True, stdout=file, universal_newlines=True)
+                    fetch_process.communicate()
             else:
                 current_type["file"] = Filenames.egl_vendor_extension_file
                 with open(current_type["file"], "w") as file:
                     fetch_process = subprocess.Popen(Filenames.fetch_egl_vendor_extension_command, shell=True, stdout=file, universal_newlines=True)
                     fetch_process.communicate()
+            update_extension_header()
 
         def refresh_vendors():
             VendorList, vendor_names = getVendorList(current_type["file"])
@@ -946,12 +983,15 @@ def OpenGL(self, tab):
         def sync_type_buttons(type_name):
             opengl_button.handler_block_by_func(on_opengl_toggled)
             opengles_button.handler_block_by_func(on_opengles_toggled)
+            glx_button.handler_block_by_func(on_glx_toggled)
             egl_button.handler_block_by_func(on_egl_toggled)
             opengl_button.set_active(type_name == "OpenGL")
             opengles_button.set_active(type_name == "OpenGL ES")
+            glx_button.set_active(type_name == "GLX")
             egl_button.set_active(type_name == "EGL")
             opengl_button.handler_unblock_by_func(on_opengl_toggled)
             opengles_button.handler_unblock_by_func(on_opengles_toggled)
+            glx_button.handler_unblock_by_func(on_glx_toggled)
             egl_button.handler_unblock_by_func(on_egl_toggled)
 
         def on_type_group_changed(group, pspec):
@@ -970,6 +1010,10 @@ def OpenGL(self, tab):
         def on_opengles_toggled(button):
             if button.get_active():
                 type_group.set_active_name("OpenGL ES")
+
+        def on_glx_toggled(button):
+            if button.get_active():
+                type_group.set_active_name("GLX")
 
         def on_egl_toggled(button):
             if button.get_active():
@@ -992,6 +1036,7 @@ def OpenGL(self, tab):
             if current_type["name"] == "OpenGL":
                 prepare_type_file("OpenGL")
                 update_extension_list()
+            update_extension_header()
 
         def on_core_toggled(button):
             if button.get_active():
@@ -1003,6 +1048,7 @@ def OpenGL(self, tab):
 
         opengl_button.connect("toggled", on_opengl_toggled)
         opengles_button.connect("toggled", on_opengles_toggled)
+        glx_button.connect("toggled", on_glx_toggled)
         egl_button.connect("toggled", on_egl_toggled)
         type_group.connect("notify::active-name", on_type_group_changed)
         type_group.set_active_name("OpenGL")
@@ -1011,6 +1057,8 @@ def OpenGL(self, tab):
         compat_button.connect("toggled", on_compat_toggled)
         profile_group.connect("notify::active-name", on_profile_group_changed)
         profile_group.set_active_name("core")
+
+        update_extension_header()
 
         vendor_dropdown.connect('notify::selected-item', lambda dropdown, *_: radcall2(dropdown, 0, current_vendors["names"], current_type["file"], extension_list, extensionColumnView, extension_list))
 
