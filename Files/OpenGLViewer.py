@@ -15,6 +15,7 @@
 
 import sys
 import os
+import re
 import gi
 import const
 import Filenames
@@ -28,7 +29,7 @@ from gi.repository import Gtk,Gio,GObject,Adw
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -59,6 +60,32 @@ def add_tree_node(item):
         for child in item.children:
             store.append(child)
         return store
+
+def parse_glxinfo_brief(lines):
+    parsed_rows = []
+    stack = []
+    for raw_line in lines:
+        line = raw_line.rstrip('\n')
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip('\t '))
+        text = line.strip()
+        if ":" in text:
+            lhs, rhs = text.split(":", 1)
+            lhs = lhs.strip()
+            rhs = rhs.strip()
+        else:
+            lhs = text
+            rhs = ""
+        node = ExpandDataObject(lhs, rhs)
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        if stack:
+            stack[-1][1].children.append(node)
+        else:
+            parsed_rows.append(node)
+        stack.append((indent, node))
+    return parsed_rows
 
 class DataObject2(GObject.GObject):
     def __init__(self, column1: str):
@@ -126,37 +153,45 @@ def bind_expander(widget, item):
 def OpenGL(self, tab):
 
     def opengl_info():
-        fetch_opengl_information_command = "cat %s | grep string | grep -v glx" %(Filenames.opengl_outpuf_file)
-        fetch_es2_information_command = "es2_info | awk '/EGL_VERSION|VENDOR/'"
-        fetch_opengl_information_lhs_command = "cat %s | awk '{gsub(/string|:.*/,'True');print}' " %(Filenames.opengl_device_info_file)
-        fetch_opengl_memory_info_lhs_command = "cat %s | grep memory: | awk '{gsub(/:.*/,'True');print}' " %(Filenames.opengl_outpuf_file)
-        fetch_opengl_information_rhs_command = "cat %s | grep -o :.* | grep -o ' .*' " %(Filenames.opengl_device_info_file)
-        fetch_opengl_memory_info_rhs_command = "cat %s | grep memory: | grep -o :.* | grep -o ' .*' " %(Filenames.opengl_outpuf_file)
+        opengl_info_list.remove_all()
 
-        with open(Filenames.opengl_device_info_file,"w") as file:
-            fetch_opengl_information_process = subprocess.Popen(fetch_opengl_information_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_opengl_information_process.communicate()
-            fetch_es2_information_process = subprocess.Popen(fetch_es2_information_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_es2_information_process.communicate()
+        openGL_root = ExpandDataObject("OpenGL Details", "")
+        glx_root = ExpandDataObject("GLX Info - Brief", "")
 
-        with open(Filenames.opengl_info_lhs_file,"w") as file:
-            fetch_opengl_information_lhs_process = subprocess.Popen(fetch_opengl_information_lhs_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_opengl_information_lhs_process.communicate()
-            fetch_opengl_memory_info_lhs_process = subprocess.Popen(fetch_opengl_memory_info_lhs_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_opengl_memory_info_lhs_process.communicate()
+        glxinfo_brief_lines = []
+        try:
+            glxinfo_brief_lines = fetchContentsFromCommand("glxinfo -B 2>/dev/null")
+        except Exception:
+            glxinfo_brief_lines = []
 
-        with open(Filenames.opengl_info_rhs_file,"w") as file:
-            fetch_opengl_information_rhs_process = subprocess.Popen(fetch_opengl_information_rhs_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_opengl_information_rhs_process.communicate()
-            fetch_opengl_memory_info_rhs_process = subprocess.Popen(fetch_opengl_memory_info_rhs_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_opengl_memory_info_rhs_process.communicate()
+        parsed_rows = parse_glxinfo_brief(glxinfo_brief_lines)
+        if parsed_rows:
+            for row in parsed_rows:
+                if row.data.startswith("OpenGL"):
+                    openGL_root.children.append(row)
+                else:
+                    glx_root.children.append(row)
+        else:
+            glx_root.children.append(ExpandDataObject("No glxinfo -B output available", ""))
 
-        value_opengl_information_rhs = copyContentsFromFile(Filenames.opengl_info_rhs_file)
-        
-        with open(Filenames.opengl_info_lhs_file, "r") as file1:
-            for i,line in enumerate(file1):
-                text = line.strip(" ")
-                opengl_info_list.append(DataObject(text.strip('\n'), value_opengl_information_rhs[i].strip('\n')))
+        egl_root = ExpandDataObject("EGL Information", "")
+        egl_lines = []
+        try:
+            egl_lines = fetchContentsFromCommand("es2_info 2>/dev/null | awk '/^EGL_VERSION|^EGL_VENDOR/ {print}'")
+        except Exception:
+            egl_lines = []
+
+        parsed_egl_rows = parse_glxinfo_brief(egl_lines)
+        if parsed_egl_rows:
+            for row in parsed_egl_rows:
+                egl_root.children.append(row)
+        else:
+            egl_root.children.append(ExpandDataObject("No EGL information available", ""))
+
+        if openGL_root.children:
+            opengl_info_list.append(openGL_root)
+        opengl_info_list.append(egl_root)
+        opengl_info_list.append(glx_root)
     
     def clickme(button):
 
@@ -1125,11 +1160,11 @@ def OpenGL(self, tab):
     openglColumnView.set_hexpand(True)
 
     factoryOpenglLhs = Gtk.SignalListItemFactory()
-    factoryOpenglLhs.connect("setup", setup)
-    factoryOpenglLhs.connect("bind", bind_column1)
+    factoryOpenglLhs.connect("setup", setup_expander)
+    factoryOpenglLhs.connect("bind", bind_expander)
     factoryOpenglRhs = Gtk.SignalListItemFactory()
     factoryOpenglRhs.connect("setup", setup)
-    factoryOpenglRhs.connect("bind", bind_column2)
+    factoryOpenglRhs.connect("bind", bind1)
 
     openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
     openglColumn1.set_factory(factoryOpenglLhs)
@@ -1143,8 +1178,9 @@ def OpenGL(self, tab):
     openglColumnView.append_column(openglColumn2)
 
     openglSelection = Gtk.SingleSelection()
-    opengl_info_list = Gio.ListStore.new(DataObject)
-    openglSelection.set_model(opengl_info_list)
+    opengl_info_list = Gio.ListStore.new(ExpandDataObject)
+    opengl_info_model = Gtk.TreeListModel.new(opengl_info_list, False, True, add_tree_node)
+    openglSelection.set_model(opengl_info_model)
     openglColumnView.set_model(openglSelection)
 
     opengl_info_scrollbar = create_scrollbar(openglColumnView)
