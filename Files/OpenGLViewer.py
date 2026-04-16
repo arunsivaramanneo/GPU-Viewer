@@ -25,11 +25,11 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 
-from gi.repository import Gtk,Gio,GObject,Adw
+from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab,getLogo
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -41,6 +41,14 @@ class ExpandDataObject(GObject.GObject):
         super(ExpandDataObject, self).__init__()
         self.data = txt
         self.data2 = txt2
+        self.children = []
+
+class ExpandDataObject3(GObject.GObject):
+    def __init__(self, txt: str, image: GdkPixbuf.Pixbuf, txt2: str):
+        super(ExpandDataObject3, self).__init__()
+        self.data = txt
+        self.data2 = image
+        self.data3 = txt2
         self.children = []
 
 def add_tree_node(item):
@@ -61,7 +69,37 @@ def add_tree_node(item):
             store.append(child)
         return store
 
-def parse_glxinfo_brief(lines):
+def add_tree_node3(item):
+    if not (item):
+            print("no item")
+            return model
+    else:        
+        if type(item) == Gtk.TreeListRow:
+            item = item.get_item()
+
+            print("converteu")
+            print(item)  
+            
+        if not item.children:
+            return None
+        store = Gio.ListStore.new(ExpandDataObject3)
+        for child in item.children:
+            store.append(child)
+        return store
+
+def setup_image(widget, item):
+    """Setup the widget to show in the Gtk.Listview"""
+    image_render = Gtk.Picture()
+    item.set_child(image_render)
+
+def bind_image(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    label.set_pixbuf(obj.data2)
+
+def parse_glxinfo_brief(lines, dummy_transparent, getLogo):
     parsed_rows = []
     stack = []
     for raw_line in lines:
@@ -77,7 +115,11 @@ def parse_glxinfo_brief(lines):
         else:
             lhs = text
             rhs = ""
-        node = ExpandDataObject(lhs, rhs)
+        if lhs == "OpenGL renderer string":
+            logo = getLogo(rhs)
+        else:
+            logo = dummy_transparent
+        node = ExpandDataObject3(lhs, logo, rhs)
         while stack and stack[-1][0] >= indent:
             stack.pop()
         if stack:
@@ -140,6 +182,20 @@ def bind1(widget, item):
     label.set_label(obj.data2)
     
 
+def bind_column3(widget, item):
+    """bind data from the store object to the widget"""
+    label = item.get_child()
+    row = item.get_item()
+    obj = row.get_item()
+    if "true" in obj.data3: 
+        label.add_css_class(css_class='true')
+    elif "false" in obj.data3:
+        label.add_css_class(css_class='false')
+    else:
+        label.add_css_class(css_class='nothing')
+    label.set_label(obj.data3)
+    
+
 def bind_expander(widget, item):
     """bind data from the store object to the widget"""
     expander = item.get_child()
@@ -155,8 +211,10 @@ def OpenGL(self, tab):
     def opengl_info():
         opengl_info_list.remove_all()
 
-        openGL_root = ExpandDataObject("OpenGL Details", "")
-        glx_root = ExpandDataObject("GLX Info - Brief", "")
+        dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
+
+        openGL_root = ExpandDataObject3("OpenGL Details", dummy_transparent, "")
+        glx_root = ExpandDataObject3("GLX Info - Brief", dummy_transparent, "")
 
         glxinfo_brief_lines = []
         try:
@@ -164,7 +222,7 @@ def OpenGL(self, tab):
         except Exception:
             glxinfo_brief_lines = []
 
-        parsed_rows = parse_glxinfo_brief(glxinfo_brief_lines)
+        parsed_rows = parse_glxinfo_brief(glxinfo_brief_lines, dummy_transparent, getLogo)
         if parsed_rows:
             for row in parsed_rows:
                 if row.data.startswith("OpenGL"):
@@ -172,21 +230,21 @@ def OpenGL(self, tab):
                 else:
                     glx_root.children.append(row)
         else:
-            glx_root.children.append(ExpandDataObject("No glxinfo -B output available", ""))
+            glx_root.children.append(ExpandDataObject3("No glxinfo -B output available", dummy_transparent, ""))
 
-        egl_root = ExpandDataObject("EGL Information", "")
+        egl_root = ExpandDataObject3("EGL Information", dummy_transparent, "")
         egl_lines = []
         try:
             egl_lines = fetchContentsFromCommand("es2_info 2>/dev/null | awk '/^EGL_VERSION|^EGL_VENDOR/ {print}'")
         except Exception:
             egl_lines = []
 
-        parsed_egl_rows = parse_glxinfo_brief(egl_lines)
+        parsed_egl_rows = parse_glxinfo_brief(egl_lines, dummy_transparent, getLogo)
         if parsed_egl_rows:
             for row in parsed_egl_rows:
                 egl_root.children.append(row)
         else:
-            egl_root.children.append(ExpandDataObject("No EGL information available", ""))
+            egl_root.children.append(ExpandDataObject3("No EGL information available", dummy_transparent, ""))
 
         if openGL_root.children:
             opengl_info_list.append(openGL_root)
@@ -1129,6 +1187,48 @@ def OpenGL(self, tab):
     opengl_box.set_hexpand(True)
     tab.append(opengl_box)
 
+    # --- OpenGL Summary Box ---
+    glxinfo_lines = []
+    try:
+        glxinfo_lines = fetchContentsFromCommand("glxinfo -B 2>/dev/null")
+    except Exception:
+        glxinfo_lines = []
+    
+    renderer = ""
+    vendor = ""
+    for line in glxinfo_lines:
+        if "OpenGL renderer string:" in line:
+            renderer = line.split(":", 1)[1].strip()
+        if "OpenGL vendor string:" in line:
+            vendor = line.split(":", 1)[1].strip()
+    
+    if renderer:
+        summary_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 20)
+        summary_box.set_halign(Gtk.Align.CENTER)
+        summary_box.set_margin_top(20)
+        summary_box.set_margin_bottom(10)
+
+        logo_pixbuf = getLogo(renderer)
+        logo_img = Gtk.Picture.new_for_pixbuf(logo_pixbuf)
+        logo_img.set_size_request(48, 48)
+        summary_box.append(logo_img)
+
+        labels_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 2)
+        labels_box.set_valign(Gtk.Align.CENTER)
+
+        device_label = Gtk.Label.new(renderer)
+        device_label.add_css_class("title-1")
+        device_label.set_halign(Gtk.Align.START)
+        labels_box.append(device_label)
+
+        vendor_label = Gtk.Label.new(f"Vendor: {vendor}")
+        vendor_label.add_css_class("caption")
+        vendor_label.set_halign(Gtk.Align.START)
+        labels_box.append(vendor_label)
+
+        summary_box.append(labels_box)
+        opengl_box.append(summary_box)
+
     split_view = Adw.NavigationSplitView.new()
     split_view.set_vexpand(True)
     split_view.set_hexpand(True)
@@ -1162,9 +1262,12 @@ def OpenGL(self, tab):
     factoryOpenglLhs = Gtk.SignalListItemFactory()
     factoryOpenglLhs.connect("setup", setup_expander)
     factoryOpenglLhs.connect("bind", bind_expander)
+    factory_image = Gtk.SignalListItemFactory()
+    factory_image.connect("setup", setup_image)
+    factory_image.connect("bind", bind_image)
     factoryOpenglRhs = Gtk.SignalListItemFactory()
     factoryOpenglRhs.connect("setup", setup)
-    factoryOpenglRhs.connect("bind", bind1)
+    factoryOpenglRhs.connect("bind", bind_column3)
 
     openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
     openglColumn1.set_factory(factoryOpenglLhs)
@@ -1172,14 +1275,19 @@ def OpenGL(self, tab):
     openglColumn1.set_resizable(True)
     openglColumnView.append_column(openglColumn1)
 
+    openglColumnLogo = Gtk.ColumnViewColumn.new("")
+    openglColumnLogo.set_factory(factory_image)
+    openglColumnLogo.set_fixed_width(30)
+    openglColumnView.append_column(openglColumnLogo)
+
     openglColumn2 = Gtk.ColumnViewColumn.new("Details")
     openglColumn2.set_factory(factoryOpenglRhs)
     openglColumn2.set_expand(True)
     openglColumnView.append_column(openglColumn2)
 
     openglSelection = Gtk.SingleSelection()
-    opengl_info_list = Gio.ListStore.new(ExpandDataObject)
-    opengl_info_model = Gtk.TreeListModel.new(opengl_info_list, False, True, add_tree_node)
+    opengl_info_list = Gio.ListStore.new(ExpandDataObject3)
+    opengl_info_model = Gtk.TreeListModel.new(opengl_info_list, False, True, add_tree_node3)
     openglSelection.set_model(opengl_info_model)
     openglColumnView.set_model(openglSelection)
 
