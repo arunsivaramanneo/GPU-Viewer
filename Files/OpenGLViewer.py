@@ -950,10 +950,23 @@ def OpenGL(self, tab):
         egl_type_toggle.set_name("EGL")
         type_group.add(egl_type_toggle)
 
-        opengl_button = Gtk.ToggleButton.new_with_label("OpenGL")
-        opengles_button = Gtk.ToggleButton.new_with_label("OpenGL ES")
-        glx_button = Gtk.ToggleButton.new_with_label("GLX")
-        egl_button = Gtk.ToggleButton.new_with_label("EGL")
+        def create_toggle_button(label_text, icon_path):
+            button = Gtk.ToggleButton()
+            box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+            box.set_halign(Gtk.Align.CENTER)
+            image = Gtk.Image.new_from_file(icon_path)
+            image.set_pixel_size(20)
+            label = Gtk.Label.new(label_text)
+            box.append(image)
+            box.append(label)
+            button.set_child(box)
+            return button
+
+        opengl_button = create_toggle_button("OpenGL", const.OPEN_GL_PNG)
+        opengles_button = create_toggle_button("OpenGL ES", const.OPEN_GL_ES_PNG)
+        glx_button = create_toggle_button("GLX", const.GLX_PNG)
+        egl_button = create_toggle_button("EGL", const.EGL_PNG)
+
         opengl_button.set_active(True)
         opengl_button.set_valign(Gtk.Align.CENTER)
         opengles_button.set_valign(Gtk.Align.CENTER)

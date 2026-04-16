@@ -85,6 +85,8 @@ VULKAN_PNG = "../Images/Vulkan.png"
 
 OPEN_GL_PNG = "../Images/OpenGL.png"
 
+GLX_PNG = "../Images/glx.png"
+
 OPEN_GL_ES_PNG = "../Images/OpenGL_ES.png"
 
 # OPEN_CL_PNG is dynamic
