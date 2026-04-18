@@ -16,6 +16,7 @@
 import gi
 import  const
 import subprocess
+import re
 import Filenames
 
 gi.require_version("Gtk", "4.0")
@@ -71,9 +72,13 @@ class ClinfoParser:
 
             # Split key and value (usually separated by multiple spaces)
             if "  " in content:
-                parts = content.split("  ", 1)
+                parts = re.split(r'\s{2,}', content, maxsplit=1)
                 key = parts[0].strip()
                 value = parts[1].strip()
+            elif " 0x" in content:
+                parts = content.split(" 0x", 1)
+                key = parts[0].strip()
+                value = "0x" + parts[1].strip()
             else:
                 key = content
                 value = ""
@@ -111,6 +116,14 @@ def openCL(self, tab):
     gpu_index_map = []
     parser = ClinfoParser()
     oclPlatforms = parser.platforms
+    platformDetails_Store = Gio.ListStore.new(ExpandDataObject)
+    PlatformExtensionDetails_Store = Gio.ListStore.new(ExpandDataObject)
+    DeviceDetails_Store = Gio.ListStore.new(ExpandDataObject)
+    DeviceExtensionDetails_Store = Gio.ListStore.new(ExpandDataObject)
+    DeviceMemoryImage_store = Gio.ListStore.new(ExpandDataObject)
+    DeviceVector_store = Gio.ListStore.new(ExpandDataObject)
+    DeviceQueueExecution_store = Gio.ListStore.new(ExpandDataObject)
+
 
     def getPlatformNames():
         return [p["name"] for p in oclPlatforms]
@@ -118,6 +131,8 @@ def openCL(self, tab):
     def selectDevice(dropdown,dummy):
         selected =dropdown.props.selected_item
         DeviceDetails_Store.remove_all()
+        DeviceExtensionDetails_Store.remove_all()
+        PlatformExtensionDetails_Store.remove_all()
         DeviceMemoryImage_store.remove_all()
         DeviceVector_store.remove_all()
         DeviceQueueExecution_store.remove_all()
@@ -128,6 +143,7 @@ def openCL(self, tab):
                 value = 0
             real_idx = gpu_index_map[value] if len(gpu_index_map) > value else value
             getDeviceDetails(real_idx)
+            refresh_extensions()
             getDeviceMemoryImageDetails(real_idx)
             getDeviceVectorDetails(real_idx)
             getDeviceQueueExecutionCapabilities(real_idx)
@@ -161,28 +177,21 @@ def openCL(self, tab):
         if value >= len(oclPlatforms): return
         
         platform = oclPlatforms[value]
-        platformDetails_Store.remove_all()
+        
+        general_props = []
+        extension_props = []
 
-        for key, value, children in platform["properties"]:
-            if key == "Platform Extensions" or key == "Platform Extensions with Version":
-                # Handle extensions as a list
-                if key == "Platform Extensions with Version":
-                    pass
+        for p in platform["properties"]:
+            if "Extension" in p[0]:
+                if "with Version" in p[0]:
+                    extension_props.append(p)
                 else:
-                    ext_list = value.split()
-                toprow = ExpandDataObject(key, str(len(ext_list)))
-                for ext in ext_list:
-                    toprow.children.append(ExpandDataObject(ext, ""))
-                platformDetails_Store.append(toprow)
-                
-                # If there are versioned children, add them too
-                for sub_key, sub_val in children:
-                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                    general_props.append(p)
             else:
-                toprow = ExpandDataObject(key, value)
-                for sub_key, sub_val in children:
-                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
-                platformDetails_Store.append(toprow)
+                general_props.append(p)
+
+        populate_store(platformDetails_Store, general_props, add_children=False)
+        populate_store(PlatformExtensionDetails_Store, extension_props, skip_top=True)
 
     def get_device_categories(platform_idx, device_idx):
         if platform_idx >= len(oclPlatforms): return None
@@ -192,6 +201,8 @@ def openCL(self, tab):
         
         categories = {
             "Device Information": [],
+            "Device Extensions": [],
+            "Device Extensions with Version": [],
             "Device Memory & Image Information": [],
             "Queue & Execution Capabilities": [],
             "Device Vector Information": []
@@ -203,8 +214,11 @@ def openCL(self, tab):
             if key == "Platform Name" or key == "Platform Vendor":
                 continue
 
-            if key == "Device Extensions":
-                categories["Device Information"].append((key, value, children))
+            if "Device Extensions with Version" in key:
+                categories["Device Extensions with Version"].append((key, value, children))
+                continue
+            if "Device Extensions" in key:
+                categories["Device Extensions"].append((key, value, children))
                 continue
             
             if "Preferred / native vector sizes" in key:
@@ -217,24 +231,47 @@ def openCL(self, tab):
             categories[current_cat].append((key, value, children))
         return categories
 
-    def populate_store(store, props):
+    def populate_store(store, props, skip_top=False, add_children=True):
         store.remove_all()
         for key, value, children in props:
-            if "Extensions" in key or "Built-in kernels" in key or "features" in key or "capabilities" in key:
+            if ("Extensions" in key or "Built-in kernels" in key or "Atomic" in key or "features" in key or "all versions" in key or "USM" in key) and "n/a" not in value.lower():
                 # Handle long lists as expandable
-                if"Extensions" in key:
-                    items = value.split()
-                elif "capabilities" in key:
-                    items = value.split(',')
-                else:
-                    items = value.split(';')
-                toprow = ExpandDataObject(key, str(len(items)))
-                for item in items:
-                    toprow.children.append(ExpandDataObject(item.strip(';'), ""))
+                all_children = []
+                if value:
+                    if "with Version" in key or "with version" in key or "features" in key or "all versions" in key or "IL" in key:
+                        if "  " in value:
+                            parts = re.split(r'\s{2,}', value, maxsplit=1)
+                            all_children.append(ExpandDataObject(parts[0].strip(), parts[1].strip()))
+                        elif " 0x" in value:
+                            parts = value.split(" 0x", 1)
+                            all_children.append(ExpandDataObject(parts[0].strip(), "0x" + parts[1].strip()))
+                        elif " (" in value:
+                            parts = value.split(" (", 1)
+                            all_children.append(ExpandDataObject(parts[0].strip(), "(" + parts[1].strip()))
+                        else:
+                            all_children.append(ExpandDataObject(value.strip(), ""))
+                    elif "Extensions" in key:
+                        for ext in value.split():
+                            all_children.append(ExpandDataObject(ext, ""))
+                    elif "Atomic" in key or "USM" in key:
+                        for item in value.split(','):
+                            all_children.append(ExpandDataObject(item.strip(), ""))
+                    else:
+                        for item in value.split(';'):
+                            all_children.append(ExpandDataObject(item.strip(), ""))
+                
                 # Add versioned children if any
                 for sub_key, sub_val in children:
-                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
-                store.append(toprow)
+                    all_children.append(ExpandDataObject(sub_key, sub_val))
+                
+                if skip_top:
+                    for child in all_children:
+                        store.append(child)
+                else:
+                    toprow = ExpandDataObject(key, str(len(all_children)))
+                    if add_children:
+                        toprow.children = all_children
+                    store.append(toprow)
             else:
                 toprow = ExpandDataObject(key, value)
                 for sub_key, sub_val in children:
@@ -258,6 +295,18 @@ def openCL(self, tab):
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceVector_store, cats["Device Vector Information"])
+
+    def getDeviceExtensionDetails(value):
+        platform_idx = platform_dropdown.props.selected
+        cats = get_device_categories(platform_idx, value)
+        if cats:
+            populate_store(DeviceExtensionDetails_Store, cats["Device Extensions with Version"], skip_top=True)
+
+    def refresh_extensions():
+        if Devices_dropdown.props.selected == Gtk.INVALID_LIST_POSITION:
+            return
+        real_idx = gpu_index_map[Devices_dropdown.props.selected] if len(gpu_index_map) > Devices_dropdown.props.selected else Devices_dropdown.props.selected
+        getDeviceExtensionDetails(real_idx)
 
     def getDeviceQueueExecutionCapabilities(value):
         platform_idx = platform_dropdown.props.selected
@@ -295,7 +344,7 @@ def openCL(self, tab):
     sidebar_listbox.set_show_separators(True)
 
     tabs = [
-        "Platform Information", "Device Information", "Device Memory  \n \t    &\nImage Information",
+        "Platform Information", "Device Information", "Device Extensions", "Device Memory  \n \t    &\nImage Information",
         "Queue Capabilities\n \t\t&\nExecution Capabilities", "Device Vector Information"
     ]
 
@@ -317,7 +366,7 @@ def openCL(self, tab):
         # Create a box for the content of this specific tab
         content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
 
-        if tab_name == "Platform Information":
+        if "Platform Information" in tab_name:
 
                 platformColumnView = Gtk.ColumnView()
                 platformColumnView.props.show_row_separators = True
@@ -332,7 +381,7 @@ def openCL(self, tab):
                 factory_platform_value.connect("bind",bind1)
 
                 platformSelection = Gtk.SingleSelection()
-                platformDetails_Store = Gio.ListStore.new(ExpandDataObject)
+                # Store already initialized at top
 
                 platformModel = Gtk.TreeListModel.new(platformDetails_Store,False,True,add_tree_node)
                 platformSelection.set_model(platformModel)
@@ -348,9 +397,51 @@ def openCL(self, tab):
                 platformColumnView.append_column(platformColumnRhs)
 
                 platformScrollbar = create_scrollbar(platformColumnView)
+                platformScrollbar.set_vexpand(True)
+
+                # Platform Extensions Box
+                platformExtColumnView = Gtk.ColumnView()
+                platformExtColumnView.props.show_row_separators = True
+                platformExtColumnView.props.show_column_separators = False
+
+                platformExtSelection = Gtk.SingleSelection()
+                
+                platformExt_search_entry = Gtk.SearchEntry()
+                platformExt_search_entry.set_property("placeholder-text", "Search platform extensions...")
+                platformExt_search_entry.add_css_class(css_class='toolbar')
+                setMargin(platformExt_search_entry, 10, 10, 10)
+
+                def platform_ext_filter_func(item, data):
+                    search_text = platformExt_search_entry.get_text().lower()
+                    if not search_text:
+                        return True
+                    return search_text in item.data.lower() or search_text in item.data2.lower()
+
+                platform_ext_filter_model = Gtk.FilterListModel.new(model=PlatformExtensionDetails_Store)
+                platform_ext_custom_filter = Gtk.CustomFilter.new(platform_ext_filter_func, None)
+                platform_ext_filter_model.set_filter(platform_ext_custom_filter)
+
+                platformExt_search_entry.connect("search-changed", lambda w: platform_ext_custom_filter.changed(Gtk.FilterChange.DIFFERENT))
+
+                platformExtModel = Gtk.TreeListModel.new(platform_ext_filter_model, False, True, add_tree_node)
+                platformExtSelection.set_model(platformExtModel)
+                platformExtColumnView.set_model(platformExtSelection)
+
+                platformExtColumnLhs = Gtk.ColumnViewColumn.new("Platform Extensions", factory_platform)
+                platformExtColumnLhs.set_resizable(True)
+                platformExtColumnRhs = Gtk.ColumnViewColumn.new("Details", factory_platform_value)
+                platformExtColumnRhs.set_expand(True)
+
+                platformExtColumnView.append_column(platformExtColumnLhs)
+                platformExtColumnView.append_column(platformExtColumnRhs)
+
+                platformExtScrollbar = create_scrollbar(platformExtColumnView)
+                platformExtScrollbar.set_vexpand(True)
 
                 content_box.append(platformScrollbar)
-        elif tab_name == "Device Information":
+                content_box.append(platformExtScrollbar)
+                content_box.append(platformExt_search_entry)
+        elif "Device Information" in tab_name:
 
                 deviceColumnView = Gtk.ColumnView()
                 deviceColumnView.props.show_row_separators = True
@@ -365,7 +456,7 @@ def openCL(self, tab):
                 factory_devices_value.connect("bind",bind1)
 
                 deviceSelection = Gtk.SingleSelection()
-                DeviceDetails_Store = Gio.ListStore.new(ExpandDataObject)
+                # Store already initialized at top
 
                 deviceModel = Gtk.TreeListModel.new(DeviceDetails_Store,False,True,add_tree_node)
                 deviceSelection.set_model(deviceModel)
@@ -383,7 +474,59 @@ def openCL(self, tab):
                 DeviceDetailsScrollbar = create_scrollbar(deviceColumnView)
 
                 content_box.append(DeviceDetailsScrollbar)
-        elif tab_name == "Device Memory  \n \t    &\nImage Information":
+        elif tab_name == "Device Extensions":
+                deviceExtensionColumnView = Gtk.ColumnView()
+                deviceExtensionColumnView.props.show_row_separators = True
+                deviceExtensionColumnView.props.show_column_separators = False
+
+                factory_devices_extension = Gtk.SignalListItemFactory()
+                factory_devices_extension.connect("setup",setup_expander)
+                factory_devices_extension.connect("bind",bind_expander)
+
+                factory_devices_extension_value = Gtk.SignalListItemFactory()
+                factory_devices_extension_value.connect("setup",setup)
+                factory_devices_extension_value.connect("bind",bind1)
+
+                deviceExtensionSelection = Gtk.SingleSelection()
+                # Store already initialized at top
+
+                search_entry = Gtk.SearchEntry()
+                search_entry.set_property("placeholder-text", "Search extensions...")
+                search_entry.add_css_class(css_class='toolbar')
+                setMargin(search_entry, 10, 10, 10)
+
+
+                def filter_func(item, data):
+                    search_text = search_entry.get_text().lower()
+                    if not search_text:
+                        return True
+                    # Check both LHS (data) and RHS (data2)
+                    return search_text in item.data.lower() or search_text in item.data2.lower()
+
+                filter_model = Gtk.FilterListModel.new(model=DeviceExtensionDetails_Store)
+                custom_filter = Gtk.CustomFilter.new(filter_func, None)
+                filter_model.set_filter(custom_filter)
+
+                search_entry.connect("search-changed", lambda w: custom_filter.changed(Gtk.FilterChange.DIFFERENT))
+
+                deviceExtensionModel = Gtk.TreeListModel.new(filter_model, False, True, add_tree_node)
+                deviceExtensionSelection.set_model(deviceExtensionModel)
+
+                deviceExtensionColumnView.set_model(deviceExtensionSelection)
+
+                deviceExtensionColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_devices_extension)
+                deviceExtensionColumnLhs.set_resizable(True)
+                deviceExtensionColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_devices_extension_value)
+                deviceExtensionColumnRhs.set_expand(True)
+
+                deviceExtensionColumnView.append_column(deviceExtensionColumnLhs)
+                deviceExtensionColumnView.append_column(deviceExtensionColumnRhs)
+
+                DeviceExtensionDetailsScrollbar = create_scrollbar(deviceExtensionColumnView)
+
+                content_box.append(DeviceExtensionDetailsScrollbar)
+                content_box.append(search_entry)
+        elif "Device Memory" in tab_name:
                 deviceMemoryImageColumnView = Gtk.ColumnView()
                 deviceMemoryImageColumnView.props.show_row_separators = True
                 deviceMemoryImageColumnView.props.show_column_separators = False
@@ -397,7 +540,7 @@ def openCL(self, tab):
                 factory_devices_memory_image_value.connect("bind",bind1)
 
                 deviceMemoryImageSelection = Gtk.SingleSelection()
-                DeviceMemoryImage_store = Gio.ListStore.new(ExpandDataObject)
+                # Store already initialized at top
 
                 deviceMemoryImageModel = Gtk.TreeListModel.new(DeviceMemoryImage_store,False,True,add_tree_node)
                 deviceMemoryImageSelection.set_model(deviceMemoryImageModel)
@@ -415,7 +558,7 @@ def openCL(self, tab):
                 DeviceMemoryImageScrollbar = create_scrollbar(deviceMemoryImageColumnView)
 
                 content_box.append(DeviceMemoryImageScrollbar)
-        elif tab_name == "Queue Capabilities\n \t\t&\nExecution Capabilities":
+        elif "Queue Capabilities" in tab_name:
                 deviceQueueExecutionColumnView = Gtk.ColumnView()
                 deviceQueueExecutionColumnView.props.show_row_separators = True
                 deviceQueueExecutionColumnView.props.show_column_separators = False
@@ -429,7 +572,7 @@ def openCL(self, tab):
                 factory_devices_queue_execution_value.connect("bind",bind1)
 
                 deviceQueueExecutionSelection = Gtk.SingleSelection()
-                DeviceQueueExecution_store = Gio.ListStore.new(ExpandDataObject)
+                # Store already initialized at top
 
                 deviceQueueExectionModel = Gtk.TreeListModel.new(DeviceQueueExecution_store,False,True,add_tree_node)
                 deviceQueueExecutionSelection.set_model(deviceQueueExectionModel)
@@ -447,7 +590,7 @@ def openCL(self, tab):
                 DeviceQueueExecutionScrollbar = create_scrollbar(deviceQueueExecutionColumnView)
 
                 content_box.append(DeviceQueueExecutionScrollbar)
-        elif tab_name == "Device Vector Information":
+        elif "Device Vector" in tab_name:
                 deviceVectorColumnView = Gtk.ColumnView()
                 deviceVectorColumnView.props.show_row_separators = True
                 deviceVectorColumnView.props.show_column_separators = False
@@ -461,7 +604,7 @@ def openCL(self, tab):
                 factory_devices_vector_value.connect("bind",bind1)
 
                 deviceVectorSelection = Gtk.SingleSelection()
-                DeviceVector_store = Gio.ListStore.new(ExpandDataObject)
+                # Store already initialized at top
 
                 deviceVectorModel = Gtk.TreeListModel.new(DeviceVector_store,False,True,add_tree_node)
                 deviceVectorSelection.set_model(deviceVectorModel)
