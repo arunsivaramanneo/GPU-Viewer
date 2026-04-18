@@ -29,15 +29,91 @@ deviceDetailsHeader = ["Device Information ", "Details "]
 deviceMemoryImageHeader = ["Device Information ", "Details "]
 
 
+class ClinfoParser:
+    def __init__(self):
+        self.platforms = []
+        self.fetch_data()
+
+    def fetch_data(self):
+        try:
+            # Run clinfo and capture output
+            output = subprocess.check_output(["clinfo"], universal_newlines=True)
+            self.platforms = self.parse(output)
+        except Exception as e:
+            print(f"Error running clinfo: {e}")
+            self.platforms = []
+
+    def parse(self, output):
+        platforms = []
+        platform_map = {}
+        current_platform = None
+        current_device = None
+        mode = "START"
+        
+        lines = output.splitlines()
+        for line in lines:
+            if not line.strip(): continue
+            indent = len(line) - len(line.lstrip())
+            content = line.strip()
+            
+            if indent == 0:
+                if "Number of platforms" in content:
+                    mode = "PLATFORM"
+                elif "Number of devices" in content:
+                    mode = "DEVICE"
+                    current_device = None
+                elif "ICD loader properties" in content or "NULL platform behavior" in content:
+                    mode = "STOP"
+                continue
+
+            if mode == "STOP" or mode == "START":
+                continue
+
+            # Split key and value (usually separated by multiple spaces)
+            if "  " in content:
+                parts = content.split("  ", 1)
+                key = parts[0].strip()
+                value = parts[1].strip()
+            else:
+                key = content
+                value = ""
+
+            if indent == 2:
+                if key == "Platform Name":
+                    if value not in platform_map:
+                        current_platform = {"name": value, "properties": [], "devices": []}
+                        platforms.append(current_platform)
+                        platform_map[value] = current_platform
+                    else:
+                        current_platform = platform_map[value]
+                    continue
+                
+                if mode == "PLATFORM" and current_platform:
+                    # Avoid duplicate properties if clinfo repeats platform block
+                    if not any(p[0] == key for p in current_platform["properties"]):
+                        current_platform["properties"].append((key, value, []))
+                elif mode == "DEVICE" and current_platform:
+                    if key == "Device Name":
+                        current_device = {"name": value, "properties": []}
+                        current_platform["devices"].append(current_device)
+                    elif current_device:
+                        current_device["properties"].append((key, value, []))
+            elif indent > 2:
+                # Sub-property of the last property
+                if current_device and current_device["properties"]:
+                    current_device["properties"][-1][2].append((key, value))
+                elif current_platform and current_platform["properties"]:
+                    current_platform["properties"][-1][2].append((key, value))
+                    
+        return platforms
+
 def openCL(self, tab):
     gpu_index_map = []
-    def getPlatformNames():
+    parser = ClinfoParser()
+    oclPlatforms = parser.platforms
 
-        createMainFile(Filenames.opencl_plaform_and_device_names_file,Filenames.fetch_platform_and_device_names_command)
-        oclPlatformName = fetchContentsFromCommand(Filenames.fetch_platform_names_command)
-        oclPlatformName = [i.strip(' ') for i in oclPlatformName]
-        oclPlatformName = [i.strip('\n') for i in oclPlatformName]
-        return oclPlatformName
+    def getPlatformNames():
+        return [p["name"] for p in oclPlatforms]
 
     def selectDevice(dropdown,dummy):
         selected =dropdown.props.selected_item
@@ -61,23 +137,13 @@ def openCL(self, tab):
 
 
     def getDeviceNames(value):
+        if value >= len(oclPlatforms): return
         
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-        fetch_device_names_command = "cat %s | awk '/Platform #%s/{flag=1;next}/Platform.*/{flag=0}flag'| grep -o :.* | grep -o ' .*' | awk /./"%(Filenames.opencl_plaform_and_device_names_file,str(value))
-
+        platform = oclPlatforms[value]
         Devices_list = Gtk.StringList()
         Devices_dropdown.set_model(Devices_list)
-        oclDeviceNames = fetchContentsFromCommand(fetch_device_names_command)
-        oclDeviceNames = [i.strip(' ') for i in oclDeviceNames]
-        oclDeviceNames = [i.strip('\n') for i in oclDeviceNames]
+        
+        oclDeviceNames = [d["name"] for d in platform["devices"]]
 
         numberOfDevicesEntry.set_text(str(len(oclDeviceNames)))
         numberOfDevicesEntry.set_editable(False)
@@ -85,288 +151,119 @@ def openCL(self, tab):
         gpu_index_map.clear()
         unique_names = []
         for i, name in enumerate(oclDeviceNames):
+            # Keep unique names for dropdown but map back to original index
             if name not in unique_names:
                 unique_names.append(name)
                 gpu_index_map.append(i)
                 Devices_list.append(name)
 
     def getPlatfromDetails(value):
-
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-        fetch_platform_details_file_command = "cat %s | awk '/Number of platforms.*/{flag=1;next}/Number of devices/{flag=0}flag' | awk '/%s/{flag=1;next}/Platform Name/{flag=0}flag' | awk /./ " %(Filenames.opencl_output_file,oclPlatformslocal[value])
-        createMainFile(Filenames.opencl_platform_details_file,fetch_platform_details_file_command)
-
-        oclPlatformDetailsLHS = fetchContentsFromCommand(Filenames.fetch_platform_details_lhs_command)
-        oclPlatformDetailsRHS = fetchContentsFromCommand(Filenames.fetch_platform_details_rhs_command)
+        if value >= len(oclPlatforms): return
+        
+        platform = oclPlatforms[value]
         platformDetails_Store.remove_all()
 
-        for i in range(len(oclPlatformDetailsLHS)):
-            if "Extensions" in oclPlatformDetailsLHS[i] and "suffix" not in oclPlatformDetailsLHS[i]:
-                if "Version" in oclPlatformDetailsLHS[i]:
-                    continue
-                oclPlatformExtensions = oclPlatformDetailsRHS[i].split(' ')
-                oclPlatformExtensions = list(filter(None,oclPlatformExtensions))
-                toprow = ExpandDataObject(oclPlatformDetailsLHS[i].strip('\n'),
-                                                           str(len(oclPlatformExtensions)))
-                for j in range(len(oclPlatformExtensions)):
-                    iter = ExpandDataObject(oclPlatformExtensions[j].strip('\n'), " ")
-                    toprow.children.append(iter)
+        for key, value, children in platform["properties"]:
+            if key == "Platform Extensions" or key == "Platform Extensions with Version":
+                # Handle extensions as a list
+                if key == "Platform Extensions with Version":
+                    pass
+                else:
+                    ext_list = value.split()
+                toprow = ExpandDataObject(key, str(len(ext_list)))
+                for ext in ext_list:
+                    toprow.children.append(ExpandDataObject(ext, ""))
+                platformDetails_Store.append(toprow)
+                
+                # If there are versioned children, add them too
+                for sub_key, sub_val in children:
+                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
             else:
-                toprow = ExpandDataObject(oclPlatformDetailsLHS[i].strip('\n'),
-                                                    oclPlatformDetailsRHS[i].strip('\n'))
-            platformDetails_Store.append(toprow)
+                toprow = ExpandDataObject(key, value)
+                for sub_key, sub_val in children:
+                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                platformDetails_Store.append(toprow)
+
+    def get_device_categories(platform_idx, device_idx):
+        if platform_idx >= len(oclPlatforms): return None
+        platform = oclPlatforms[platform_idx]
+        if device_idx >= len(platform["devices"]): return None
+        device = platform["devices"][device_idx]
+        
+        categories = {
+            "Device Information": [],
+            "Device Memory & Image Information": [],
+            "Queue & Execution Capabilities": [],
+            "Device Vector Information": []
+        }
+        
+        current_cat = "Device Information"
+        for key, value, children in device["properties"]:
+            # Skip redundant platform info in device section
+            if key == "Platform Name" or key == "Platform Vendor":
+                continue
+
+            if key == "Device Extensions":
+                categories["Device Information"].append((key, value, children))
+                continue
+            
+            if "Preferred / native vector sizes" in key:
+                current_cat = "Device Vector Information"
+            elif "Address bits" in key or "Max alignment" in key:
+                current_cat = "Device Memory & Image Information"
+            elif "Queue properties" in key or "Execution capabilities" in key or "Device enqueue" in key:
+                current_cat = "Queue & Execution Capabilities"
+                
+            categories[current_cat].append((key, value, children))
+        return categories
+
+    def populate_store(store, props):
+        store.remove_all()
+        for key, value, children in props:
+            if "Extensions" in key or "Built-in kernels" in key or "features" in key or "capabilities" in key:
+                # Handle long lists as expandable
+                if"Extensions" in key:
+                    items = value.split()
+                elif "capabilities" in key:
+                    items = value.split(',')
+                else:
+                    items = value.split(';')
+                toprow = ExpandDataObject(key, str(len(items)))
+                for item in items:
+                    toprow.children.append(ExpandDataObject(item.strip(';'), ""))
+                # Add versioned children if any
+                for sub_key, sub_val in children:
+                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                store.append(toprow)
+            else:
+                toprow = ExpandDataObject(key, value)
+                for sub_key, sub_val in children:
+                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                store.append(toprow)
 
     def getDeviceDetails(value):
-
-        value2 = platform_dropdown.props.selected
-
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-
-        fetch_device_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s*/' | awk '/Device Name.*/&& ++n == %d,/Preferred \\/.*/' | grep -v Preferred | grep -v Available" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
-        fetch_device_extensions_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Extensions|Available/'" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
-        
-        with open(Filenames.opencl_device_details_file,"w") as file:
-            fetch_device_details_file_process = subprocess.Popen(fetch_device_details_file_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_device_details_file_process.communicate()
-            fetch_device_extensions_process = subprocess.Popen(fetch_device_extensions_command,shell=True,stdout=file,universal_newlines=True)
-            fetch_device_extensions_process.communicate()
-
-        oclDeviceDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_details_lhs_command)
-        oclDeviceDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_details_rhs_command)
-
-
-    #    DeviceDetails_Store.remove_all()
-
-        iter = None
-        for i in range(len(oclDeviceDetailsLHS)):
-            if "    " in oclDeviceDetailsLHS[i]:
-                oclDeviceDetailsLHS[i] = oclDeviceDetailsLHS[i].strip("  ")
-                iter = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'), oclDeviceDetailsRHS[i].strip('\n'))
-                toprow.children.append(iter)
-            else:
-                if "Number of devices" in oclDeviceDetailsLHS[i]:
-                    oclDeviceDetailsLHS[i] = "  Number of devices"
-                    oclDeviceDetailsRHS[i] = oclDeviceDetailsRHS[i][len(oclDeviceDetailsLHS[i]):].strip(' ')
-                if "OpenCL" in oclDeviceDetailsLHS[i] and ("versions" in oclDeviceDetailsLHS[i] or "features" in oclDeviceDetailsLHS[i]):
-                    if "versions" in oclDeviceDetailsLHS[i]:
-                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
-                        iter  = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
-                        toprow.children.append(iter)
-                    if "features" in oclDeviceDetailsLHS[i]:
-                        DeviceDetails_Store.append(toprow)
-                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
-                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
-                        toprow.children.append(iter)
-                    continue
-                if "0x" in oclDeviceDetailsRHS[i] and "Device" not in oclDeviceDetailsLHS[i]:
-                #    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),"")
-                    if "OpenCL" in oclDeviceDetailsRHS[i]:
-                        
-                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3]),""),(oclDeviceDetailsRHS[i].split())[2]+" "+(oclDeviceDetailsRHS[i].split())[3])
-                        toprow.children.append(iter)
-                        continue
-                    else:
-                        iter = ExpandDataObject(oclDeviceDetailsRHS[i].replace(((oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2]),""), (oclDeviceDetailsRHS[i].split())[1]+" "+(oclDeviceDetailsRHS[i].split())[2])
-                        toprow.children.append(iter)
-                        continue
-                if "Extensions" in oclDeviceDetailsLHS[i]:
-                    oclDeviceExtenstions = oclDeviceDetailsRHS[i].split(" ")
-                    oclDeviceExtenstions = list(filter(None,oclDeviceExtenstions))
-                    DeviceDetails_Store.append(toprow)
-                    toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),str(len(oclDeviceExtenstions)).strip('\n'))
-                    for j in range(len(oclDeviceExtenstions)):
-                        iter = ExpandDataObject(oclDeviceExtenstions[j].strip('\n'), " ")
-                        toprow.children.append(iter)
-                else:
-                    if iter == None:
-                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
-                                                             oclDeviceDetailsRHS[i].strip('\n'))
-                        DeviceDetails_Store.append(toprow)
-                    else:
-                        DeviceDetails_Store.append(toprow)
-                        toprow = ExpandDataObject(oclDeviceDetailsLHS[i].strip('\n'),
-                                                             oclDeviceDetailsRHS[i].strip('\n'))
-        DeviceDetails_Store.append(toprow)
-
-
+        platform_idx = platform_dropdown.props.selected
+        cats = get_device_categories(platform_idx, value)
+        if cats:
+            populate_store(DeviceDetails_Store, cats["Device Information"])
 
     def getDeviceMemoryImageDetails(value):
-
-        value2 = platform_dropdown.props.selected
-
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-        fetch_device_memory_and_image_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Address.*/{flag=1;print}/Queue.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
-        createMainFile(Filenames.opencl_device_memory_and_image_file,fetch_device_memory_and_image_file_command)
-
-        oclDeviceMemoryImageDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_memory_and_image_details_lhs_command)
-        oclDeviceMemoryImageDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_memory_and_image_details_rhs_command)
-
-        oclDeviceMemoryImageDetailsLHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsLHS]
-        oclDeviceMemoryImageDetailsRHS = [i.strip('\n') for i in oclDeviceMemoryImageDetailsRHS]
-
-    #    DeviceMemoryImage_store.remove_all()
-        iter = None
-        for i in range(len(oclDeviceMemoryImageDetailsLHS)):
-            if "    " in oclDeviceMemoryImageDetailsLHS[i]:
-                if "Base address alignment for 2D image buffers" in oclDeviceMemoryImageDetailsLHS[i]:
-                    oclDeviceMemoryImageDetailsLHS[i] = "    Base address alignment for 2D image buffers"
-                    oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][
-                                                        len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
-                oclDeviceMemoryImageDetailsLHS[i] = oclDeviceMemoryImageDetailsLHS[i].strip("  ")
-             #   DeviceMemoryImage_store.append(toprow)
-                iter = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
-                toprow.children.append(iter)
-            else:
-                if oclDeviceMemoryImageDetailsLHS[i] in oclDeviceMemoryImageDetailsRHS[i]:
-                    oclDeviceMemoryImageDetailsRHS[i] = oclDeviceMemoryImageDetailsRHS[i][
-                                                        len(oclDeviceMemoryImageDetailsLHS[i]):].strip(' ')
-                 #   toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
-                elif "Built-in" in oclDeviceMemoryImageDetailsLHS[i]:
-                    oclDeviceKernels = oclDeviceMemoryImageDetailsRHS[i].split(';')
-                    toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),str(len(oclDeviceKernels) - 1).strip('\n'))
-                    for j in range(len(oclDeviceKernels) - 1):
-                        iter = ExpandDataObject(oclDeviceKernels[j].strip('\n'), " ")
-                        toprow.children.append(iter)
-                else:
-                    if iter == None:
-                        toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
-                        DeviceMemoryImage_store.append(toprow)
-                    else:
-                        DeviceMemoryImage_store.append(toprow)
-                        toprow = ExpandDataObject(oclDeviceMemoryImageDetailsLHS[i].strip('\n'),oclDeviceMemoryImageDetailsRHS[i].strip('\n'))
-                #    DeviceMemoryImage_store.append(toprow)
-        DeviceMemoryImage_store.append(toprow)
+        platform_idx = platform_dropdown.props.selected
+        cats = get_device_categories(platform_idx, value)
+        if cats:
+            populate_store(DeviceMemoryImage_store, cats["Device Memory & Image Information"])
 
     def getDeviceVectorDetails(value):
-
-        value2 = platform_dropdown.props.selected
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-        fetch_device_vector_details_file_command = "cat %s | awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/'| awk '/Preferred \\/.*/{flag=1;print}/Address.*/{flag=0}flag' | uniq" % (Filenames.opencl_output_file, oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
-        createMainFile(Filenames.opencl_device_vector_file,fetch_device_vector_details_file_command)
-
-        oclDeviceVectorDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_vector_details_lhs_command)
-        oclDeviceVectorDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_vector_details_rhs_command)
-
-        oclDeviceVectorDetailsLHS = [i.strip('\n') for i in oclDeviceVectorDetailsLHS]
-        oclDeviceVectorDetailsRHS = [i.strip('\n') for i in oclDeviceVectorDetailsRHS]
-        DeviceVector_store.remove_all()
-        iter = None
-        for i in range(len(oclDeviceVectorDetailsLHS)):
-            if "    " in oclDeviceVectorDetailsLHS[i]:
-                if "Correctly-rounded divide and sqrt operations" in oclDeviceVectorDetailsLHS[i]:
-                    oclDeviceVectorDetailsLHS[i] = "    Correctly-rounded divide and sqrt operations"
-                    oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i][
-                                                   len(oclDeviceVectorDetailsLHS[i]):].strip(' ')
-                #    oclDeviceVectorDetailsLHS[i] = oclDeviceVectorDetailsLHS[i].strip("  ")
-                iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
-                toprow.children.append(iter)
-        #            iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
-        #            toprow.children.append(iter)
-                 #   DeviceVector_store.append(toprow)
-          #      else:
-         #           print(oclDeviceVectorDetailsLHS[i])
-                #    DeviceVector_store.append(toprow)
-        #            iter = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'), oclDeviceVectorDetailsRHS[i])
-        #            toprow.children.append(iter)
-        #            continue
-            #    DeviceVector_store.append(toprow)
-            #    continue
-            else:
-                if oclDeviceVectorDetailsLHS[i] in oclDeviceVectorDetailsRHS[i]:
-                    oclDeviceVectorDetailsRHS[i] = oclDeviceVectorDetailsRHS[i].strip(oclDeviceVectorDetailsLHS[i])
-                if iter == None:
-                    toprow = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'))
-                else:
-                    DeviceVector_store.append(toprow)
-                    toprow = ExpandDataObject(oclDeviceVectorDetailsLHS[i].strip('\n'),oclDeviceVectorDetailsRHS[i].strip('\n'))
-        DeviceVector_store.append(toprow)
-            
+        platform_idx = platform_dropdown.props.selected
+        cats = get_device_categories(platform_idx, value)
+        if cats:
+            populate_store(DeviceVector_store, cats["Device Vector Information"])
 
     def getDeviceQueueExecutionCapabilities(value):
-
-        value2 = platform_dropdown.props.selected
-
-        oclPlatformslocal = []
-        oclPlatformslocal = oclPlatformslocal + oclPlatforms
-        oclPlatformslocal.append("BLANK")
-
-        for i in range(len(oclPlatformslocal)):
-            oclPlatformslocal[i] = [j.replace("(", "\\(") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = [j.replace(")", "\\)") for j in oclPlatformslocal[i]]
-            oclPlatformslocal[i] = ''.join(oclPlatformslocal[i])
-
-        fetch_device_queue_execution_file_command = "cat %s |  awk '/%s/&& ++n == 2,/%s/' | awk '/Device Name.*/&& ++n == %d,/Extensions.*/' | awk '/Queue.*/{flag=1;print}/Extensions.*/{flag=0}flag' | grep -v Available | uniq" % (Filenames.opencl_output_file,oclPlatformslocal[value2], oclPlatformslocal[value2 + 1], value + 1)
-        createMainFile(Filenames.opencl_device_queue_execution_details_file,fetch_device_queue_execution_file_command)
-
-        oclDeviceQueueExecutionDetailsLHS = fetchContentsFromCommand(Filenames.fetch_device_queue_execution_details_lhs_command)
-        oclDeviceQueueExecutionDetailsRHS = fetchContentsFromCommand(Filenames.fetch_device_queue_execution_details_rhs_command)
-
-        oclDeviceQueueExecutionDetailsLHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsLHS]
-        oclDeviceQueueExecutionDetailsRHS = [i.strip('\n') for i in oclDeviceQueueExecutionDetailsRHS]
-
-        DeviceQueueExecution_store.remove_all()
-        iter = None
-        for i in range(len(oclDeviceQueueExecutionDetailsLHS)):
-            if "    " in oclDeviceQueueExecutionDetailsLHS[i] and "0x" not in oclDeviceQueueExecutionDetailsRHS[i]:
-                oclDeviceQueueExecutionDetailsLHS[i] = oclDeviceQueueExecutionDetailsLHS[i].strip("  ")
-                iter = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
-                toprow.children.append(iter)
-            else:
-                if "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" not in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
-                    oclDeviceKernels = oclDeviceQueueExecutionDetailsRHS[i].split(';')
-                    toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),str(len(oclDeviceKernels) ).strip('\n'))
-                    for j in range(len(oclDeviceKernels)):
-                        iter = ExpandDataObject(oclDeviceKernels[j].strip('\n'), " ")
-                        toprow.children.append(iter)
-                elif "Built-in" in oclDeviceQueueExecutionDetailsLHS[i] and "version" in oclDeviceQueueExecutionDetailsLHS[i] and "n/a" not in oclDeviceQueueExecutionDetailsRHS[i]:
-                    DeviceQueueExecution_store.append(toprow)
-                    toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i],"")
-                    iter = ExpandDataObject(oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2])
-                    toprow.children.append(iter)
-                elif "0x" in oclDeviceQueueExecutionDetailsRHS[i]:
-                    iter = ExpandDataObject(oclDeviceQueueExecutionDetailsRHS[i].replace(((oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2]),""),(oclDeviceQueueExecutionDetailsRHS[i].split())[1]+" "+(oclDeviceQueueExecutionDetailsRHS[i].split())[2])
-                    toprow.children.append(iter)
-                    continue
-                else:
-                    if iter == None:
-                        toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
-                    #    DeviceQueueExecution_store.append(toprow)
-                    else:
-                        DeviceQueueExecution_store.append(toprow)
-                        toprow = ExpandDataObject(oclDeviceQueueExecutionDetailsLHS[i].strip('\n'),oclDeviceQueueExecutionDetailsRHS[i].strip('\n'))
-        DeviceQueueExecution_store.append(toprow)
+        platform_idx = platform_dropdown.props.selected
+        cats = get_device_categories(platform_idx, value)
+        if cats:
+            populate_store(DeviceQueueExecution_store, cats["Queue & Execution Capabilities"])
 
     def selectPlatform(dropdown,dummy):
         selected =dropdown.props.selected_item
@@ -643,9 +540,9 @@ def openCL(self, tab):
 #    setMargin(h_device_box,10,10,10)
     platform_list = Gtk.StringList()
 
-    oclPlatforms = getPlatformNames()
+    platform_names = getPlatformNames()
 
-    for i in oclPlatforms:
+    for i in platform_names:
         platform_list.append(i)
 
     platform_dropdown = Gtk.DropDown()

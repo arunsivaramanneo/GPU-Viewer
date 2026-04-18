@@ -41,6 +41,7 @@ def setup(widget, item):
     label = Gtk.Label()
     label.props.use_markup = True
     label.props.xalign = 0.0
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
 
 

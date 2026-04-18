@@ -27,7 +27,7 @@ import subprocess, const
 import threading
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib, GObject, Gio, GdkPixbuf
+from gi.repository import Gtk, Gio, GObject, Adw, GdkPixbuf, Pango, GLib
 from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats
 import Filenames
 
@@ -83,6 +83,7 @@ def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
     label.props.xalign = 0.0
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
 
 
@@ -1717,7 +1718,6 @@ def create_vulkan_tab_content(self):
 
             deviceColumnLhs = Gtk.ColumnViewColumn.new("Device Details",factory_devices)
             deviceColumnLhs.set_resizable(True)
-            deviceColumnLhs.set_fixed_width(250)
             deviceColumnRhs1 = Gtk.ColumnViewColumn.new("",factory_devices_value1)
             deviceColumnRhs1.set_resizable(True)
             deviceColumnRhs1.set_expand(False)

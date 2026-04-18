@@ -22,7 +22,7 @@ from pathlib import Path
 gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
-from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw,GLib
+from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw,GLib,Pango
 import cairo as _cairo
 
 
@@ -365,6 +365,7 @@ def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
     label.props.xalign = 0.0
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
 
 
@@ -561,6 +562,7 @@ def setup_expander(widget, item):
     expander = Gtk.TreeExpander.new()
  #   expander.props.indent_for_icon = True
  #   expander.props.indent_for_depth = True
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     expander.set_child(label)
     item.set_child(expander)
 
@@ -568,6 +570,7 @@ def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
     label.props.xalign = 0.0
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
 
 def bind_expander(widget, item):

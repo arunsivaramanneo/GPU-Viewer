@@ -25,7 +25,7 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 
-from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf
+from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf,Pango
 
 Adw.init()
 
@@ -146,6 +146,7 @@ def setup_expander(widget, item):
     expander = Gtk.TreeExpander.new()
  #   expander.props.indent_for_icon = True
  #   expander.props.indent_for_depth = True
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     expander.set_child(label)
     item.set_child(expander)
 
@@ -153,6 +154,7 @@ def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
     label.props.xalign = 0.0
+    label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
 
 def bind_column1(widget, item):
@@ -596,7 +598,7 @@ def OpenGL(self, tab):
     def create_sidebar_row(label_text, sensitive=True, css_class=None):
         row = Gtk.ListBoxRow()
         label = Gtk.Label.new(label_text)
-        label.set_xalign(0)
+        label.set_xalign(0.5)
         label.set_margin_start(12)
         label.set_margin_end(12)
         label.set_margin_top(8)
@@ -665,7 +667,21 @@ def OpenGL(self, tab):
 
         limitSelection = Gtk.SingleSelection()
         limits_store = Gio.ListStore.new(ExpandDataObject)
-        limitModel = Gtk.TreeListModel.new(limits_store, False, True, add_tree_node)
+        search_entry = Gtk.SearchEntry()
+        search_entry.set_property("placeholder-text", "Type here to filter Limits.....")
+        search_entry.add_css_class(css_class='toolbar')
+
+        def filter_func(item, filter_list_model):
+            search_text_widget = search_entry.get_text()
+            if not search_text_widget:
+                return True
+            return search_text_widget.upper() in item.data.upper() or search_text_widget.upper() in item.data2.upper()
+
+        filterLimitsListStore = Gtk.FilterListModel(model=limits_store)
+        filterLimits = Gtk.CustomFilter.new(filter_func, filterLimitsListStore)
+        filterLimitsListStore.set_filter(filterLimits)
+
+        limitModel = Gtk.TreeListModel.new(filterLimitsListStore, False, True, add_tree_node)
         limitSelection.set_model(limitModel)
 
         limitsColumnView.set_model(limitSelection)
@@ -734,8 +750,10 @@ def OpenGL(self, tab):
 
         load_limits_profile("core")
 
-        limitsDropDown.connect("notify::selected-item", showLimits, limits_store, limitsColumnView, current_mode["file"])
+        search_entry.connect("search-changed", _on_search_method_changed, filterLimits)
+        limitsDropDown.connect("notify::selected-item", lambda *args: showLimits(limitsDropDown, 0, limits_store, limitsColumnView, current_mode["file"]))
         limits_page.append(create_scrollbar(limitsColumnView))
+        limits_page.append(search_entry)
         return limits_page
 
     def create_framebuffer_page(visuals_command, fbconfig_command):
@@ -810,16 +828,37 @@ def OpenGL(self, tab):
             fbColumn.set_expand(True)
             frameBufferColumnView.append_column(fbColumn)
 
-            fb_selection = Gtk.SingleSelection()
-            fb_store = Gio.ListStore.new(DataObject2)
-            fb_selection.set_model(fb_store)
-            frameBufferColumnView.set_model(fb_selection)
-        else:
-            fb_selection = Gtk.SingleSelection()
-            fb_store = Gio.ListStore.new(FramebufferRow)
-            fb_selection.set_model(fb_store)
-            frameBufferColumnView.set_model(fb_selection)
+        fb_selection = Gtk.SingleSelection()
+        fb_store = Gio.ListStore.new(DataObject2 if max_columns == 0 else FramebufferRow)
+        
+        search_entry = Gtk.SearchEntry()
+        search_entry.set_property("placeholder-text", "Type here to filter GLX FB Config.....")
+        search_entry.add_css_class(css_class='toolbar')
 
+        def filter_func(item, filter_list_model):
+            search_text = search_entry.get_text().upper()
+            if not search_text:
+                return True
+            
+            if hasattr(item, "column1"):
+                if search_text in item.column1.upper():
+                    return True
+            
+            for i in range(1, max_columns + 1):
+                attr = f"data{i}"
+                if hasattr(item, attr):
+                    val = getattr(item, attr)
+                    if val and search_text in val.upper():
+                        return True
+            return False
+
+        filterFbListStore = Gtk.FilterListModel(model=fb_store)
+        filterFb = Gtk.CustomFilter.new(filter_func, filterFbListStore)
+        filterFbListStore.set_filter(filterFb)
+        fb_selection.set_model(filterFbListStore)
+        frameBufferColumnView.set_model(fb_selection)
+
+        if max_columns > 0:
             for index in range(1, max_columns + 1):
                 factory = Gtk.SignalListItemFactory()
                 factory.connect("setup", setup)
@@ -876,7 +915,9 @@ def OpenGL(self, tab):
 
         set_active_profile("glx-visuals")
 
+        search_entry.connect("search-changed", _on_search_method_changed, filterFb)
         page.append(create_scrollbar(frameBufferColumnView))
+        page.append(search_entry)
         return page
 
     def create_extensions_page():
@@ -1188,7 +1229,7 @@ def OpenGL(self, tab):
         sidebar_target_names = {
             "OpenGL Information": "opengl-information",
             "OpenGL Limits": "opengl-limits",
-            "Framebuffer Configuration": "framebuffer-configuration",
+            "GLX FB Config": "framebuffer-configuration",
             "Extensions": "extensions",
         }
         child_name = sidebar_target_names.get(tab_name)
@@ -1284,13 +1325,13 @@ def OpenGL(self, tab):
 
     openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
     openglColumn1.set_factory(factoryOpenglLhs)
-    openglColumn1.set_expand(True)
+    openglColumn1.set_expand(False)
     openglColumn1.set_resizable(True)
     openglColumnView.append_column(openglColumn1)
 
     openglColumnLogo = Gtk.ColumnViewColumn.new("")
     openglColumnLogo.set_factory(factory_image)
-    openglColumnLogo.set_fixed_width(30)
+    # openglColumnLogo.set_fixed_width(30)
     openglColumnView.append_column(openglColumnLogo)
 
     openglColumn2 = Gtk.ColumnViewColumn.new("Details")
@@ -1309,7 +1350,6 @@ def OpenGL(self, tab):
     opengl_info_scrollbar.set_hexpand(True)
     opengl_info_scrollbar.set_valign(Gtk.Align.FILL)
     opengl_info_scrollbar.set_min_content_height(440)
-    opengl_info_scrollbar.set_min_content_width(520)
 
     info_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
     info_box.set_hexpand(True)
@@ -1341,12 +1381,12 @@ def OpenGL(self, tab):
 
     content_stack.add_titled(info_page, "opengl-information", "OpenGL Information")
     content_stack.add_titled(limits_page, "opengl-limits", "OpenGL Limits")
-    content_stack.add_titled(framebuffer_page, "framebuffer-configuration", "Framebuffer Configuration")
+    content_stack.add_titled(framebuffer_page, "framebuffer-configuration", "GLX FB Config")
     content_stack.add_titled(extensions_page, "extensions", "Extensions")
 
     sidebar_listbox.append(create_sidebar_row("OpenGL Information", True))
     sidebar_listbox.append(create_sidebar_row("OpenGL Limits", True))
-    sidebar_listbox.append(create_sidebar_row("Framebuffer Configuration", True))
+    sidebar_listbox.append(create_sidebar_row("GLX FB Config", True))
     sidebar_listbox.append(create_sidebar_row("Extensions", True))
 
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
