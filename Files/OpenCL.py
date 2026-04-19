@@ -356,7 +356,6 @@ def openCL(self, tab):
     for tab_name in tabs:
         row = Gtk.ListBoxRow()
         label = Gtk.Label.new(tab_name)
-        label.set_selectable(True)
         # Add padding to the label inside the row
         label.set_margin_top(10)
         label.set_margin_bottom(10)
@@ -672,7 +671,6 @@ def openCL(self, tab):
  #   platformFrame.set_child(platformGrid)
 
     platformLabel = Gtk.Label()
-    platformLabel.set_selectable(True)
     platformLabel.add_css_class(css_class="toolbar")
 #    setMargin(platformLabel,300,10,10)
     platformLabel.set_text("Available Platform(s):")
@@ -699,7 +697,6 @@ def openCL(self, tab):
     h_box.append(platform_dropdown)
 
     AvailableDevices = Gtk.Label()
-    AvailableDevices.set_selectable(True)
     
     AvailableDevices.set_label("Available Device(s) :")
     setMargin(AvailableDevices,50,10,10)
@@ -732,7 +729,6 @@ def openCL(self, tab):
 #    platformGrid.attach_next_to(platform_dropdown, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
     numberOfPlatforms = Gtk.Label()
-    numberOfPlatforms.set_selectable(True)
     setMargin(numberOfPlatforms,30,10,10)
     numberOfPlatforms.set_label("Number of Platforms :")
 #    h_platform_box.append(numberOfPlatforms)
@@ -746,7 +742,6 @@ def openCL(self, tab):
 #    platformGrid.attach_next_to(numberOfPlatformsEntry, numberOfPlatforms, Gtk.PositionType.RIGHT, 1, 1)
 
     numberOfDevices = Gtk.Label()
-    numberOfDevices.set_selectable(True)
     setMargin(numberOfDevices,30,10,10)
     numberOfDevices.set_label("Number Of Devices :")
 #    h_device_box.append(numberOfDevices)
