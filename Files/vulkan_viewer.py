@@ -82,6 +82,7 @@ def bind_image(widget, item):
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
+    label.set_selectable(True)
     label.props.xalign = 0.0
     label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
@@ -1011,6 +1012,7 @@ def create_vulkan_tab_content(self):
             InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
 
         label = Gtk.Label.new("Instance Extensions (%d)" %len(vulkan_device_instance_lhs))
+        label.set_selectable(True)
 #        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
      #   row.set_header(label)
 
@@ -1362,6 +1364,7 @@ def create_vulkan_tab_content(self):
 
     # Create the label for the devices
     label = Gtk.Label.new("Available Device(s) :")
+    label.set_selectable(True)
     h_box.append(label)
 
     # Create a list with some dummy device names
@@ -1678,6 +1681,7 @@ def create_vulkan_tab_content(self):
     for tab_name in tabs:
         row = Gtk.ListBoxRow()
         label = Gtk.Label.new(tab_name)
+        label.set_selectable(True)
         # Add padding to the label inside the row
         label.set_margin_top(10)
         label.set_margin_bottom(10)

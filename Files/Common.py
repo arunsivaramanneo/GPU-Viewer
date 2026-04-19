@@ -559,6 +559,7 @@ def add_tree_node(item):
 def setup_expander(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
+    label.set_selectable(True)
     expander = Gtk.TreeExpander.new()
  #   expander.props.indent_for_icon = True
  #   expander.props.indent_for_depth = True
@@ -569,6 +570,7 @@ def setup_expander(widget, item):
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
+    label.set_selectable(True)
     label.props.xalign = 0.0
     label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)
