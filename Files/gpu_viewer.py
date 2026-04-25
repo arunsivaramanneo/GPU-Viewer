@@ -27,12 +27,14 @@ os.chdir(script_dir)
 import gi
 import subprocess
 import shutil
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # This line is crucial for working with PyGObject.
 # It ensures we are using the correct versions of the libraries.
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GObject,Gdk, Gio
+from gi.repository import Gtk, Adw, GObject, Gdk, Gio, GLib
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
 from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand,setMargin,Config
@@ -47,8 +49,14 @@ from pathlib import Path
 # It inherits from Adw.Application, which provides a modern application shell.
 
 def isVulkanSupported():
-    with open(Filenames.vulkaninfo_output_file,"w") as file:
-        vulkan_process = subprocess.Popen(Filenames.vulkaninfo_output_command,shell=True,stdout= file,universal_newlines=True)
+    # Runs inside ThreadPoolExecutor (parallel with glxinfo/clinfo/vdpauinfo),
+    # so --show-formats completes fully before _build_tabs_on_main_thread is
+    # called — no race condition against create_vulkan_tab_content().
+    with open(Filenames.vulkaninfo_output_file, "w") as file:
+        vulkan_process = subprocess.Popen(
+            Filenames.vulkaninfo_output_command,
+            shell=True, stdout=file, universal_newlines=True
+        )
         vulkan_process.wait()
         vulkan_process.communicate()
     vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
@@ -56,15 +64,23 @@ def isVulkanSupported():
 
 def isOpenglSupported():
     with open(Filenames.opengl_outpuf_file, "w") as file:
-        opengl_process = subprocess.Popen(Filenames.opengl_output_command,shell=True,stdout= file,universal_newlines=True)
+        opengl_process = subprocess.Popen(
+            Filenames.opengl_output_command,
+            shell=True, stdout=file, universal_newlines=True
+        )
         opengl_process.wait()
         opengl_process.communicate()
     opengl_output = copyContentsFromFile(Filenames.opengl_outpuf_file)
     return len(opengl_output) > 10 and opengl_process.returncode == 0
 
 def isOpenclSupported():
+    # Fix #3 (part 1): Write clinfo output to the shared file so OpenCL.py
+    # can reuse it without spawning a second clinfo process.
     with open(Filenames.opencl_output_file, "w") as file:
-        clinfo_process = subprocess.Popen(Filenames.clinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+        clinfo_process = subprocess.Popen(
+            "clinfo",
+            shell=True, stdout=file, universal_newlines=True
+        )
         clinfo_process.wait()
         clinfo_process.communicate()
     clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
@@ -72,14 +88,24 @@ def isOpenclSupported():
 
 def isVdpauinfoSupported():
     with open(Filenames.vdpauinfo_output_file, "w") as file:
-        vdpauinfo_process = subprocess.Popen(Filenames.vdpauinfo_output_command,shell=True,stdout= file,universal_newlines=True)
+        vdpauinfo_process = subprocess.Popen(
+            Filenames.vdpauinfo_output_command,
+            shell=True, stdout=file, universal_newlines=True
+        )
         vdpauinfo_process.wait()
         vdpauinfo_process.communicate()
     vdpauinfo_output = copyContentsFromFile(Filenames.vdpauinfo_output_file)
     return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
 
 def isVulkanVideoSupported():
-    return  len(fetchContentsFromCommand("vulkaninfo | grep 'Video Profiles'")) > 0
+    # Fix #1 & #6: Grep the file already written by isVulkanSupported() —
+    # no need to spawn a second vulkaninfo process.
+    try:
+        return len(fetchContentsFromCommand(
+            f"grep 'Video Profiles' {Filenames.vulkaninfo_output_file}"
+        )) > 0
+    except Exception:
+        return False
 
 def quit(instance):
     unset_lc_all_process = subprocess.Popen(Filenames.unset_LC_ALL_conmand,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
@@ -395,53 +421,112 @@ else:
 
             # Set the main box as the content of the window
             self.window.set_content(main_box)
+            self.window.connect("close-request", quit)
 
-            self.create_tabs()
-            self.window.connect("close-request",quit)
-            
+            # Fix #4: Show the window immediately so the user sees it right
+            # away, then kick off tab-building asynchronously.
             self.show_window()
+            GLib.idle_add(self._start_loading_tabs)
 
         def refresh_tabs(self):
             """Clears and re-creates all tabs in the view stack."""
+            # Remove all current children
             child = self.view_stack.get_first_child()
             while child:
                 next_child = child.get_next_sibling()
                 self.view_stack.remove(child)
                 child = next_child
-            self.create_tabs()
+            # Re-show spinner and re-trigger async load
+            self._start_loading_tabs()
 
-        def create_tabs(self):
-            """Creates and adds all tabs to the view stack."""
-            mkdir_process = subprocess.Popen(Filenames.mkdir_output_command,stdout=subprocess.PIPE,shell=True)
-            mkdir_process.communicate()
+        def _start_loading_tabs(self):
+            """Show a loading spinner immediately, then build tabs in a background thread."""
+            # Show a spinner page so the user sees *something* right away
+            self._loading_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+            self._loading_box.set_valign(Gtk.Align.CENTER)
+            self._loading_box.set_halign(Gtk.Align.CENTER)
+            self._loading_box.set_vexpand(True)
 
-            if isVulkanSupported():
+            spinner = Gtk.Spinner()
+            spinner.set_size_request(48, 48)
+            spinner.start()
+
+            loading_label = Gtk.Label(label="Loading GPU information…")
+            loading_label.add_css_class("dim-label")
+
+            self._loading_box.append(spinner)
+            self._loading_box.append(loading_label)
+            self.view_stack.add_titled_with_icon(self._loading_box, "loading", "Loading", "system-run-symbolic")
+
+            # Ensure the /tmp/gpu-viewer directory exists before threads start
+            subprocess.Popen(Filenames.mkdir_output_command, stdout=subprocess.PIPE, shell=True).communicate()
+
+            # Fix #2: Run all support checks in parallel, then build UI on main thread
+            thread = threading.Thread(target=self._probe_and_build_tabs, daemon=True)
+            thread.start()
+            return False  # Do not repeat GLib.idle_add
+
+        def _probe_and_build_tabs(self):
+            """Run support checks in parallel (background thread), then schedule UI build."""
+            # Fix #2: parallel support checks via ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = {
+                    executor.submit(isVulkanSupported):   "vulkan",
+                    executor.submit(isOpenglSupported):   "opengl",
+                    executor.submit(isOpenclSupported):   "opencl",
+                    executor.submit(isVdpauinfoSupported): "vdpau",
+                }
+                results = {}
+                for future in as_completed(futures):
+                    key = futures[future]
+                    try:
+                        results[key] = future.result()
+                    except Exception as e:
+                        print(f"Support check failed for {key}: {e}")
+                        results[key] = False
+
+            # Fix #1 & #6: vulkan-video check reuses the file written by isVulkanSupported
+            results["vulkan_video"] = isVulkanVideoSupported() if results.get("vulkan") else False
+
+            # Schedule the actual GTK widget construction back on the main thread
+            GLib.idle_add(self._build_tabs_on_main_thread, results)
+
+        def _build_tabs_on_main_thread(self, results):
+            """Called on the GLib main thread — safe to create/modify GTK widgets."""
+            # Remove the loading spinner page
+            if hasattr(self, '_loading_box') and self._loading_box:
+                self.view_stack.remove(self._loading_box)
+                self._loading_box = None
+
+            if results.get("vulkan"):
                 vulkan_box = create_vulkan_tab_content(self)
                 self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
 
-            page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-            if isOpenglSupported():
+            if results.get("opengl"):
+                page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                 opengl_box = OpenGL(self, page2_box)
                 self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
 
-            opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-            if isOpenclSupported():
+            if results.get("opencl"):
+                opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                 opencl_content = openCL(self, opencl_box)
-                self.view_stack.add_titled_with_icon(opencl_content,"opencl_page","OpenCL","OpenCL")
+                self.view_stack.add_titled_with_icon(opencl_content, "opencl_page", "OpenCL", "OpenCL")
 
-            vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-            if isVulkanVideoSupported():
+            if results.get("vulkan_video"):
+                vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                 vulkan_video_content = VulkanVideo(vulkan_video_box)
-                self.view_stack.add_titled_with_icon(vulkan_video_content,"vulkan_video_page","Vulkan Video","Vulkan-Video")
+                self.view_stack.add_titled_with_icon(vulkan_video_content, "vulkan_video_page", "Vulkan Video", "Vulkan-Video")
 
-            vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-            if isVdpauinfoSupported():
+            if results.get("vdpau"):
+                vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                 vdpau_content = vdpauinfo(vdpau_box)
-                self.view_stack.add_titled_with_icon(vdpau_content,"vdpau_page","VDPAU","vdpauinfo")
+                self.view_stack.add_titled_with_icon(vdpau_content, "vdpau_page", "VDPAU", "vdpauinfo")
 
             page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             self.about_page_ui = about_page(page3_box)
             self.view_stack.add_titled_with_icon(page3_box, "page3", "About Us", "about-us")
+
+            return False  # Do not repeat GLib.idle_add
 
         def show_window(self):
             # Show the window and all its children

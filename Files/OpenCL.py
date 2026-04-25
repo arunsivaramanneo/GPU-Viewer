@@ -36,13 +36,24 @@ class ClinfoParser:
         self.fetch_data()
 
     def fetch_data(self):
+        # Fix #3: Re-use the clinfo output file already written by
+        # isOpenclSupported() in gpu_viewer.py — avoids a redundant
+        # clinfo subprocess on every startup.
         try:
-            # Run clinfo and capture output
-            output = subprocess.check_output(["clinfo"], universal_newlines=True)
+            with open(Filenames.opencl_output_file, "r") as f:
+                output = f.read()
+            if not output.strip():
+                raise ValueError("clinfo output file is empty")
             self.platforms = self.parse(output)
         except Exception as e:
-            print(f"Error running clinfo: {e}")
-            self.platforms = []
+            print(f"Error reading clinfo output: {e}")
+            # Fallback: run clinfo directly if the file is missing/empty
+            try:
+                output = subprocess.check_output(["clinfo"], universal_newlines=True)
+                self.platforms = self.parse(output)
+            except Exception as e2:
+                print(f"Error running clinfo fallback: {e2}")
+                self.platforms = []
 
     def parse(self, output):
         platforms = []
