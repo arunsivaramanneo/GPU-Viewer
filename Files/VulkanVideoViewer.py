@@ -18,7 +18,7 @@ import gi
 gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
-from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw
+from gi.repository import Gtk,GdkPixbuf,GObject,Gio,Adw,GLib
 from Common import ExpandDataObject, setup_expander,bind_expander,setup,bind1,add_tree_node, ExpandDataObject2,add_tree_node2,bind2,bind3,bind4,fetchContentsFromCommand
 from itertools import islice
 
@@ -33,10 +33,33 @@ def VulkanVideo(videoTab):
 
 
 
+    tab_spinners = {}
+    tab_content_containers = {}
+    tabs_loading_count = {"count": 0}
+
+    def hide_spinner_for_tab(tab_name):
+        if tab_name in tab_spinners and tab_name in tab_content_containers:
+            def update_ui():
+                spinner = tab_spinners[tab_name]
+                content_box, spinner_box = tab_content_containers[tab_name]
+                spinner.set_spinning(False)
+                spinner_box.set_visible(False)
+                content_box.set_visible(True)
+                tabs_loading_count["count"] -= 1
+                return False
+            GLib.idle_add(update_ui)
+
     def vProfiles(gpu):
+        from concurrent.futures import ThreadPoolExecutor
+        def run_cmd(cmd):
+            return fetchContentsFromCommand(cmd)
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            f1 = pool.submit(run_cmd, r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}/Display.*/{flag=0}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
+            f2 = pool.submit(run_cmd, r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
         
-        vulkanVideoProfiles = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}/Display.*/{flag=0}flag' | awk /./ | awk '!/===/' "%(gpu,gpu+1))
-        vulkanVideoProfilesUniq = fetchContentsFromCommand(r"vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk /./ | awk '!/===/' | awk '{gsub(/\(.*/, 'True');print}' | uniq "%(gpu,gpu+1))
+        vulkanVideoProfiles = f1.result()
+        vulkanVideoProfilesUniq = f2.result()
         
         vulkanVideoProfilesCount = []
         for i in range(len(vulkanVideoProfilesUniq)):
@@ -46,221 +69,300 @@ def VulkanVideo(videoTab):
                     count = count + 1
             vulkanVideoProfilesCount.append(count)
 
-        vkVideoProfilesTab_Store.remove_all()
         vulkanVideoProfilesUniq.append("")
 
-        j = 0; k = 0 ; group = None
-        for line in vulkanVideoProfiles:
-            if 'Video Profiles' in line:
-                toprow = ExpandDataObject(line.replace('count =',''),"")
-                continue
-            if vulkanVideoProfilesUniq[j] in line and j <= len(vulkanVideoProfilesUniq) - 2:
-                iter = ExpandDataObject(vulkanVideoProfilesUniq[j].replace("placeholder =","")+": %d" %vulkanVideoProfilesCount[j],"")
-                toprow.children.append(iter)
-                iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
-                iter.children.append(iter2)
-                j = j + 1
-            else:
-                if vulkanVideoProfilesUniq[j] in line:
-                    iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
-                    iter.children.append(iter2)
+        def update_ui():
+            vkVideoProfilesTab_Store.remove_all()
+            j = 0; k = 0 ; group = None
+            toprow = None
+            for line in vulkanVideoProfiles:
+                if 'Video Profiles' in line:
+                    toprow = ExpandDataObject(line.replace('count =',''),"")
                     continue
+                if not toprow:
+                    continue
+                if vulkanVideoProfilesUniq[j] in line and j <= len(vulkanVideoProfilesUniq) - 2:
+                    iter1 = ExpandDataObject(vulkanVideoProfilesUniq[j].replace("placeholder =","")+": %d" %vulkanVideoProfilesCount[j],"")
+                    toprow.children.append(iter1)
+                    iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
+                    iter1.children.append(iter2)
+                    j = j + 1
                 else:
                     iter2 = ExpandDataObject(line.replace("placeholder =",""),"")
-                    iter.children.append(iter2)
-                #    iter.children.append(iter2)
+                    # Try to append to the last iter1, or toprow if not exists
+                    if len(toprow.children) > 0:
+                        toprow.children[-1].children.append(iter2)
+                    else:
+                        toprow.children.append(iter2)
                     continue
 
-
-        vkVideoProfilesTab_Store.append(toprow)
+            if toprow:
+                vkVideoProfilesTab_Store.append(toprow)
+            hide_spinner_for_tab("Video Profiles")
+            return False
+        GLib.idle_add(update_ui)
 
     def vDefinitions(gpu):
+        from concurrent.futures import ThreadPoolExecutor
+        def run_cmd(cmd):
+            return fetchContentsFromCommand(cmd)
 
-        vulkanVideoProfileDefinition = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
-        vulkanVideoProfileDefinitionLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
-        vulkanVideoProfileDefinitionRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            f1 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
+            f2 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')}1' "%(gpu,gpu+1))
+            f3 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Definition/{flag=1}/Video Profile Capabilities/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+            f4 = pool.submit(run_cmd, "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
 
-        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
+        vulkanVideoProfileDefinition = f1.result()
+        vulkanVideoProfileDefinitionLHS = f2.result()
+        vulkanVideoProfileDefinitionRHS = f3.result()
+        vulkanVideoProfiles = f4.result()
         vulkanVideoProfiles.append("")
 
-        vkVideoProfileDefinitionTab_Store.remove_all()
-        group = None
-        j = 0;i =0 ;k = 0
-        for line in vulkanVideoProfileDefinition:
-            if '=' in line and "Video Profile Definition" not in line:
-                rhs = vulkanVideoProfileDefinitionRHS[k].replace('count =','')
-                k = k + 1
-            else:
-                rhs = ""
-            if "Video Profile Definition" in line:
-                if group == None:
-                    iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+        def update_ui():
+            vkVideoProfileDefinitionTab_Store.remove_all(); print("update_ui running for Profile Definition"); print("LENGTH:", len(vulkanVideoProfileDefinition))
+            group = None
+            j = 0;i =0 ;k = 0
+            iter1 = None
+            for line in vulkanVideoProfileDefinition:
+                if '=' in line and "Video Profile Definition" not in line:
+                    rhs = vulkanVideoProfileDefinitionRHS[k].replace('count =','') if k < len(vulkanVideoProfileDefinitionRHS) else ""
+                    k = k + 1
                 else:
-                    vkVideoProfileDefinitionTab_Store.append(iter1)
-                    iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
-                j = j + 1
-                i = i + 1
-                group = line
-                continue
-            elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
-                iter1.children.append(iter2)
-                i = i + 1
-                continue
-            elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
-                iter2.children.append(iter3)
-                i = i + 1
-                continue
-            elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
-                iter3.children.append(iter4)
-                i = i + 1
-                continue            
-            elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
-                iter4.children.append(iter5)
-                i = i + 1
-                continue    
-            else:
-                iter6 = ExpandDataObject(vulkanVideoProfileDefinitionLHS[i].strip("\t"),rhs)
-                iter5.children.append(iter6)
-                i = i + 1
-    #        #   continue
-            
+                    rhs = ""
+                if "Video Profile Definition" in line:
+                    if group == None:
+                        if j < len(vulkanVideoProfiles):
+                            iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+                    else:
+                        if iter1:
+                            vkVideoProfileDefinitionTab_Store.append(iter1); print("Appended iter1 to Profile Definition Store")
+                        if j < len(vulkanVideoProfiles):
+                            iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+                    j = j + 1
+                    i = i + 1
+                    group = line
+                    continue
                 
-        vkVideoProfileDefinitionTab_Store.append(iter1)
-
+                if not iter1 or i >= len(vulkanVideoProfileDefinitionLHS):
+                    continue
+                    
+                lhs_val = vulkanVideoProfileDefinitionLHS[i].strip("\t")
+                if "\t" in line and "\t\t" not in line:
+                    iter2 = ExpandDataObject(lhs_val,rhs)
+                    iter1.children.append(iter2)
+                    i = i + 1
+                    continue
+                elif "\t\t" in line and "\t\t\t" not in line:
+                    iter3 = ExpandDataObject(lhs_val,rhs)
+                    iter2.children.append(iter3)
+                    i = i + 1
+                    continue
+                elif "\t\t\t" in line and "\t\t\t\t" not in line:
+                    iter4 = ExpandDataObject(lhs_val,rhs)
+                    iter3.children.append(iter4)
+                    i = i + 1
+                    continue            
+                elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                    iter5 = ExpandDataObject(lhs_val,rhs)
+                    iter4.children.append(iter5)
+                    i = i + 1
+                    continue    
+                else:
+                    iter6 = ExpandDataObject(lhs_val,rhs)
+                    iter5.children.append(iter6)
+                    i = i + 1
+                    
+            if iter1:
+                vkVideoProfileDefinitionTab_Store.append(iter1); print("Appended iter1 to Profile Definition Store")
+            hide_spinner_for_tab("Profile Definition")
+            return False
+        GLib.idle_add(update_ui)
     def vCapabitlies(gpu):
+        from concurrent.futures import ThreadPoolExecutor
+        def run_cmd(cmd):
+            return fetchContentsFromCommand(cmd)
 
-        vulkanVideoCapabilities = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
-        vulkanVideoCapabilitiesLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
-        vulkanVideoCapabilitiesRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            f1 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' "%(gpu,gpu+1))
+            f2 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')}1' "%(gpu,gpu+1))
+            f3 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Profile Capabilities/{flag=1}/Video Formats/{flag=0}flag'| awk /./ | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+            f4 = pool.submit(run_cmd, "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
 
-        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
+        vulkanVideoCapabilities = f1.result()
+        vulkanVideoCapabilitiesLHS = f2.result()
+        vulkanVideoCapabilitiesRHS = f3.result()
+        vulkanVideoProfiles = f4.result()
         vulkanVideoProfiles.append("")
 
-        vkVideoCapabilitiesTab_Store.remove_all()
-        toprow = []; group = None
-        j = 0;i = 0 ; k = 0
-        for line in vulkanVideoCapabilities:
-            if '=' in line:
-                rhs = vulkanVideoCapabilitiesRHS[k].replace('count =','')
-                k = k + 1
-            else:
-                rhs = ""
-            if "Video Profile Capabilities" in line:
-                if group == None:
-                    iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+        def update_ui():
+            vkVideoCapabilitiesTab_Store.remove_all()
+            group = None
+            j = 0;i = 0 ; k = 0
+            iter1 = None
+            for line in vulkanVideoCapabilities:
+                if '=' in line:
+                    rhs = vulkanVideoCapabilitiesRHS[k].replace('count =','') if k < len(vulkanVideoCapabilitiesRHS) else ""
+                    k = k + 1
                 else:
-                    vkVideoCapabilitiesTab_Store.append(iter1)
-                    iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
-                j = j + 1
-                i = i + 1
-                group = line
-                continue
-            elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
-                iter1.children.append(iter2)
-                i = i + 1
-                continue
-            elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
-                iter2.children.append(iter3)
-                i = i + 1
-                continue
-            elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
-                iter3.children.append(iter4)
-                i = i + 1
-                continue            
-            elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
-                iter4.children.append(iter5)
-                i = i + 1
-                continue    
-            else:
-                iter6 = ExpandDataObject(vulkanVideoCapabilitiesLHS[i].strip("\t"),rhs)
-                iter5.children.append(iter6)
-                i = i + 1
-    #        #    continue
+                    rhs = ""
+                if "Video Profile Capabilities" in line:
+                    if group == None:
+                        if j < len(vulkanVideoProfiles):
+                            iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+                    else:
+                        if iter1:
+                            vkVideoCapabilitiesTab_Store.append(iter1)
+                        if j < len(vulkanVideoProfiles):
+                            iter1 = ExpandDataObject((vulkanVideoProfiles[j]).replace("placeholder =",""),"")
+                    j = j + 1
+                    i = i + 1
+                    group = line
+                    continue
                 
-        vkVideoCapabilitiesTab_Store.append(iter1)
-
+                if not iter1 or i >= len(vulkanVideoCapabilitiesLHS):
+                    continue
+                    
+                lhs_val = vulkanVideoCapabilitiesLHS[i].strip("\t")
+                if "\t" in line and "\t\t" not in line:
+                    iter2 = ExpandDataObject(lhs_val,rhs)
+                    iter1.children.append(iter2)
+                    i = i + 1
+                    continue
+                elif "\t\t" in line and "\t\t\t" not in line:
+                    iter3 = ExpandDataObject(lhs_val,rhs)
+                    iter2.children.append(iter3)
+                    i = i + 1
+                    continue
+                elif "\t\t\t" in line and "\t\t\t\t" not in line:
+                    iter4 = ExpandDataObject(lhs_val,rhs)
+                    iter3.children.append(iter4)
+                    i = i + 1
+                    continue            
+                elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                    iter5 = ExpandDataObject(lhs_val,rhs)
+                    iter4.children.append(iter5)
+                    i = i + 1
+                    continue    
+                else:
+                    iter6 = ExpandDataObject(lhs_val,rhs)
+                    iter5.children.append(iter6)
+                    i = i + 1
+                    
+            if iter1:
+                vkVideoCapabilitiesTab_Store.append(iter1)
+            hide_spinner_for_tab("Video Capabilities")
+            return False
+        GLib.idle_add(update_ui)
     def vFormats(gpu):
+        from concurrent.futures import ThreadPoolExecutor
+        def run_cmd(cmd):
+            return fetchContentsFromCommand(cmd)
 
-        vulkanVideoFormats = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' "%(gpu,gpu+1))
-        vulkanVideoFormatsLHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')l}1' "%(gpu,gpu+1))
-        vulkanVideoFormatsRHS = fetchContentsFromCommand("vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            f1 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' "%(gpu,gpu+1))
+            f2 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | awk '{gsub(/[=,:].*/,'True')}1' "%(gpu,gpu+1))
+            f3 = pool.submit(run_cmd, "vulkaninfo --show-video-props | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;next}flag' | awk '/Video Formats:/{flag=1}/Display.*/{flag=0}flag'| awk '/./' | awk '!/---|===/' | grep -o [=].* | grep -o ' .*' "%(gpu,gpu+1))
+            f4 = pool.submit(run_cmd, "vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
 
-        vulkanVideoProfiles = fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Video Profiles/{flag=1;}flag' | awk /./ | awk '!/===/' | grep placeholder "%(gpu,gpu+1))
+        vulkanVideoFormats = f1.result()
+        vulkanVideoFormatsLHS = f2.result()
+        vulkanVideoFormatsRHS = f3.result()
+        vulkanVideoProfiles = f4.result()
         vulkanVideoProfiles.append("")
 
-        vkVideoFormatsTab_Store.remove_all()
-        toprow = []; group = None
-        j = 1;i = 0; k = 0;
-        toprow = ExpandDataObject(vulkanVideoProfiles[0].replace("placeholder = ",""),"")
-        for line in vulkanVideoFormats:
-            if '=' in line:
-                rhs = vulkanVideoFormatsRHS[k].replace('count =','')
-                k = k + 1
-            else:
-                rhs = ""
-            if  line.strip(":") in vulkanVideoProfiles[j].replace("placeholder = ",""):
-                if group == None:
-                    vkVideoFormatsTab_Store.append(toprow)
-                    toprow = ExpandDataObject(vulkanVideoProfiles[j].replace("placeholder = ",""),"")
-                else:
-                    vkVideoFormatsTab_Store.append(toprow)
-                    toprow = ExpandDataObject(vulkanVideoProfiles[j].replace("placeholder = ",""),"")
-                j = j + 1
-                i = i + 1
-                group = line
-                continue
-            elif "Video Formats" in line:
-                iter1 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                toprow.children.append(iter1)
-                i = i + 1
-                continue
-            elif "\t" in line and "\t\t" not in line:
-                iter2 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                iter1.children.append(iter2)
-                i = i + 1
-                continue
-            elif "\t\t" in line and "\t\t\t" not in line:
-                iter3 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                iter2.children.append(iter3)
-                i = i + 1
-                continue
-            elif "\t\t\t" in line and "\t\t\t\t" not in line:
-                iter4 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                iter3.children.append(iter4)
-                i = i + 1
-                continue            
-            elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                iter5 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                iter4.children.append(iter5)
-                i = i + 1
-                continue    
-            else:
-                iter6 = ExpandDataObject(vulkanVideoFormatsLHS[i].strip("\t"),rhs)
-                iter5.children.append(iter6)
-                i = i + 1
-    #        #    continue
+        def update_ui():
+            vkVideoFormatsTab_Store.remove_all()
+            group = None
+            j = 1;i = 0; k = 0;
+            toprow = None
+            if len(vulkanVideoProfiles) > 0:
+                toprow = ExpandDataObject(vulkanVideoProfiles[0].replace("placeholder = ",""),"")
                 
-        vkVideoFormatsTab_Store.append(toprow)
+            for line in vulkanVideoFormats:
+                if '=' in line:
+                    rhs = vulkanVideoFormatsRHS[k].replace('count =','') if k < len(vulkanVideoFormatsRHS) else ""
+                    k = k + 1
+                else:
+                    rhs = ""
+                    
+                if not toprow:
+                    continue
+                    
+                if j < len(vulkanVideoProfiles) and line.strip(":") in vulkanVideoProfiles[j].replace("placeholder = ",""):
+                    vkVideoFormatsTab_Store.append(toprow)
+                    toprow = ExpandDataObject(vulkanVideoProfiles[j].replace("placeholder = ",""),"")
+                    j = j + 1
+                    i = i + 1
+                    group = line
+                    continue
+                    
+                if i >= len(vulkanVideoFormatsLHS):
+                    continue
+                    
+                lhs_val = vulkanVideoFormatsLHS[i].strip("\t")
+                if "Video Formats" in line:
+                    iter1 = ExpandDataObject(lhs_val,rhs)
+                    toprow.children.append(iter1)
+                    i = i + 1
+                    continue
+                elif "\t" in line and "\t\t" not in line:
+                    iter2 = ExpandDataObject(lhs_val,rhs)
+                    iter1.children.append(iter2)
+                    i = i + 1
+                    continue
+                elif "\t\t" in line and "\t\t\t" not in line:
+                    iter3 = ExpandDataObject(lhs_val,rhs)
+                    iter2.children.append(iter3)
+                    i = i + 1
+                    continue
+                elif "\t\t\t" in line and "\t\t\t\t" not in line:
+                    iter4 = ExpandDataObject(lhs_val,rhs)
+                    iter3.children.append(iter4)
+                    i = i + 1
+                    continue            
+                elif "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                    iter5 = ExpandDataObject(lhs_val,rhs)
+                    iter4.children.append(iter5)
+                    i = i + 1
+                    continue    
+                else:
+                    iter6 = ExpandDataObject(lhs_val,rhs)
+                    iter5.children.append(iter6)
+                    i = i + 1
+                    
+            if toprow:
+                vkVideoFormatsTab_Store.append(toprow)
+            hide_spinner_for_tab("Video Formats")
+            return False
+        GLib.idle_add(update_ui)
 
     def on_gpu_dropdown_changed(combo,dummy):
         text = combo.props.selected_item
         for gpu in range(len(gpu_list)):
             if gpu_list[gpu] in text.get_string():
-                vProfiles(gpu)
-                vDefinitions(gpu)
-                vCapabitlies(gpu)
-                vFormats(gpu)
+                tabs_loading_count["count"] = 4
+                for tab in tab_spinners:
+                    tab_spinners[tab].start()
+                    tab_spinners[tab].set_visible(True)
+                    tab_content_containers[tab][1].set_visible(True)
+                    tab_content_containers[tab][0].set_visible(False)
+                    
+                import threading
+                def load_all_bg(selected_gpu):
+                    try:
+                        vProfiles(selected_gpu)
+                        vDefinitions(selected_gpu)
+                        vCapabitlies(selected_gpu)
+                        vFormats(selected_gpu)
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
+                threading.Thread(target=load_all_bg, args=(gpu,), daemon=True).start()
 
                 gpu_image = getGpuImage(gpu_list[gpu])
                 image_renderer.set_pixbuf(gpu_image)
+                break
 
 
 
@@ -345,6 +447,25 @@ def VulkanVideo(videoTab):
 
         # Create a box for the content of this specific tab
         content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+        
+        spinner_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+        spinner_box.set_valign(Gtk.Align.CENTER)
+        spinner_box.set_halign(Gtk.Align.CENTER)
+        spinner_box.set_vexpand(True)
+        spinner = Gtk.Spinner()
+        spinner.set_size_request(36, 36)
+        lbl = Gtk.Label(label=f"Loading {tab_name}…")
+        lbl.add_css_class("dim-label")
+        spinner_box.append(spinner)
+        spinner_box.append(lbl)
+        
+        tab_spinners[tab_name] = spinner
+        tab_content_containers[tab_name] = (content_box, spinner_box)
+        
+        tab_wrapper = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        content_box.set_visible(False)
+        tab_wrapper.append(spinner_box)
+        tab_wrapper.append(content_box)
         
         if tab_name == "Video Profiles":
  # --------------------- Vulkan Video Profiles ---------------------------------------------------------------------
@@ -482,7 +603,7 @@ def VulkanVideo(videoTab):
             vkVideoFormatsScrollbar = create_scrollbar(vkVideoFormatsColumnView)
             content_box.append(vkVideoFormatsScrollbar)
 
-        content_stack.add_titled(content_box, tab_name.replace(" ", "-").lower(), tab_name)
+        content_stack.add_titled(tab_wrapper, tab_name.replace(" ", "-").lower(), tab_name)
 
     gpu_Dropdown.connect("notify::selected-item", on_gpu_dropdown_changed)
 

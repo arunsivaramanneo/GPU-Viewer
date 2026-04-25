@@ -133,42 +133,40 @@ def create_vulkan_tab_content(self):
         fetch_vulkan_instance_version_command = "cat %s | grep Version | grep Instance" %(Filenames.vulkaninfo_output_file)
 
         # ------------------------------------ Writing the Output of all the Commands to a File -----------------------------------------------------------------------------------------------------
-        with open(Filenames.vulkan_device_info_file,"w" ) as file:
-            fetch_vulkan_gpu_info_process = subprocess.Popen(fetch_vulkan_gpu_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_vulkan_gpu_info_process.communicate()
-            fetch_vulkan_gpu_pipeline_process = subprocess.Popen(fetch_vulkan_gpu_pipeline_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_vulkan_gpu_pipeline_process.communicate()
-            fetch_vulkan_instance_version_process = subprocess.Popen(fetch_vulkan_instance_version_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_vulkan_instance_version_process.communicate()
-            fetch_cpu_info_process = subprocess.Popen(fetch_cpu_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_cpu_info_process.communicate()
-            fetch_cpu_core_info_process = subprocess.Popen(fetch_cpu_core_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_cpu_core_info_process.communicate()
-            fetch_mem_info_process = subprocess.Popen(fetch_mem_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_mem_info_process.communicate()
-            fetch_lsb_release_process = subprocess.Popen(fetch_lsb_release_info_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_lsb_release_process.communicate()
+        from concurrent.futures import ThreadPoolExecutor
+        def run_cmd(cmd):
+            try:
+                return subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout
+            except Exception:
+                return ""
 
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            f1 = pool.submit(run_cmd, fetch_vulkan_gpu_info_command)
+            f2 = pool.submit(run_cmd, fetch_vulkan_gpu_pipeline_command)
+            f3 = pool.submit(run_cmd, fetch_vulkan_instance_version_command)
+            f4 = pool.submit(run_cmd, fetch_cpu_info_command)
+            f5 = pool.submit(run_cmd, fetch_cpu_core_info_command)
+            f6 = pool.submit(run_cmd, fetch_mem_info_command)
+            f7 = pool.submit(run_cmd, fetch_lsb_release_info_command)
+
+        with open(Filenames.vulkan_device_info_file,"w" ) as file:
+            file.write(f1.result() + f2.result() + f3.result() + f4.result() + f5.result() + f6.result() + f7.result())
 
         fetch_device_tab_lhs_command = "cat %s |  %s " %(Filenames.vulkan_device_info_file,Filenames.remove_rhs_Command)
 
+        # -------------------------------------- Seperating the LHS and RHS side of the Device Tab ----------------------------------------------------------------------------------------------
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            f_lhs = pool.submit(run_cmd, fetch_device_tab_lhs_command)
+            f_rhs = pool.submit(run_cmd, fetch_device_tab_rhs_command)
+            f_xdg = pool.submit(run_cmd, fetch_XDG_CURRENT_DESKTOP_command)
+            f_kernel = pool.submit(run_cmd, fetch_kernal_version_command)
+            f_win = pool.submit(run_cmd, fetch_windowing_system_command)
 
-        # -------------------------------------- Seperating the LHS side of the Device Tab ----------------------------------------------------------------------------------------------
         with open(Filenames.vulkan_device_info_lhs_file,"w") as file:
-            fetch_device_tab_lhs_process = subprocess.Popen(fetch_device_tab_lhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_device_tab_lhs_process.communicate()
+            file.write(f_lhs.result())
         
-
-        #------------------------------------- Seperating the RHS Side of the Device Tab -------------------------------------------------------------------------------------------------------------------       
         with open(Filenames.vulkan_device_info_rhs_file,"w") as file:
-            fetch_device_tab_rhs_process = subprocess.Popen(fetch_device_tab_rhs_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_device_tab_rhs_process.communicate()
-            fetch_XDG_CURRENT_DESKTOP_process = subprocess.Popen(fetch_XDG_CURRENT_DESKTOP_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_XDG_CURRENT_DESKTOP_process.communicate()
-            fetch_kernal_version_process = subprocess.Popen(fetch_kernal_version_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_kernal_version_process.communicate()
-            fetch_windowing_system_process = subprocess.Popen(fetch_windowing_system_command,stdout=file,universal_newlines=True,shell=True)
-            fetch_windowing_system_process.communicate()
+            file.write(f_rhs.result() + f_xdg.result() + f_kernel.result() + f_win.result())
 
         valueLHS = copyContentsFromFile(Filenames.vulkan_device_info_lhs_file)
         valueLHS.append("Desktop")
@@ -189,85 +187,87 @@ def create_vulkan_tab_content(self):
         valueRHS = [i.strip('\t') for i in valueRHS]
         valueRHS = [i.strip(' ') for i in valueRHS]
 
-        DeviceTab_Store.remove_all()
-    #    TreeDevice.set_model(DeviceTab_Store)
+        def update_ui():
+            DeviceTab_Store.remove_all()
+        #    TreeDevice.set_model(DeviceTab_Store)
 
-        dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
-        toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ")
-        for i in range(len(valueRHS)):
-            if "apiVersion" in valueLHS[i]:
-                if '.' not in valueRHS[i]:
-                    valueRHS[i] = getVulkanVersion(valueRHS[i])
-            if "driverVersion" in valueLHS[i]:
-                if '.' not in valueRHS[i]:
-                    valueRHS[i] = getDriverVersion(valueRHS,i)
-            if "deviceName" in valueLHS[i]:
-                gpu_logo = getLogo(valueRHS[i])
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "driverName" in valueLHS[i]:
-                driver_logo = getLogo(valueRHS[i])
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "Model" in valueLHS[i]:
-                cpu_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(toprow) 
-                toprow = ExpandDataObject3("Processor Details...",dummy_transparent,"")
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "Description" in valueLHS[i]:
-                distro_logo = getLogo(valueRHS[i])
-                DeviceTab_Store.append(toprow) 
-                toprow = ExpandDataObject3("Operating System Details...",dummy_transparent,"")
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),distro_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "Desktop" in valueLHS[i]:
-                desktop_logo = getLogo(valueRHS[i])
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "Windowing" in valueLHS[i]:
-                windowing_system_logo = getLogo(valueRHS[i])
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-                continue
-            if "MemTotal" in valueLHS[i]:
-                DeviceTab_Store.append(toprow) 
-                toprow = ExpandDataObject3("Memory Details...",dummy_transparent," ")
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
-                toprow.children.append(iter1)
-            elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
-                toprow.children.append(iter1)
-            else:
-                iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'))
-                toprow.children.append(iter1)
-        DeviceTab_Store.append(toprow)
+            dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
+            toprow = ExpandDataObject3("Vulkan Details...",dummy_transparent," ")
+            for i in range(len(valueRHS)):
+                if "apiVersion" in valueLHS[i]:
+                    if '.' not in valueRHS[i]:
+                        valueRHS[i] = getVulkanVersion(valueRHS[i])
+                if "driverVersion" in valueLHS[i]:
+                    if '.' not in valueRHS[i]:
+                        valueRHS[i] = getDriverVersion(valueRHS,i)
+                if "deviceName" in valueLHS[i]:
+                    gpu_logo = getLogo(valueRHS[i])
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),gpu_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "driverName" in valueLHS[i]:
+                    driver_logo = getLogo(valueRHS[i])
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),driver_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "Model" in valueLHS[i]:
+                    cpu_logo = getLogo(valueRHS[i])
+                    DeviceTab_Store.append(toprow) 
+                    toprow = ExpandDataObject3("Processor Details...",dummy_transparent,"")
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),cpu_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "Description" in valueLHS[i]:
+                    distro_logo = getLogo(valueRHS[i])
+                    DeviceTab_Store.append(toprow) 
+                    toprow = ExpandDataObject3("Operating System Details...",dummy_transparent,"")
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),distro_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "Desktop" in valueLHS[i]:
+                    desktop_logo = getLogo(valueRHS[i])
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),desktop_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "Windowing" in valueLHS[i]:
+                    windowing_system_logo = getLogo(valueRHS[i])
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),windowing_system_logo, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+                    continue
+                if "MemTotal" in valueLHS[i]:
+                    DeviceTab_Store.append(toprow) 
+                    toprow = ExpandDataObject3("Memory Details...",dummy_transparent," ")
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
+                    toprow.children.append(iter1)
+                elif "Mem" in valueLHS[i] or "Swap" in valueLHS[i] :
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, getRamInGb(valueRHS[i]))
+                    toprow.children.append(iter1)
+                else:
+                    iter1 = ExpandDataObject3(valueLHS[i].strip('\n'),dummy_transparent, valueRHS[i].strip('\n'))
+                    toprow.children.append(iter1)
+            DeviceTab_Store.append(toprow)
 
-        fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
-        #fetch_device_properties_command = "vulkaninfo --show-promoted-structs | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(GPUname)
+            fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
+            #fetch_device_properties_command = "vulkaninfo --show-promoted-structs | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(GPUname)
 
-    #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
-        createMainFile(Filenames.vulkan_device_properties_file,fetch_device_properties_command)
-        
-    #    propertiesList = Gtk.StringList()
-    #    propertiesDropdown.set_model(propertiesList)
-        propertiesList.remove_all()
-        propertiesList.append(DataObject("Show All Device Properties",""))
-        with open(Filenames.vulkan_device_properties_file, "r") as file1:
-            for i, line in enumerate(file1):
-                if "Vk" in line:
-                    text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
-                    text = text1[:-1]
-                    propertiesList.append(DataObject(text.strip("\n"),""))
-        
-        # Hide spinner and show Properties content
-        hide_spinner_for_tab("Properties")
-                    
+        #    os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' > /tmp/gpu-viewer/VKDDevicesparseinfo1.txt" % GPUname)
+            createMainFile(Filenames.vulkan_device_properties_file,fetch_device_properties_command)
+
+        #    propertiesList = Gtk.StringList()
+        #    propertiesDropdown.set_model(propertiesList)
+            propertiesList.remove_all()
+            propertiesList.append(DataObject("Show All Device Properties",""))
+            with open(Filenames.vulkan_device_properties_file, "r") as file1:
+                for i, line in enumerate(file1):
+                    if "Vk" in line:
+                        text1 = ((line.strip("\t")).replace("VkPhysicalDevice",'')).replace(":","")
+                        text = text1[:-1]
+                        propertiesList.append(DataObject(text.strip("\n"),""))
+
+            # Hide spinner and show Properties content
+            hide_spinner_for_tab("Properties")
+
+        GLib.idle_add(update_ui)
     def selectProperties(dropdown, _pspec):
         selected =dropdown.props.selected_item
         property = ""
@@ -392,60 +392,64 @@ def create_vulkan_tab_content(self):
 
         vulkan_device_limits_rhs = fetchContentsFromCommand(fetch_vulkan_Limits_ouput_rhs_command)
 
-        LimitsTab_Store.remove_all()
-    #    TreeLimits.set_model(LimitsTab_Store_filter)
-   
-    #    v1 = [ExpandDataObject("entrada 01", "other")]
-    #    v2 = [ExpandDataObject("entrada 02","", v1)]
-    #    LimitsTab_Store.append(ExpandDataObject("entrada 03", "else", v2)) 
-        with open(Filenames.vulkan_device_limits_file, "r") as file1:
-            j = 0; iter = None
-            toprow = None
-            for i,line in enumerate(file1):
-                text = vulkan_device_limits_lhs[i].strip('\t')
-                if not (iter == text):
-                    if '=' in line and "\t\t" not in line:
-                        text = vulkan_device_limits_lhs[i].strip('\t')
-                        if iter == None:
-                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
-                            j = j + 1
-                        else:
-                            if toprow:
-                                LimitsTab_Store.append(toprow)
-                            toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
-                            j = j + 1
-                        iter = text
-                        continue
-                #    iter = [ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'),iter2)]
-                #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
-                #    j = j + 1
-                if "\t\t" in line and "=" not in line:
-                 #   iter2 = [ExpandDataObject(text.strip('\n')," ",iter)]
-                    childrow = ExpandDataObject((text.strip('\n')).replace(' count',''), " ")
-                    if toprow:
-                        toprow.children.append(childrow)
-                    continue
-            if toprow:
-                LimitsTab_Store.append(toprow)
-        
-        # Hide spinner and show content
-        hide_spinner_for_tab("Limits")
+        def update_ui():
+            LimitsTab_Store.remove_all()
+        #    TreeLimits.set_model(LimitsTab_Store_filter)
 
+        #    v1 = [ExpandDataObject("entrada 01", "other")]
+        #    v2 = [ExpandDataObject("entrada 02","", v1)]
+        #    LimitsTab_Store.append(ExpandDataObject("entrada 03", "else", v2)) 
+            with open(Filenames.vulkan_device_limits_file, "r") as file1:
+                j = 0; iter = None
+                toprow = None
+                for i,line in enumerate(file1):
+                    text = vulkan_device_limits_lhs[i].strip('\t')
+                    if not (iter == text):
+                        if '=' in line and "\t\t" not in line:
+                            text = vulkan_device_limits_lhs[i].strip('\t')
+                            if iter == None:
+                                toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                                j = j + 1
+                            else:
+                                if toprow:
+                                    LimitsTab_Store.append(toprow)
+                                toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                                j = j + 1
+                            iter = text
+                            continue
+                    #    iter = [ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'),iter2)]
+                    #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n'))
+                    #    j = j + 1
+                    if "\t\t" in line and "=" not in line:
+                     #   iter2 = [ExpandDataObject(text.strip('\n')," ",iter)]
+                        childrow = ExpandDataObject((text.strip('\n')).replace(' count',''), " ")
+                        if toprow:
+                            toprow.children.append(childrow)
+                        continue
+                if toprow:
+                    LimitsTab_Store.append(toprow)
+
+            # Hide spinner and show content
+            hide_spinner_for_tab("Limits")
+
+        GLib.idle_add(update_ui)
     def Features(GPUname):
         fetch_device_features_command = "cat %s | awk '/GPU%d/{flag=1;next}/Format Properties.*/{flag=0}flag' | awk '/VkPhysicalDeviceFeatures:/{flag=1;next}/Format Properties.*/{flag=0}flag' " %(Filenames.vulkaninfo_output_file,GPUname)
 
         createMainFile(Filenames.vulkan_device_features_file,fetch_device_features_command)
-        featureList.remove_all()
-        featureList.append(DataObject("Show All Device Features",""))
-        with open(Filenames.vulkan_device_features_file, "r") as file:
-            for line in file:
-                if "Vk" in line:
-                    text = line[:-2]
-                    featureList.append(DataObject(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")),""))
-        
-        # Hide spinner and show content
-        hide_spinner_for_tab("Features")
+        def update_ui():
+            featureList.remove_all()
+            featureList.append(DataObject("Show All Device Features",""))
+            with open(Filenames.vulkan_device_features_file, "r") as file:
+                for line in file:
+                    if "Vk" in line:
+                        text = line[:-2]
+                        featureList.append(DataObject(((text.strip("\n")).replace("VkPhysicalDevice","").replace(":","")),""))
 
+            # Hide spinner and show content
+            hide_spinner_for_tab("Features")
+
+        GLib.idle_add(update_ui)
     def selectFeature(dropdown, _pspec):
         selected =dropdown.props.selected_item
         feature = ""
@@ -501,19 +505,21 @@ def create_vulkan_tab_content(self):
 
             vulkan_device_extensions_rhs = fetchContentsFromCommand(fetch_device_extensions_rhs_command)
 
-            ExtensionTab_Store.remove_all()
-            extensionColumnView.set_model(extensionSelection)
+            def update_ui():
+                ExtensionTab_Store.remove_all()
+                extensionColumnView.set_model(extensionSelection)
 
-            for i in range(len(vulkan_device_extension_lhs)):
-                ExtensionTab_Store.append(DataObject(vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i]))
+                for i in range(len(vulkan_device_extension_lhs)):
+                    ExtensionTab_Store.append(DataObject(vulkan_device_extension_lhs[i].strip('\t'),vulkan_device_extensions_rhs[i]))
 
-            label = "Device Extensions (%d)" %len(vulkan_device_extensions_rhs)
-            deviceExtensionColumn.set_title(label)
-            
-            # Hide spinner and show content
-            hide_spinner_for_tab("Extensions")
-        #    notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
+                label = "Device Extensions (%d)" %len(vulkan_device_extensions_rhs)
+                deviceExtensionColumn.set_title(label)
 
+                # Hide spinner and show content
+                hide_spinner_for_tab("Extensions")
+            #    notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
+
+            GLib.idle_add(update_ui)
     def Formats(GPUname):
                 # noinspection PyPep8
         fetch_vulkan_device_formats_command = "cat %s |  awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | awk '/Format Properties/{flag=1; next}/Unsupported Formats:*/{flag=0} flag' | awk '/./'" %(Filenames.vulkaninfo_output_file,GPUname,GPUname+1)
@@ -535,15 +541,17 @@ def create_vulkan_tab_content(self):
 
         createMainFile(Filenames.vulkan_device_format_types_buffer_count_file,fetch_vulkan_device_format_type_buffer_count_command)  
 
-        FormatsList.remove_all()
-        FormatsList.append(DataObject("Show All Device Formats",""))
-        with open(Filenames.vulkan_device_formats_types_file,"r") as file:
-            for line in file:
-                FormatsList.append(DataObject(((line.replace("FORMAT_","")).strip("\n")).strip("\t"),""))
-        
-        # Hide spinner and show content
-        hide_spinner_for_tab("Formats")
+        def update_ui():
+            FormatsList.remove_all()
+            FormatsList.append(DataObject("Show All Device Formats",""))
+            with open(Filenames.vulkan_device_formats_types_file,"r") as file:
+                for line in file:
+                    FormatsList.append(DataObject(((line.replace("FORMAT_","")).strip("\n")).strip("\t"),""))
 
+            # Hide spinner and show content
+            hide_spinner_for_tab("Formats")
+
+        GLib.idle_add(update_ui)
     def selectFormats(dropdown,_pspec):
         selected =dropdown.props.selected_item
         selected_Format = ""
@@ -775,141 +783,143 @@ def create_vulkan_tab_content(self):
 
         propertyFlag = ["DEVICE_LOCAL","HOST_VISIBLE_BIT","HOST_COHERENT_BIT","HOST_CACHED_BIT","LAZILY_ALLOCATED_BIT","PROTECTED_BIT","DEVICE_COHERENT_BIT_AMD","DEVICE_UNCACHED_BIT_AMD","RDMA_CAPABLE_BIT_NV"]
 
-        MemoryTab_Store.remove_all()
-    #    TreeMemory.set_model(MemoryTab_Store)
-        groupName = None
-        toprow = None
-        for i in range(len(vulkan_memory_types_lhs)):
-            if not (vulkan_memory_types_lhs[i] == groupName):
-                if "memoryTypes" in vulkan_memory_types_lhs[i]:
-                    if groupName == None:
-                        toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
-                    else:
-                        MemoryTab_Store.append(toprow)
-                #   iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
-                        toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
-                #    MemoryTab_Store.append(iter)
-                #    groupName = vulkan_memory_types_lhs[i]
-                    continue
-                if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
-                #    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
-                    iter2 = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i])
-                    if toprow:
-                        toprow.children.append(iter2)
-                #    MemoryTab_Store.append(iter)
-                #    groupName = vulkan_memory_types_lhs[i]
-                    continue
-                if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
-                #    iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
-                    iter3 = ExpandDataObject((((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_","")),mRhs[i])
-                    if 'iter2' in locals() and iter2:
-                         iter2.children.append(iter3)
-                #    print(vulkan_memory_types_lhs[i])
-                #    iter.children.append(iter2)
-                    groupName = vulkan_memory_types_lhs[i]
-                    continue
-                else:
-                #    MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
-                    iter4 = ExpandDataObject(((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",)
-                    if 'iter3' in locals() and iter3:
-                         iter3.children.append(iter4)
-        if toprow:
-            MemoryTab_Store.append(toprow)
-
-        #----------------------------------------------------- Memory Heaps ----------------------------------------------------------------------------------------------------------------------------------------
-
-        fetch_vulkan_device_memory_heaps_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/memoryHeaps:/{flag=1; next}/memoryTypes:/{flag=0} flag' " %(Filenames.vulkaninfo_output_file,GPUname)
-        fetch_vulkan_device_memory_heaps_lhs_command = "cat %s | %s| awk '/./'" %(Filenames.vulkan_device_memory_heaps_file,Filenames.remove_rhs_Command)
-        fetch_vulkan_device_memory_heaps_rhs_command = r"cat %s | grep = | grep -v count| grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' " %(Filenames.vulkan_device_memory_heaps_file)
-
-        createMainFile(Filenames.vulkan_device_memory_heaps_file,fetch_vulkan_device_memory_heaps_command)
-
-        vulkan_memory_heaps_lhs = fetchContentsFromCommand(fetch_vulkan_device_memory_heaps_lhs_command)
-
-        vulkan_memory_heaps_rhs = fetchContentsFromCommand(fetch_vulkan_device_memory_heaps_rhs_command)
-  
-        HeapTab_Store.remove_all()
-    #    TreeHeap.set_model(HeapTab_Store)
-
-        vulkan_memory_heaps_lhs = [i.strip('\t') for i in vulkan_memory_heaps_lhs]
-    
-        j = 0
-        HCount = 0;iter = None
-        toprow = None
-        for i in range(len(vulkan_memory_heaps_lhs)):
-                if not (iter == vulkan_memory_heaps_lhs[i]):
-                    if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
-                        if iter == None:
-                            toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+        def update_ui():
+            MemoryTab_Store.remove_all()
+        #    TreeMemory.set_model(MemoryTab_Store)
+            groupName = None
+            toprow = None
+            for i in range(len(vulkan_memory_types_lhs)):
+                if not (vulkan_memory_types_lhs[i] == groupName):
+                    if "memoryTypes" in vulkan_memory_types_lhs[i]:
+                        if groupName == None:
+                            toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
                         else:
-                            HeapTab_Store.append(toprow)
-                            toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
-                    #    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",const.BGCOLOR3])
-                    #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n')
-                    #    HeapTab_Store.append(toprow)
-                        HCount = HCount + 1
-                        iter = vulkan_memory_heaps_lhs[i]
+                            MemoryTab_Store.append(toprow)
+                    #   iter = MemoryTab_Store.append(None,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",const.BGCOLOR3,const.COLOR3])
+                            toprow = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")," ",)
+                    #    MemoryTab_Store.append(iter)
+                    #    groupName = vulkan_memory_types_lhs[i]
                         continue
-                    if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
-                    #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
-                        # childrow was using childrow but variable name not defined in this scope?
-                        # Wait, childrow is not defined in this block.
-                        # It seems I am looking at lines 777.
-                        # childrow is used?
-                        # childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
-                        # childrow.children.append(childchildrow)
-                        # Where is childrow defined?
-                        # It is NOT defined in this loop efficiently.
-                        # It seems there is another bug: 'childrow' referenced before assignment at 778.
-                        # And 'childrow' assigned at 785 (later).
-                        # I will assume childrow logic is also broken.
-                        # But I will fix toprow as requested.
-                        # And define childrow = None.
-                        
-                        childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
-                        if 'childrow' in locals() and childrow:
-                             childrow.children.append(childchildrow)
-                        else:
-                             # If childrow not defined, append to toprow?
-                             if toprow:
-                                 toprow.children.append(childchildrow)
-
-                    #    toprow.children.append(childrow)
-                    #    HeapTab_Store.append(toprow)
-                        iter = vulkan_memory_heaps_lhs[i]
-                        continue
-                    if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
-                    #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
-                        childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], getDeviceSize(vulkan_memory_heaps_rhs[j]))
+                    if "\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t" not in vulkan_memory_types_lhs[i]:
+                    #    iter2 = MemoryTab_Store.append(iter,[(vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i],background_color,const.COLOR3])
+                        iter2 = ExpandDataObject((vulkan_memory_types_lhs[i].strip('\n')).strip("\t"),mRhs[i])
                         if toprow:
-                            toprow.children.append(childrow)
-                        j = j + 1
-                        iter = vulkan_memory_heaps_lhs[i]
+                            toprow.children.append(iter2)
+                    #    MemoryTab_Store.append(iter)
+                    #    groupName = vulkan_memory_types_lhs[i]
+                        continue
+                    if "\t\t\t" in vulkan_memory_types_lhs[i] and "\t\t\t\t" not in vulkan_memory_types_lhs[i]:
+                    #    iter3 = MemoryTab_Store.append(iter2,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_",""),mRhs[i],background_color,const.COLOR3])
+                        iter3 = ExpandDataObject((((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("MEMORY_PROPERTY_","")),mRhs[i])
+                        if 'iter2' in locals() and iter2:
+                             iter2.children.append(iter3)
+                    #    print(vulkan_memory_types_lhs[i])
+                    #    iter.children.append(iter2)
+                        groupName = vulkan_memory_types_lhs[i]
                         continue
                     else:
-                        if "None" not in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" not in vulkan_memory_heaps_lhs[i]:
-                    #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
-                            childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                    #    MemoryTab_Store.append(iter3,[((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",background_color,const.COLOR3])
+                        iter4 = ExpandDataObject(((vulkan_memory_types_lhs[i].strip('\n')).strip("\t")).replace("FORMAT_","")," ",)
+                        if 'iter3' in locals() and iter3:
+                             iter3.children.append(iter4)
+            if toprow:
+                MemoryTab_Store.append(toprow)
+
+            #----------------------------------------------------- Memory Heaps ----------------------------------------------------------------------------------------------------------------------------------------
+
+            fetch_vulkan_device_memory_heaps_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/memoryHeaps:/{flag=1; next}/memoryTypes:/{flag=0} flag' " %(Filenames.vulkaninfo_output_file,GPUname)
+            fetch_vulkan_device_memory_heaps_lhs_command = "cat %s | %s| awk '/./'" %(Filenames.vulkan_device_memory_heaps_file,Filenames.remove_rhs_Command)
+            fetch_vulkan_device_memory_heaps_rhs_command = r"cat %s | grep = | grep -v count| grep -o  =.* | grep -o ' .*' | awk '{gsub(/\(.*/,'True');print}' " %(Filenames.vulkan_device_memory_heaps_file)
+
+            createMainFile(Filenames.vulkan_device_memory_heaps_file,fetch_vulkan_device_memory_heaps_command)
+
+            vulkan_memory_heaps_lhs = fetchContentsFromCommand(fetch_vulkan_device_memory_heaps_lhs_command)
+
+            vulkan_memory_heaps_rhs = fetchContentsFromCommand(fetch_vulkan_device_memory_heaps_rhs_command)
+
+            HeapTab_Store.remove_all()
+        #    TreeHeap.set_model(HeapTab_Store)
+
+            vulkan_memory_heaps_lhs = [i.strip('\t') for i in vulkan_memory_heaps_lhs]
+
+            j = 0
+            HCount = 0;iter = None
+            toprow = None
+            for i in range(len(vulkan_memory_heaps_lhs)):
+                    if not (iter == vulkan_memory_heaps_lhs[i]):
+                        if "memoryHeaps" in vulkan_memory_heaps_lhs[i]:
+                            if iter == None:
+                                toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+                            else:
+                                HeapTab_Store.append(toprow)
+                                toprow = ExpandDataObject(vulkan_memory_heaps_lhs[i],"")
+                        #    iter = HeapTab_Store.append(None,[vulkan_memory_heaps_lhs[i],"",const.BGCOLOR3])
+                        #    toprow = ExpandDataObject((text.strip('\n')).replace(' count',''), vulkan_device_limits_rhs[j].strip('\n')
+                        #    HeapTab_Store.append(toprow)
+                            HCount = HCount + 1
                             iter = vulkan_memory_heaps_lhs[i]
+                            continue
+                        if "None" in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" in vulkan_memory_heaps_lhs[i] and "memoryHeaps" not in vulkan_memory_heaps_lhs[i]:
+                        #    HeapTab_Store.append(iter2,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                            # childrow was using childrow but variable name not defined in this scope?
+                            # Wait, childrow is not defined in this block.
+                            # It seems I am looking at lines 777.
+                            # childrow is used?
+                            # childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                            # childrow.children.append(childchildrow)
+                            # Where is childrow defined?
+                            # It is NOT defined in this loop efficiently.
+                            # It seems there is another bug: 'childrow' referenced before assignment at 778.
+                            # And 'childrow' assigned at 785 (later).
+                            # I will assume childrow logic is also broken.
+                            # But I will fix toprow as requested.
+                            # And define childrow = None.
+
+                            childchildrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                            if 'childrow' in locals() and childrow:
+                                 childrow.children.append(childchildrow)
+                            else:
+                                 # If childrow not defined, append to toprow?
+                                 if toprow:
+                                     toprow.children.append(childchildrow)
+
+                        #    toprow.children.append(childrow)
+                        #    HeapTab_Store.append(toprow)
+                            iter = vulkan_memory_heaps_lhs[i]
+                            continue
+                        if "size" in vulkan_memory_heaps_lhs[i] or "budget" in vulkan_memory_heaps_lhs[i] or "usage" in vulkan_memory_heaps_lhs[i]:
+                        #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],getDeviceSize(vulkan_memory_heaps_rhs[j]),setBackgroundColor(i)])
+                            childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], getDeviceSize(vulkan_memory_heaps_rhs[j]))
                             if toprow:
                                 toprow.children.append(childrow)
+                            j = j + 1
+                            iter = vulkan_memory_heaps_lhs[i]
+                            continue
+                        else:
+                            if "None" not in vulkan_memory_heaps_lhs[i] or "MEMORY_HEAP" not in vulkan_memory_heaps_lhs[i]:
+                        #    iter2 = HeapTab_Store.append(iter,[vulkan_memory_heaps_lhs[i],"",setBackgroundColor(i)])
+                                childrow = ExpandDataObject(vulkan_memory_heaps_lhs[i], " ")
+                                iter = vulkan_memory_heaps_lhs[i]
+                                if toprow:
+                                    toprow.children.append(childrow)
 
-            #    toprow.children.append(childrow)
-        if toprow:
-            HeapTab_Store.append(toprow)
+                #    toprow.children.append(childrow)
+            if toprow:
+                HeapTab_Store.append(toprow)
 
-    #    TreeHeap.expand_all()
-        labe13 = "Memory Heaps (%d)" %(HCount)
-        heapColumnLhs.set_title(labe13)
-     #   notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
-        label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags))
-        memoryTypesColumnLhs.set_title(label2)
-        
-        # Hide spinners and show content
-        hide_spinner_for_tab("Memory Types")
-        hide_spinner_for_tab("Memory Heaps")
-    #    notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
+        #    TreeHeap.expand_all()
+            labe13 = "Memory Heaps (%d)" %(HCount)
+            heapColumnLhs.set_title(labe13)
+         #   notebook.set_tab_label(MemoryHeapTab,Gtk.Label(label=labe13))
+            label2 = "Memory Types (%d) " %(len(vulkan_memory_types_property_flags))
+            memoryTypesColumnLhs.set_title(label2)
 
+            # Hide spinners and show content
+            hide_spinner_for_tab("Memory Types")
+            hide_spinner_for_tab("Memory Heaps")
+        #    notebook.set_tab_label(MemoryTab,Gtk.Label(label=label2))
+
+        GLib.idle_add(update_ui)
     def Queues(GPUname):
 
         #------------------------------ commands ---------------------------------------------------------------------------------------
@@ -927,70 +937,72 @@ def create_vulkan_tab_content(self):
         
         vulkan_device_queue_counts = fetchContentsFromCommand(fetch_vulkan_device_queue_counts_command)
 
-        QueueTab_Store.remove_all()
-     #   TreeQueue.set_model(QueueTab_Store)
+        def update_ui():
+            QueueTab_Store.remove_all()
+         #   TreeQueue.set_model(QueueTab_Store)
 
-        j = 0
-        qRHS = []
-        with open(Filenames.vulkan_device_queues_file) as file1:
-            for line in file1:
-                if " = " in line:
-                    qRHS.append(vulkan_device_queues_rhs[j])
-                    j = j + 1
-                else:
-                    qRHS.append("")
-        
-        qRHS.pop(0)
-    
-        groupName = None
-        for i in range(len(vulkan_device_queues_lhs)):
-            if not (groupName == vulkan_device_queues_lhs[i]):
-                if "Properties[" in vulkan_device_queues_lhs[i]:
-                    if groupName == None:
-                        toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
+            j = 0
+            qRHS = []
+            with open(Filenames.vulkan_device_queues_file) as file1:
+                for line in file1:
+                    if " = " in line:
+                        qRHS.append(vulkan_device_queues_rhs[j])
+                        j = j + 1
                     else:
-                        QueueTab_Store.append(toprow)
-                        toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
-                #    iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
-                #    k = 0
-                    groupName = vulkan_device_queues_lhs[i]
-                    continue
-                if "---" in vulkan_device_queues_lhs[i]:
-                    continue
-                if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
-                    iter3 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''))
-                    iter2.children.append(iter3)
-                #    iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
-                    continue
-                if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
-                    iter4 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
-                    iter3.children.append(iter4)
-                #    QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-                    continue
-                else :
-                    if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
-                        supportedFlags = qRHS[i].split("|")
-                        iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),"")
-                        toprow.children.append(iter2)
-                    #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
-                        for flags in supportedFlags:
-                            iter2_1 = ExpandDataObject(flags.replace("QUEUE_",""),"")
-                            iter2.children.append(iter2_1)
-                        #    QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
-        
-                    else:
-                        iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
-                        toprow.children.append(iter2)
-                    #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-        QueueTab_Store.append(toprow)           
-    #    TreeQueue.expand_all()
-        label = "Queues (%d)" % len(vulkan_device_queue_counts)
-        queueColumnLhs.set_title(label)
-        
-        # Hide spinner and show content
-        hide_spinner_for_tab("Queues")
-    #    notebook.set_tab_label(QueueTab, Gtk.Label(label=label))
+                        qRHS.append("")
 
+            qRHS.pop(0)
+
+            groupName = None
+            for i in range(len(vulkan_device_queues_lhs)):
+                if not (groupName == vulkan_device_queues_lhs[i]):
+                    if "Properties[" in vulkan_device_queues_lhs[i]:
+                        if groupName == None:
+                            toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
+                        else:
+                            QueueTab_Store.append(toprow)
+                            toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
+                    #    iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
+                    #    k = 0
+                        groupName = vulkan_device_queues_lhs[i]
+                        continue
+                    if "---" in vulkan_device_queues_lhs[i]:
+                        continue
+                    if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
+                        iter3 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''))
+                        iter2.children.append(iter3)
+                    #    iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
+                        continue
+                    if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
+                        iter4 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
+                        iter3.children.append(iter4)
+                    #    QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+                        continue
+                    else :
+                        if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
+                            supportedFlags = qRHS[i].split("|")
+                            iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),"")
+                            toprow.children.append(iter2)
+                        #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
+                            for flags in supportedFlags:
+                                iter2_1 = ExpandDataObject(flags.replace("QUEUE_",""),"")
+                                iter2.children.append(iter2_1)
+                            #    QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
+
+                        else:
+                            iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
+                            toprow.children.append(iter2)
+                        #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+            QueueTab_Store.append(toprow)           
+        #    TreeQueue.expand_all()
+            label = "Queues (%d)" % len(vulkan_device_queue_counts)
+            queueColumnLhs.set_title(label)
+
+            # Hide spinner and show content
+            hide_spinner_for_tab("Queues")
+        #    notebook.set_tab_label(QueueTab, Gtk.Label(label=label))
+
+        GLib.idle_add(update_ui)
     def Instance():
 
         #--------------------------------------------------Commands -----------------------------------------------------------------------------------------
@@ -1005,93 +1017,95 @@ def create_vulkan_tab_content(self):
 
         vulkan_device_instance_rhs = fetchContentsFromCommand(fetch_vulkan_device_instances_rhs_command)
 
-        InstanceTab_Store.remove_all()
+        def update_ui():
+            InstanceTab_Store.remove_all()
 
-        for i in range(len(vulkan_device_instance_lhs)):
-            InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
+            for i in range(len(vulkan_device_instance_lhs)):
+                InstanceTab_Store.append(DataObject(vulkan_device_instance_lhs[i].strip('\t'),vulkan_device_instance_rhs[i]))
 
-        label = Gtk.Label.new("Instance Extensions (%d)" %len(vulkan_device_instance_lhs))
-#        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
-     #   row.set_header(label)
+            label = Gtk.Label.new("Instance Extensions (%d)" %len(vulkan_device_instance_lhs))
+    #        InstanceNotebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
+         #   row.set_header(label)
 
 
 
-        #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
-        fetch_vulkan_device_layers_command = "cat %s  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file)
-        fetch_vulkan_device_layer_names_command = r"cat %s | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} '" %(Filenames.vulkan_device_layers_file)
-        fetch_vulkan_device_layer_vulkan_version_command = "cat %s | grep ^VK | grep -o 'Vulkan.*' | awk '{gsub(/,.*/,'True');print}' | grep -o 'version.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
-        fetch_vulkan_device_layer_version_command = "cat %s | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' "  %(Filenames.vulkan_device_layers_file)
-        fetch_vulkan_device_layer_description_command = r"cat %s | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' " %(Filenames.vulkan_device_layers_file)
-        fetch_vulkan_device_layer_extension_count_command = "cat %s | grep 'Layer Extensions' | grep -o '=.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
+            #-------------------------------------------------------------Layers Commands -----------------------------------------------------------------------------------------------------------------------------------
+            fetch_vulkan_device_layers_command = "cat %s  | awk '/Layers:.*/{flag=1;next}/Presentable Surfaces.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file)
+            fetch_vulkan_device_layer_names_command = r"cat %s | grep _LAYER_ | awk '{gsub(/\(.*/,'True');print} '" %(Filenames.vulkan_device_layers_file)
+            fetch_vulkan_device_layer_vulkan_version_command = "cat %s | grep ^VK | grep -o 'Vulkan.*' | awk '{gsub(/,.*/,'True');print}' | grep -o 'version.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
+            fetch_vulkan_device_layer_version_command = "cat %s | grep ^VK | grep -o 'layer version.*' | awk '{gsub(/:.*/,'True');print}' | grep -o version.* | grep -o ' .*' "  %(Filenames.vulkan_device_layers_file)
+            fetch_vulkan_device_layer_description_command = r"cat %s | grep _LAYER_ | grep -o \(.* | awk '{gsub(/\).*/,'True');print}'| awk '{gsub(/\(/,'True');print}' " %(Filenames.vulkan_device_layers_file)
+            fetch_vulkan_device_layer_extension_count_command = "cat %s | grep 'Layer Extensions' | grep -o '=.*' | grep -o ' .*' " %(Filenames.vulkan_device_layers_file)
 
-        createMainFile(Filenames.vulkan_device_layers_file,fetch_vulkan_device_layers_command,)
-        
-        layer_names = fetchContentsFromCommand(fetch_vulkan_device_layer_names_command)
+            createMainFile(Filenames.vulkan_device_layers_file,fetch_vulkan_device_layers_command,)
 
-        layer_vulkan_version = fetchContentsFromCommand(fetch_vulkan_device_layer_vulkan_version_command)
+            layer_names = fetchContentsFromCommand(fetch_vulkan_device_layer_names_command)
 
-        layer_version = fetchContentsFromCommand(fetch_vulkan_device_layer_version_command)
+            layer_vulkan_version = fetchContentsFromCommand(fetch_vulkan_device_layer_vulkan_version_command)
 
-        layer_descriptions = fetchContentsFromCommand(fetch_vulkan_device_layer_description_command)
+            layer_version = fetchContentsFromCommand(fetch_vulkan_device_layer_version_command)
 
-        layer_extension_counts = fetchContentsFromCommand(fetch_vulkan_device_layer_extension_count_command)
+            layer_descriptions = fetchContentsFromCommand(fetch_vulkan_device_layer_description_command)
 
-        LayerTab_Store.remove_all()
+            layer_extension_counts = fetchContentsFromCommand(fetch_vulkan_device_layer_extension_count_command)
 
-        label = "Instance Extensions (%d)" % (len(vulkan_device_instance_lhs))
-        label2 = "Instance Layers (%d)" %len(layer_names)
-        instanceExtensionColumn.set_title(label)
-        layerColumnLhs.set_title(label2)
-    #    notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
-    #    notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
-        i = 0
-        groupName = None
-        with open(Filenames.vulkan_device_layers_file) as file:
-            for line in file:
-                if '====' in line:
-                    continue
-                if not (groupName == line):
-                    if "VK_LAYER" in line:
-                        if groupName == None:
-                            toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
-                        else:
-                            LayerTab_Store.append(toprow)
-                            toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
-                    #    iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
-                    #    layer_extension_counts[i], layer_descriptions[i],
-                        groupName = line
-                        i = i + 1
+            LayerTab_Store.remove_all()
+
+            label = "Instance Extensions (%d)" % (len(vulkan_device_instance_lhs))
+            label2 = "Instance Layers (%d)" %len(layer_names)
+            instanceExtensionColumn.set_title(label)
+            layerColumnLhs.set_title(label2)
+        #    notebook.set_tab_label(InstanceExtTab, Gtk.Label(label=label))
+        #    notebook.set_tab_label(InstanceLayersTab, Gtk.Label(label=label2))
+            i = 0
+            groupName = None
+            with open(Filenames.vulkan_device_layers_file) as file:
+                for line in file:
+                    if '====' in line:
                         continue
-                    elif "\t" in line and "\t\t" not in line:
-                        iter2 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
-                        toprow.children.append(iter2)
-                    #    continue
-                    #    iter2 = LayerTab_Store.append(iter,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                     #   j = j + 1
-                    elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
-                        iter3 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
-                        iter2.children.append(iter3)
-                     #   continue
-                    #    iter3 = LayerTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    #    j = j + 1
-                    elif "Layer-Device" in line:
-                        iter4 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
-                        iter3.children.append(iter4)
-                    #    continue
-                    #    iter4 = LayerTab_Store.append(iter3,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    #    j = j + 1
-                    else:
-                        iter5 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
-                        iter4.children.append(iter5)
-                    #    continue
-                    #    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
-                    #    j = j + 1
-            LayerTab_Store.append(toprow)
-            
-            # Hide spinners and show content
-            hide_spinner_for_tab("Instance Extensions")
-            hide_spinner_for_tab("Instance Layers")
+                    if not (groupName == line):
+                        if "VK_LAYER" in line:
+                            if groupName == None:
+                                toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
+                            else:
+                                LayerTab_Store.append(toprow)
+                                toprow = ExpandDataObject2(layer_names[i], layer_vulkan_version[i], layer_version[i],layer_extension_counts[i], layer_descriptions[i])
+                        #    iter = LayerTab_Store.append(None,[layer_names[i], layer_vulkan_version[i], layer_version[i],
+                        #    layer_extension_counts[i], layer_descriptions[i],
+                            groupName = line
+                            i = i + 1
+                            continue
+                        elif "\t" in line and "\t\t" not in line:
+                            iter2 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                            toprow.children.append(iter2)
+                        #    continue
+                        #    iter2 = LayerTab_Store.append(iter,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                         #   j = j + 1
+                        elif "\t\t" in line and "\t\t\t" not in line and "Layer-Device" not in line:
+                            iter3 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                            iter2.children.append(iter3)
+                         #   continue
+                        #    iter3 = LayerTab_Store.append(iter2,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                        #    j = j + 1
+                        elif "Layer-Device" in line:
+                            iter4 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                            iter3.children.append(iter4)
+                        #    continue
+                        #    iter4 = LayerTab_Store.append(iter3,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                        #    j = j + 1
+                        else:
+                            iter5 = ExpandDataObject2(((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","")
+                            iter4.children.append(iter5)
+                        #    continue
+                        #    LayerTab_Store.append(iter4,[((line.strip('\n')).strip('\t')).replace('count =',' '),"","","","",setBackgroundColor(j)])
+                        #    j = j + 1
+                LayerTab_Store.append(toprow)
 
+                # Hide spinners and show content
+                hide_spinner_for_tab("Instance Extensions")
+                hide_spinner_for_tab("Instance Layers")
+
+        GLib.idle_add(update_ui)
     def Surface(GPU):
 
         fetch_vulkan_device_surface_command = "cat %s | awk '/Presentable Surfaces:.*/{flag=1}/Device Properties and Extensions.*/{flag=0}flag' | awk '/Presentable Surfaces:.*/{flag=1;next}/Groups.*/{flag=0}flag'  | awk '/GPU id : %d/{flag=1;next}/GPU id.*/{flag=0}flag' | awk '/./'" %(Filenames.vulkaninfo_output_file,GPU)
@@ -1104,58 +1118,60 @@ def create_vulkan_tab_content(self):
         valueLHS = fetchContentsFromCommand(fetch_vulkan_device_surface_lhs_command)
 
         SurfaceRHS = []
-        SurfaceTab_Store.remove_all()
-    #    TreeSurface.set_model(SurfaceTab_Store)
-        groupName = None
-        with open(Filenames.vulkan_device_surface_file, "r") as file1:
-            j=0
-            for i,line in enumerate(file1):
-                if '---' in line:
-                    continue
-                if not (valueLHS[i] == groupName):
-                    if "=" in line:
-                        SurfaceRHS = valueRHS[j].strip('\n')
-                    #    print(SurfaceRHS)
-                        j = j+1
-                    else:
-                        SurfaceRHS = " "
-                    if "\t" in line and "\t\t" not in line:
-                        if groupName == None:
-                            toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+        def update_ui():
+            SurfaceTab_Store.remove_all()
+        #    TreeSurface.set_model(SurfaceTab_Store)
+            groupName = None
+            with open(Filenames.vulkan_device_surface_file, "r") as file1:
+                j=0
+                for i,line in enumerate(file1):
+                    if '---' in line:
+                        continue
+                    if not (valueLHS[i] == groupName):
+                        if "=" in line:
+                            SurfaceRHS = valueRHS[j].strip('\n')
+                        #    print(SurfaceRHS)
+                            j = j+1
                         else:
-                            SurfaceTab_Store.append(toprow)
-                            toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
-                    #    background_color = const.BGCOLOR3
-                    #    iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                        groupName = valueLHS[i]
-                        continue
-                    if "\t\t" in line and "\t\t\t" not in line:
-                        iter2 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
-                        toprow.children.append(iter2)
-                    #    iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                        continue
-                    if "\t\t\t" in line and "\t\t\t\t" not in line:
-                        iter3 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
-                        iter2.children.append(iter3)
-                    #    iter3 = SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-                        continue
-                    if "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
-                        iter4 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
-                        iter3.children.append(iter4)
-                    #    iter4 = SurfaceTab_Store.append(iter3,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color]) 
-                    else:
-                        iter5 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
-                        iter4.children.append(iter5)
-                    #    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
-            SurfaceTab_Store.append(toprow)
-            
-            # Hide spinner and show content
-            hide_spinner_for_tab("Surface")
-        #    TreeSurface.expand_all()
-    
+                            SurfaceRHS = " "
+                        if "\t" in line and "\t\t" not in line:
+                            if groupName == None:
+                                toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                            else:
+                                SurfaceTab_Store.append(toprow)
+                                toprow = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                        #    background_color = const.BGCOLOR3
+                        #    iter1 = SurfaceTab_Store.append(None,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                            groupName = valueLHS[i]
+                            continue
+                        if "\t\t" in line and "\t\t\t" not in line:
+                            iter2 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                            toprow.children.append(iter2)
+                        #    iter2 = SurfaceTab_Store.append(iter1,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                            continue
+                        if "\t\t\t" in line and "\t\t\t\t" not in line:
+                            iter3 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                            iter2.children.append(iter3)
+                        #    iter3 = SurfaceTab_Store.append(iter2,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                            continue
+                        if "\t\t\t\t" in line and "\t\t\t\t\t" not in line:
+                            iter4 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                            iter3.children.append(iter4)
+                        #    iter4 = SurfaceTab_Store.append(iter3,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color]) 
+                        else:
+                            iter5 = ExpandDataObject((valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''))
+                            iter4.children.append(iter5)
+                        #    SurfaceTab_Store.append(iter4,[(valueLHS[i].strip('\n')).strip('\t'),SurfaceRHS.replace('count ',''),background_color])
+                SurfaceTab_Store.append(toprow)
+
+                # Hide spinner and show content
+                hide_spinner_for_tab("Surface")
+            #    TreeSurface.expand_all()
 
 
 
+
+        GLib.idle_add(update_ui)
     def _get_search_entry_widget(dropdown):
         popover = dropdown.get_last_child()
         box = popover.get_child()
@@ -1248,87 +1264,30 @@ def create_vulkan_tab_content(self):
         text = gpu_index_map[idx]
 
         # Reset and show the loading spinner
-        tabs_loading_count["count"] = 8  # Number of tabs being loaded in background
+        tabs_loading_count["count"] = 7  # Omit Formats for lazy loading
         loading_spinner.set_spinning(True)
         loading_spinner_box.set_visible(True)
 
         # Load System Information immediately (Devices tab)
         Devices(text)
 
-        # Load other tabs in the background
+        # Load tabs in the background using ThreadPoolExecutor
         def load_tabs_background():
+            from concurrent.futures import ThreadPoolExecutor
             try:
-                # Each function needs to be called on the main thread via GLib.idle_add
-                def call_limits():
-                    try:
-                        Limits(text)
-                    except Exception as e:
-                        print(f"Error loading Limits: {e}")
-                    return False
-                
-                def call_features():
-                    try:
-                        Features(text)
-                    except Exception as e:
-                        print(f"Error loading Features: {e}")
-                    return False
-                
-                def call_extensions():
-                    try:
-                        Extensions(text)
-                    except Exception as e:
-                        print(f"Error loading Extensions: {e}")
-                    return False
-                
-                def call_formats():
-                    try:
-                        Formats(text)
-                    except Exception as e:
-                        print(f"Error loading Formats: {e}")
-                    return False
-                
-                def call_memorytypes():
-                    try:
-                        MemoryTypes(text)
-                    except Exception as e:
-                        print(f"Error loading MemoryTypes: {e}")
-                    return False
-                
-                def call_queues():
-                    try:
-                        Queues(text)
-                    except Exception as e:
-                        print(f"Error loading Queues: {e}")
-                    return False
-                
-                def call_instance():
-                    try:
-                        Instance()
-                    except Exception as e:
-                        print(f"Error loading Instance: {e}")
-                    return False
-                
-                def call_surface():
-                    try:
-                        Surface(text)
-                    except Exception as e:
-                        print(f"Error loading Surface: {e}")
-                    return False
-                
-                # Schedule all UI updates on the main thread
-                GLib.idle_add(call_limits)
-                GLib.idle_add(call_features)
-                GLib.idle_add(call_extensions)
-                GLib.idle_add(call_formats)
-                GLib.idle_add(call_memorytypes)
-                GLib.idle_add(call_queues)
-                GLib.idle_add(call_instance)
-                GLib.idle_add(call_surface)
+                with ThreadPoolExecutor(max_workers=8) as pool:
+                    pool.submit(Limits, text)
+                    pool.submit(Features, text)
+                    pool.submit(Extensions, text)
+                    # pool.submit(Formats, text) # Deferred until user clicks
+                    pool.submit(MemoryTypes, text)
+                    pool.submit(Queues, text)
+                    pool.submit(Instance)
+                    pool.submit(Surface, text)
             except Exception as e:
                 print(f"Error in background thread: {e}")
             return False
 
-        # Schedule background loading on a thread to keep UI responsive
         import threading
         background_thread = threading.Thread(target=load_tabs_background)
         background_thread.daemon = True
@@ -1365,8 +1324,11 @@ def create_vulkan_tab_content(self):
     h_box.append(label)
 
     # Create a list with some dummy device names
-    gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
-    gpu_id_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_id_command)
+    if not hasattr(self, '_cached_gpu_list'):
+        self._cached_gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
+        self._cached_gpu_id_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_id_command)
+    gpu_list = self._cached_gpu_list
+    gpu_id_list = self._cached_gpu_id_list
     
     # Create the gpu_dropdown, populated from the list of strings
     gpu_Dropdown = Gtk.DropDown()
@@ -2397,11 +2359,12 @@ def create_vulkan_tab_content(self):
                 content_box.set_visible(True)
                 
                 # Decrement loading counter and check if all tabs are done
-                tabs_loading_count["count"] -= 1
-                if tabs_loading_count["count"] <= 0:
-                    # All tabs have finished loading, hide the main loading spinner
-                    loading_spinner.set_spinning(False)
-                    loading_spinner_box.set_visible(False)
+                if tab_name != "Formats":
+                    tabs_loading_count["count"] -= 1
+                    if tabs_loading_count["count"] <= 0:
+                        # All tabs have finished loading, hide the main loading spinner
+                        loading_spinner.set_spinning(False)
+                        loading_spinner_box.set_visible(False)
                 
                 return False
             # Schedule UI update on main thread
@@ -2415,6 +2378,8 @@ def create_vulkan_tab_content(self):
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
     sidebar_scrolled_window.set_child(sidebar_listbox)
 
+    formats_loaded_for_gpu = {"gpu": None}
+
     # Connect the listbox signal to change the stack page
     def on_row_activated(listbox, row):
         # Get the label from the activated row to find the tab's name
@@ -2426,6 +2391,30 @@ def create_vulkan_tab_content(self):
 
         # Set the visible child of the stack using its name
         content_stack.set_visible_child_name(child_name)
+        
+        if child_name == "formats":
+            idx = gpu_Dropdown.props.selected
+            if idx == Gtk.INVALID_LIST_POSITION:
+                idx = 0
+            text = gpu_index_map[idx]
+            if formats_loaded_for_gpu.get("gpu") != text:
+                formats_loaded_for_gpu["gpu"] = text
+                
+                if "Formats" in tab_spinners:
+                    tab_spinners["Formats"].start()
+                    tab_spinners["Formats"].set_visible(True)
+                if "Formats" in tab_content_containers:
+                    content_box, spinner_box = tab_content_containers["Formats"]
+                    content_box.set_visible(False)
+                    spinner_box.set_visible(True)
+                    
+                import threading
+                def load_formats_lazy():
+                    try:
+                        Formats(text)
+                    except Exception as e:
+                        print(f"Error loading Formats lazily: {e}")
+                threading.Thread(target=load_formats_lazy, daemon=True).start()
         
     sidebar_listbox.connect("row-activated", on_row_activated)
     sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
