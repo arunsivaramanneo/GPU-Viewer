@@ -291,7 +291,13 @@ def VulkanVideo(videoTab):
     
     unique_gpus = []
     for i in range(len(gpu_list)):
-        if (fetchContentsFromCommand("vulkaninfo | awk '/GPU%d/{flag=1;next}/GPU%d/{flag=0}flag' | grep 'Video Profiles'"%(i,i+1))):
+        # Re-use the cached vulkaninfo file — avoids spawning vulkaninfo once per GPU
+        check_cmd = (
+            f"cat {Filenames.vulkaninfo_output_file} "
+            f"| awk '/GPU{i}/{{flag=1;next}}/GPU{i+1}/{{flag=0}}flag' "
+            f"| grep 'Video Profiles'"
+        )
+        if fetchContentsFromCommand(check_cmd):
             if gpu_list[i] not in unique_gpus:
                 unique_gpus.append(gpu_list[i])
                 gpu_Dropdown_list.append(gpu_list[i])

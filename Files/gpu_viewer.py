@@ -492,39 +492,130 @@ else:
             GLib.idle_add(self._build_tabs_on_main_thread, results)
 
         def _build_tabs_on_main_thread(self, results):
-            """Called on the GLib main thread — safe to create/modify GTK widgets."""
-            # Remove the loading spinner page
+            """Called on the GLib main thread — safe to create/modify GTK widgets.
+
+            Each tab is immediately added to the outer ViewStack with a fixed inner
+            Gtk.Stack that starts on its "spinner" child.  When the real content is
+            ready the inner stack simply switches to its "content" child — the outer
+            ViewStack page never moves, so tabs never jump or reorder.
+            """
+            # Remove the global loading spinner page
             if hasattr(self, '_loading_box') and self._loading_box:
                 self.view_stack.remove(self._loading_box)
                 self._loading_box = None
 
+            self._tab_built = {}          # page_name → bool
+            self._inner_stacks = {}       # page_name → inner Gtk.Stack
+
+            def _make_placeholder(label_text):
+                """Centred spinner displayed until the real content arrives."""
+                box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 12)
+                box.set_valign(Gtk.Align.CENTER)
+                box.set_halign(Gtk.Align.CENTER)
+                box.set_vexpand(True)
+                sp = Gtk.Spinner()
+                sp.set_size_request(36, 36)
+                sp.start()
+                lbl = Gtk.Label(label=f"Loading {label_text}…")
+                lbl.add_css_class("dim-label")
+                box.append(sp)
+                box.append(lbl)
+                return box, sp  # return spinner ref so we can stop it later
+
+            def _register_tab(page_name, title, icon, builder):
+                """Add a stable ViewStack page with an inner stack (spinner + content)."""
+                inner = Gtk.Stack()
+                inner.set_vexpand(True)
+                inner.set_hexpand(True)
+                # Disable transition animation inside the inner stack
+                inner.set_transition_type(Gtk.StackTransitionType.NONE)
+
+                placeholder, spinner_widget = _make_placeholder(title)
+                inner.add_named(placeholder, "spinner")
+                # "content" child is added later by _reveal_content
+
+                # The outer ViewStack page wraps the inner stack — it never moves
+                self.view_stack.add_titled_with_icon(inner, page_name, title, icon)
+                self._inner_stacks[page_name] = (inner, spinner_widget)
+                self._tab_built[page_name] = False
+
+            def _build_tab_async(page_name):
+                """Run builder in a worker thread; reveal result on main thread."""
+                builder = self._tab_builders[page_name]
+                def _worker():
+                    real_widget = builder()
+                    GLib.idle_add(_reveal_content, page_name, real_widget)
+                threading.Thread(target=_worker, daemon=True).start()
+
+            def _reveal_content(page_name, real_widget):
+                """Swap spinner → real content inside the inner stack (main thread)."""
+                entry = self._inner_stacks.get(page_name)
+                if entry is None:
+                    return False
+                inner, spinner_widget = entry
+                inner.add_named(real_widget, "content")
+                inner.set_visible_child_name("content")
+                # Stop the spinner to free resources
+                spinner_widget.stop()
+                self._tab_built[page_name] = True
+                return False  # Don't repeat
+
+            # Keep builder callables in a separate dict (needed by _build_tab_async)
+            self._tab_builders = {}
+
+            def _register(page_name, title, icon, builder):
+                self._tab_builders[page_name] = builder
+                _register_tab(page_name, title, icon, builder)
+
+            # ---- Register all supported tabs ----
             if results.get("vulkan"):
-                vulkan_box = create_vulkan_tab_content(self)
-                self.view_stack.add_titled_with_icon(vulkan_box, "page1", "Vulkan", "Vulkan")
+                _register("page1", "Vulkan", "Vulkan",
+                           lambda: create_vulkan_tab_content(self))
 
             if results.get("opengl"):
-                page2_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                opengl_box = OpenGL(self, page2_box)
-                self.view_stack.add_titled_with_icon(opengl_box, "page2", "OpenGL", "OpenGL")
+                def _build_opengl():
+                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                    return OpenGL(self, box)
+                _register("page2", "OpenGL", "OpenGL", _build_opengl)
 
             if results.get("opencl"):
-                opencl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                opencl_content = openCL(self, opencl_box)
-                self.view_stack.add_titled_with_icon(opencl_content, "opencl_page", "OpenCL", "OpenCL")
+                def _build_opencl():
+                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                    return openCL(self, box)
+                _register("opencl_page", "OpenCL", "OpenCL", _build_opencl)
 
             if results.get("vulkan_video"):
-                vulkan_video_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                vulkan_video_content = VulkanVideo(vulkan_video_box)
-                self.view_stack.add_titled_with_icon(vulkan_video_content, "vulkan_video_page", "Vulkan Video", "Vulkan-Video")
+                def _build_vulkan_video():
+                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                    return VulkanVideo(box)
+                _register("vulkan_video_page", "Vulkan Video", "Vulkan-Video",
+                           _build_vulkan_video)
 
             if results.get("vdpau"):
-                vdpau_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                vdpau_content = vdpauinfo(vdpau_box)
-                self.view_stack.add_titled_with_icon(vdpau_content, "vdpau_page", "VDPAU", "vdpauinfo")
+                def _build_vdpau():
+                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                    return vdpauinfo(box)
+                _register("vdpau_page", "VDPAU", "vdpauinfo", _build_vdpau)
 
+            # About page has no subprocesses — build immediately
             page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             self.about_page_ui = about_page(page3_box)
             self.view_stack.add_titled_with_icon(page3_box, "page3", "About Us", "about-us")
+
+            # ---- Trigger a lazy build whenever the visible tab changes ----
+            def _on_visible_child_changed(stack, _pspec):
+                name = stack.get_visible_child_name()
+                if name and not self._tab_built.get(name, True):
+                    self._tab_built[name] = True   # prevent double-build
+                    _build_tab_async(name)
+
+            self.view_stack.connect("notify::visible-child", _on_visible_child_changed)
+
+            # Start building the first (default) tab automatically
+            first = self.view_stack.get_visible_child_name()
+            if first and not self._tab_built.get(first, True):
+                self._tab_built[first] = True
+                _build_tab_async(first)
 
             return False  # Do not repeat GLib.idle_add
 
