@@ -429,7 +429,7 @@ def openCL(self, tab):
 
                 platformExtColumnLhs = Gtk.ColumnViewColumn.new("Platform Extensions", factory_platform)
                 platformExtColumnLhs.set_resizable(True)
-                platformExtColumnRhs = Gtk.ColumnViewColumn.new("Details", factory_platform_value)
+                platformExtColumnRhs = Gtk.ColumnViewColumn.new("Version", factory_platform_value)
                 platformExtColumnRhs.set_expand(True)
 
                 platformExtColumnView.append_column(platformExtColumnLhs)
@@ -514,9 +514,9 @@ def openCL(self, tab):
 
                 deviceExtensionColumnView.set_model(deviceExtensionSelection)
 
-                deviceExtensionColumnLhs = Gtk.ColumnViewColumn.new("Device Information",factory_devices_extension)
+                deviceExtensionColumnLhs = Gtk.ColumnViewColumn.new("Device Extensions",factory_devices_extension)
                 deviceExtensionColumnLhs.set_resizable(True)
-                deviceExtensionColumnRhs = Gtk.ColumnViewColumn.new("Details",factory_devices_extension_value)
+                deviceExtensionColumnRhs = Gtk.ColumnViewColumn.new("Version",factory_devices_extension_value)
                 deviceExtensionColumnRhs.set_expand(True)
 
                 deviceExtensionColumnView.append_column(deviceExtensionColumnLhs)

@@ -22,7 +22,7 @@ from gi.repository import Gtk, Adw, GObject,Gdk, Gio
 def update_theme_constants(prefer_dark):
     global AMDRADEON_LOGO_PNG, Gnome_logo, LLVM_logo, LLVM_LOGO_SVG, AMDRYZEN_LOGO_PNG
     global AMD_LOGO_PNG, GITHUB_LOGO_PNG, CONTACT_LOGO_PNG, BUG_LOGO_PNG, cosmic_logo
-    global BGCOLOR1, BGCOLOR2, BGCOLOR3, COLOR1, COLOR2, COLOR3, OPEN_CL_PNG, Ryzen_logo, AMD_logo
+    global BGCOLOR1, BGCOLOR2, BGCOLOR3, COLOR1, COLOR2, COLOR3, OPEN_CL_PNG, Ryzen_logo, AMD_logo, CACHYOS_LOGO_PNG
     
     if prefer_dark:
         AMDRADEON_LOGO_PNG = "../Images/AMD_Radeon_White.png"
@@ -106,6 +106,8 @@ GEFORCE_PNG = "../Images/GeForce.png"
 INTEL_LOGO_PNG = "../Images/intel-logo.png"
 
 INTEL_ARC_LOGO_PNG = "../Images/Intel_Arc_logo.png"
+
+CACHYOS_LOGO_PNG = "../Images/CachyOS_Logo.png"
 
 #AMD_LOGO_PNG = "../Images/AMD.png"
 

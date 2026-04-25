@@ -467,6 +467,8 @@ def getLogo(line):
         logo_pixbuf = fetchImageFromUrl(const.Solus_logo,32,28,True)
     elif "Mandriva" in line:       
         logo_pixbuf = fetchImageFromUrl(const.OpenMandriva_logo,32,28,True)
+    elif "CachyOS" in line:       
+        logo_pixbuf = fetchImageFromUrl(const.CACHYOS_LOGO_PNG,32,28,True)
     elif "Xubuntu" in line:
         logo_pixbuf = fetchImageFromUrl(const.Xubuntu_logo,32,28,True)
     elif "Arch" in line:
