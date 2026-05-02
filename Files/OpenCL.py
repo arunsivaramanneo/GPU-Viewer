@@ -188,21 +188,8 @@ def openCL(self, tab):
         if value >= len(oclPlatforms): return
         
         platform = oclPlatforms[value]
-        
-        general_props = []
-        extension_props = []
-
-        for p in platform["properties"]:
-            if "Extension" in p[0]:
-                if "with Version" in p[0]:
-                    extension_props.append(p)
-                else:
-                    general_props.append(p)
-            else:
-                general_props.append(p)
-
-        populate_store(platformDetails_Store, general_props, add_children=False)
-        populate_store(PlatformExtensionDetails_Store, extension_props, skip_top=True)
+        all_props = platform["properties"]
+        populate_store(platformDetails_Store, all_props)
 
     def get_device_categories(platform_idx, device_idx):
         if platform_idx >= len(oclPlatforms): return None
@@ -410,48 +397,7 @@ def openCL(self, tab):
                 platformScrollbar = create_scrollbar(platformColumnView)
                 platformScrollbar.set_vexpand(True)
 
-                # Platform Extensions Box
-                platformExtColumnView = Gtk.ColumnView()
-                platformExtColumnView.props.show_row_separators = True
-                platformExtColumnView.props.show_column_separators = False
-
-                platformExtSelection = Gtk.SingleSelection()
-                
-                platformExt_search_entry = Gtk.SearchEntry()
-                platformExt_search_entry.set_property("placeholder-text", "Search platform extensions...")
-                platformExt_search_entry.add_css_class(css_class='toolbar')
-                setMargin(platformExt_search_entry, 10, 10, 10)
-
-                def platform_ext_filter_func(item, data):
-                    search_text = platformExt_search_entry.get_text().lower()
-                    if not search_text:
-                        return True
-                    return search_text in item.data.lower() or search_text in item.data2.lower()
-
-                platform_ext_filter_model = Gtk.FilterListModel.new(model=PlatformExtensionDetails_Store)
-                platform_ext_custom_filter = Gtk.CustomFilter.new(platform_ext_filter_func, None)
-                platform_ext_filter_model.set_filter(platform_ext_custom_filter)
-
-                platformExt_search_entry.connect("search-changed", lambda w: platform_ext_custom_filter.changed(Gtk.FilterChange.DIFFERENT))
-
-                platformExtModel = Gtk.TreeListModel.new(platform_ext_filter_model, False, True, add_tree_node)
-                platformExtSelection.set_model(platformExtModel)
-                platformExtColumnView.set_model(platformExtSelection)
-
-                platformExtColumnLhs = Gtk.ColumnViewColumn.new("Platform Extensions", factory_platform)
-                platformExtColumnLhs.set_resizable(True)
-                platformExtColumnRhs = Gtk.ColumnViewColumn.new("Version", factory_platform_value)
-                platformExtColumnRhs.set_expand(True)
-
-                platformExtColumnView.append_column(platformExtColumnLhs)
-                platformExtColumnView.append_column(platformExtColumnRhs)
-
-                platformExtScrollbar = create_scrollbar(platformExtColumnView)
-                platformExtScrollbar.set_vexpand(True)
-
                 content_box.append(platformScrollbar)
-                content_box.append(platformExtScrollbar)
-                content_box.append(platformExt_search_entry)
         elif "Device Information" in tab_name:
 
                 deviceColumnView = Gtk.ColumnView()
