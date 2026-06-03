@@ -350,6 +350,7 @@ header {
 
 columnview.view>header>button,
 treeview.view>header>button {
+  text-align: left;
   background-image: linear-gradient(#dcdcdc, #dcdcdc);
   min-height: 0;
   min-width: 0;

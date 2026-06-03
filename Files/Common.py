@@ -221,7 +221,7 @@ def setMargin(widget,start,top,bottom):
 
 def getRamInGb(ram):
     ram1 = ram.split()
-    return str("%.2f" %(float(ram1[0])/(1028*1028))) + " GB"
+    return str("%.2f" %(float(ram1[0])/(1024*1024))) + " GB"
 
 # Setting the Minimum Screen Size
 def getScreenSize():
@@ -383,9 +383,9 @@ def createSearchEntry(store_filter):
 
 
 def getDeviceSize(size):
-    sizeMB = float(size) / (1028 * 1028 * 1028)
+    sizeMB = float(size) / (1024 * 1024 * 1024)
     if sizeMB < 1.0:
-        sizeMB = str(format((sizeMB * 1028), '.2f')) + " MB"
+        sizeMB = str(format((sizeMB * 1024), '.2f')) + " MB"
     else:
         sizeMB = str(format(sizeMB, '.2f')) + " GB"
     return sizeMB
@@ -395,11 +395,11 @@ def appendLimitsRHS(filename, temp):
     LimitRHSValue = []
     i = 0
     with open(filename, "r") as file1:
-        for line in file1:
-            if "= " in line:
-                LimitsRHS.append(temp[i])
-                LimitRHSValue.append(True)
-                i = i + 1
+        for i, line in enumerate(file1):
+            if i < len(temp):
+                val = temp[i].strip()
+                LimitsRHS.append(val)
+                LimitRHSValue.append(val != "")
             else:
                 LimitsRHS.append("")
                 LimitRHSValue.append(False)
@@ -561,7 +561,6 @@ def add_tree_node(item):
 def setup_expander(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
-    label.set_selectable(True)
     expander = Gtk.TreeExpander.new()
  #   expander.props.indent_for_icon = True
  #   expander.props.indent_for_depth = True
@@ -572,7 +571,6 @@ def setup_expander(widget, item):
 def setup(widget, item):
     """Setup the widget to show in the Gtk.Listview"""
     label = Gtk.Label()
-    label.set_selectable(True)
     label.props.xalign = 0.0
     label.set_ellipsize(Pango.EllipsizeMode.END)
     item.set_child(label)

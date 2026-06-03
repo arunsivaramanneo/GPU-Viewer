@@ -114,6 +114,9 @@ def quit(instance):
     rmdir_process.communicate()
     instance.destroy()
 
+def simple_quit(instance):
+    instance.destroy()
+
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
     def show_message(app):
@@ -140,7 +143,7 @@ if Path(Filenames.gpu_viewer_folder_path).exists():
         message_grid.attach(label,0,0,20,1)
         
         message_button_OK = Gtk.Button.new_with_label("OK")
-        message_button_OK.connect("clicked",quit)
+        message_button_OK.connect("clicked",simple_quit)
     #    message_button_CANCEL = Gtk.Button.new_with_label("No")
         setMargin(message_button_OK,500,50,10)
         message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,5,1)

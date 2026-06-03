@@ -488,76 +488,80 @@ def OpenGL(self, tab):
         if selected is not None:
             limitValue = selected.props.string
         
-        def bg_worker(limit_val):
+        def bg_worker(limitValue):
             k = 0
             count = 0
             fetch_show_opengl_limits_lhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_rhs_Command) 
             fetch_show_opengl_limits_rhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_lhs_command)
-            fetch_show_select_opengl_limits_command = "cat %s | awk '/%s:/{flag=1;next}/:.*/{flag=0}flag'  "%(openGLLimits,limit_val)
-
+            # Escape limit_val for awk
+            fetch_show_select_opengl_limits_command = "cat %s | awk '/%s:/{flag=1;next}/:.*/{flag=0}flag'  "%(openGLLimits,limitValue)
             opengl_limits_lhs = []
             opengl_limits_rhs = []
-            select_opengl_limits_file = " "
-            if "Show All OpenGL Hardware Core Limits" in limit_val or "Show All OpenGL Hardware Compatible Limits" in limit_val:
+            select_opengl_limits_file = Filenames.select_opengl_limits_file
+            if "Show All OpenGL Hardware Core Limits" in limitValue or "Show All OpenGL Hardware Compatible Limits" in limitValue:
                 fetch_show_limits_lhs_process = subprocess.Popen(fetch_show_opengl_limits_lhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
                 opengl_limits_lhs = fetch_show_limits_lhs_process.communicate()[0].splitlines()
                 fetch_show_limits_rhs_process = subprocess.Popen(fetch_show_opengl_limits_rhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
                 opengl_limits_rhs = fetch_show_limits_rhs_process.communicate()[0].splitlines()
                 select_opengl_limits_file = openGLLimits
             else:
-                with open(Filenames.select_opengl_limits_file,"w") as file:
+                with open(select_opengl_limits_file,"w") as file:
                     fetch_show_select_opengl_limits_process = subprocess.Popen(fetch_show_select_opengl_limits_command,shell=True,stdout=file,universal_newlines=True)
                     fetch_show_select_opengl_limits_process.communicate()
 
-                fetch_show_select_opengl_limits_lhs_command = "cat %s | %s " %(Filenames.select_opengl_limits_file,Filenames.remove_rhs_Command)
-                fetch_show_select_opengl_limits_rhs_command = "cat %s | %s " %(Filenames.select_opengl_limits_file,Filenames.remove_lhs_command)
-                fetch_show_select_opengl_limits_lhs_process = subprocess.Popen(fetch_show_select_opengl_limits_lhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
+                fetch_show_select_opengl_limits_lhs_command = "cat %s | %s " %(select_opengl_limits_file, Filenames.remove_rhs_Command)
+                fetch_show_select_opengl_limits_rhs_command = "cat %s | %s " %(select_opengl_limits_file, Filenames.remove_lhs_command)
+                fetch_show_select_opengl_limits_lhs_process = subprocess.Popen(fetch_show_select_opengl_limits_lhs_command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
                 opengl_limits_lhs = fetch_show_select_opengl_limits_lhs_process.communicate()[0].splitlines()
-                fetch_show_select_opengl_limits_rhs_process = subprocess.Popen(fetch_show_select_opengl_limits_rhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
+                fetch_show_select_opengl_limits_rhs_process = subprocess.Popen(fetch_show_select_opengl_limits_rhs_command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
                 opengl_limits_rhs = fetch_show_select_opengl_limits_rhs_process.communicate()[0].splitlines()
-                select_opengl_limits_file = Filenames.select_opengl_limits_file
 
             LimitsRHS,LimitRHSValue = appendLimitsRHS(select_opengl_limits_file,opengl_limits_rhs)
 
             def update_ui():
                 Limits_Store.remove_all()
-                groupName = None
                 toprow = None
+                iter3 = None
+                count = 0
+                toprow_added = False
                 with open(select_opengl_limits_file,"r") as file:
                     for i, line in enumerate(file):
-                        if i >= len(opengl_limits_lhs) or i >= len(LimitsRHS):
-                            break
+            #         TreeLimits.expand_all()
                         text = opengl_limits_lhs[i].strip(' ')
                         if ("TEXTURE_FORMATS" in line or "SHADING_LANGUAGE" in line) and LimitRHSValue[i] == True:
                             try:
+                            #    iter3 = Limits_Store.append(iter2, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                                 iter3 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
-                                if toprow:
-                                    toprow.children.append(iter3)
-                                else:
-                                    toprow = iter3
+                                toprow.children.append(iter3)
                             except Exception:
+                            #    iter3 = Limits_Store.append(None, [text.strip('\n'), LimitsRHS[i].strip('\n'), background_color])
                                 toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                                toprow_added = False
+                    #         toprow.children.append(iter3)
+                            finally:
+                                pass
                         elif "      " in line and LimitRHSValue[i] == False and ":" not in line:
                             iter4 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
-                            if 'iter3' in locals():
-                                iter3.children.append(iter4)
+                            iter3.children.append(iter4)
                         else:
                             if ":" in line:
+                                k = 0
                                 text = opengl_limits_lhs[i]
-                                if toprow:
+                                count += 1
+                                if toprow is not None and not toprow_added:
                                     Limits_Store.append(toprow)
                                 toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
+                                toprow_added = False
                                 continue
-                            if "    " in line:
+                            if count > 0 and "    " in line:
                                 iter2_1 = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
-                                if toprow:
-                                    toprow.children.append(iter2_1)
+                                toprow.children.append(iter2_1)
                             else:
-                                if toprow:
-                                    Limits_Store.append(toprow)
                                 toprow = ExpandDataObject(text.strip('\n'), LimitsRHS[i].strip('\n'))
-                    if toprow:
-                        Limits_Store.append(toprow)
+                                Limits_Store.append(toprow)
+                                toprow_added = True
+                if toprow is not None and not toprow_added:
+                    Limits_Store.append(toprow)
                 return False
 
             GLib.idle_add(update_ui)
@@ -764,7 +768,7 @@ def OpenGL(self, tab):
                     with open(current_mode["lhs"], "r") as file1:
                         for line in file1:
                             if ":" in line:
-                                text = line[:-2]
+                                text = line.split(":")[0]
                                 new_model.append(text.strip(" "))
                     limitsDropDown.set_model(new_model)
                     limitsDropDown.set_selected(0)
@@ -986,6 +990,7 @@ def OpenGL(self, tab):
                             column_name = headings[index - 1] if index <= len(headings) else f"Column {index}"
                             column = Gtk.ColumnViewColumn.new(column_name, factory)
                             column.set_resizable(True)
+                            column.set_fixed_width(60)
                             if index == max_cols:
                                 column.set_expand(True)
                             frameBufferColumnView.append_column(column)
@@ -1392,13 +1397,11 @@ def OpenGL(self, tab):
                     device_label = Gtk.Label.new(renderer)
                     device_label.add_css_class("title-1")
                     device_label.set_halign(Gtk.Align.START)
-                    device_label.set_selectable(True)
                     labels_box.append(device_label)
 
                     vendor_label = Gtk.Label.new(f"Vendor: {vendor}")
                     vendor_label.add_css_class("caption")
                     vendor_label.set_halign(Gtk.Align.START)
-                    vendor_label.set_selectable(True)
                     labels_box.append(vendor_label)
 
                     summary_box.append(labels_box)

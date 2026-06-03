@@ -27,8 +27,8 @@ unset_LC_ALL_conmand = "unset LC_ALL"
 
 #------------------------- Command Commands --------------------------------
 
-remove_rhs_Command = "awk '{gsub(/[=,:].*/,'True')l}1' | awk '/./' "
-remove_lhs_command = "grep -o [=,:].* | grep -o ' .*' "
+remove_rhs_Command = "awk '{gsub(/[=,:].*/,\"\")}1' | awk '/./' "
+remove_lhs_command = "awk -F'[=,:]' '{if (NF>1) {v=$0; sub(/.*[=,:] */, \"\", v); print v} else print \"\"}' "
 
 
 
@@ -153,7 +153,7 @@ opengl_core_limits_lhs_file = "/tmp/gpu-viewer/opengl_core_limits_lhs.txt"
 opengl_core_limits_file = "/tmp/gpu-viewer/opengl_core_limits.txt"
 
 fetch_opengl_core_limits_command = "glxinfo -l | awk '/OpenGL core profile limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL core profile limits:/{flag=1;next}/OpenGL version string.*/{flag=0} flag' | awk '/./' "
-fetch_opengl_core_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,'True');print}' " %(opengl_core_limits_file)
+fetch_opengl_core_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,\"\")}1' " %(opengl_core_limits_file)
 
 opengl_compat_limits_file = "/tmp/gpu-viewer/opengl_compat_limits.txt"
 
@@ -161,7 +161,7 @@ opengl_compat_limits_lhs_file = "/tmp/gpu-viewer/opengl_compat_limits_lhs.txt"
 
 fetch_opengl_compat_limits_command = "glxinfo -l | awk '/OpenGL limits:/{flag=1}/GLX Visuals.*/{flag=0} flag' | awk '/OpenGL limits:/{flag=1;next}/OpenGL ES profile/{flag=0} flag' | awk '/./' "
 
-fetch_opengl_compat_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,'True');print}'" %(opengl_compat_limits_file)
+fetch_opengl_compat_limits_lhs_command = "cat %s | awk '{gsub(/=.*/,\"\")}1' " %(opengl_compat_limits_file)
 
 select_opengl_limits_file = "/tmp/gpu-viewer/selectOpenglLimits.txt"
 
