@@ -23,7 +23,7 @@ from Common import create_scrollbar,fetchImageFromUrl,getLinkButtonImg,setMargin
 
 Adw.init()
 
-title = "About GPU-Viewer v3.32"
+title = "About GPU-Viewer v3.34"
 
 import gi
 
@@ -56,7 +56,6 @@ class AboutPage(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.grid = Gtk.Grid()
         
-        title = "About GPU-Viewer v3.32"
         self.column_view = Gtk.ColumnView()
         self.column_view.props.show_row_separators = True
         self.column_view.props.single_click_activate = False
