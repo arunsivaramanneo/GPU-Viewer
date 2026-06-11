@@ -795,10 +795,18 @@ def OpenGL(self, tab):
         def on_core_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("core")
+            elif profile_group.get_active_name() == "core":
+                button.handler_block_by_func(on_core_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_core_toggled)
 
         def on_compat_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("compat")
+            elif profile_group.get_active_name() == "compat":
+                button.handler_block_by_func(on_compat_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_compat_toggled)
 
         core_button.connect("toggled", on_core_toggled)
         compat_button.connect("toggled", on_compat_toggled)
@@ -943,10 +951,18 @@ def OpenGL(self, tab):
         def on_visuals_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("glx-visuals")
+            elif profile_group.get_active_name() == "glx-visuals":
+                button.handler_block_by_func(on_visuals_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_visuals_toggled)
 
         def on_fbconfig_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("glx-fbconfig")
+            elif profile_group.get_active_name() == "glx-fbconfig":
+                button.handler_block_by_func(on_fbconfig_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_fbconfig_toggled)
 
         visuals_button.connect("toggled", on_visuals_toggled)
         fbconfig_button.connect("toggled", on_fbconfig_toggled)
@@ -1255,18 +1271,34 @@ def OpenGL(self, tab):
         def on_opengl_toggled(button):
             if button.get_active():
                 type_group.set_active_name("OpenGL")
+            elif type_group.get_active_name() == "OpenGL":
+                button.handler_block_by_func(on_opengl_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_opengl_toggled)
 
         def on_opengles_toggled(button):
             if button.get_active():
                 type_group.set_active_name("OpenGL ES")
+            elif type_group.get_active_name() == "OpenGL ES":
+                button.handler_block_by_func(on_opengles_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_opengles_toggled)
 
         def on_glx_toggled(button):
             if button.get_active():
                 type_group.set_active_name("GLX")
+            elif type_group.get_active_name() == "GLX":
+                button.handler_block_by_func(on_glx_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_glx_toggled)
 
         def on_egl_toggled(button):
             if button.get_active():
                 type_group.set_active_name("EGL")
+            elif type_group.get_active_name() == "EGL":
+                button.handler_block_by_func(on_egl_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_egl_toggled)
 
         def sync_profile_buttons(profile):
             core_button.handler_block_by_func(on_core_toggled)
@@ -1289,10 +1321,18 @@ def OpenGL(self, tab):
         def on_core_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("core")
+            elif profile_group.get_active_name() == "core":
+                button.handler_block_by_func(on_core_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_core_toggled)
 
         def on_compat_toggled(button):
             if button.get_active():
                 profile_group.set_active_name("compat")
+            elif profile_group.get_active_name() == "compat":
+                button.handler_block_by_func(on_compat_toggled)
+                button.set_active(True)
+                button.handler_unblock_by_func(on_compat_toggled)
 
         opengl_button.connect("toggled", on_opengl_toggled)
         opengles_button.connect("toggled", on_opengles_toggled)
