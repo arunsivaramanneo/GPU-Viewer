@@ -125,8 +125,10 @@ class ClinfoParser:
 
 def openCL(self, tab):
     gpu_index_map = []
+    self.opencl_gpu_index_map = gpu_index_map
     parser = ClinfoParser()
     oclPlatforms = parser.platforms
+    self.opencl_platforms = oclPlatforms
     platformDetails_Store = Gio.ListStore.new(ExpandDataObject)
     PlatformExtensionDetails_Store = Gio.ListStore.new(ExpandDataObject)
     DeviceDetails_Store = Gio.ListStore.new(ExpandDataObject)
@@ -228,6 +230,7 @@ def openCL(self, tab):
                 
             categories[current_cat].append((key, value, children))
         return categories
+    self.opencl_get_device_categories = get_device_categories
 
     def populate_store(store, props, skip_top=False, add_children=True):
         store.remove_all()
@@ -646,6 +649,7 @@ def openCL(self, tab):
         platform_list.append(i)
 
     platform_dropdown = Gtk.DropDown()
+    self.opencl_platform_dropdown = platform_dropdown
     platform_dropdown.add_css_class(css_class="card")
     platform_dropdown.set_model(platform_list)
 
@@ -662,6 +666,7 @@ def openCL(self, tab):
 
     Devices_list = Gtk.StringList()
     Devices_dropdown = Gtk.DropDown()
+    self.opencl_devices_dropdown = Devices_dropdown
     Devices_dropdown.add_css_class(css_class="card")
     Devices_dropdown.set_model(Devices_list)
     setMargin(Devices_dropdown,20,10,10)

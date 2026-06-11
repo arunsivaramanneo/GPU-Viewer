@@ -235,21 +235,52 @@ else:
                 default_name = "clinfo.txt"
                 if hasattr(self, 'opencl_content_stack'):
                     opencl_tab = self.opencl_content_stack.get_visible_child_name()
-                    if opencl_tab == "platform-information":
-                        source_file = Filenames.opencl_platform_details_file
-                        default_name = "platform_details.txt"
-                    elif opencl_tab == "device-information":
-                        source_file = Filenames.opencl_device_details_file
-                        default_name = "device_details.txt"
-                    elif opencl_tab and opencl_tab.startswith("device-memory"):
-                        source_file = Filenames.opencl_device_memory_and_image_file
-                        default_name = "memory_and_image_details.txt"
-                    elif opencl_tab and opencl_tab.startswith("queue-capabilities"):
-                        source_file = Filenames.opencl_device_queue_execution_details_file
-                        default_name = "queue_execution_details.txt"
-                    elif opencl_tab == "device-vector-information":
-                        source_file = Filenames.opencl_device_vector_file
-                        default_name = "vector_details.txt"
+                    props = None
+                    if hasattr(self, 'opencl_platforms') and self.opencl_platforms:
+                        platform_idx = self.opencl_platform_dropdown.props.selected if hasattr(self, 'opencl_platform_dropdown') else 0
+                        if platform_idx == Gtk.INVALID_LIST_POSITION:
+                            platform_idx = 0
+                        device_selected = self.opencl_devices_dropdown.props.selected if hasattr(self, 'opencl_devices_dropdown') else 0
+                        if device_selected != Gtk.INVALID_LIST_POSITION:
+                            device_idx = self.opencl_gpu_index_map[device_selected] if (hasattr(self, 'opencl_gpu_index_map') and len(self.opencl_gpu_index_map) > device_selected) else device_selected
+                        else:
+                            device_idx = 0
+                        if opencl_tab == "platform-information":
+                            if platform_idx < len(self.opencl_platforms):
+                                props = self.opencl_platforms[platform_idx]["properties"]
+                                default_name = "platform_details.txt"
+                        elif hasattr(self, 'opencl_get_device_categories'):
+                            cats = self.opencl_get_device_categories(platform_idx, device_idx)
+                            if cats:
+                                if opencl_tab == "device-information":
+                                    props = cats["Device Information"]
+                                    default_name = "device_details.txt"
+                                elif opencl_tab == "device-extensions":
+                                    props = cats["Device Extensions with Version"]
+                                    default_name = "device_extensions.txt"
+                                elif opencl_tab and (opencl_tab.startswith("device-memory") or "image" in opencl_tab):
+                                    props = cats["Device Memory & Image Information"]
+                                    default_name = "memory_and_image_details.txt"
+                                elif opencl_tab and (opencl_tab.startswith("queue-capabilities") or "queue" in opencl_tab):
+                                    props = cats["Queue & Execution Capabilities"]
+                                    default_name = "queue_execution_details.txt"
+                                elif opencl_tab == "device-vector-information":
+                                    props = cats["Device Vector Information"]
+                                    default_name = "vector_details.txt"
+                    if props is not None:
+                        temp_file = "/tmp/gpu-viewer/opencl_tab_output.txt"
+                        try:
+                            with open(temp_file, "w") as f:
+                                for key, value, children in props:
+                                    if value:
+                                        f.write(f"{key}: {value}\n")
+                                    else:
+                                        f.write(f"{key}\n")
+                                    for sub_key, sub_val in children:
+                                        f.write(f"    {sub_key}: {sub_val}\n")
+                            source_file = temp_file
+                        except Exception as e:
+                            print(f"Error writing temporary OpenCL file: {e}")
 
             elif visible_child_name == "vdpau_page":
                 source_file = Filenames.vdpauinfo_output_file
@@ -288,6 +319,7 @@ else:
             Callback to handle the theme button click.
             It toggles the Adw.StyleManager's color scheme.
             """
+            self.theme_button.set_sensitive(False)
             prefer_dark_theme = not self.config.get_theme_preference()
             self._apply_theme(prefer_dark_theme)
 
@@ -391,6 +423,7 @@ else:
             self.theme_button = Gtk.Button.new()
             self.theme_button.add_css_class("flat")
             self.theme_button.set_valign(Gtk.Align.CENTER)
+            self.theme_button.set_sensitive(False)
             
             self.theme_icon = Gtk.Image.new()
             self._update_theme_button_icon(prefer_dark_theme)
@@ -619,6 +652,9 @@ else:
             if first and not self._tab_built.get(first, True):
                 self._tab_built[first] = True
                 _build_tab_async(first)
+
+            if hasattr(self, 'theme_button') and self.theme_button:
+                self.theme_button.set_sensitive(True)
 
             return False  # Do not repeat GLib.idle_add
 
