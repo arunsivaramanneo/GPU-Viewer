@@ -344,7 +344,7 @@ else:
             provider = Gtk.CssProvider.new()
             provider.load_from_file(fname)
             Gtk.StyleContext.add_provider_for_display(display, provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
             # Update constants
             const.update_theme_constants(state)
@@ -399,7 +399,7 @@ else:
             display = Gtk.Widget.get_display(self.window)
             provider.load_from_file(fname)
             Gtk.StyleContext.add_provider_for_display(display, provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                Gtk.STYLE_PROVIDER_PRIORITY_USER)
             
             # Synchronize constants with the loaded preference
             const.update_theme_constants(prefer_dark_theme)

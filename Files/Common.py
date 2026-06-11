@@ -260,7 +260,7 @@ def on_light_action_actived(self, action, win,param=None):
     fname = Gio.file_new_for_path('gtk_light.css')
     provider.load_from_file(fname)
     Gtk.StyleContext.add_provider_for_display(display, provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            Gtk.STYLE_PROVIDER_PRIORITY_USER)
     
         
 def on_dark_action_actived(self, action,win, param=None):
@@ -269,7 +269,7 @@ def on_dark_action_actived(self, action,win, param=None):
     fname = Gio.file_new_for_path('gtk_dark.css')
     provider.load_from_file(fname)
     Gtk.StyleContext.add_provider_for_display(display, provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            Gtk.STYLE_PROVIDER_PRIORITY_USER)
         
 
 # setting up Sub Tabs in Vulkan
