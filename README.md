@@ -16,7 +16,7 @@
 ### A front-end to glxinfo, vulkaninfo, clinfo and es2_info.
 
 
-![image](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/gpu-viewer.svg)](https://repology.org/project/gpu-viewer/versions)
 
 
 This project aims to capture all the important details of glxinfo, vulkaninfo
