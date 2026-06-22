@@ -1,1 +1,19 @@
 theme: jekyll-theme-cayman
+
+# Exclude directories from Jekyll build
+exclude:
+  - venv
+  - _build
+  - bin
+  - .github
+  - Files
+  - meson.build
+  - gpu-viewer.in
+  - node_modules
+  - /.*
+
+# Include only necessary files
+include:
+  - README.md
+  - Change Log.md
+  - LICENSE
