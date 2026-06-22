@@ -54,12 +54,12 @@ sudo apt install gpu-viewer
 **Arch based distro**
 
 ```
-sudo pacman -S appstream-glib clinfo gtk4 libadwaita lsb-release mesa-utils meson pkgconf python-gobject vdpauinfo vulkan-tools xorg-xdpyinfo
+sudo pacman -S appstream-glib clinfo gtk4 libadwaita lsb-release mesa-utils meson python-gobject vdpauinfo vulkan-tools xorg-xdpyinfo
 ```
 **Debian & Ubuntu based distro**
 
 ```
-sudo apt install clinfo gawk gir1.2-adw-1 gir1.2-gtk-4.0 libadwaita-1-dev libgtk-4-dev lsb-release mesa-opencl-icd mesa-utils pkgconf python3-cairo python3-click python3-gi python3-gi-cairo vdpauinfo vulkan-tools x11-util
+sudo apt install clinfo gawk gir1.2-adw-1 gir1.2-gtk-4.0 lsb-release mesa-opencl-icd mesa-utils meson python3-cairo python3-click python3-gi python3-gi-cairo vdpauinfo vulkan-tools x11-utils
 ```
 **Fedora based distro**
 
