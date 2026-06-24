@@ -79,9 +79,9 @@ sudo zypper install clinfo mesa-demo mesa-vulkan-device-select libvulkan_intel l
 3.  Open terminal and enter below commands
 
 ```
-meson _build
+meson setup _build
 cd _build
-DESTDIR=/usr/local ninja install
+ninja install
 ```
 
 
