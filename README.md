@@ -2,7 +2,8 @@
 
 
 
-![image](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)
+[![Donate](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)](https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q)
+
 ## Testimonials
 
 ### Softpedia
@@ -150,4 +151,4 @@ donate means that you simply believe in this project and want it to be better.**
 
 
 
-![image](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)
+[![Donate](https://user-images.githubusercontent.com/30646692/209199473-a51dbd6c-d7f2-4bfe-a392-0abf20cbc4ec.png)](https://www.paypal.com/donate/?hosted_button_id=7M3PMM78FBR4Q)
