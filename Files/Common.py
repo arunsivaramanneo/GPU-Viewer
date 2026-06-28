@@ -77,17 +77,26 @@ def get_gpu_stats(device_id, num_devices):
     gpu_index = -1
     # Loop and check each card file to find the matching device_id
     for i in range(num_devices):
-        device_file_path = f"/sys/class/drm/card{i}/device/device"
-        if os.path.exists(device_file_path):
-            try:
-                with open(device_file_path, 'r') as f:
-                    # Convert hex value from file to number and compare with device_id
-                    sys_device_id = int(f.read().strip(), 16)
-                    if sys_device_id == device_id:
-                        gpu_index = i
-                        break
-            except (ValueError, OSError):
-                continue
+        # Try both possible device paths
+        device_file_paths = [
+            f"/sys/class/drm/card{i}/device/device",
+            f"/sys/class/drm/card{i}/device"
+        ]
+        
+        for device_file_path in device_file_paths:
+            if os.path.exists(device_file_path):
+                try:
+                    with open(device_file_path, 'r') as f:
+                        # Convert hex value from file to number and compare with device_id
+                        sys_device_id = int(f.read().strip(), 16)
+                        if sys_device_id == device_id:
+                            gpu_index = i
+                            break
+                except (ValueError, OSError):
+                    continue
+        
+        if gpu_index != -1:
+            break
 
     if gpu_index == -1:
         return None

@@ -43,6 +43,7 @@ from OpenGLViewer import OpenGL
 from OpenCL import openCL
 from VdpauViewer import vdpauinfo
 from VulkanVideoViewer import VulkanVideo
+from SummaryViewer import create_summary_page
 from pathlib import Path
 
 # Define the main application class.
@@ -542,6 +543,7 @@ else:
 
             self._tab_built = {}          # page_name → bool
             self._inner_stacks = {}       # page_name → inner Gtk.Stack
+            self._available_tab_builders = {}
 
             def _make_placeholder(label_text):
                 """Centred spinner displayed until the real content arrives."""
@@ -603,35 +605,46 @@ else:
                 self._tab_builders[page_name] = builder
                 _register_tab(page_name, title, icon, builder)
 
-            # ---- Register all supported tabs ----
+            def _register_available(page_name, title, icon, builder):
+                self._tab_builders[page_name] = builder
+                self._available_tab_builders[page_name] = (title, icon, builder)
+
+            def _register_summary():
+                def _build_summary():
+                    return create_summary_page(self, results)
+                _register("summary", "Summary", "view-list-symbolic", _build_summary)
+
+            _register_summary()
+
+            # Keep supported page builders available, but do not add them to the view stack yet.
             if results.get("vulkan"):
-                _register("page1", "Vulkan", "Vulkan",
-                           lambda: create_vulkan_tab_content(self))
+                _register_available("page1", "Vulkan", "Vulkan",
+                                    lambda: create_vulkan_tab_content(self))
 
             if results.get("opengl"):
                 def _build_opengl():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return OpenGL(self, box)
-                _register("page2", "OpenGL", "OpenGL", _build_opengl)
+                _register_available("page2", "OpenGL", "OpenGL", _build_opengl)
 
             if results.get("opencl"):
                 def _build_opencl():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return openCL(self, box)
-                _register("opencl_page", "OpenCL", "OpenCL", _build_opencl)
+                _register_available("opencl_page", "OpenCL", "OpenCL", _build_opencl)
 
             if results.get("vulkan_video"):
                 def _build_vulkan_video():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return VulkanVideo(box)
-                _register("vulkan_video_page", "Vulkan Video", "Vulkan-Video",
-                           _build_vulkan_video)
+                _register_available("vulkan_video_page", "Vulkan Video", "Vulkan-Video",
+                                   _build_vulkan_video)
 
             if results.get("vdpau"):
                 def _build_vdpau():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return vdpauinfo(box)
-                _register("vdpau_page", "VDPAU", "vdpauinfo", _build_vdpau)
+                _register_available("vdpau_page", "VDPAU", "vdpauinfo", _build_vdpau)
 
             # About page has no subprocesses — build immediately
             page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
@@ -641,13 +654,28 @@ else:
             # ---- Trigger a lazy build whenever the visible tab changes ----
             def _on_visible_child_changed(stack, _pspec):
                 name = stack.get_visible_child_name()
-                if name and not self._tab_built.get(name, True):
+                if name and not self._tab_built.get(name, True) and name in self._tab_builders:
                     self._tab_built[name] = True   # prevent double-build
                     _build_tab_async(name)
 
             self.view_stack.connect("notify::visible-child", _on_visible_child_changed)
 
-            # Start building the first (default) tab automatically
+            def open_tab(page_name):
+                if page_name in self._inner_stacks:
+                    self.view_stack.set_visible_child_name(page_name)
+                    return
+                if page_name not in self._available_tab_builders:
+                    return
+
+                title, icon, builder = self._available_tab_builders[page_name]
+                _register_tab(page_name, title, icon, builder)
+                self._tab_built[page_name] = True   # mark as building to prevent duplicate work
+                _build_tab_async(page_name)
+                self.view_stack.set_visible_child_name(page_name)
+
+            self.open_tab = open_tab
+
+            # Build the first tab automatically if it is registered
             first = self.view_stack.get_visible_child_name()
             if first and not self._tab_built.get(first, True):
                 self._tab_built[first] = True
