@@ -121,7 +121,7 @@ class ClinfoParser:
                 elif current_platform and current_platform["properties"]:
                     current_platform["properties"][-1][2].append((key, value))
                     
-        return platforms
+        return [p for p in platforms if p.get("devices")]
 
 def openCL(self, tab):
     gpu_index_map = []

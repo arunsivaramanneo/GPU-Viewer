@@ -123,6 +123,18 @@ def _parse_vulkan(results: dict) -> dict:
                 extensions_count += 1
 
         if device_name:
+            # Extract video profiles specifically from this GPU block
+            video_profiles = set()
+            matches = re.findall(r'VIDEO_CODEC_OPERATION_(\w+)_BIT_KHR', block)
+            for match in matches:
+                codec_name = match.replace("DECODE_", "").replace("ENCODE_", "")
+                if codec_name:
+                    video_profiles.add(codec_name)
+            decode_matches = re.findall(r'VK_KHR_video_decode_(\w+)', block)
+            for codec in decode_matches:
+                if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
+                    video_profiles.add(codec.upper())
+
             data["devices"].append({
                 "name": device_name,
                 "api_version": api_version,
@@ -131,6 +143,7 @@ def _parse_vulkan(results: dict) -> dict:
                 "device_type": device_type,
                 "formats_count": formats_count,
                 "extensions_count": extensions_count,
+                "video_profiles": sorted(list(video_profiles)),
             })
 
     data["instance_version"] = instance_version
@@ -289,6 +302,11 @@ def _parse_opencl(results: dict) -> dict:
                 # Count device extensions
                 if re.match(r'^cl_\w+', key):
                     current_device["extensions_count"] += 1
+
+    # Filter platforms to keep only those with devices
+    data["platforms"] = [p for p in data["platforms"] if p.get("devices")]
+    if not data["platforms"]:
+        data["supported"] = False
 
     return data
 
@@ -629,7 +647,8 @@ def _get_icon_name(field_name: str) -> str:
 
 def _make_card(title: str, icon_name: str, rows: list,
                nav_page: str | None, app,
-               supported: bool = True) -> Gtk.Box:
+               supported: bool = True,
+               row_widgets_out: dict = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -699,6 +718,8 @@ def _make_card(title: str, icon_name: str, rows: list,
         for row_title, row_subtitle in rows:
             row = _make_action_row(row_title, row_subtitle)
             card_box.append(row)
+            if row_widgets_out is not None:
+                row_widgets_out[row_title] = row
 
     # Dim the whole card if not supported
     if not supported:
@@ -725,6 +746,30 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     outer.set_vexpand(True)
     outer.set_hexpand(True)
+
+    device_id_cache = [None]
+    num_devices_cache = [0]
+    
+    # Pre-calculate device information once (fast, no processes spawned)
+    try:
+        card_paths = sorted(glob.glob("/sys/class/drm/card*/device"))
+        if not card_paths:
+            card_paths = sorted(glob.glob("/sys/class/drm/card*"))
+        if card_paths:
+            num_devices_cache[0] = len(card_paths)
+            for card_path in card_paths:
+                device_file = f"{card_path}/device"
+                if not os.path.exists(device_file):
+                    device_file = f"{card_path}/../../device"
+                if os.path.exists(device_file):
+                    try:
+                        with open(device_file, "r") as f:
+                            device_id_cache[0] = int(f.read().strip(), 16)
+                        break
+                    except (ValueError, OSError):
+                        continue
+    except Exception:
+        pass
 
     # ---- Loading state ----
     loading_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -801,6 +846,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             flow_box.append(sys_card)
 
         gpui_data = data["gpui_stats"]
+        stats_widgets = {}
         if gpui_data["supported"]:
             stats_rows = []
             if gpui_data.get("mem_used") is not None and gpui_data.get("mem_total") is not None:
@@ -826,6 +872,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 nav_page=None,
                 app=None,
                 supported=True,
+                row_widgets_out=stats_widgets
             )
             stats_card.set_size_request(300, -1)
             flow_box.append(stats_card)
@@ -862,6 +909,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     rows.append(("Vulkan Formats", str(dev["formats_count"])))
                 if dev.get("extensions_count") is not None and dev.get("extensions_count") > 0:
                     rows.append(("Extensions", str(dev["extensions_count"])))
+                if dev.get("video_profiles"):
+                    rows.append(("Video Profiles", ", ".join(dev["video_profiles"])))
 
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan – GPU {i}"
                 card = _make_card(
@@ -951,32 +1000,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             card.set_size_request(300, -1)
             flow_box.append(card)
 
-        # ── Vulkan Video ─────────────────────────────────────────────────
-        vv_data = data["vulkan_video"]
-        if vv_data.get("supported"):
-            vv_rows = []
-            if vv_data.get("profiles"):
-                vv_rows.append(("Supported Profiles", str(len(vv_data["profiles"]))))
-                for profile in vv_data["profiles"][:6]:  # Show first 6 profiles
-                    vv_rows.append(("Codec", profile))
-            else:
-                vv_rows.append(("Status", "Hardware video support detected"))
-            card = _make_card(
-                "Vulkan Video",
-                "../Images/Vulkan-Video.png",
-                vv_rows,
-                nav_page="vulkan_video_page",
-                app=app,
-                supported=True,
-            )
-        else:
-            card = _make_card(
-                "Vulkan Video", "../Images/Vulkan-Video.png",
-                [], nav_page=None, app=None, supported=False,
-            )
-        card.set_size_request(300, -1)
-        flow_box.append(card)
-
         # ── VDPAU ────────────────────────────────────────────────────────
         vd_data = data["vdpau"]
         if vd_data["supported"]:
@@ -1002,6 +1025,51 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         flow_box.append(card)
 
         outer.append(scroll)
+
+        # Periodic statistics update
+        def update_stats_callback():
+            if not outer.get_mapped():
+                return True
+                
+            def fetch_stats():
+                try:
+                    dev_id = device_id_cache[0]
+                    num_devs = num_devices_cache[0]
+                    if dev_id is not None:
+                        stats = get_gpu_stats(dev_id, num_devs)
+                        
+                        def apply_updates():
+                            if stats:
+                                if "Video Memory" in stats_widgets and stats.get("mem_used") is not None and stats.get("mem_total") is not None:
+                                    stats_widgets["Video Memory"].set_subtitle(f"{stats['mem_used']} MB / {stats['mem_total']} MB")
+                                if "GPU Usage" in stats_widgets and stats.get("usage") is not None:
+                                    stats_widgets["GPU Usage"].set_subtitle(f"{stats['usage']} %")
+                                if "Temperature" in stats_widgets and stats.get("temp") is not None:
+                                    stats_widgets["Temperature"].set_subtitle(f"{stats['temp']} °C")
+                                if "GPU Clock" in stats_widgets:
+                                    if stats.get("clock_current") is not None and stats.get("clock_max") is not None:
+                                        stats_widgets["GPU Clock"].set_subtitle(f"{stats['clock_current']} / {stats['clock_max']} MHz")
+                                    elif stats.get("clock_current") is not None:
+                                        stats_widgets["GPU Clock"].set_subtitle(f"{stats['clock_current']} MHz")
+                                if "Power" in stats_widgets and stats.get("power_usage") is not None:
+                                    stats_widgets["Power"].set_subtitle(f"{stats['power_usage']} W")
+                                if "Fan Speed" in stats_widgets and stats.get("fan_speed") is not None:
+                                    stats_widgets["Fan Speed"].set_subtitle(f"{stats['fan_speed']} %")
+                            return False
+                            
+                        GLib.idle_add(apply_updates)
+                except Exception as e:
+                    print(f"Error updating real-time stats: {e}")
+                    
+            threading.Thread(target=fetch_stats, daemon=True).start()
+            return True
+            
+        timeout_id = GLib.timeout_add(1000, update_stats_callback)
+        
+        def on_destroy(widget):
+            GLib.source_remove(timeout_id)
+        outer.connect("destroy", on_destroy)
+
         return False  # GLib.idle_add must return False to not repeat
 
     threading.Thread(target=_bg_worker, daemon=True).start()

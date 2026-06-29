@@ -85,7 +85,7 @@ def isOpenclSupported():
         clinfo_process.wait()
         clinfo_process.communicate()
     clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
-    return len(clinfo_output) > 10 and clinfo_process.returncode == 0
+    return len(clinfo_output) > 10 and clinfo_process.returncode == 0 and "Device Name" in clinfo_output
 
 def isVdpauinfoSupported():
     with open(Filenames.vdpauinfo_output_file, "w") as file:
@@ -286,11 +286,6 @@ else:
             elif visible_child_name == "vdpau_page":
                 source_file = Filenames.vdpauinfo_output_file
                 default_name = "vdpauinfo.txt"
-            elif visible_child_name == "vulkan_video_page":
-                source_file = "/tmp/gpu-viewer/vulkan_video_info.txt"
-                default_name = "vulkan_video_info.txt"
-                with open(source_file, "w") as f:
-                    subprocess.run(["vulkaninfo", "--show-video-props"], stdout=f, universal_newlines=True)
             else:
                 return
             
@@ -633,12 +628,6 @@ else:
                     return openCL(self, box)
                 _register_available("opencl_page", "OpenCL", "OpenCL", _build_opencl)
 
-            if results.get("vulkan_video"):
-                def _build_vulkan_video():
-                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                    return VulkanVideo(box)
-                _register_available("vulkan_video_page", "Vulkan Video", "Vulkan-Video",
-                                   _build_vulkan_video)
 
             if results.get("vdpau"):
                 def _build_vdpau():
