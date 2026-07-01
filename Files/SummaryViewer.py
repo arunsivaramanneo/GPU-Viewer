@@ -34,7 +34,7 @@ import shutil
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango
+from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
 
 import const
 import Filenames
@@ -962,6 +962,8 @@ def _make_card(title: str, icon_name: str, rows: list,
     frame.set_margin_end(0)
     frame.set_margin_top(0)
     frame.set_margin_bottom(0)
+    # Add CSS class for styling
+    frame.add_css_class("summary-card")
 
     card_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     frame.set_child(card_box)
@@ -1048,6 +1050,26 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     app     : the GPUViewerApp instance (has .view_stack)
     results : the dict from _probe_and_build_tabs  {vulkan: bool, …}
     """
+    # Add CSS styling for cards
+    css_provider = Gtk.CssProvider()
+    css_provider.load_from_data(b"""
+    .summary-card {
+        border: 1px solid @borders;
+        border-radius: 6px;
+        background-color: @view_bg_color;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+    
+    .summary-card:disabled {
+        opacity: 0.55;
+    }
+    """)
+    Gtk.StyleContext.add_provider_for_display(
+        Gdk.Display.get_default(),
+        css_provider,
+        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+    
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     outer.set_vexpand(True)
     outer.set_hexpand(True)
