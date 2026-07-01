@@ -325,10 +325,20 @@ def _parse_opencl(results: dict) -> dict:
             parser = ClinfoParser()
             platforms = []
             for p in parser.platforms:
-                plat = {"name": p.get("name", ""), "devices": [], "extensions_count": 0}
+                plat = {
+                    "name": p.get("name", ""),
+                    "version": "",
+                    "profile": "",
+                    "devices": [],
+                    "extensions_count": 0
+                }
                 # Platform properties often contain 'Platform Extensions'
                 for key, val, children in p.get("properties", []):
-                    if "Platform Extensions" in key:
+                    if key == "Platform Version" or key == "Version":
+                        plat["version"] = val
+                    elif key == "Platform Profile" or key == "Profile":
+                        plat["profile"] = val
+                    elif "Platform Extensions" in key:
                         # Count cl_* tokens in the value and any child entries
                         cnt = 0
                         if val:
@@ -338,7 +348,14 @@ def _parse_opencl(results: dict) -> dict:
                             cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
                         plat["extensions_count"] = cnt
                 for d in p.get("devices", []):
-                    dev = {"name": d.get("name", ""), "version": "", "opencl_c_version": "", "driver_version": "", "extensions_count": 0}
+                    dev = {
+                        "name": d.get("name", ""),
+                        "version": "",
+                        "opencl_c_version": "",
+                        "driver_version": "",
+                        "extensions_count": 0,
+                        "opencl_c_features_count": 0
+                    }
                     for key, val, children in d.get("properties", []):
                         if key == "Device Version" or key == "Version":
                             dev["version"] = val
@@ -355,6 +372,13 @@ def _parse_opencl(results: dict) -> dict:
                                 cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_k))
                                 cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
                             dev["extensions_count"] = cnt
+                    # Count OpenCL C features (count _opencl_c in properties)
+                    for key, val, children in d.get("properties", []):
+                        if "OpenCL C" in key and "Features" in key:
+                            dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', val or ""))
+                            for sub_k, sub_v in children:
+                                dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', sub_k))
+                                dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', sub_v))
                     plat["devices"].append(dev)
                 platforms.append(plat)
 
@@ -375,18 +399,20 @@ def _parse_opencl(results: dict) -> dict:
     except Exception:
         return data
 
-    # Quick pass: just grab Platform Name + first Device Name + Device Version + extensions
+    # Quick pass: grab Platform Name, Version, Profile + Device info + extensions
     current_platform = None
     current_device = None
     mode = "START"
     in_platform_extensions = False
     in_device_extensions = False
+    in_opencl_c_features = False
 
     for line in content.splitlines():
         if not line.strip():
-            if in_platform_extensions or in_device_extensions:
+            if in_platform_extensions or in_device_extensions or in_opencl_c_features:
                 in_platform_extensions = False
                 in_device_extensions = False
+                in_opencl_c_features = False
             continue
         indent = len(line) - len(line.lstrip())
         content_line = line.strip()
@@ -401,6 +427,7 @@ def _parse_opencl(results: dict) -> dict:
                 mode = "STOP"
             in_platform_extensions = False
             in_device_extensions = False
+            in_opencl_c_features = False
             continue
 
         if mode in ("STOP", "START"):
@@ -416,14 +443,28 @@ def _parse_opencl(results: dict) -> dict:
 
         if indent == 2:
             if key == "Platform Name":
-                current_platform = {"name": value, "devices": [], "extensions_count": 0}
+                current_platform = {
+                    "name": value,
+                    "version": "",
+                    "profile": "",
+                    "devices": [],
+                    "extensions_count": 0
+                }
                 data["platforms"].append(current_platform)
                 current_device = None
                 in_platform_extensions = False
                 in_device_extensions = False
+                in_opencl_c_features = False
+            elif key == "Platform Version" or key == "Version":
+                if current_platform:
+                    current_platform["version"] = value
+            elif key == "Platform Profile" or key == "Profile":
+                if current_platform:
+                    current_platform["profile"] = value
             elif key == "Platform Extensions":
                 in_platform_extensions = True
                 in_device_extensions = False
+                in_opencl_c_features = False
                 continue
             elif mode == "DEVICE" and current_platform:
                 if key == "Device Name":
@@ -433,11 +474,19 @@ def _parse_opencl(results: dict) -> dict:
                         "opencl_c_version": "",
                         "driver_version": "",
                         "extensions_count": 0,
+                        "opencl_c_features_count": 0
                     }
                     current_platform["devices"].append(current_device)
                     in_device_extensions = False
+                    in_opencl_c_features = False
                 elif key == "Device Extensions":
                     in_device_extensions = True
+                    in_platform_extensions = False
+                    in_opencl_c_features = False
+                    continue
+                elif "OpenCL C" in key and "Features" in key:
+                    in_opencl_c_features = True
+                    in_device_extensions = False
                     in_platform_extensions = False
                     continue
                 elif current_device:
@@ -455,6 +504,10 @@ def _parse_opencl(results: dict) -> dict:
                 # Extract cl_* tokens from the whole line
                 matches = re.findall(r'\bcl_[A-Za-z0-9_]+\b', content_line)
                 current_device["extensions_count"] += len(matches)
+            elif in_opencl_c_features and current_device:
+                # Extract _opencl_c features from the whole line
+                matches = re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', content_line)
+                current_device["opencl_c_features_count"] += len(matches)
 
     # Filter platforms to keep only those with devices
     data["platforms"] = [p for p in data["platforms"] if p.get("devices")]
@@ -1338,26 +1391,37 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         # ── OpenCL ───────────────────────────────────────────────────────
         cl_data = data["opencl"]
         if cl_data["supported"] and cl_data.get("platforms"):
-            for platform in cl_data["platforms"]:
-                rows = [("Platform", platform["name"])]
-                if platform.get("extensions_count", 0) > 0:
-                    rows.append(("Platform Extensions", str(platform["extensions_count"])))
-                for dev in platform.get("devices", [])[:3]:  # max 3 devices shown
-                    if dev.get("name"):
-                        rows.append(("Device", dev["name"]))
-                    if dev.get("version"):
-                        rows.append(("OpenCL Version", dev["version"]))
-                    if dev.get("driver_version"):
-                        rows.append(("Driver Version", dev["driver_version"]))
-                    if dev.get("extensions_count", 0) > 0:
-                        rows.append(("Device Extensions", str(dev["extensions_count"])))
+            for i, platform in enumerate(cl_data["platforms"]):
+                # Create columns: first for platform, then for each device
+                columns = [
+                    [
+                        ("Platform", platform["name"]),
+                        ("Platform Version", platform.get("version", "—")),
+                        ("Platform Profile", platform.get("profile", "—")),
+                        ("Platform Extensions", str(platform.get("extensions_count", 0))),
+                    ]
+                ]
+                
+                # Add each device as a separate column
+                for dev in platform.get("devices", []):
+                    columns.append([
+                        ("Device", dev.get("name", "—")),
+                        ("Device Version", dev.get("version", "—")),
+                        ("Driver Version", dev.get("driver_version", "—")),
+                        ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
+                        ("Device Extensions", str(dev.get("extensions_count", 0))),
+                    ])
+                
+                content_widget = _make_grid_card_content(columns)
+                label = f"OpenCL – {platform['name']}"
                 card = _make_card(
-                    f"OpenCL – {platform['name']}",
+                    label,
                     "../Images/OpenCL.svg",
-                    rows,
+                    [],
                     nav_page="opencl_page",
                     app=app,
                     supported=True,
+                    content_widget=content_widget,
                 )
                 card.set_size_request(300, -1)
                 flow_box.append(card)
