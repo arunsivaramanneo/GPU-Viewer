@@ -435,11 +435,39 @@ else:
             self.save_button.set_icon_name("document-save-symbolic")
             self.save_button.connect("clicked", self._on_save_button_clicked)
 
+            # Create the close-tab button (disabled for Summary and About Us)
+            self.close_tab_button = Gtk.Button.new()
+            self.close_tab_button.add_css_class("flat")
+            self.close_tab_button.set_valign(Gtk.Align.CENTER)
+            self.close_tab_button.set_icon_name("window-close-symbolic")
+            self.close_tab_button.set_sensitive(False)
+            def _on_close_tab_clicked(btn):
+                visible = self.view_stack.get_visible_child_name()
+                if not visible or visible in ("summary", "page3"):
+                    return
+
+                # Remove the currently visible child and return to summary.
+                current = self.view_stack.get_visible_child()
+                if current is not None:
+                    self.view_stack.remove(current)
+
+                # Allow the tab to be rebuilt later if reopened.
+                if visible in self._inner_stacks:
+                    del self._inner_stacks[visible]
+                if visible in self._tab_built:
+                    self._tab_built[visible] = False
+
+                self.view_stack.set_visible_child_name("summary")
+                if hasattr(self, 'close_tab_button') and self.close_tab_button:
+                    self.close_tab_button.set_sensitive(False)
+            self.close_tab_button.connect("clicked", _on_close_tab_clicked)
+
             # Create a box to hold the buttons
             header_buttons_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
             header_buttons_box.set_halign(Gtk.Align.END)
             header_buttons_box.set_valign(Gtk.Align.CENTER)
             header_buttons_box.append(self.save_button)
+            header_buttons_box.append(self.close_tab_button)
             header_buttons_box.append(self.theme_button)
             self.header_bar.pack_end(header_buttons_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
@@ -517,6 +545,18 @@ else:
                         print(f"Support check failed for {key}: {e}")
                         results[key] = False
 
+            # If the parallel probe missed OpenCL but a clinfo output file
+            # exists with device information, treat OpenCL as available so
+            # the OpenCL tab can be registered and opened from Summary.
+            try:
+                if not results.get("opencl"):
+                    clout_lines = copyContentsFromFile(Filenames.opencl_output_file)
+                    clout = "\n".join(clout_lines) if isinstance(clout_lines, (list, tuple)) else str(clout_lines)
+                    if len(clout) > 10 and "Device Name" in clout:
+                        results["opencl"] = True
+            except Exception:
+                pass
+
             # Fix #1 & #6: vulkan-video check reuses the file written by isVulkanSupported
             results["vulkan_video"] = isVulkanVideoSupported() if results.get("vulkan") else False
 
@@ -531,6 +571,9 @@ else:
             ready the inner stack simply switches to its "content" child — the outer
             ViewStack page never moves, so tabs never jump or reorder.
             """
+            # Debug: print probe results for troubleshooting OpenCL tab
+            pass
+
             # Remove the global loading spinner page
             if hasattr(self, '_loading_box') and self._loading_box:
                 self.view_stack.remove(self._loading_box)
@@ -573,12 +616,12 @@ else:
                 self._tab_built[page_name] = False
 
             def _build_tab_async(page_name):
-                """Run builder in a worker thread; reveal result on main thread."""
+                """Build tab widgets on the main thread to avoid GTK thread issues."""
                 builder = self._tab_builders[page_name]
-                def _worker():
+                def _build_on_main():
                     real_widget = builder()
-                    GLib.idle_add(_reveal_content, page_name, real_widget)
-                threading.Thread(target=_worker, daemon=True).start()
+                    return _reveal_content(page_name, real_widget)
+                GLib.idle_add(_build_on_main)
 
             def _reveal_content(page_name, real_widget):
                 """Swap spinner → real content inside the inner stack (main thread)."""
@@ -616,6 +659,12 @@ else:
                 _register_available("page1", "Vulkan", "Vulkan",
                                     lambda: create_vulkan_tab_content(self))
 
+            if results.get("vulkan_video"):
+                def _build_vulkan_video():
+                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                    return VulkanVideo(box)
+                _register_available("vulkan_video_page", "Vulkan Video", "Vulkan-Video", _build_vulkan_video)
+
             if results.get("opengl"):
                 def _build_opengl():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
@@ -627,7 +676,6 @@ else:
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return openCL(self, box)
                 _register_available("opencl_page", "OpenCL", "OpenCL", _build_opencl)
-
 
             if results.get("vdpau"):
                 def _build_vdpau():
@@ -647,6 +695,10 @@ else:
                     self._tab_built[name] = True   # prevent double-build
                     _build_tab_async(name)
 
+                # Enable close button only for main tabs (not Summary or About)
+                if hasattr(self, 'close_tab_button') and self.close_tab_button:
+                    self.close_tab_button.set_sensitive(name not in ("summary", "page3"))
+
             self.view_stack.connect("notify::visible-child", _on_visible_child_changed)
 
             def open_tab(page_name):
@@ -658,7 +710,7 @@ else:
 
                 title, icon, builder = self._available_tab_builders[page_name]
                 _register_tab(page_name, title, icon, builder)
-                self._tab_built[page_name] = True   # mark as building to prevent duplicate work
+                self._tab_built[page_name] = False
                 _build_tab_async(page_name)
                 self.view_stack.set_visible_child_name(page_name)
 

@@ -29,6 +29,7 @@ import os
 import glob
 import subprocess
 import threading
+import shutil
 
 import gi
 gi.require_version("Gtk", "4.0")
@@ -38,6 +39,11 @@ from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango
 import const
 import Filenames
 from Common import getLogo, getGpuImage, get_gpu_stats, fetchContentsFromCommand
+# Try to reuse the robust clinfo parser when available
+try:
+    from OpenCL import ClinfoParser
+except Exception:
+    ClinfoParser = None
 
 
 # ---------------------------------------------------------------------------
@@ -49,6 +55,8 @@ def _parse_vulkan(results: dict) -> dict:
     data = {
         "supported": results.get("vulkan", False),
         "devices": [],
+        "instance_extensions_count": 0,
+        "instance_layers_count": 0,
     }
     if not data["supported"]:
         return data
@@ -64,11 +72,6 @@ def _parse_vulkan(results: dict) -> dict:
     # gpu_blocks[0] is the preamble (instance version etc.)
     # gpu_blocks[1..] are per-device blocks
 
-    instance_version = ""
-    m = re.search(r'Instance Version\s*=\s*(\S+)', content)
-    if m:
-        instance_version = m.group(1)
-
     for block in gpu_blocks[1:]:
         device_name = ""
         api_version = ""
@@ -77,6 +80,9 @@ def _parse_vulkan(results: dict) -> dict:
         device_type = ""
         formats_count = 0
         extensions_count = 0
+        memory_types_count = 0
+        memory_heaps_count = 0
+        queue_count = 0
 
         for line in block.splitlines():
             stripped = line.strip()
@@ -113,11 +119,6 @@ def _parse_vulkan(results: dict) -> dict:
                     driver_version = raw
             elif stripped.startswith("deviceType"):
                 device_type = stripped.split("=", 1)[-1].strip()
-            elif "Formats:" in stripped and "count" in stripped:
-                # Count formats in this GPU block
-                m = re.search(r'count\s*=\s*(\d+)', stripped)
-                if m:
-                    formats_count += int(m.group(1))
             elif stripped.startswith("VK_") and "extension" in stripped.lower():
                 # Count extensions in this GPU block
                 extensions_count += 1
@@ -135,18 +136,67 @@ def _parse_vulkan(results: dict) -> dict:
                 if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
                     video_profiles.add(codec.upper())
 
+            memory_types_count = len(re.findall(r'memoryTypes\s*\[\s*\d+\s*\]', block, re.I))
+            memory_heaps_count = len(re.findall(r'memoryHeaps\s*\[\s*\d+\s*\]', block, re.I))
+            queue_count = len(re.findall(r'queueProperties\s*\[\s*\d+\s*\]', block, re.I))
+
             data["devices"].append({
                 "name": device_name,
                 "api_version": api_version,
                 "driver_name": driver_name,
                 "driver_version": driver_version,
                 "device_type": device_type,
+                # Count only supported formats listed under 'Format Properties'
                 "formats_count": formats_count,
                 "extensions_count": extensions_count,
+                "memory_types_count": memory_types_count,
+                "memory_heaps_count": memory_heaps_count,
+                "queue_count": queue_count,
                 "video_profiles": sorted(list(video_profiles)),
             })
 
-    data["instance_version"] = instance_version
+        # Post-process: count supported formats by scanning 'Format Properties' section
+        try:
+            # Sum numeric "Formats: count = <N>" values found in the
+            # supported 'Format Properties' section (stop at 'Unsupported Formats').
+            in_formats = False
+            formats_total = 0
+            for line in block.splitlines():
+                s = line.strip()
+                if 'Format Properties' in s:
+                    in_formats = True
+                    continue
+                if in_formats:
+                    if 'Unsupported Formats' in s:
+                        break
+                    m = re.search(r'Formats:\s*count\s*=\s*(\d+)', s)
+                    if m:
+                        try:
+                            formats_total += int(m.group(1))
+                        except Exception:
+                            continue
+            formats_count = formats_total
+            if data['devices']:
+                data['devices'][-1]['formats_count'] = formats_count
+        except Exception:
+            pass
+
+    instance_ext_match = re.search(r'Instance Extensions\s*:\s*count\s*=\s*(\d+)', content, re.I)
+    if instance_ext_match:
+        data["instance_extensions_count"] = int(instance_ext_match.group(1))
+    else:
+        ext_section = re.search(r'Instance Extensions\s*:\s*(.*?)\n\n', content, re.S | re.I)
+        if ext_section:
+            data["instance_extensions_count"] = len(re.findall(r'VK_[A-Za-z0-9_]+', ext_section.group(1)))
+        else:
+            data["instance_extensions_count"] = len(re.findall(r'VK_[A-Za-z0-9_]+', content))
+
+    instance_layers_section = re.search(r'Instance Layers\s*:\s*(.*?)\n\n', content, re.S | re.I)
+    if instance_layers_section:
+        data["instance_layers_count"] = len(re.findall(r'VK_LAYER_[A-Za-z0-9_]+', instance_layers_section.group(1)))
+    else:
+        data["instance_layers_count"] = len(re.findall(r'VK_LAYER_[A-Za-z0-9_]+', content))
+
     return data
 
 
@@ -160,13 +210,21 @@ def _count_vulkan_formats(content: str) -> int:
 def _parse_opengl(results: dict) -> dict:
     """Return key OpenGL fields via glxinfo -B (re-using glxinfo.txt if possible)."""
     data = {
-        "supported": results.get("opengl", False),
+        "supported": results.get("opengl") or results.get("egl", False),
         "renderer": "",
         "vendor": "",
         "version": "",
         "shading_language_version": "",
         "es_version": "",
+        "es_shading_language_version": "",
         "egl_version": "",
+        "glx_version": "",
+        "extensions_count": 0,
+        "es_extensions_count": 0,
+        "glx_extension_count": 0,
+        "egl_count": 0,
+        "glx_visual_count": 0,
+        "fbconfig_count": 0,
     }
     if not data["supported"]:
         return data
@@ -187,6 +245,9 @@ def _parse_opengl(results: dict) -> dict:
     data["extensions_count"] = len(extensions)
     data["fbconfig_count"] = fbconfig_count
 
+    count_data = _parse_glx_es_egl_counts(lines)
+    data.update(count_data)
+
     for line in lines:
         line = line.strip()
         if line.startswith("OpenGL renderer string:"):
@@ -199,10 +260,43 @@ def _parse_opengl(results: dict) -> dict:
             data["shading_language_version"] = line.split(":", 1)[1].strip()
         elif line.startswith("OpenGL ES profile version string:"):
             data["es_version"] = line.split(":", 1)[1].strip()
+        elif line.startswith("OpenGL ES profile shading language version string:"):
+            data["es_shading_language_version"] = line.split(":", 1)[1].strip()
+        elif line.startswith("GLX version:"):
+            data["glx_version"] = line.split(":", 1)[1].strip()
         elif "EGL" in line and "version" in line.lower():
             # Try to extract EGL version
             if "EGL version:" in line:
                 data["egl_version"] = line.split(":", 1)[1].strip()
+
+    # Try to gather EGL extension count from es2_info when available.
+    try:
+        es2_lines = fetchContentsFromCommand("es2_info 2>/dev/null")
+        egl_entries = []
+        in_extensions_section = False
+        for line in es2_lines:
+            if line.startswith("EGL_VERSION") and not data["egl_version"]:
+                parts = line.split(":", 1)
+                if len(parts) > 1:
+                    data["egl_version"] = parts[1].strip()
+                continue
+
+            if line.startswith("EGL_EXTENSIONS"):
+                in_extensions_section = True
+                parts = line.split(":", 1)
+                if len(parts) > 1:
+                    egl_entries.append(parts[1])
+                continue
+
+            if in_extensions_section:
+                if line.startswith("EGL_CLIENT"):
+                    break
+                egl_entries.append(line)
+
+        extensions_text = ",".join(egl_entries)
+        data["egl_count"] = len(re.findall(r'\bEGL_[A-Za-z0-9_]+\b', extensions_text))
+    except Exception:
+        pass
 
     return data
 
@@ -213,9 +307,68 @@ def _parse_opencl(results: dict) -> dict:
         "supported": results.get("opencl", False),
         "platforms": [],
     }
+    # If the probe flag says OpenCL is unsupported, still attempt to parse
+    # the clinfo output file if it exists and is non-empty — some systems
+    # produce clinfo output even when the probe check failed.
     if not data["supported"]:
-        return data
+        try:
+            if not os.path.exists(Filenames.opencl_output_file) or os.path.getsize(Filenames.opencl_output_file) < 10:
+                return data
+            # allow parsing to continue; `data["supported"]` will be updated
+            # based on parsed platforms later
+        except Exception:
+            return data
 
+    # Prefer the full parser from OpenCL.py if available — it's more robust.
+    if ClinfoParser is not None:
+        try:
+            parser = ClinfoParser()
+            platforms = []
+            for p in parser.platforms:
+                plat = {"name": p.get("name", ""), "devices": [], "extensions_count": 0}
+                # Platform properties often contain 'Platform Extensions'
+                for key, val, children in p.get("properties", []):
+                    if "Platform Extensions" in key:
+                        # Count cl_* tokens in the value and any child entries
+                        cnt = 0
+                        if val:
+                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', val))
+                        for sub_k, sub_v in children:
+                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_k))
+                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
+                        plat["extensions_count"] = cnt
+                for d in p.get("devices", []):
+                    dev = {"name": d.get("name", ""), "version": "", "opencl_c_version": "", "driver_version": "", "extensions_count": 0}
+                    for key, val, children in d.get("properties", []):
+                        if key == "Device Version" or key == "Version":
+                            dev["version"] = val
+                        elif "OpenCL C" in key and "Version" in key:
+                            dev["opencl_c_version"] = val
+                        elif key == "Driver Version":
+                            dev["driver_version"] = val
+                        elif "Device Extensions" in key:
+                            # Count cl_* tokens in value and children
+                            cnt = 0
+                            if val:
+                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', val))
+                            for sub_k, sub_v in children:
+                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_k))
+                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
+                            dev["extensions_count"] = cnt
+                    plat["devices"].append(dev)
+                platforms.append(plat)
+
+            data["platforms"] = [pp for pp in platforms if pp.get("devices")]
+            if data["platforms"]:
+                data["supported"] = True
+            else:
+                data["supported"] = False
+            return data
+        except Exception:
+            # Fall through to the simple parser below
+            pass
+
+    # Fallback: quick parsing (best-effort)
     try:
         with open(Filenames.opencl_output_file, "r") as f:
             content = f.read()
@@ -295,17 +448,19 @@ def _parse_opencl(results: dict) -> dict:
                     elif key == "Driver Version":
                         current_device["driver_version"] = value
             elif in_platform_extensions and current_platform:
-                # Count platform extensions
-                if re.match(r'^cl_\w+', key):
-                    current_platform["extensions_count"] += 1
+                # Extract cl_* tokens from the whole line
+                matches = re.findall(r'\bcl_[A-Za-z0-9_]+\b', content_line)
+                current_platform["extensions_count"] += len(matches)
             elif in_device_extensions and current_device:
-                # Count device extensions
-                if re.match(r'^cl_\w+', key):
-                    current_device["extensions_count"] += 1
+                # Extract cl_* tokens from the whole line
+                matches = re.findall(r'\bcl_[A-Za-z0-9_]+\b', content_line)
+                current_device["extensions_count"] += len(matches)
 
     # Filter platforms to keep only those with devices
     data["platforms"] = [p for p in data["platforms"] if p.get("devices")]
-    if not data["platforms"]:
+    if data["platforms"]:
+        data["supported"] = True
+    else:
         data["supported"] = False
 
     return data
@@ -347,6 +502,60 @@ def _count_opengl_extensions_and_fbconfig(lines: list) -> tuple[set, int]:
             fbconfig_count += 1
 
     return extensions, fbconfig_count
+
+
+def _parse_glx_es_egl_counts(lines: list) -> dict:
+    es_extensions = set()
+    glx_extensions = set()
+    glx_visual_count = 0
+    in_es_extensions = False
+    in_glx_client_extensions = False
+    in_glx_visuals = False
+    glx_visuals_started = False
+
+    for line in lines:
+        stripped = line.strip()
+
+        if stripped.startswith("OpenGL ES profile extensions:"):
+            in_es_extensions = True
+            continue
+        if in_es_extensions:
+            if stripped == "":
+                in_es_extensions = False
+                continue
+            es_extensions.update(re.findall(r'\bGL_[A-Za-z0-9_]+\b', stripped))
+            continue
+
+        if stripped.startswith("client glx extensions:"):
+            in_glx_client_extensions = True
+            continue
+        if in_glx_client_extensions:
+            if stripped == "":
+                in_glx_client_extensions = False
+                continue
+            glx_extensions.update(re.findall(r'\bGLX_[A-Za-z0-9_]+\b', stripped))
+            continue
+
+        if "GLX Visuals" in stripped:
+            in_glx_visuals = True
+            glx_visuals_started = False
+            continue
+        if in_glx_visuals:
+            if re.match(r'^[-=]{2,}', stripped):
+                glx_visuals_started = True
+                continue
+            if not glx_visuals_started:
+                continue
+            if stripped == "":
+                in_glx_visuals = False
+                continue
+            glx_visual_count += 1
+
+    return {
+        "es_extensions_count": len(es_extensions),
+        "glx_extension_count": len(glx_extensions),
+        "glx_visual_count": glx_visual_count,
+    }
 
 
 def _parse_gpui_stats(results: dict) -> dict:
@@ -484,6 +693,9 @@ def _parse_system() -> dict:
         "kernel": "",
         "desktop": "",
         "windowing": "",
+        "hardware_model": "",
+        "disk_capacity": "",
+        "display": "",
     }
     try:
         result = subprocess.run(
@@ -529,6 +741,75 @@ def _parse_system() -> dict:
     info["desktop"] = os.environ.get("XDG_CURRENT_DESKTOP", "")
     info["windowing"] = os.environ.get("XDG_SESSION_TYPE", "")
 
+    try:
+        product_name = ""
+        sys_vendor = ""
+        version = ""
+        for path, key in [
+            ("/sys/devices/virtual/dmi/id/product_name", "product_name"),
+            ("/sys/devices/virtual/dmi/id/sys_vendor", "sys_vendor"),
+            ("/sys/devices/virtual/dmi/id/product_version", "version"),
+        ]:
+            try:
+                if os.path.exists(path):
+                    with open(path, "r") as f:
+                        value = f.read().strip()
+                    if key == "product_name":
+                        product_name = value
+                    elif key == "sys_vendor":
+                        sys_vendor = value
+                    elif key == "version":
+                        version = value
+            except Exception:
+                pass
+
+        if product_name:
+            model_parts = []
+            if sys_vendor:
+                model_parts.append(sys_vendor)
+            model_parts.append(product_name)
+            if version and version not in product_name:
+                model_parts.append(version)
+            info["hardware_model"] = " ".join(model_parts)
+    except Exception:
+        pass
+
+    try:
+        usage = shutil.disk_usage("/")
+        total_gb = usage.total / (1024**3)
+        used_gb = usage.used / (1024**3)
+        free_gb = usage.free / (1024**3)
+        info["disk_capacity"] = f"{used_gb:.1f} GB used / {total_gb:.1f} GB total ({free_gb:.1f} GB free)"
+    except Exception:
+        pass
+
+    try:
+        display_info = []
+        if shutil.which("xrandr"):
+            result = subprocess.run(
+                ["xrandr", "--listmonitors"],
+                capture_output=True, text=True, timeout=3
+            )
+            if result.returncode == 0:
+                for line in result.stdout.splitlines()[1:]:
+                    parts = line.strip().split()
+                    if len(parts) >= 3:
+                        display_info.append(f"{parts[1]} {parts[2]}")
+                    elif len(parts) >= 2:
+                        display_info.append(parts[1])
+        if not display_info and shutil.which("xdpyinfo"):
+            result = subprocess.run(
+                ["xdpyinfo"], capture_output=True, text=True, timeout=3
+            )
+            for line in result.stdout.splitlines():
+                if "dimensions:" in line:
+                    display_info.append(line.strip().split("dimensions:", 1)[1].strip())
+                    break
+        if display_info:
+            info["display"] = "; ".join(display_info)
+    except Exception:
+        pass
+
     return info
 
 
@@ -555,16 +836,15 @@ def _make_action_row(title: str, subtitle: str) -> Adw.ActionRow:
     row.set_subtitle(subtitle if subtitle else "—")
     row.set_title_selectable(True)
     row.set_subtitle_selectable(True)
-    
-    # Add icon prefix
+
     icon_name = _get_icon_name(title)
     try:
         icon = Gtk.Image.new_from_icon_name(icon_name)
-        icon.set_pixel_size(16)
+        icon.set_pixel_size(12)
         row.add_prefix(icon)
     except Exception:
         pass
-    
+
     return row
 
 
@@ -576,6 +856,18 @@ def _make_status_badge(text: str, good: bool) -> Gtk.Label:
     if good:
         badge.add_css_class("success")
     return badge
+
+
+def _make_grid_card_content(columns: list[list[tuple[str, str]]]) -> Gtk.Widget:
+    grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
+    grid_box.set_hexpand(True)
+    for column_rows in columns:
+        col_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        col_box.set_hexpand(True)
+        for title, subtitle in column_rows:
+            col_box.append(_make_action_row(title, subtitle))
+        grid_box.append(col_box)
+    return grid_box
 
 
 def _nav_button(label: str, page_name: str, app) -> Gtk.Button:
@@ -628,7 +920,14 @@ def _get_icon_name(field_name: str) -> str:
         "vendor": "organization-symbolic",
         "opengl version": "preferences-system-symbolic",
         "glsl version": "text-editor-symbolic",
+        "opengl es version": "text-editor-symbolic",
+        "opengl es glsl version": "text-editor-symbolic",
+        "opengl es extension count": "preferences-system-symbolic",
         "egl version": "system-search-symbolic",
+        "egl extension count": "system-search-symbolic",
+        "glx extension count": "view-grid-symbolic",
+        "glx visual count": "view-preview-symbolic",
+        "glx fbconfig count": "view-list-symbolic",
         "platform": "system-symbolic",
         "opencl version": "document-symbolic",
         "status": "emblem-ok-symbolic",
@@ -648,7 +947,8 @@ def _get_icon_name(field_name: str) -> str:
 def _make_card(title: str, icon_name: str, rows: list,
                nav_page: str | None, app,
                supported: bool = True,
-               row_widgets_out: dict = None) -> Gtk.Box:
+               row_widgets_out: dict = None,
+               content_widget: Gtk.Widget | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -673,15 +973,15 @@ def _make_card(title: str, icon_name: str, rows: list,
     # Try to load the subsystem logo icon
     try:
         icon_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            icon_name, 28, 28, True
+            icon_name, 20, 20, True
         )
         icon_img = Gtk.Picture.new_for_pixbuf(icon_pixbuf)
-        icon_img.set_size_request(28, 28)
+        icon_img.set_size_request(20, 20)
         header.append(icon_img)
     except Exception:
         # Fallback: named icon
         icon_img = Gtk.Image.new_from_icon_name("application-x-executable-symbolic")
-        icon_img.set_pixel_size(24)
+        icon_img.set_pixel_size(20)
         header.append(icon_img)
 
     title_lbl = Gtk.Label(label=title)
@@ -709,7 +1009,9 @@ def _make_card(title: str, icon_name: str, rows: list,
     card_box.append(sep)
 
     # ---------- Property rows ----------
-    if not supported:
+    if content_widget is not None and supported:
+        card_box.append(content_widget)
+    elif not supported:
         no_row = Adw.ActionRow()
         no_row.set_title("Status")
         no_row.set_subtitle("This subsystem was not detected on your system.")
@@ -819,59 +1121,59 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
         # ── System Information ───────────────────────────────────────────
         sys_data = data["system"]
-        sys_rows = []
-        if sys_data.get("os"):
-            sys_rows.append(("Operating System", sys_data["os"]))
-        if sys_data.get("cpu"):
-            sys_rows.append(("Processor", sys_data["cpu"]))
-        if sys_data.get("ram"):
-            sys_rows.append(("System RAM", sys_data["ram"]))
-        if sys_data.get("kernel"):
-            sys_rows.append(("Kernel", sys_data["kernel"]))
-        if sys_data.get("desktop"):
-            sys_rows.append(("Desktop", sys_data["desktop"]))
-        if sys_data.get("windowing"):
-            sys_rows.append(("Windowing System", sys_data["windowing"]))
-
-        if sys_rows:
-            sys_card = _make_card(
-                "System",
-                "../Images/about-us.png",
-                sys_rows,
-                nav_page=None,   # no detail tab for system info
-                app=None,
-                supported=True,
-            )
-            sys_card.set_size_request(300, -1)
-            flow_box.append(sys_card)
+        sys_columns = [
+            [
+                ("Operating System", sys_data.get("os", "—")),
+                ("Processor", sys_data.get("cpu", "—")),
+                ("System RAM", sys_data.get("ram", "—")),
+            ],
+            [
+                ("Kernel", sys_data.get("kernel", "—")),
+                ("Desktop", sys_data.get("desktop", "—")),
+                ("Windowing System", sys_data.get("windowing", "—")),
+            ],
+            [
+                ("Hardware Model", sys_data.get("hardware_model", "—")),
+                ("Disk Capacity", sys_data.get("disk_capacity", "—")),
+                ("Display", sys_data.get("display", "—")),
+            ],
+        ]
+        sys_card = _make_card(
+            "System",
+            "../Images/about-us.png",
+            [],
+            nav_page=None,   # no detail tab for system info
+            app=None,
+            supported=True,
+            content_widget=_make_grid_card_content(sys_columns),
+        )
+        sys_card.set_size_request(300, -1)
+        flow_box.append(sys_card)
 
         gpui_data = data["gpui_stats"]
         stats_widgets = {}
         if gpui_data["supported"]:
             stats_rows = []
-            if gpui_data.get("mem_used") is not None and gpui_data.get("mem_total") is not None:
-                stats_rows.append(("Video Memory", f"{gpui_data['mem_used']} MB / {gpui_data['mem_total']} MB"))
-            if gpui_data.get("usage") is not None and gpui_data["usage"] >= 0:
-                stats_rows.append(("GPU Usage", f"{gpui_data['usage']} %"))
-            if gpui_data.get("temp") is not None:
-                stats_rows.append(("Temperature", f"{gpui_data['temp']} °C"))
-            if gpui_data.get("clock_current") is not None and gpui_data.get("clock_max") is not None:
-                stats_rows.append(("GPU Clock", f"{gpui_data['clock_current']} / {gpui_data['clock_max']} MHz"))
-            elif gpui_data.get("clock_current") is not None:
-                stats_rows.append(("GPU Clock", f"{gpui_data['clock_current']} MHz"))
-            if gpui_data.get("power_usage") is not None and gpui_data["power_usage"] > 0:
-                stats_rows.append(("Power", f"{gpui_data['power_usage']} W"))
-            if gpui_data.get("fan_speed") is not None and gpui_data["fan_speed"] >= 0:
-                stats_rows.append(("Fan Speed", f"{gpui_data['fan_speed']} %"))
-            if not stats_rows:
-                stats_rows.append(("Status", "GPU stats are available, but no numeric values could be read."))
+            stats_columns = [
+                [
+                    ("Video Memory", f"{gpui_data['mem_used']} MB / {gpui_data['mem_total']} MB" if gpui_data.get("mem_used") is not None and gpui_data.get("mem_total") is not None else "—"),
+                    ("GPU Usage", f"{gpui_data['usage']} %" if gpui_data.get("usage") is not None and gpui_data["usage"] >= 0 else "—"),
+                    ("Temperature", f"{gpui_data['temp']} °C" if gpui_data.get("temp") is not None else "—"),
+                ],
+                [
+                    ("GPU Clock", f"{gpui_data['clock_current']} / {gpui_data['clock_max']} MHz" if gpui_data.get("clock_current") is not None and gpui_data.get("clock_max") is not None else (f"{gpui_data['clock_current']} MHz" if gpui_data.get("clock_current") is not None else "—")),
+                    ("Power", f"{gpui_data['power_usage']} W" if gpui_data.get("power_usage") is not None and gpui_data["power_usage"] > 0 else "—"),
+                    ("Fan Speed", f"{gpui_data['fan_speed']} %" if gpui_data.get("fan_speed") is not None and gpui_data["fan_speed"] >= 0 else "—"),
+                ],
+            ]
             stats_card = _make_card(
                 "GPU Statistics",
                 "../Images/about-us.png",
-                stats_rows,
+                [],
                 nav_page=None,
                 app=None,
                 supported=True,
+                content_widget=_make_grid_card_content(stats_columns),
                 row_widgets_out=stats_widgets
             )
             stats_card.set_size_request(300, -1)
@@ -892,34 +1194,38 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         vk_data = data["vulkan"]
         if vk_data["supported"] and vk_data.get("devices"):
             for i, dev in enumerate(vk_data["devices"]):
-                rows = []
-                if dev.get("name"):
-                    rows.append(("Device", dev["name"]))
-                if dev.get("api_version"):
-                    rows.append(("API Version", dev["api_version"]))
-                if dev.get("driver_name"):
-                    rows.append(("Driver", dev["driver_name"]))
-                if dev.get("driver_version"):
-                    rows.append(("Driver Version", dev["driver_version"]))
-                if dev.get("device_type"):
-                    rows.append(("Device Type", dev["device_type"]))
-                if vk_data.get("instance_version"):
-                    rows.append(("Instance Version", vk_data["instance_version"]))
-                if dev.get("formats_count") is not None and dev.get("formats_count") > 0:
-                    rows.append(("Vulkan Formats", str(dev["formats_count"])))
-                if dev.get("extensions_count") is not None and dev.get("extensions_count") > 0:
-                    rows.append(("Extensions", str(dev["extensions_count"])))
+                columns = [
+                    [
+                        ("API Version", dev.get("api_version", "—")),
+                        ("Driver", dev.get("driver_name", "—")),
+                        ("Driver Version", dev.get("driver_version", "—")),
+                        ("Device Type", dev.get("device_type", "—")),
+                    ],
+                    [
+                        ("Vulkan Formats", str(dev.get("formats_count", "—"))),
+                        ("Extensions", str(dev.get("extensions_count", "—"))),
+                        ("Memory Types Count", str(dev.get("memory_types_count", "—"))),
+                        ("Memory Heaps Count", str(dev.get("memory_heaps_count", "—"))),
+                    ],
+                    [
+                        ("Queues Count", str(dev.get("queue_count", "—"))),
+                        ("Instance Extensions", str(vk_data.get("instance_extensions_count", "—"))),
+                        ("Instance Layers Count", str(vk_data.get("instance_layers_count", "—"))),
+                    ],
+                ]
                 if dev.get("video_profiles"):
-                    rows.append(("Video Profiles", ", ".join(dev["video_profiles"])))
+                    columns[2].append(("Video Profiles", ", ".join(dev["video_profiles"])))
 
-                label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan – GPU {i}"
+                content_widget = _make_grid_card_content(columns)
+                label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
                 card = _make_card(
                     label,
                     "../Images/Vulkan.png",
-                    rows,
+                    [],
                     nav_page="page1",
                     app=app,
                     supported=True,
+                    content_widget=content_widget,
                 )
                 card.set_size_request(300, -1)
                 flow_box.append(card)
@@ -931,29 +1237,68 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             card.set_size_request(300, -1)
             flow_box.append(card)
 
+        vk_video_data = data["vulkan_video"]
+        if vk_video_data["supported"]:
+            video_rows = []
+            if vk_video_data.get("profiles"):
+                video_rows.append(("Profiles", ", ".join(vk_video_data["profiles"])))
+            card = _make_card(
+                "Vulkan Video",
+                "../Images/Vulkan-Video.png",
+                video_rows,
+                nav_page="vulkan_video_page",
+                app=app,
+                supported=True,
+            )
+            card.set_size_request(300, -1)
+            flow_box.append(card)
+        else:
+            card = _make_card(
+                "Vulkan Video",
+                "../Images/Vulkan-Video.png",
+                [],
+                nav_page=None,
+                app=None,
+                supported=False,
+            )
+            card.set_size_request(300, -1)
+            flow_box.append(card)
+
         # ── OpenGL ───────────────────────────────────────────────────────
         gl_data = data["opengl"]
         if gl_data["supported"] and gl_data.get("renderer"):
-            rows = []
-            if gl_data.get("renderer"):
-                rows.append(("Renderer", gl_data["renderer"]))
-            if gl_data.get("vendor"):
-                rows.append(("Vendor", gl_data["vendor"]))
-            if gl_data.get("version"):
-                rows.append(("OpenGL Version", gl_data["version"]))
-            if gl_data.get("shading_language_version"):
-                rows.append(("GLSL Version", gl_data["shading_language_version"]))
-            if gl_data.get("es_version"):
-                rows.append(("OpenGL ES Version", gl_data["es_version"]))
-            if gl_data.get("egl_version"):
-                rows.append(("EGL Version", gl_data["egl_version"]))
-            if gl_data.get("extensions_count") is not None:
-                rows.append(("Extension Count", str(gl_data["extensions_count"])))
-            if gl_data.get("fbconfig_count") is not None:
-                rows.append(("GLX FBConfig Count", str(gl_data["fbconfig_count"])))
+            columns = [
+                [
+                    ("Vendor", gl_data.get("vendor", "—")),
+                    ("OpenGL Version", gl_data.get("version", "—")),
+                    ("GLSL Version", gl_data.get("shading_language_version", "—")),
+                    ("OpenGL Extension Count", str(gl_data.get("extensions_count", "—"))),
+                ],
+                [
+                    ("OpenGL ES Version", gl_data.get("es_version", "—")),
+                    ("OpenGL ES GLSL Version", gl_data.get("es_shading_language_version", "—")),
+                    ("OpenGL ES Extension Count", str(gl_data.get("es_extensions_count", "—"))),
+                ],
+                [
+                    ("EGL Version", gl_data.get("egl_version", "—")),
+                    ("EGL Extension Count", str(gl_data.get("egl_count", "—"))),
+                ],
+                [
+                    ("GLX Version", gl_data.get("glx_version", "—")),
+                    ("GLX Extension Count", str(gl_data.get("glx_extension_count", "—"))),
+                    ("GLX Visual Count", str(gl_data.get("glx_visual_count", "—"))),
+                    ("GLX FBConfig Count", str(gl_data.get("fbconfig_count", "—"))),
+                ],
+            ]
+            content_widget = _make_grid_card_content(columns)
             card = _make_card(
-                "OpenGL", "../Images/OpenGL.png",
-                rows, nav_page="page2", app=app, supported=True,
+                f"OpenGL - {gl_data['renderer']}",
+                "../Images/OpenGL.png",
+                [],
+                nav_page="page2",
+                app=app,
+                supported=True,
+                content_widget=content_widget,
             )
             card.set_size_request(300, -1)
             flow_box.append(card)

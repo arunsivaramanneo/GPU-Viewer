@@ -1628,13 +1628,14 @@ def create_vulkan_tab_content(self):
         "Features", "Formats", "Memory Types", "Memory Heaps", "Queues",
         "Instance Extensions", "Instance Layers", "Surface"
     ]
-    
+    # Vulkan Video pages are handled by the separate Vulkan Video tab.
     # Create the content view using a Gtk.Stack to switch pages
     content_stack = Gtk.Stack.new()
     
     # Dictionary to store spinners for each tab (for lazy loading UI)
     tab_spinners = {}
     tab_content_containers = {}
+    video_text_views = {}
 
     # Create the content pages for each tab and add them to the stack
     for tab_name in tabs:
@@ -2305,6 +2306,46 @@ def create_vulkan_tab_content(self):
 
             content_box.append(SurfaceScrollbar)
             
+        elif tab_name == "Video Profiles":
+            tv = Gtk.TextView.new()
+            tv.set_editable(False)
+            tv.set_wrap_mode(Gtk.WrapMode.NONE)
+            tv.set_monospace(True)
+            scroller = Gtk.ScrolledWindow.new()
+            scroller.set_child(tv)
+            content_box.append(scroller)
+            video_text_views[tab_name] = tv
+
+        elif tab_name == "Profile Definition":
+            tv = Gtk.TextView.new()
+            tv.set_editable(False)
+            tv.set_wrap_mode(Gtk.WrapMode.NONE)
+            tv.set_monospace(True)
+            scroller = Gtk.ScrolledWindow.new()
+            scroller.set_child(tv)
+            content_box.append(scroller)
+            video_text_views[tab_name] = tv
+
+        elif tab_name == "Video Capabilities":
+            tv = Gtk.TextView.new()
+            tv.set_editable(False)
+            tv.set_wrap_mode(Gtk.WrapMode.NONE)
+            tv.set_monospace(True)
+            scroller = Gtk.ScrolledWindow.new()
+            scroller.set_child(tv)
+            content_box.append(scroller)
+            video_text_views[tab_name] = tv
+
+        elif tab_name == "Video Formats":
+            tv = Gtk.TextView.new()
+            tv.set_editable(False)
+            tv.set_wrap_mode(Gtk.WrapMode.NONE)
+            tv.set_monospace(True)
+            scroller = Gtk.ScrolledWindow.new()
+            scroller.set_child(tv)
+            content_box.append(scroller)
+            video_text_views[tab_name] = tv
+
         else:
             # For all other tabs, create a simple label
             content_label = Gtk.Label.new(f"Content for {tab_name}")
