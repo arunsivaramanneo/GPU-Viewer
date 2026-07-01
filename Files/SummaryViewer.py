@@ -858,14 +858,17 @@ def _make_status_badge(text: str, good: bool) -> Gtk.Label:
     return badge
 
 
-def _make_grid_card_content(columns: list[list[tuple[str, str]]]) -> Gtk.Widget:
+def _make_grid_card_content(columns: list[list[tuple[str, str]]], row_widgets_out: dict = None) -> Gtk.Widget:
     grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
     grid_box.set_hexpand(True)
     for column_rows in columns:
         col_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         col_box.set_hexpand(True)
         for title, subtitle in column_rows:
-            col_box.append(_make_action_row(title, subtitle))
+            row = _make_action_row(title, subtitle)
+            col_box.append(row)
+            if row_widgets_out is not None:
+                row_widgets_out[title] = row
         grid_box.append(col_box)
     return grid_box
 
@@ -1173,7 +1176,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 nav_page=None,
                 app=None,
                 supported=True,
-                content_widget=_make_grid_card_content(stats_columns),
+                content_widget=_make_grid_card_content(stats_columns, row_widgets_out=stats_widgets),
                 row_widgets_out=stats_widgets
             )
             stats_card.set_size_request(300, -1)
