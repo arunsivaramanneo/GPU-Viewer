@@ -338,7 +338,7 @@ def _parse_opencl(results: dict) -> dict:
                         plat["version"] = val
                     elif key == "Platform Profile" or key == "Profile":
                         plat["profile"] = val
-                    elif "Platform Extensions" in key:
+                    elif "Platform Extensions" == key:
                         # Count cl_* tokens in the value and any child entries
                         cnt = 0
                         if val:
@@ -374,11 +374,11 @@ def _parse_opencl(results: dict) -> dict:
                             dev["extensions_count"] = cnt
                     # Count OpenCL C features (count _opencl_c in properties)
                     for key, val, children in d.get("properties", []):
-                        if "OpenCL C" in key and "Features" in key:
-                            dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', val or ""))
+                        if "OpenCL C" in key and "features" in key:
+                            dev["opencl_c_features_count"] += len(re.findall(r'\b__opencl_c[A-Za-z0-9_]*\b', val or ""))
                             for sub_k, sub_v in children:
-                                dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', sub_k))
-                                dev["opencl_c_features_count"] += len(re.findall(r'\b_opencl_c[A-Za-z0-9_]*\b', sub_v))
+                                dev["opencl_c_features_count"] += len(re.findall(r'\b__opencl_c[A-Za-z0-9_]*\b', sub_k))
+                                dev["opencl_c_features_count"] += len(re.findall(r'\b__opencl_c[A-Za-z0-9_]*\b', sub_v))
                     plat["devices"].append(dev)
                 platforms.append(plat)
 
@@ -1280,15 +1280,15 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Device Type", dev.get("device_type", "—")),
                     ],
                     [
-                        ("Vulkan Formats", str(dev.get("formats_count", "—"))),
-                        ("Extensions", str(dev.get("extensions_count", "—"))),
-                        ("Memory Types Count", str(dev.get("memory_types_count", "—"))),
-                        ("Memory Heaps Count", str(dev.get("memory_heaps_count", "—"))),
+                        ("Device Formats", str(dev.get("formats_count", "—"))),
+                        ("Device Extensions", str(dev.get("extensions_count", "—"))),
+                        ("Memory Types", str(dev.get("memory_types_count", "—"))),
+                        ("Memory Heaps", str(dev.get("memory_heaps_count", "—"))),
                     ],
                     [
-                        ("Queues Count", str(dev.get("queue_count", "—"))),
+                        ("Queue Families ", str(dev.get("queue_count", "—"))),
                         ("Instance Extensions", str(vk_data.get("instance_extensions_count", "—"))),
-                        ("Instance Layers Count", str(vk_data.get("instance_layers_count", "—"))),
+                        ("Instance Layers", str(vk_data.get("instance_layers_count", "—"))),
                     ],
                 ]
                 if dev.get("video_profiles"):
@@ -1350,20 +1350,20 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     ("Vendor", gl_data.get("vendor", "—")),
                     ("OpenGL Version", gl_data.get("version", "—")),
                     ("GLSL Version", gl_data.get("shading_language_version", "—")),
-                    ("OpenGL Extension Count", str(gl_data.get("extensions_count", "—"))),
+                    ("OpenGL Extensions", str(gl_data.get("extensions_count", "—"))),
                 ],
                 [
                     ("OpenGL ES Version", gl_data.get("es_version", "—")),
                     ("OpenGL ES GLSL Version", gl_data.get("es_shading_language_version", "—")),
-                    ("OpenGL ES Extension Count", str(gl_data.get("es_extensions_count", "—"))),
+                    ("OpenGL ES Extensions", str(gl_data.get("es_extensions_count", "—"))),
                 ],
                 [
                     ("EGL Version", gl_data.get("egl_version", "—")),
-                    ("EGL Extension Count", str(gl_data.get("egl_count", "—"))),
+                    ("EGL Extensions", str(gl_data.get("egl_count", "—"))),
                 ],
                 [
                     ("GLX Version", gl_data.get("glx_version", "—")),
-                    ("GLX Extension Count", str(gl_data.get("glx_extension_count", "—"))),
+                    ("GLX Extensions", str(gl_data.get("glx_extension_count", "—"))),
                     ("GLX Visual Count", str(gl_data.get("glx_visual_count", "—"))),
                     ("GLX FBConfig Count", str(gl_data.get("fbconfig_count", "—"))),
                 ],
