@@ -359,6 +359,7 @@ def _parse_opencl(results: dict) -> dict:
                         "name": d.get("name", ""),
                         "version": "",
                         "opencl_c_version": "",
+                        "device_profile": "",
                         "driver_version": "",
                         "extensions_count": 0,
                         "opencl_c_version": "",
@@ -374,6 +375,8 @@ def _parse_opencl(results: dict) -> dict:
                             dev["version"] = val
                         elif "Device OpenCL C Version" == key:
                             dev["opencl_c_version"] = val
+                        elif "Device Profile" == key:
+                            dev["device_profile"] = val
                         elif key == "Driver Version":
                             dev["driver_version"] = val
                         elif key == "Device Type":
@@ -1436,10 +1439,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     columns.append([
                         ("Device", dev.get("name", "—")),
                         ("Device Version", dev.get("version", "—")),
-                        ("Driver Version", dev.get("driver_version", "—")),
-                        ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
                         ("Device Extensions", str(dev.get("extensions_count", 0))),
                         ("Device Type", dev.get("device_type", "—")),
+                        ("Device Profile", dev.get("device_profile", "—")),
+                        ("Driver Version", dev.get("driver_version", "—")),
                         ("OpenCL C Version", str(dev.get("opencl_c_version", 0))),
                         ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
                         ("Compute Units", str(dev.get("compute_units", 0))),
