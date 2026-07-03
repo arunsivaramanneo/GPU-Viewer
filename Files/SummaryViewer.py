@@ -57,6 +57,7 @@ def _parse_vulkan(results: dict) -> dict:
         "devices": [],
         "instance_extensions_count": 0,
         "instance_layers_count": 0,
+        "instance_version": "",
     }
     if not data["supported"]:
         return data
@@ -83,6 +84,7 @@ def _parse_vulkan(results: dict) -> dict:
         memory_types_count = 0
         memory_heaps_count = 0
         queue_count = 0
+        pipelineCacheUUID = ""
 
         for line in block.splitlines():
             stripped = line.strip()
@@ -119,6 +121,8 @@ def _parse_vulkan(results: dict) -> dict:
                     driver_version = raw
             elif stripped.startswith("deviceType"):
                 device_type = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("pipelineCacheUUID"):
+                pipelineCacheUUID = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("VK_") and "extension" in stripped.lower():
                 # Count extensions in this GPU block
                 extensions_count += 1
@@ -152,6 +156,7 @@ def _parse_vulkan(results: dict) -> dict:
                 "memory_types_count": memory_types_count,
                 "memory_heaps_count": memory_heaps_count,
                 "queue_count": queue_count,
+                "pipelineCacheUUID": pipelineCacheUUID,
                 "video_profiles": sorted(list(video_profiles)),
             })
 
@@ -182,6 +187,8 @@ def _parse_vulkan(results: dict) -> dict:
             pass
 
     instance_ext_match = re.search(r'Instance Extensions\s*:\s*count\s*=\s*(\d+)', content, re.I)
+    instance_version_match = re.search(r'Vulkan Instance Version:*(\d+)*.*(\d+)', content, re.I)
+    data["instance_version"] = instance_version_match.group(0).split(":", 1)[-1].strip()
     if instance_ext_match:
         data["instance_extensions_count"] = int(instance_ext_match.group(1))
     else:
@@ -342,10 +349,10 @@ def _parse_opencl(results: dict) -> dict:
                         # Count cl_* tokens in the value and any child entries
                         cnt = 0
                         if val:
-                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', val))
+                            cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', val))
                         for sub_k, sub_v in children:
-                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_k))
-                            cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
+                            cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', sub_k))
+                            cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', sub_v))
                         plat["extensions_count"] = cnt
                 for d in p.get("devices", []):
                     dev = {
@@ -354,23 +361,39 @@ def _parse_opencl(results: dict) -> dict:
                         "opencl_c_version": "",
                         "driver_version": "",
                         "extensions_count": 0,
-                        "opencl_c_features_count": 0
+                        "opencl_c_version": "",
+                        "opencl_c_features_count": 0,
+                        "device_type": "",
+                        "compute_units": "",
+                        "workgroup_size": "",
+                        "global_memory": "",
+                        "local_memory": ""
                     }
                     for key, val, children in d.get("properties", []):
                         if key == "Device Version" or key == "Version":
                             dev["version"] = val
-                        elif "OpenCL C" in key and "Version" in key:
+                        elif "Device OpenCL C Version" == key:
                             dev["opencl_c_version"] = val
                         elif key == "Driver Version":
                             dev["driver_version"] = val
+                        elif key == "Device Type":
+                            dev["device_type"] = val
+                        elif key == "Max compute units":
+                            dev["compute_units"] = val
+                        elif key == "Max work group size":
+                            dev["workgroup_size"] = val
+                        elif key == "Global memory size":
+                            dev["global_memory"] = val
+                        elif key == "Local memory size":
+                            dev["local_memory"] = val
                         elif "Device Extensions" in key:
                             # Count cl_* tokens in value and children
                             cnt = 0
                             if val:
-                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', val))
+                                cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', val))
                             for sub_k, sub_v in children:
-                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_k))
-                                cnt += len(re.findall(r'\bcl_[A-Za-z0-9_]+\b', sub_v))
+                                cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', sub_k))
+                                cnt += len(re.findall(r'\bcl[A-Za-z0-9_]+\b', sub_v))
                             dev["extensions_count"] = cnt
                     # Count OpenCL C features (count _opencl_c in properties)
                     for key, val, children in d.get("properties", []):
@@ -474,7 +497,8 @@ def _parse_opencl(results: dict) -> dict:
                         "opencl_c_version": "",
                         "driver_version": "",
                         "extensions_count": 0,
-                        "opencl_c_features_count": 0
+                        "opencl_c_features_count": 0,
+                        "device_type": "",
                     }
                     current_platform["devices"].append(current_device)
                     in_device_extensions = False
@@ -496,6 +520,8 @@ def _parse_opencl(results: dict) -> dict:
                         current_device["opencl_c_version"] = value
                     elif key == "Driver Version":
                         current_device["driver_version"] = value
+                    elif key == "Device Type":
+                        current_device["device_type"] = value
             elif in_platform_extensions and current_platform:
                 # Extract cl_* tokens from the whole line
                 matches = re.findall(r'\bcl_[A-Za-z0-9_]+\b', content_line)
@@ -1278,17 +1304,20 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Driver", dev.get("driver_name", "—")),
                         ("Driver Version", dev.get("driver_version", "—")),
                         ("Device Type", dev.get("device_type", "—")),
+                        ("pipelineCacheUUID", dev.get("pipelineCacheUUID","-")),
                     ],
                     [
                         ("Device Formats", str(dev.get("formats_count", "—"))),
                         ("Device Extensions", str(dev.get("extensions_count", "—"))),
                         ("Memory Types", str(dev.get("memory_types_count", "—"))),
                         ("Memory Heaps", str(dev.get("memory_heaps_count", "—"))),
+                        ("Queue Families ", str(dev.get("queue_count", "—"))),
                     ],
                     [
-                        ("Queue Families ", str(dev.get("queue_count", "—"))),
                         ("Instance Extensions", str(vk_data.get("instance_extensions_count", "—"))),
                         ("Instance Layers", str(vk_data.get("instance_layers_count", "—"))),
+                        ("Instance Version", str(vk_data.get("instance_version", "—"))),
+
                     ],
                 ]
                 if dev.get("video_profiles"):
@@ -1410,6 +1439,13 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Driver Version", dev.get("driver_version", "—")),
                         ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
                         ("Device Extensions", str(dev.get("extensions_count", 0))),
+                        ("Device Type", dev.get("device_type", "—")),
+                        ("OpenCL C Version", str(dev.get("opencl_c_version", 0))),
+                        ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
+                        ("Compute Units", str(dev.get("compute_units", 0))),
+                        ("Global Memory Size", str(dev.get("global_memory", 0))),
+                        ("Local Memory Size", str(dev.get("local_memory", 0))),
+                        ("Max work group size", str(dev.get("workgroup_size", 0))),
                     ])
                 
                 content_widget = _make_grid_card_content(columns)
