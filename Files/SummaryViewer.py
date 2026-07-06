@@ -38,7 +38,7 @@ from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
 
 import const
 import Filenames
-from Common import getLogo, getGpuImage, get_gpu_stats, fetchContentsFromCommand
+from Common import getLogo, getGpuImage, get_gpu_stats, get_gpu_stats_for_index, fetchContentsFromCommand
 # Try to reuse the robust clinfo parser when available
 try:
     from OpenCL import ClinfoParser
@@ -85,6 +85,18 @@ def _parse_vulkan(results: dict) -> dict:
         memory_heaps_count = 0
         queue_count = 0
         pipelineCacheUUID = ""
+        vendor_id = ""
+        device_id = ""
+        driver_info = ""
+        device_uuid = ""
+        driver_uuid = ""
+        conformance_version = ""
+        
+        in_conformance = False
+        conf_major = None
+        conf_minor = None
+        conf_subminor = None
+        conf_patch = None
 
         for line in block.splitlines():
             stripped = line.strip()
@@ -123,9 +135,46 @@ def _parse_vulkan(results: dict) -> dict:
                 device_type = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("pipelineCacheUUID"):
                 pipelineCacheUUID = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("vendorID"):
+                vendor_id = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("deviceID"):
+                device_id = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("driverInfo"):
+                driver_info = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("deviceUUID"):
+                device_uuid = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("driverUUID"):
+                driver_uuid = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("conformanceVersion:"):
+                in_conformance = True
+                continue
             elif stripped.startswith("VK_") and "extension" in stripped.lower():
                 # Count extensions in this GPU block
                 extensions_count += 1
+
+            if in_conformance:
+                if "=" in stripped:
+                    k, v = stripped.split("=", 1)
+                    k = k.strip()
+                    v = v.strip()
+                    if k == "major":
+                        conf_major = v
+                    elif k == "minor":
+                        conf_minor = v
+                    elif k == "subminor":
+                        conf_subminor = v
+                    elif k == "patch":
+                        conf_patch = v
+                else:
+                    if stripped and not stripped.startswith(("major", "minor", "subminor", "patch")):
+                        in_conformance = False
+
+        if conf_major is not None and conf_minor is not None:
+            conformance_version = f"{conf_major}.{conf_minor}"
+            if conf_subminor is not None:
+                conformance_version += f".{conf_subminor}"
+            if conf_patch is not None:
+                conformance_version += f".{conf_patch}"
 
         if device_name:
             # Extract video profiles specifically from this GPU block
@@ -158,6 +207,12 @@ def _parse_vulkan(results: dict) -> dict:
                 "queue_count": queue_count,
                 "pipelineCacheUUID": pipelineCacheUUID,
                 "video_profiles": sorted(list(video_profiles)),
+                "vendor_id": vendor_id,
+                "device_id": device_id,
+                "driver_info": driver_info,
+                "device_uuid": device_uuid,
+                "driver_uuid": driver_uuid,
+                "conformance_version": conformance_version,
             })
 
         # Post-process: count supported formats by scanning 'Format Properties' section
@@ -362,13 +417,17 @@ def _parse_opencl(results: dict) -> dict:
                         "device_profile": "",
                         "driver_version": "",
                         "extensions_count": 0,
-                        "opencl_c_version": "",
                         "opencl_c_features_count": 0,
                         "device_type": "",
                         "compute_units": "",
                         "workgroup_size": "",
                         "global_memory": "",
-                        "local_memory": ""
+                        "local_memory": "",
+                        "vendor": "",
+                        "vendor_id": "",
+                        "max_clock": "",
+                        "unified_memory": "",
+                        "conformance_test": "",
                     }
                     for key, val, children in d.get("properties", []):
                         if key == "Device Version" or key == "Version":
@@ -389,6 +448,16 @@ def _parse_opencl(results: dict) -> dict:
                             dev["global_memory"] = val
                         elif key == "Local memory size":
                             dev["local_memory"] = val
+                        elif key == "Device Vendor":
+                            dev["vendor"] = val
+                        elif key == "Device Vendor ID":
+                            dev["vendor_id"] = val
+                        elif key == "Max clock frequency":
+                            dev["max_clock"] = val
+                        elif key == "Unified memory for Host and Device":
+                            dev["unified_memory"] = val
+                        elif key == "Latest conformance test passed":
+                            dev["conformance_test"] = val
                         elif "Device Extensions" in key:
                             # Count cl_* tokens in value and children
                             cnt = 0
@@ -502,6 +571,15 @@ def _parse_opencl(results: dict) -> dict:
                         "extensions_count": 0,
                         "opencl_c_features_count": 0,
                         "device_type": "",
+                        "compute_units": "",
+                        "global_memory": "",
+                        "local_memory": "",
+                        "workgroup_size": "",
+                        "vendor": "",
+                        "vendor_id": "",
+                        "max_clock": "",
+                        "unified_memory": "",
+                        "conformance_test": "",
                     }
                     current_platform["devices"].append(current_device)
                     in_device_extensions = False
@@ -525,6 +603,24 @@ def _parse_opencl(results: dict) -> dict:
                         current_device["driver_version"] = value
                     elif key == "Device Type":
                         current_device["device_type"] = value
+                    elif key == "Device Vendor":
+                        current_device["vendor"] = value
+                    elif key == "Device Vendor ID":
+                        current_device["vendor_id"] = value
+                    elif key == "Max clock frequency":
+                        current_device["max_clock"] = value
+                    elif key == "Unified memory for Host and Device":
+                        current_device["unified_memory"] = value
+                    elif key == "Latest conformance test passed":
+                        current_device["conformance_test"] = value
+                    elif key == "Max compute units":
+                        current_device["compute_units"] = value
+                    elif key == "Global memory size":
+                        current_device["global_memory"] = value
+                    elif key == "Local memory size":
+                        current_device["local_memory"] = value
+                    elif key == "Max work group size":
+                        current_device["workgroup_size"] = value
             elif in_platform_extensions and current_platform:
                 # Extract cl_* tokens from the whole line
                 matches = re.findall(r'\bcl_[A-Za-z0-9_]+\b', content_line)
@@ -640,66 +736,136 @@ def _parse_glx_es_egl_counts(lines: list) -> dict:
     }
 
 
-def _parse_gpui_stats(results: dict) -> dict:
-    data = {
-        "supported": False,
-        "mem_used": None,
-        "mem_total": None,
-        "usage": None,
-        "temp": None,
-        "clock_current": None,
-        "clock_max": None,
-        "fan_speed": None,
-        "power_usage": None,
-    }
-
+def _parse_gpui_stats(results: dict) -> list:
+    gpus = []
     try:
-        # Try multiple device path patterns
-        card_paths = sorted(glob.glob("/sys/class/drm/card*/device"))
-        if not card_paths:
-            card_paths = sorted(glob.glob("/sys/class/drm/card*"))
-        
-        if card_paths:
-            device_id = None
-            # Try to read device ID from various possible paths
-            for card_path in card_paths:
-                device_file = f"{card_path}/device"
-                if not os.path.exists(device_file):
-                    device_file = f"{card_path}/../../device"
-                if os.path.exists(device_file):
-                    try:
-                        with open(device_file, "r") as f:
-                            device_id = int(f.read().strip(), 16)
-                        break
-                    except (ValueError, OSError):
-                        continue
+        # Find all card directories under /sys/class/drm/
+        # They are usually named card0, card1, card2 etc.
+        card_dirs = sorted(glob.glob("/sys/class/drm/card[0-9]*"))
+        for card_dir in card_dirs:
+            # card_dir is /sys/class/drm/card1 etc.
+            card_name = os.path.basename(card_dir) # e.g. "card1"
+            # Get the card index from the name (digits only)
+            m = re.search(r'\d+', card_name)
+            if not m:
+                continue
+            card_index = int(m.group(0))
             
-            if device_id is None:
-                # Fallback: try reading from vendor/device files
-                for card_path in card_paths:
-                    vendor_file = f"{card_path}/vendor"
-                    if os.path.exists(vendor_file):
-                        try:
-                            with open(vendor_file, "r") as f:
-                                vendor = int(f.read().strip(), 16)
-                            device_file = f"{card_path}/device"
-                            with open(device_file, "r") as f:
-                                dev_id = int(f.read().strip(), 16)
-                            device_id = (vendor << 16) | dev_id
-                            break
-                        except (ValueError, OSError):
-                            continue
+            # Read vendor, device, driver, vbios, pcie link speed/width, etc.
+            device_path = f"{card_dir}/device"
+            if not os.path.isdir(device_path):
+                continue
             
-            if device_id is not None:
-                num_devices = len(card_paths)
-                stats = get_gpu_stats(device_id, num_devices)
-                if stats:
-                    data.update(stats)
-                    data["supported"] = True
-    except Exception:
-        pass
+            vendor_id = ""
+            device_id = ""
+            driver = ""
+            vbios = ""
+            pci_address = ""
+            pcie_link_speed = ""
+            pcie_link_width = ""
+            
+            # Vendor ID
+            if os.path.exists(f"{device_path}/vendor"):
+                try:
+                    with open(f"{device_path}/vendor", "r") as f:
+                        vendor_id = f.read().strip()
+                except Exception:
+                    pass
+            
+            # Device ID
+            if os.path.exists(f"{device_path}/device"):
+                try:
+                    with open(f"{device_path}/device", "r") as f:
+                        device_id = f.read().strip()
+                except Exception:
+                    pass
+            
+            # Driver
+            driver_link = f"{device_path}/driver"
+            if os.path.islink(driver_link):
+                try:
+                    driver = os.path.basename(os.readlink(driver_link))
+                except Exception:
+                    pass
+            
+            # VBIOS
+            if os.path.exists(f"{device_path}/vbios_version"):
+                try:
+                    with open(f"{device_path}/vbios_version", "r") as f:
+                        vbios = f.read().strip()
+                except Exception:
+                    pass
+            
+            # PCI Address (from the symlink target or subsystem slot)
+            try:
+                real_device_path = os.path.realpath(device_path)
+                pci_address = os.path.basename(real_device_path) # e.g. 0000:03:00.0
+            except Exception:
+                pass
+            
+            # PCIe Link Speed
+            curr_speed = ""
+            max_speed = ""
+            if os.path.exists(f"{device_path}/current_link_speed"):
+                try:
+                    with open(f"{device_path}/current_link_speed", "r") as f:
+                        curr_speed = f.read().strip()
+                except Exception:
+                    pass
+            if os.path.exists(f"{device_path}/max_link_speed"):
+                try:
+                    with open(f"{device_path}/max_link_speed", "r") as f:
+                        max_speed = f.read().strip()
+                except Exception:
+                    pass
+            if curr_speed or max_speed:
+                pcie_link_speed = f"{curr_speed} / {max_speed}" if curr_speed and max_speed else (curr_speed or max_speed)
+            
+            # PCIe Link Width
+            curr_width = ""
+            max_width = ""
+            if os.path.exists(f"{device_path}/current_link_width"):
+                try:
+                    with open(f"{device_path}/current_link_width", "r") as f:
+                        curr_width = f.read().strip()
+                except Exception:
+                    pass
+            if os.path.exists(f"{device_path}/max_link_width"):
+                try:
+                    with open(f"{device_path}/max_link_width", "r") as f:
+                        max_width = f.read().strip()
+                except Exception:
+                    pass
+            if curr_width or max_width:
+                pcie_link_width = f"x{curr_width} / x{max_width}" if curr_width and max_width else (f"x{curr_width}" if curr_width else f"x{max_width}")
 
-    return data
+            # Now get real-time stats
+            stats = get_gpu_stats_for_index(card_index)
+            if not stats:
+                stats = {
+                    'mem_used': 0, 'mem_total': 0, 'temp': 0, 
+                    'clock_current': 0, 'clock_max': 0, 'usage': -1, 
+                    'fan_speed': -1, 'power_usage': -1
+                }
+            
+            gpu_info = {
+                "card_index": card_index,
+                "card_name": card_name,
+                "vendor_id": vendor_id,
+                "device_id": device_id,
+                "driver": driver,
+                "vbios": vbios,
+                "pci_address": pci_address,
+                "pcie_link_speed": pcie_link_speed,
+                "pcie_link_width": pcie_link_width,
+                "stats": stats,
+                "supported": True
+            }
+            gpus.append(gpu_info)
+    except Exception as e:
+        print(f"Error gathering GPU stats: {e}")
+        pass
+    return gpus
 
 
 def _parse_vdpau(results: dict) -> dict:
@@ -767,12 +933,18 @@ def _parse_vulkan_video(results: dict) -> dict:
 
 
 def _parse_system() -> dict:
-    """Return basic system info (OS, CPU, RAM, Kernel, Desktop)."""
+    """Return basic system info (OS, CPU, RAM, Kernel, Desktop, plus detailed BIOS, Uptime, etc.)."""
     info = {
         "os": "",
         "cpu": "",
+        "cpu_cores_threads": "—",
         "ram": "",
         "kernel": "",
+        "architecture": "",
+        "hostname": "",
+        "uptime": "",
+        "bios_version": "",
+        "bios_date": "",
         "desktop": "",
         "windowing": "",
         "hardware_model": "",
@@ -802,6 +974,23 @@ def _parse_system() -> dict:
     except Exception:
         pass
 
+    # CPU Cores and Threads
+    try:
+        cores = 0
+        threads = 0
+        with open("/proc/cpuinfo", "r") as f:
+            content = f.read()
+            core_match = re.search(r'cpu cores\s*:\s*(\d+)', content)
+            if core_match:
+                cores = int(core_match.group(1))
+            threads = len(re.findall(r'^processor\s*:', content, re.M))
+        if cores > 0 and threads > 0:
+            info["cpu_cores_threads"] = f"{cores} Cores / {threads} Threads"
+        elif threads > 0:
+            info["cpu_cores_threads"] = f"{threads} Threads"
+    except Exception:
+        pass
+
     try:
         with open("/proc/meminfo", "r") as f:
             for line in f:
@@ -813,12 +1002,50 @@ def _parse_system() -> dict:
         pass
 
     try:
-        result = subprocess.run(
-            ["uname", "-r"], capture_output=True, text=True, timeout=2
-        )
-        info["kernel"] = result.stdout.strip()
+        uname_res = os.uname()
+        info["kernel"] = uname_res.release
+        info["architecture"] = uname_res.machine
+        info["hostname"] = uname_res.nodename
+    except Exception:
+        try:
+            result = subprocess.run(
+                ["uname", "-r"], capture_output=True, text=True, timeout=2
+            )
+            info["kernel"] = result.stdout.strip()
+        except Exception:
+            pass
+
+    # System Uptime
+    try:
+        with open("/proc/uptime", "r") as f:
+            uptime_seconds = float(f.readline().split()[0])
+            mins, secs = divmod(uptime_seconds, 60)
+            hours, mins = divmod(mins, 60)
+            days, hours = divmod(hours, 24)
+            parts = []
+            if days > 0:
+                parts.append(f"{int(days)}d")
+            if hours > 0:
+                parts.append(f"{int(hours)}h")
+            if mins > 0:
+                parts.append(f"{int(mins)}m")
+            if not parts:
+                parts.append(f"{int(secs)}s")
+            info["uptime"] = " ".join(parts)
     except Exception:
         pass
+
+    # BIOS Version & Date
+    for path, key in [
+        ("/sys/class/dmi/id/bios_version", "bios_version"),
+        ("/sys/class/dmi/id/bios_date", "bios_date"),
+    ]:
+        try:
+            if os.path.exists(path):
+                with open(path, "r") as f:
+                    info[key] = f.read().strip()
+        except Exception:
+            pass
 
     info["desktop"] = os.environ.get("XDG_CURRENT_DESKTOP", "")
     info["windowing"] = os.environ.get("XDG_SESSION_TYPE", "")
@@ -1122,6 +1349,58 @@ def _make_card(title: str, icon_name: str, rows: list,
 # Public entry point
 # ---------------------------------------------------------------------------
 
+def _match_vulkan_name(vendor_id_str, device_id_str, vk_devices):
+    if not vendor_id_str or not device_id_str:
+        return None
+    try:
+        v1 = int(vendor_id_str, 16)
+        d1 = int(device_id_str, 16)
+        for dev in vk_devices:
+            vk_vendor = dev.get("vendor_id")
+            vk_device = dev.get("device_id")
+            if vk_vendor and vk_device:
+                try:
+                    v2 = int(vk_vendor, 16)
+                    d2 = int(vk_device, 16)
+                    if v1 == v2 and d1 == d2:
+                        return dev.get("name")
+                except ValueError:
+                    pass
+    except ValueError:
+        pass
+    return None
+
+
+def _get_gpu_fallback_name(vendor_id_str, device_id_str):
+    vendor_names = {
+        0x1002: "AMD Radeon",
+        0x10de: "NVIDIA GeForce",
+        0x8086: "Intel Graphics",
+    }
+    try:
+        v = int(vendor_id_str, 16)
+        d = int(device_id_str, 16)
+        vendor_name = vendor_names.get(v, "Generic")
+        return f"{vendor_name} (Device {device_id_str})"
+    except Exception:
+        return "Unknown GPU"
+
+
+def _get_gpu_logo(vendor_id_str: str) -> str:
+    """Return the best logo image path for a GPU based on its vendor ID."""
+    try:
+        v = int(vendor_id_str, 16)
+        if v == 0x1002:   # AMD
+            return "../Images/AMD_Radeon.png"
+        elif v == 0x10de: # NVIDIA
+            return "../Images/Nvidia_logo.png"
+        elif v == 0x8086: # Intel
+            return "../Images/Intel_logo.png"
+    except Exception:
+        pass
+    return "../Images/about-us.png"
+
+
 def create_summary_page(app, results: dict) -> Gtk.Widget:
     """
     Return a widget for the "Summary" tab.  Data gathering runs in a
@@ -1155,30 +1434,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     outer.set_vexpand(True)
     outer.set_hexpand(True)
-
-    device_id_cache = [None]
-    num_devices_cache = [0]
-    
-    # Pre-calculate device information once (fast, no processes spawned)
-    try:
-        card_paths = sorted(glob.glob("/sys/class/drm/card*/device"))
-        if not card_paths:
-            card_paths = sorted(glob.glob("/sys/class/drm/card*"))
-        if card_paths:
-            num_devices_cache[0] = len(card_paths)
-            for card_path in card_paths:
-                device_file = f"{card_path}/device"
-                if not os.path.exists(device_file):
-                    device_file = f"{card_path}/../../device"
-                if os.path.exists(device_file):
-                    try:
-                        with open(device_file, "r") as f:
-                            device_id_cache[0] = int(f.read().strip(), 16)
-                        break
-                    except (ValueError, OSError):
-                        continue
-    except Exception:
-        pass
 
     # ---- Loading state ----
     loading_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -1232,15 +1487,19 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             [
                 ("Operating System", sys_data.get("os", "—")),
                 ("Processor", sys_data.get("cpu", "—")),
+                ("CPU Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
                 ("System RAM", sys_data.get("ram", "—")),
             ],
             [
                 ("Kernel", sys_data.get("kernel", "—")),
-                ("Desktop", sys_data.get("desktop", "—")),
-                ("Windowing System", sys_data.get("windowing", "—")),
+                ("Architecture", sys_data.get("architecture", "—")),
+                ("Hostname", sys_data.get("hostname", "—")),
+                ("Uptime", sys_data.get("uptime", "—")),
             ],
             [
                 ("Hardware Model", sys_data.get("hardware_model", "—")),
+                ("BIOS Info", f"{sys_data.get('bios_version', '—')} ({sys_data.get('bios_date', '—')})" if sys_data.get("bios_version") or sys_data.get("bios_date") else "—"),
+                ("Desktop / Session", f"{sys_data.get('desktop', '—')} ({sys_data.get('windowing', '—')})" if sys_data.get("desktop") or sys_data.get("windowing") else "—"),
                 ("Disk Capacity", sys_data.get("disk_capacity", "—")),
                 ("Display", sys_data.get("display", "—")),
             ],
@@ -1257,34 +1516,61 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         sys_card.set_size_request(300, -1)
         flow_box.append(sys_card)
 
-        gpui_data = data["gpui_stats"]
-        stats_widgets = {}
-        if gpui_data["supported"]:
-            stats_rows = []
-            stats_columns = [
-                [
-                    ("Video Memory", f"{gpui_data['mem_used']} MB / {gpui_data['mem_total']} MB" if gpui_data.get("mem_used") is not None and gpui_data.get("mem_total") is not None else "—"),
-                    ("GPU Usage", f"{gpui_data['usage']} %" if gpui_data.get("usage") is not None and gpui_data["usage"] >= 0 else "—"),
-                    ("Temperature", f"{gpui_data['temp']} °C" if gpui_data.get("temp") is not None else "—"),
-                ],
-                [
-                    ("GPU Clock", f"{gpui_data['clock_current']} / {gpui_data['clock_max']} MHz" if gpui_data.get("clock_current") is not None and gpui_data.get("clock_max") is not None else (f"{gpui_data['clock_current']} MHz" if gpui_data.get("clock_current") is not None else "—")),
-                    ("Power", f"{gpui_data['power_usage']} W" if gpui_data.get("power_usage") is not None and gpui_data["power_usage"] > 0 else "—"),
-                    ("Fan Speed", f"{gpui_data['fan_speed']} %" if gpui_data.get("fan_speed") is not None and gpui_data["fan_speed"] >= 0 else "—"),
-                ],
-            ]
-            stats_card = _make_card(
-                "GPU Statistics",
-                "../Images/about-us.png",
-                [],
-                nav_page=None,
-                app=None,
-                supported=True,
-                content_widget=_make_grid_card_content(stats_columns, row_widgets_out=stats_widgets),
-                row_widgets_out=stats_widgets
-            )
-            stats_card.set_size_request(300, -1)
-            flow_box.append(stats_card)
+        # ── GPU Statistics & Details (Multi-GPU support) ─────────────────
+        gpui_list = data["gpui_stats"] # This is a list of dicts
+        stats_widgets_list = []
+        vk_devices = data["vulkan"].get("devices", []) if data.get("vulkan") else []
+
+        # Filter out GPU entries with no identifiable vendor/device ID
+        known_gpus = [g for g in gpui_list if g.get("vendor_id") or g.get("device_id")]
+
+        if known_gpus:
+            for gpu_info in known_gpus:
+                gpu_idx = gpu_info["card_index"]
+                gpu_stats = gpu_info["stats"]
+                
+                # Match Vulkan name
+                matched_name = _match_vulkan_name(gpu_info["vendor_id"], gpu_info["device_id"], vk_devices)
+                if not matched_name:
+                    matched_name = _get_gpu_fallback_name(gpu_info["vendor_id"], gpu_info["device_id"])
+                
+                card_title = f"{matched_name} ({gpu_info['card_name']})"
+                
+                gpu_widgets = {}
+                gpu_columns = [
+                    [
+                        ("PCI Address", gpu_info.get("pci_address") or "—"),
+                        ("Driver", gpu_info.get("driver") or "—"),
+                        ("VBIOS Version", gpu_info.get("vbios") or "—"),
+                        ("PCIe Link Speed", gpu_info.get("pcie_link_speed") or "—"),
+                        ("PCIe Link Width", gpu_info.get("pcie_link_width") or "—"),
+                    ],
+                    [
+                        ("Video Memory", f"{gpu_stats['mem_used']} MB / {gpu_stats['mem_total']} MB" if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None else "—"),
+                        ("GPU Usage", f"{gpu_stats['usage']} %" if gpu_stats.get("usage") is not None and gpu_stats["usage"] >= 0 else "—"),
+                        ("Temperature", f"{gpu_stats['temp']} °C" if gpu_stats.get("temp") is not None else "—"),
+                    ],
+                    [
+                        ("GPU Clock", f"{gpu_stats['clock_current']} / {gpu_stats['clock_max']} MHz" if gpu_stats.get("clock_current") is not None and gpu_stats.get("clock_max") is not None else (f"{gpu_stats['clock_current']} MHz" if gpu_stats.get("clock_current") is not None else "—")),
+                        ("Power", f"{gpu_stats['power_usage']} W" if gpu_stats.get("power_usage") is not None and gpu_stats["power_usage"] > 0 else "—"),
+                        ("Fan Speed", f"{gpu_stats['fan_speed']} %" if gpu_stats.get("fan_speed") is not None and gpu_stats['fan_speed'] >= 0 else "—"),
+                    ],
+                ]
+                
+                gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
+                gpu_card = _make_card(
+                    card_title,
+                    gpu_logo,
+                    [],
+                    nav_page=None,
+                    app=None,
+                    supported=True,
+                    content_widget=_make_grid_card_content(gpu_columns, row_widgets_out=gpu_widgets),
+                    row_widgets_out=gpu_widgets
+                )
+                gpu_card.set_size_request(300, -1)
+                flow_box.append(gpu_card)
+                stats_widgets_list.append((gpu_idx, gpu_widgets))
         else:
             stats_card = _make_card(
                 "GPU Statistics",
@@ -1306,8 +1592,16 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("API Version", dev.get("api_version", "—")),
                         ("Driver", dev.get("driver_name", "—")),
                         ("Driver Version", dev.get("driver_version", "—")),
+                        ("Driver Info", dev.get("driver_info", "—")),
                         ("Device Type", dev.get("device_type", "—")),
                         ("pipelineCacheUUID", dev.get("pipelineCacheUUID","-")),
+                    ],
+                    [
+                        ("Vendor ID", dev.get("vendor_id", "—")),
+                        ("Device ID", dev.get("device_id", "—")),
+                        ("Device UUID", dev.get("device_uuid", "—")),
+                        ("Driver UUID", dev.get("driver_uuid", "—")),
+                        ("Conformance Version", dev.get("conformance_version", "—")),
                     ],
                     [
                         ("Device Formats", str(dev.get("formats_count", "—"))),
@@ -1320,11 +1614,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Instance Extensions", str(vk_data.get("instance_extensions_count", "—"))),
                         ("Instance Layers", str(vk_data.get("instance_layers_count", "—"))),
                         ("Instance Version", str(vk_data.get("instance_version", "—"))),
-
                     ],
                 ]
                 if dev.get("video_profiles"):
-                    columns[2].append(("Video Profiles", ", ".join(dev["video_profiles"])))
+                    columns[3].append(("Video Profiles", ", ".join(dev["video_profiles"])))
 
                 content_widget = _make_grid_card_content(columns)
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
@@ -1377,41 +1670,109 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         # ── OpenGL ───────────────────────────────────────────────────────
         gl_data = data["opengl"]
         if gl_data["supported"] and gl_data.get("renderer"):
-            columns = [
+            renderer_label = gl_data["renderer"]
+
+            # Card 1: Core OpenGL
+            gl_columns = [
                 [
+                    ("Renderer", renderer_label),
                     ("Vendor", gl_data.get("vendor", "—")),
+                ],
+                [
                     ("OpenGL Version", gl_data.get("version", "—")),
                     ("GLSL Version", gl_data.get("shading_language_version", "—")),
-                    ("OpenGL Extensions", str(gl_data.get("extensions_count", "—"))),
                 ],
                 [
-                    ("OpenGL ES Version", gl_data.get("es_version", "—")),
-                    ("OpenGL ES GLSL Version", gl_data.get("es_shading_language_version", "—")),
-                    ("OpenGL ES Extensions", str(gl_data.get("es_extensions_count", "—"))),
-                ],
-                [
-                    ("EGL Version", gl_data.get("egl_version", "—")),
-                    ("EGL Extensions", str(gl_data.get("egl_count", "—"))),
-                ],
-                [
-                    ("GLX Version", gl_data.get("glx_version", "—")),
-                    ("GLX Extensions", str(gl_data.get("glx_extension_count", "—"))),
-                    ("GLX Visual Count", str(gl_data.get("glx_visual_count", "—"))),
-                    ("GLX FBConfig Count", str(gl_data.get("fbconfig_count", "—"))),
+                    ("Extension Count", str(gl_data.get("extensions_count", "—"))),
                 ],
             ]
-            content_widget = _make_grid_card_content(columns)
             card = _make_card(
-                f"OpenGL - {gl_data['renderer']}",
+                f"OpenGL",
                 "../Images/OpenGL.png",
                 [],
                 nav_page="page2",
                 app=app,
                 supported=True,
-                content_widget=content_widget,
+                content_widget=_make_grid_card_content(gl_columns),
             )
             card.set_size_request(300, -1)
             flow_box.append(card)
+
+            # Card 2: OpenGL ES (only if data present)
+            es_version = gl_data.get("es_version", "")
+            if es_version:
+                es_columns = [
+                    [
+                        ("OpenGL ES Version", es_version),
+                        ("GLSL ES Version", gl_data.get("es_shading_language_version", "—")),
+                    ],
+                    [
+                        ("Extension Count", str(gl_data.get("es_extensions_count", "—"))),
+                    ],
+                ]
+                es_card = _make_card(
+                    "OpenGL ES",
+                    "../Images/OpenGL_ES.png",
+                    [],
+                    nav_page="page2",
+                    app=app,
+                    supported=True,
+                    content_widget=_make_grid_card_content(es_columns),
+                )
+                es_card.set_size_request(300, -1)
+                flow_box.append(es_card)
+
+            # Card 3: EGL (only if data present)
+            egl_version = gl_data.get("egl_version", "")
+            egl_count = gl_data.get("egl_count", 0)
+            if egl_version or egl_count:
+                egl_columns = [
+                    [
+                        ("EGL Version", egl_version or "—"),
+                    ],
+                    [
+                        ("Extension Count", str(egl_count) if egl_count else "—"),
+                    ],
+                ]
+                egl_card = _make_card(
+                    "EGL",
+                    "../Images/Egl_logo.png",
+                    [],
+                    nav_page="page2",
+                    app=app,
+                    supported=True,
+                    content_widget=_make_grid_card_content(egl_columns),
+                )
+                egl_card.set_size_request(300, -1)
+                flow_box.append(egl_card)
+
+            # Card 4: GLX (only if data present)
+            glx_version = gl_data.get("glx_version", "")
+            glx_ext = gl_data.get("glx_extension_count", 0)
+            glx_vis = gl_data.get("glx_visual_count", 0)
+            glx_fb = gl_data.get("fbconfig_count", 0)
+            if glx_version or glx_ext or glx_vis or glx_fb:
+                glx_columns = [
+                    [
+                        ("GLX Version", glx_version or "—"),
+                        ("Extension Count", str(glx_ext) if glx_ext else "—"),
+                    ],
+                    [
+                        ("Visual Count", str(glx_vis) if glx_vis else "—"),
+                        ("FBConfig Count", str(glx_fb) if glx_fb else "—"),
+                    ],
+                ]
+                glx_card = _make_card(
+                    "GLX",
+                    "../Images/glx.png",
+                    [],
+                    nav_page="page2",
+                    app=app,
+                    supported=True,
+                    content_widget=_make_grid_card_content(glx_columns),
+                )
+                glx_card.set_size_request(300, -1)
+                flow_box.append(glx_card)
         else:
             card = _make_card(
                 "OpenGL", "../Images/OpenGL.png",
@@ -1423,44 +1784,50 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         # ── OpenCL ───────────────────────────────────────────────────────
         cl_data = data["opencl"]
         if cl_data["supported"] and cl_data.get("platforms"):
-            for i, platform in enumerate(cl_data["platforms"]):
-                # Create columns: first for platform, then for each device
-                columns = [
-                    [
-                        ("Platform", platform["name"]),
-                        ("Platform Version", platform.get("version", "—")),
-                        ("Platform Profile", platform.get("profile", "—")),
-                        ("Platform Extensions", str(platform.get("extensions_count", 0))),
-                    ]
+            for platform in cl_data["platforms"]:
+                platform_name = platform.get("name", "Unknown Platform")
+                devices = platform.get("devices", [])
+
+                # Column 1: Platform details
+                platform_col = [
+                    ("Platform", platform_name),
+                    ("Version", platform.get("version", "—")),
+                    ("Profile", platform.get("profile", "—")),
+                    ("Extensions", str(platform.get("extensions_count", 0))),
                 ]
-                
-                # Add each device as a separate column
-                for dev in platform.get("devices", []):
-                    columns.append([
+
+                # Columns 2, 3, 4…: one column per device
+                all_columns = [platform_col]
+                for dev in devices:
+                    dev_col = [
                         ("Device", dev.get("name", "—")),
-                        ("Device Version", dev.get("version", "—")),
-                        ("Device Extensions", str(dev.get("extensions_count", 0))),
+                        ("Vendor", dev.get("vendor", "—")),
+                        ("Vendor ID", dev.get("vendor_id", "—")),
                         ("Device Type", dev.get("device_type", "—")),
                         ("Device Profile", dev.get("device_profile", "—")),
+                        ("Device Version", dev.get("version", "—")),
                         ("Driver Version", dev.get("driver_version", "—")),
-                        ("OpenCL C Version", str(dev.get("opencl_c_version", 0))),
-                        ("OpenCL C Features", str(dev.get("opencl_c_features_count", 0))),
-                        ("Compute Units", str(dev.get("compute_units", 0))),
-                        ("Global Memory Size", str(dev.get("global_memory", 0))),
-                        ("Local Memory Size", str(dev.get("local_memory", 0))),
-                        ("Max work group size", str(dev.get("workgroup_size", 0))),
-                    ])
-                
-                content_widget = _make_grid_card_content(columns)
-                label = f"OpenCL – {platform['name']}"
+                        ("OpenCL C Version", dev.get("opencl_c_version", "—")),
+                        ("Extensions", str(dev.get("extensions_count", 0))),
+                        ("Compute Units", str(dev.get("compute_units", "—"))),
+                        ("Max Clock Freq", dev.get("max_clock", "—")),
+                        ("Max Workgroup Size", str(dev.get("workgroup_size", "—"))),
+                        ("Global Memory", str(dev.get("global_memory", "—"))),
+                        ("Local Memory", str(dev.get("local_memory", "—"))),
+                        ("Unified Memory", dev.get("unified_memory", "—")),
+                        ("OpenCL C Features", str(dev.get("opencl_c_features_count", "—"))),
+                        ("Conformance Test", dev.get("conformance_test", "—")),
+                    ]
+                    all_columns.append(dev_col)
+
                 card = _make_card(
-                    label,
+                    f"OpenCL – {platform_name}",
                     "../Images/OpenCL.svg",
                     [],
                     nav_page="opencl_page",
                     app=app,
                     supported=True,
-                    content_widget=content_widget,
+                    content_widget=_make_grid_card_content(all_columns),
                 )
                 card.set_size_request(300, -1)
                 flow_box.append(card)
@@ -1506,31 +1873,27 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 
             def fetch_stats():
                 try:
-                    dev_id = device_id_cache[0]
-                    num_devs = num_devices_cache[0]
-                    if dev_id is not None:
-                        stats = get_gpu_stats(dev_id, num_devs)
-                        
-                        def apply_updates():
-                            if stats:
-                                if "Video Memory" in stats_widgets and stats.get("mem_used") is not None and stats.get("mem_total") is not None:
-                                    stats_widgets["Video Memory"].set_subtitle(f"{stats['mem_used']} MB / {stats['mem_total']} MB")
-                                if "GPU Usage" in stats_widgets and stats.get("usage") is not None:
-                                    stats_widgets["GPU Usage"].set_subtitle(f"{stats['usage']} %")
-                                if "Temperature" in stats_widgets and stats.get("temp") is not None:
-                                    stats_widgets["Temperature"].set_subtitle(f"{stats['temp']} °C")
-                                if "GPU Clock" in stats_widgets:
-                                    if stats.get("clock_current") is not None and stats.get("clock_max") is not None:
-                                        stats_widgets["GPU Clock"].set_subtitle(f"{stats['clock_current']} / {stats['clock_max']} MHz")
-                                    elif stats.get("clock_current") is not None:
-                                        stats_widgets["GPU Clock"].set_subtitle(f"{stats['clock_current']} MHz")
-                                if "Power" in stats_widgets and stats.get("power_usage") is not None:
-                                    stats_widgets["Power"].set_subtitle(f"{stats['power_usage']} W")
-                                if "Fan Speed" in stats_widgets and stats.get("fan_speed") is not None:
-                                    stats_widgets["Fan Speed"].set_subtitle(f"{stats['fan_speed']} %")
-                            return False
-                            
-                        GLib.idle_add(apply_updates)
+                    for gpu_index, widgets in stats_widgets_list:
+                        stats = get_gpu_stats_for_index(gpu_index)
+                        if stats:
+                            def apply_updates(w=widgets, s=stats):
+                                if "Video Memory" in w and s.get("mem_used") is not None and s.get("mem_total") is not None:
+                                    w["Video Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB")
+                                if "GPU Usage" in w and s.get("usage") is not None:
+                                    w["GPU Usage"].set_subtitle(f"{s['usage']} %")
+                                if "Temperature" in w and s.get("temp") is not None:
+                                    w["Temperature"].set_subtitle(f"{s['temp']} °C")
+                                if "GPU Clock" in w:
+                                    if s.get("clock_current") is not None and s.get("clock_max") is not None:
+                                        w["GPU Clock"].set_subtitle(f"{s['clock_current']} / {s['clock_max']} MHz")
+                                    elif s.get("clock_current") is not None:
+                                        w["GPU Clock"].set_subtitle(f"{s['clock_current']} MHz")
+                                if "Power" in w and s.get("power_usage") is not None:
+                                    w["Power"].set_subtitle(f"{s['power_usage']} W")
+                                if "Fan Speed" in w and s.get("fan_speed") is not None:
+                                    w["Fan Speed"].set_subtitle(f"{s['fan_speed']} %")
+                                return False
+                            GLib.idle_add(apply_updates)
                 except Exception as e:
                     print(f"Error updating real-time stats: {e}")
                     

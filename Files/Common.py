@@ -64,20 +64,116 @@ class Config:
 
 Adw.init()
 
-def get_gpu_stats(device_id, num_devices):
+def get_gpu_stats_for_index(gpu_index):
     """
-    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power).
-    Returns a dictionary: {'mem_used': int (MB), 'mem_total': int (MB), 'temp': int (C), 
-                           'clock_current': int (MHz), 'clock_max': int (MHz), 'usage': int (%),
-                           'fan_speed': int (%), 'power_usage': int (W)}
-    or None if failed.
+    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power)
+    by direct GPU index corresponding to /sys/class/drm/card{gpu_index}.
     """
     stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1}
     
+    # Try AMD / Intel (sysfs)
+    card_path = f"/sys/class/drm/card{gpu_index}/device"
+    if not os.path.isdir(card_path):
+        card_path = f"/sys/class/drm/card{gpu_index}"
+        if not os.path.isdir(card_path):
+            return None
+
+    try:
+        # AMD Memory
+        if os.path.exists(f"{card_path}/mem_info_vram_used"):
+            with open(f"{card_path}/mem_info_vram_used", 'r') as f:
+                stats['mem_used'] = int(f.read().strip()) // (1024 * 1024)
+        
+        if os.path.exists(f"{card_path}/mem_info_vram_total"):
+             with open(f"{card_path}/mem_info_vram_total", 'r') as f:
+                stats['mem_total'] = int(f.read().strip()) // (1024 * 1024)
+
+        # Temperature, Fan, Power
+        # Search for hwmon
+        hwmon_pattern = f"{card_path}/hwmon/hwmon*"
+        hwmons = glob.glob(hwmon_pattern)
+        if hwmons:
+            for hwmon in hwmons:
+                # Temperature
+                temp_input = f"{hwmon}/temp1_input"
+                if os.path.exists(temp_input):
+                     with open(temp_input, 'r') as f:
+                        stats['temp'] = int(f.read().strip()) // 1000
+                
+                # Fan Speed (PWM)
+                pwm_input = f"{hwmon}/pwm1"
+                pwm_max_input = f"{hwmon}/pwm1_max"
+                if os.path.exists(pwm_input):
+                    with open(pwm_input, 'r') as f:
+                        pwm_value = int(f.read().strip())
+                        # PWM is usually 0-255, convert to percentage
+                        pwm_max = 255
+                        if os.path.exists(pwm_max_input):
+                            try:
+                                with open(pwm_max_input, 'r') as f_max:
+                                    pwm_max = int(f_max.read().strip())
+                            except:
+                                pass
+                        stats['fan_speed'] = int((pwm_value / pwm_max) * 100)
+                
+                # Power Usage
+                power_input = f"{hwmon}/power1_average"
+                if os.path.exists(power_input):
+                    with open(power_input, 'r') as f:
+                        # Power is in microwatts, convert to watts
+                        stats['power_usage'] = int(f.read().strip()) // 1000000
+        
+        # GPU Usage (AMD specific)
+        if os.path.exists(f"{card_path}/gpu_busy_percent"):
+            with open(f"{card_path}/gpu_busy_percent", 'r') as f:
+                stats['usage'] = int(f.read().strip())
+        
+        # Clock (AMD specific usually)
+        if os.path.exists(f"{card_path}/pp_dpm_sclk"):
+            with open(f"{card_path}/pp_dpm_sclk", 'r') as f:
+                lines = f.readlines()
+                max_clock = 0
+                current_clock = 0
+                for line in lines:
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        clock_str = parts[1].replace('Mhz', '').replace('MHz', '')
+                        try:
+                            clock_val = int(clock_str)
+                            if clock_val > max_clock:
+                                max_clock = clock_val
+                            if '*' in line:
+                                current_clock = clock_val
+                        except ValueError:
+                            pass
+                stats['clock_current'] = current_clock
+                stats['clock_max'] = max_clock
+        
+        # Fallback for clock: current freq from hwmon if pp_dpm_sclk fails or simpler card
+        if stats['clock_current'] == 0 and hwmons:
+             for hwmon in hwmons:
+                freq_input = f"{hwmon}/freq1_input"
+                if os.path.exists(freq_input):
+                     with open(freq_input, 'r') as f:
+                        stats['clock_current'] = int(f.read().strip()) // (1000 * 1000) # Hz to MHz
+                        break
+
+        if stats['mem_total'] > 0 or stats['temp'] > 0 or stats['usage'] >= 0 or stats['clock_current'] > 0: # minimal validation
+            return stats
+    except Exception as e:
+        print(f"Error reading sysfs for card {gpu_index}: {e}")
+        pass
+
+    return None
+
+
+def get_gpu_stats(device_id, num_devices):
+    """
+    Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power)
+    by looking up matching device_id.
+    """
     gpu_index = -1
-    # Loop and check each card file to find the matching device_id
     for i in range(num_devices):
-        # Try both possible device paths
         device_file_paths = [
             f"/sys/class/drm/card{i}/device/device",
             f"/sys/class/drm/card{i}/device"
@@ -87,7 +183,6 @@ def get_gpu_stats(device_id, num_devices):
             if os.path.exists(device_file_path):
                 try:
                     with open(device_file_path, 'r') as f:
-                        # Convert hex value from file to number and compare with device_id
                         sys_device_id = int(f.read().strip(), 16)
                         if sys_device_id == device_id:
                             gpu_index = i
@@ -101,99 +196,8 @@ def get_gpu_stats(device_id, num_devices):
     if gpu_index == -1:
         return None
 
-    # Try AMD / Intel (sysfs)
-    # Use the found gpu_index
-    card_path = f"/sys/class/drm/card{gpu_index}/device"
-    if os.path.isdir(card_path):
-        try:
-            # AMD Memory
-            if os.path.exists(f"{card_path}/mem_info_vram_used"):
-                with open(f"{card_path}/mem_info_vram_used", 'r') as f:
-                    stats['mem_used'] = int(f.read().strip()) // (1024 * 1024)
-            
-            if os.path.exists(f"{card_path}/mem_info_vram_total"):
-                 with open(f"{card_path}/mem_info_vram_total", 'r') as f:
-                    stats['mem_total'] = int(f.read().strip()) // (1024 * 1024)
+    return get_gpu_stats_for_index(gpu_index)
 
-            # Temperature, Fan, Power
-            # Search for hwmon
-            hwmon_pattern = f"{card_path}/hwmon/hwmon*"
-            hwmons = glob.glob(hwmon_pattern)
-            if hwmons:
-                for hwmon in hwmons:
-                    # Temperature
-                    temp_input = f"{hwmon}/temp1_input"
-                    if os.path.exists(temp_input):
-                         with open(temp_input, 'r') as f:
-                            stats['temp'] = int(f.read().strip()) // 1000
-                    
-                    # Fan Speed (PWM)
-                    pwm_input = f"{hwmon}/pwm1"
-                    pwm_max_input = f"{hwmon}/pwm1_max"
-                    if os.path.exists(pwm_input):
-                        with open(pwm_input, 'r') as f:
-                            pwm_value = int(f.read().strip())
-                            # PWM is usually 0-255, convert to percentage
-                            pwm_max = 255
-                            if os.path.exists(pwm_max_input):
-                                try:
-                                    with open(pwm_max_input, 'r') as f_max:
-                                        pwm_max = int(f_max.read().strip())
-                                except:
-                                    pass
-                            stats['fan_speed'] = int((pwm_value / pwm_max) * 100)
-                    
-                    # Power Usage
-                    power_input = f"{hwmon}/power1_average"
-                    if os.path.exists(power_input):
-                        with open(power_input, 'r') as f:
-                            # Power is in microwatts, convert to watts
-                            stats['power_usage'] = int(f.read().strip()) // 1000000
-            
-            # GPU Usage (AMD specific)
-            if os.path.exists(f"{card_path}/gpu_busy_percent"):
-                with open(f"{card_path}/gpu_busy_percent", 'r') as f:
-                    stats['usage'] = int(f.read().strip())
-            
-            # Clock (AMD specific usually)
-            # Try pp_dpm_sclk first (shows list of clocks provided by driver, * marks current)
-            if os.path.exists(f"{card_path}/pp_dpm_sclk"):
-                with open(f"{card_path}/pp_dpm_sclk", 'r') as f:
-                    lines = f.readlines()
-                    max_clock = 0
-                    current_clock = 0
-                    for line in lines:
-                        # Format: "0: 300Mhz *"
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            clock_str = parts[1].replace('Mhz', '').replace('MHz', '')
-                            try:
-                                clock_val = int(clock_str)
-                                if clock_val > max_clock:
-                                    max_clock = clock_val
-                                if '*' in line:
-                                    current_clock = clock_val
-                            except ValueError:
-                                pass
-                    stats['clock_current'] = current_clock
-                    stats['clock_max'] = max_clock
-            
-            # Fallback for clock: current freq from hwmon if pp_dpm_sclk fails or simpler card
-            if stats['clock_current'] == 0 and hwmons:
-                 for hwmon in hwmons:
-                    freq_input = f"{hwmon}/freq1_input"
-                    if os.path.exists(freq_input):
-                         with open(freq_input, 'r') as f:
-                            stats['clock_current'] = int(f.read().strip()) // (1000 * 1000) # Hz to MHz
-                            break
-
-            if stats['mem_total'] > 0: # minimal validation
-                return stats
-        except Exception as e:
-            print(f"Error reading sysfs: {e}")
-            pass
-
-    return None
 
 
 
