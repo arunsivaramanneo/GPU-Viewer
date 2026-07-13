@@ -177,17 +177,38 @@ def _parse_vulkan(results: dict) -> dict:
                 conformance_version += f".{conf_patch}"
 
         if device_name:
-            # Extract video profiles specifically from this GPU block
-            video_profiles = set()
-            matches = re.findall(r'VIDEO_CODEC_OPERATION_(\w+)_BIT_KHR', block)
-            for match in matches:
-                codec_name = match.replace("DECODE_", "").replace("ENCODE_", "")
-                if codec_name:
-                    video_profiles.add(codec_name)
-            decode_matches = re.findall(r'VK_KHR_video_decode_(\w+)', block)
-            for codec in decode_matches:
+            # Extract decode and encode video profiles separately from this GPU block
+            video_decode_profiles = set()
+            video_encode_profiles = set()
+
+            # From VIDEO_CODEC_OPERATION_DECODE_*/ENCODE_* flags
+            for match in re.findall(r'VIDEO_CODEC_OPERATION_(DECODE|ENCODE)_(\w+)_BIT_KHR', block):
+                op_type, codec = match
+                if op_type == "DECODE":
+                    video_decode_profiles.add(codec)
+                else:
+                    video_encode_profiles.add(codec)
+
+            # From VK_KHR_video_decode_* extensions (secondary source)
+            for codec in re.findall(r'VK_KHR_video_decode_(\w+)', block):
                 if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                    video_profiles.add(codec.upper())
+                    video_decode_profiles.add(codec.upper())
+
+            # From VK_KHR_video_encode_* extensions (secondary source)
+            for codec in re.findall(r'VK_KHR_video_encode_(\w+)', block):
+                if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
+                    video_encode_profiles.add(codec.upper())
+
+            # Also parse placeholder profile names from the summary section
+            for m in re.findall(r'placeholder\s*=\s*(.*)', block):
+                m = m.strip()
+                if 'Decode' in m:
+                    # Extract codec name from e.g. "AV1 Decode (4:2:0 8-bit) ..."
+                    codec = m.split()[0].upper()
+                    video_decode_profiles.add(codec)
+                elif 'Encode' in m:
+                    codec = m.split()[0].upper()
+                    video_encode_profiles.add(codec)
 
             memory_types_count = len(re.findall(r'memoryTypes\s*\[\s*\d+\s*\]', block, re.I))
             memory_heaps_count = len(re.findall(r'memoryHeaps\s*\[\s*\d+\s*\]', block, re.I))
@@ -206,7 +227,10 @@ def _parse_vulkan(results: dict) -> dict:
                 "memory_heaps_count": memory_heaps_count,
                 "queue_count": queue_count,
                 "pipelineCacheUUID": pipelineCacheUUID,
-                "video_profiles": sorted(list(video_profiles)),
+                # Keep combined list for backward compatibility
+                "video_profiles": sorted(video_decode_profiles | video_encode_profiles),
+                "video_decode_profiles": sorted(list(video_decode_profiles)),
+                "video_encode_profiles": sorted(list(video_encode_profiles)),
                 "vendor_id": vendor_id,
                 "device_id": device_id,
                 "driver_info": driver_info,
@@ -1391,7 +1415,7 @@ def _get_gpu_logo(vendor_id_str: str) -> str:
     try:
         v = int(vendor_id_str, 16)
         if v == 0x1002:   # AMD
-            return "../Images/AMD_Radeon.png"
+            return "../Images/AMD_logo.png"
         elif v == 0x10de: # NVIDIA
             return "../Images/Nvidia_logo.png"
         elif v == 0x8086: # Intel
@@ -1616,8 +1640,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Instance Version", str(vk_data.get("instance_version", "—"))),
                     ],
                 ]
-                if dev.get("video_profiles"):
-                    columns[3].append(("Video Profiles", ", ".join(dev["video_profiles"])))
+                if dev.get("video_decode_profiles"):
+                    columns[3].append(("Video Decode Profiles", ", ".join(dev["video_decode_profiles"])))
+                if dev.get("video_encode_profiles"):
+                    columns[3].append(("Video Encode Profiles", ", ".join(dev["video_encode_profiles"])))
 
                 content_widget = _make_grid_card_content(columns)
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
@@ -1640,29 +1666,49 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             card.set_size_request(300, -1)
             flow_box.append(card)
 
+        # ── Vulkan Video ─────────────────────────────────────────────────
+        # Build per-GPU Vulkan Video cards using decode/encode profiles from
+        # the per-device data extracted by _parse_vulkan.
         vk_video_data = data["vulkan_video"]
-        if vk_video_data["supported"]:
-            video_rows = []
-            if vk_video_data.get("profiles"):
-                video_rows.append(("Profiles", ", ".join(vk_video_data["profiles"])))
-            card = _make_card(
-                "Vulkan Video",
-                "../Images/Vulkan-Video.png",
-                video_rows,
-                nav_page="vulkan_video_page",
-                app=app,
-                supported=True,
-            )
-            card.set_size_request(300, -1)
-            flow_box.append(card)
+        vk_video_devices = [
+            dev for dev in vk_data.get("devices", [])
+            if dev.get("video_decode_profiles") or dev.get("video_encode_profiles")
+        ] if vk_data.get("supported") else []
+
+        if vk_video_devices:
+            for dev in vk_video_devices:
+                video_rows = []
+                decode_profiles = dev.get("video_decode_profiles", [])
+                encode_profiles = dev.get("video_encode_profiles", [])
+                if decode_profiles:
+                    video_rows.append(("Video Decode", ", ".join(decode_profiles)))
+                if encode_profiles:
+                    video_rows.append(("Video Encode", ", ".join(encode_profiles)))
+
+                label = (
+                    "Vulkan Video"
+                    if len(vk_video_devices) == 1
+                    else f"Vulkan Video – {dev['name']}"
+                )
+                card = _make_card(
+                    label,
+                    "../Images/Vulkan-Video.png",
+                    video_rows,
+                    nav_page="vulkan_video_page",
+                    app=app,
+                    supported=True,
+                )
+                card.set_size_request(300, -1)
+                flow_box.append(card)
         else:
+            # Fallback: use the global vulkan_video flag to decide supported state
             card = _make_card(
                 "Vulkan Video",
                 "../Images/Vulkan-Video.png",
                 [],
                 nav_page=None,
                 app=None,
-                supported=False,
+                supported=vk_video_data["supported"],
             )
             card.set_size_request(300, -1)
             flow_box.append(card)
@@ -1788,18 +1834,17 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 platform_name = platform.get("name", "Unknown Platform")
                 devices = platform.get("devices", [])
 
-                # Column 1: Platform details
-                platform_col = [
-                    ("Platform", platform_name),
-                    ("Version", platform.get("version", "—")),
-                    ("Profile", platform.get("profile", "—")),
-                    ("Extensions", str(platform.get("extensions_count", 0))),
-                ]
-
-                # Columns 2, 3, 4…: one column per device
-                all_columns = [platform_col]
                 for dev in devices:
-                    dev_col = [
+                    # Column 1: Platform details
+                    platform_col = [
+                        ("Platform", platform_name),
+                        ("Version", platform.get("version", "—")),
+                        ("Profile", platform.get("profile", "—")),
+                        ("Extensions", str(platform.get("extensions_count", 0))),
+                    ]
+
+                    # Column 2: Device details (part 1: from Device to OpenCL C Version)
+                    dev_col_1 = [
                         ("Device", dev.get("name", "—")),
                         ("Vendor", dev.get("vendor", "—")),
                         ("Vendor ID", dev.get("vendor_id", "—")),
@@ -1808,6 +1853,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("Device Version", dev.get("version", "—")),
                         ("Driver Version", dev.get("driver_version", "—")),
                         ("OpenCL C Version", dev.get("opencl_c_version", "—")),
+                    ]
+
+                    # Column 3: The rest of the device details
+                    dev_col_2 = [
                         ("Extensions", str(dev.get("extensions_count", 0))),
                         ("Compute Units", str(dev.get("compute_units", "—"))),
                         ("Max Clock Freq", dev.get("max_clock", "—")),
@@ -1818,19 +1867,19 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("OpenCL C Features", str(dev.get("opencl_c_features_count", "—"))),
                         ("Conformance Test", dev.get("conformance_test", "—")),
                     ]
-                    all_columns.append(dev_col)
 
-                card = _make_card(
-                    f"OpenCL – {platform_name}",
-                    "../Images/OpenCL.svg",
-                    [],
-                    nav_page="opencl_page",
-                    app=app,
-                    supported=True,
-                    content_widget=_make_grid_card_content(all_columns),
-                )
-                card.set_size_request(300, -1)
-                flow_box.append(card)
+                    card_title = f"OpenCL – {platform_name} ({dev.get('name', '—')})"
+                    card = _make_card(
+                        card_title,
+                        "../Images/OpenCL.svg",
+                        [],
+                        nav_page="opencl_page",
+                        app=app,
+                        supported=True,
+                        content_widget=_make_grid_card_content([platform_col, dev_col_1, dev_col_2]),
+                    )
+                    card.set_size_request(300, -1)
+                    flow_box.append(card)
         else:
             card = _make_card(
                 "OpenCL",
