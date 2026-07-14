@@ -248,68 +248,6 @@ def create_vulkan_tab_content(self):
                     toprow.children.append(iter1)
             DeviceTab_Store.append(toprow)
 
-            # ── Vulkan Video Profiles ───────────────────────────────────────
-            # Parse the GPU block from the cached vulkaninfo file to find which
-            # video decode and encode profiles this GPU supports, then append
-            # them as dedicated rows inside the "Vulkan Details" top-row.
-            try:
-                with open(Filenames.vulkaninfo_output_file, "r") as _vf:
-                    _vk_content = _vf.read()
-                # Split out the block for this specific GPU index
-                _gpu_blocks = re.split(r'\nGPU\d+:', "\n" + _vk_content)
-                # GPUname is the 0-based index used above; block index is GPUname+1
-                _gpu_block = _gpu_blocks[GPUname + 1] if GPUname + 1 < len(_gpu_blocks) else ""
-
-                _decode_profiles = set()
-                _encode_profiles = set()
-
-                for _op, _codec in re.findall(
-                    r'VIDEO_CODEC_OPERATION_(DECODE|ENCODE)_(\w+)_BIT_KHR', _gpu_block
-                ):
-                    if _op == "DECODE":
-                        _decode_profiles.add(_codec)
-                    else:
-                        _encode_profiles.add(_codec)
-
-                for _codec in re.findall(r'VK_KHR_video_decode_(\w+)', _gpu_block):
-                    if _codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                        _decode_profiles.add(_codec.upper())
-
-                for _codec in re.findall(r'VK_KHR_video_encode_(\w+)', _gpu_block):
-                    if _codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                        _encode_profiles.add(_codec.upper())
-
-                for _m in re.findall(r'placeholder\s*=\s*(.*)', _gpu_block):
-                    _m = _m.strip()
-                    if 'Decode' in _m:
-                        _decode_profiles.add(_m.split()[0].upper())
-                    elif 'Encode' in _m:
-                        _encode_profiles.add(_m.split()[0].upper())
-
-                if _decode_profiles or _encode_profiles:
-                    _vk_video_toprow = ExpandDataObject3(
-                        "Vulkan Video Profiles", dummy_transparent, ""
-                    )
-                    if _decode_profiles:
-                        _vk_video_toprow.children.append(
-                            ExpandDataObject3(
-                                "Video Decode Profiles",
-                                dummy_transparent,
-                                ", ".join(sorted(_decode_profiles)),
-                            )
-                        )
-                    if _encode_profiles:
-                        _vk_video_toprow.children.append(
-                            ExpandDataObject3(
-                                "Video Encode Profiles",
-                                dummy_transparent,
-                                ", ".join(sorted(_encode_profiles)),
-                            )
-                        )
-                    DeviceTab_Store.append(_vk_video_toprow)
-            except Exception as _e:
-                print(f"Vulkan Video profile parse error: {_e}")
-
             fetch_device_properties_command = "cat %s | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
             #fetch_device_properties_command = "vulkaninfo --show-promoted-structs | awk '/GPU%d/{flag=1;next}/Device Extensions.*/{flag=0}flag' | awk '/VkPhysicalDeviceSparseProperties:/{flag=1}/Device Extensions.*/{flag=0}flag' | awk '/./' " %(GPUname)
 

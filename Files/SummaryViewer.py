@@ -181,34 +181,40 @@ def _parse_vulkan(results: dict) -> dict:
             video_decode_profiles = set()
             video_encode_profiles = set()
 
+            def _normalise_codec(name: str) -> str:
+                """Return a display-friendly codec name, e.g. H264 → H.264."""
+                _MAP = {"H264": "H.264", "H265": "H.265"}
+                return _MAP.get(name.upper(), name.upper())
+
             # From VIDEO_CODEC_OPERATION_DECODE_*/ENCODE_* flags
             for match in re.findall(r'VIDEO_CODEC_OPERATION_(DECODE|ENCODE)_(\w+)_BIT_KHR', block):
                 op_type, codec = match
+                normalised = _normalise_codec(codec)
                 if op_type == "DECODE":
-                    video_decode_profiles.add(codec)
+                    video_decode_profiles.add(normalised)
                 else:
-                    video_encode_profiles.add(codec)
+                    video_encode_profiles.add(normalised)
 
             # From VK_KHR_video_decode_* extensions (secondary source)
             for codec in re.findall(r'VK_KHR_video_decode_(\w+)', block):
                 if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                    video_decode_profiles.add(codec.upper())
+                    video_decode_profiles.add(_normalise_codec(codec))
 
             # From VK_KHR_video_encode_* extensions (secondary source)
             for codec in re.findall(r'VK_KHR_video_encode_(\w+)', block):
                 if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                    video_encode_profiles.add(codec.upper())
+                    video_encode_profiles.add(_normalise_codec(codec))
 
             # Also parse placeholder profile names from the summary section
             for m in re.findall(r'placeholder\s*=\s*(.*)', block):
                 m = m.strip()
                 if 'Decode' in m:
                     # Extract codec name from e.g. "AV1 Decode (4:2:0 8-bit) ..."
-                    codec = m.split()[0].upper()
-                    video_decode_profiles.add(codec)
+                    codec = m.split()[0]
+                    video_decode_profiles.add(_normalise_codec(codec))
                 elif 'Encode' in m:
-                    codec = m.split()[0].upper()
-                    video_encode_profiles.add(codec)
+                    codec = m.split()[0]
+                    video_encode_profiles.add(_normalise_codec(codec))
 
             memory_types_count = len(re.findall(r'memoryTypes\s*\[\s*\d+\s*\]', block, re.I))
             memory_heaps_count = len(re.findall(r'memoryHeaps\s*\[\s*\d+\s*\]', block, re.I))
@@ -1492,7 +1498,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         flow_box = Gtk.FlowBox()
         flow_box.set_homogeneous(False)
         flow_box.set_min_children_per_line(1)
-        flow_box.set_max_children_per_line(3)  # 2-3 columns
+        flow_box.set_max_children_per_line(2)  # up to 2 cards per row
         flow_box.set_selection_mode(Gtk.SelectionMode.NONE)
         flow_box.set_margin_top(12)
         flow_box.set_margin_bottom(24)
@@ -1561,6 +1567,11 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 card_title = f"{matched_name} ({gpu_info['card_name']})"
                 
                 gpu_widgets = {}
+                mem_free = (
+                    (gpu_stats["mem_total"] - gpu_stats["mem_used"])
+                    if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None
+                    else None
+                )
                 gpu_columns = [
                     [
                         ("PCI Address", gpu_info.get("pci_address") or "—"),
@@ -1570,7 +1581,9 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         ("PCIe Link Width", gpu_info.get("pcie_link_width") or "—"),
                     ],
                     [
-                        ("Video Memory", f"{gpu_stats['mem_used']} MB / {gpu_stats['mem_total']} MB" if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None else "—"),
+                        ("VRAM Used", f"{gpu_stats['mem_used']} MB" if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None else "—"),
+                        ("VRAM Free", f"{mem_free} MB" if mem_free is not None else "—"),
+                        ("VRAM Total", f"{gpu_stats['mem_total']} MB" if gpu_stats.get("mem_total") is not None else "—"),
                         ("GPU Usage", f"{gpu_stats['usage']} %" if gpu_stats.get("usage") is not None and gpu_stats["usage"] >= 0 else "—"),
                         ("Temperature", f"{gpu_stats['temp']} °C" if gpu_stats.get("temp") is not None else "—"),
                     ],
@@ -1926,21 +1939,43 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         stats = get_gpu_stats_for_index(gpu_index)
                         if stats:
                             def apply_updates(w=widgets, s=stats):
+                                mem_free = (
+                                    (s["mem_total"] - s["mem_used"])
+                                    if s.get("mem_used") is not None and s.get("mem_total") is not None
+                                    else None
+                                )
+                                if "VRAM Used" in w and s.get("mem_used") is not None:
+                                    w["VRAM Used"].set_subtitle(f"{s['mem_used']} MB" if s["mem_used"] >= 0 else "—")
+                                if "VRAM Free" in w and mem_free is not None:
+                                    w["VRAM Free"].set_subtitle(f"{mem_free} MB" if mem_free >= 0 else "—")
+                                if "VRAM Total" in w and s.get("mem_total") is not None:
+                                    w["VRAM Total"].set_subtitle(f"{s['mem_total']} MB" if s["mem_total"] > 0 else "—")
                                 if "Video Memory" in w and s.get("mem_used") is not None and s.get("mem_total") is not None:
-                                    w["Video Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB")
+                                    w["Video Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB" if s["mem_used"] >= 0 and s["mem_total"] > 0 else "—")
+                                if "Memory" in w and s.get("mem_used") is not None and s.get("mem_total") is not None:
+                                    w["Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB" if s["mem_used"] >= 0 and s["mem_total"] > 0 else "—")
                                 if "GPU Usage" in w and s.get("usage") is not None:
-                                    w["GPU Usage"].set_subtitle(f"{s['usage']} %")
+                                    w["GPU Usage"].set_subtitle(f"{s['usage']} %" if s["usage"] >= 0 else "—")
                                 if "Temperature" in w and s.get("temp") is not None:
-                                    w["Temperature"].set_subtitle(f"{s['temp']} °C")
+                                    w["Temperature"].set_subtitle(f"{s['temp']} °C" if s["temp"] > 0 else "—")
                                 if "GPU Clock" in w:
-                                    if s.get("clock_current") is not None and s.get("clock_max") is not None:
+                                    if s.get("clock_current") is not None and s.get("clock_max") is not None and s["clock_current"] > 0 and s["clock_max"] > 0:
                                         w["GPU Clock"].set_subtitle(f"{s['clock_current']} / {s['clock_max']} MHz")
-                                    elif s.get("clock_current") is not None:
+                                    elif s.get("clock_current") is not None and s["clock_current"] > 0:
                                         w["GPU Clock"].set_subtitle(f"{s['clock_current']} MHz")
+                                    else:
+                                        w["GPU Clock"].set_subtitle("—")
+                                if "Clock" in w:
+                                    if s.get("clock_current") is not None and s["clock_current"] > 0:
+                                        w["Clock"].set_subtitle(f"{s['clock_current']} MHz")
+                                    else:
+                                        w["Clock"].set_subtitle("—")
                                 if "Power" in w and s.get("power_usage") is not None:
-                                    w["Power"].set_subtitle(f"{s['power_usage']} W")
+                                    w["Power"].set_subtitle(f"{s['power_usage']} W" if s["power_usage"] > 0 else "—")
                                 if "Fan Speed" in w and s.get("fan_speed") is not None:
-                                    w["Fan Speed"].set_subtitle(f"{s['fan_speed']} %")
+                                    w["Fan Speed"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
+                                if "Fan" in w and s.get("fan_speed") is not None:
+                                    w["Fan"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
                                 return False
                             GLib.idle_add(apply_updates)
                 except Exception as e:
