@@ -115,42 +115,17 @@ def quit(instance):
     rmdir_process.communicate()
     instance.destroy()
 
-def simple_quit(instance):
-    instance.destroy()
-
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
+    def on_response(dialog, result, app):
+        app.release()
+
     def show_message(app):
+        app.hold()
         dialog = Gtk.AlertDialog()
-        dialog.set_modal(False)
         dialog.set_message('gpu-viewer is already running')
         dialog.set_detail('If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again')
-    #    dialog.set_default_button(0)
-        dialog.set_cancel_button(1)
-        dialog.choose(None,None,None,None)
-    #    dialog.show()
-        message_window = Gtk.ApplicationWindow(application=app)
-        message_grid = Gtk.Grid()
-        message_window.set_title("gpu-viewer application is already running")
-        message_window.set_default_size(480,120)
-        message_window.set_resizable(False)
-    #    message_window.present()
-        message_window_frame = Gtk.Frame()
-        setMargin(message_window_frame,5,5,10)
-        label = Gtk.Label(label="If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
-        message_window.set_child(message_window_frame)
-        message_window_frame.set_child(message_grid)
-        setMargin(label,5,10,0)
-        message_grid.attach(label,0,0,20,1)
-        
-        message_button_OK = Gtk.Button.new_with_label("OK")
-        message_button_OK.connect("clicked",simple_quit)
-    #    message_button_CANCEL = Gtk.Button.new_with_label("No")
-        setMargin(message_button_OK,500,50,10)
-        message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,5,1)
-     #   message_grid.attach_next_to(message_button_CANCEL,message_button_OK,Gtk.PositionType.RIGHT,10,1)
-    #    setMargin(message_button_CANCEL,50,50,10)
-        setMargin(message_window,5,5,10)
+        dialog.choose(None,None,on_response,app)
 
     app = Gtk.Application()
     app.connect("activate",show_message)
