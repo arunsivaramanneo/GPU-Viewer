@@ -2414,8 +2414,23 @@ def create_vulkan_tab_content(self):
 
     gpu_Dropdown.connect("notify::selected-item", on_gpu_dropdown_changed)
 
+    on_gpu_dropdown_changed(gpu_Dropdown, dummy=0)
 
-    on_gpu_dropdown_changed(gpu_Dropdown,dummy=0)
+    # Apply pre-selection requested from the Summary "Open" button.
+    # gpu_index_map maps dropdown position → real GPU index, so we find the
+    # dropdown position whose mapped value equals the requested gpu_index.
+    _pending = getattr(self, '_pending_gpu_index', None)
+    if _pending is not None:
+        try:
+            # Find the dropdown position that corresponds to _pending
+            for drop_pos, real_idx in enumerate(gpu_index_map):
+                if real_idx == _pending:
+                    gpu_Dropdown.set_selected(drop_pos)
+                    break
+        except Exception as _e:
+            print(f"GPU pre-selection error: {_e}")
+        self._pending_gpu_index = None
+
     # Create a scrolled window for the sidebar list
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
     sidebar_scrolled_window.set_child(sidebar_listbox)

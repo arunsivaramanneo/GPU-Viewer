@@ -115,42 +115,17 @@ def quit(instance):
     rmdir_process.communicate()
     instance.destroy()
 
-def simple_quit(instance):
-    instance.destroy()
-
 if Path(Filenames.gpu_viewer_folder_path).exists():
     
+    def on_response(dialog, result, app):
+        app.release()
+
     def show_message(app):
+        app.hold()
         dialog = Gtk.AlertDialog()
-        dialog.set_modal(False)
         dialog.set_message('gpu-viewer is already running')
         dialog.set_detail('If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again')
-    #    dialog.set_default_button(0)
-        dialog.set_cancel_button(1)
-        dialog.choose(None,None,None,None)
-    #    dialog.show()
-        message_window = Gtk.ApplicationWindow(application=app)
-        message_grid = Gtk.Grid()
-        message_window.set_title("gpu-viewer application is already running")
-        message_window.set_default_size(480,120)
-        message_window.set_resizable(False)
-    #    message_window.present()
-        message_window_frame = Gtk.Frame()
-        setMargin(message_window_frame,5,5,10)
-        label = Gtk.Label(label="If you are unable to view the application, please run rm -r /tmp/gpu-viewer and run the application again")
-        message_window.set_child(message_window_frame)
-        message_window_frame.set_child(message_grid)
-        setMargin(label,5,10,0)
-        message_grid.attach(label,0,0,20,1)
-        
-        message_button_OK = Gtk.Button.new_with_label("OK")
-        message_button_OK.connect("clicked",simple_quit)
-    #    message_button_CANCEL = Gtk.Button.new_with_label("No")
-        setMargin(message_button_OK,500,50,10)
-        message_grid.attach_next_to(message_button_OK,label,Gtk.PositionType.BOTTOM,5,1)
-     #   message_grid.attach_next_to(message_button_CANCEL,message_button_OK,Gtk.PositionType.RIGHT,10,1)
-    #    setMargin(message_button_CANCEL,50,50,10)
-        setMargin(message_window,5,5,10)
+        dialog.choose(None,None,on_response,app)
 
     app = Gtk.Application()
     app.connect("activate",show_message)
@@ -335,21 +310,29 @@ else:
                 style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
                 fname = Gio.file_new_for_path('gtk_light.css')
 
-            # Reload CSS
-            display = Gtk.Widget.get_display(self.window)
-            provider = Gtk.CssProvider.new()
-            provider.load_from_file(fname)
-            Gtk.StyleContext.add_provider_for_display(display, provider,
+            # Reload CSS cleanly by removing previous provider
+            display = Gtk.Widget.get_display(self.window) if hasattr(self, 'window') and self.window else Gdk.Display.get_default()
+            if hasattr(self, '_css_provider') and self._css_provider:
+                try:
+                    Gtk.StyleContext.remove_provider_for_display(display, self._css_provider)
+                except Exception:
+                    pass
+
+            self._css_provider = Gtk.CssProvider.new()
+            self._css_provider.load_from_file(fname)
+            Gtk.StyleContext.add_provider_for_display(display, self._css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
             # Update constants
             const.update_theme_constants(state)
 
             # Update button icon
-            self._update_theme_button_icon(state)
+            if hasattr(self, 'theme_icon'):
+                self._update_theme_button_icon(state)
             
             # Refresh UI by re-creating tabs
-            self.refresh_tabs()
+            if hasattr(self, 'view_stack'):
+                self.refresh_tabs()
 
         def _update_theme_button_icon(self, is_dark):
             """Updates the icon of the theme toggle button."""
@@ -381,7 +364,6 @@ else:
             else:
                 self.window.set_size_request(int(width) * const.WIDTH_RATIO ,int(height) * const.HEIGHT_RATIO1)
     
-            provider = Gtk.CssProvider.new()
             style_manager = Adw.StyleManager.get_default()
             prefer_dark_theme = self.config.get_theme_preference()
             
@@ -393,8 +375,9 @@ else:
                 fname = Gio.file_new_for_path('gtk_light.css')
 
             display = Gtk.Widget.get_display(self.window)
-            provider.load_from_file(fname)
-            Gtk.StyleContext.add_provider_for_display(display, provider,
+            self._css_provider = Gtk.CssProvider.new()
+            self._css_provider.load_from_file(fname)
+            Gtk.StyleContext.add_provider_for_display(display, self._css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_USER)
             
             # Synchronize constants with the loaded preference
@@ -433,6 +416,7 @@ else:
             self.save_button.add_css_class("flat")
             self.save_button.set_valign(Gtk.Align.CENTER)
             self.save_button.set_icon_name("document-save-symbolic")
+            self.save_button.set_sensitive(False)
             self.save_button.connect("clicked", self._on_save_button_clicked)
 
             # Create the close-tab button (disabled for Summary and About Us)
@@ -686,6 +670,7 @@ else:
             # About page has no subprocesses — build immediately
             page3_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
             self.about_page_ui = about_page(page3_box)
+            self._about_page_box = page3_box  # keep reference for tab reordering
             self.view_stack.add_titled_with_icon(page3_box, "page3", "About Us", "about-us")
 
             # ---- Trigger a lazy build whenever the visible tab changes ----
@@ -699,19 +684,42 @@ else:
                 if hasattr(self, 'close_tab_button') and self.close_tab_button:
                     self.close_tab_button.set_sensitive(name not in ("summary", "page3"))
 
+                # Enable save button only for API detail tabs (not Summary or About)
+                if hasattr(self, 'save_button') and self.save_button:
+                    self.save_button.set_sensitive(name not in ("summary", "page3"))
+
             self.view_stack.connect("notify::visible-child", _on_visible_child_changed)
 
-            def open_tab(page_name):
+            def open_tab(page_name, gpu_index=None):
+                # Store GPU pre-selection request for Vulkan/OpenCL viewers to read
+                self._pending_gpu_index = gpu_index
+
                 if page_name in self._inner_stacks:
                     self.view_stack.set_visible_child_name(page_name)
                     return
                 if page_name not in self._available_tab_builders:
                     return
 
+                # Remove About Us temporarily so the new tab inserts before it
+                about_box = getattr(self, '_about_page_box', None)
+                if about_box is not None:
+                    try:
+                        self.view_stack.remove(about_box)
+                    except Exception:
+                        pass
+
                 title, icon, builder = self._available_tab_builders[page_name]
                 _register_tab(page_name, title, icon, builder)
                 self._tab_built[page_name] = False
                 _build_tab_async(page_name)
+
+                # Re-append About Us at the very end
+                if about_box is not None:
+                    try:
+                        self.view_stack.add_titled_with_icon(about_box, "page3", "About Us", "about-us")
+                    except Exception:
+                        pass
+
                 self.view_stack.set_visible_child_name(page_name)
 
             self.open_tab = open_tab

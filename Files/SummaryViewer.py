@@ -962,6 +962,72 @@ def _parse_vulkan_video(results: dict) -> dict:
     return data
 
 
+_cpu_last_stat = [0, 0]  # [idle, total]
+
+def get_realtime_cpu_usage() -> str:
+    global _cpu_last_stat
+    try:
+        with open("/proc/stat", "r") as f:
+            line = f.readline()
+        if line.startswith("cpu "):
+            parts = [float(x) for x in line.split()[1:]]
+            idle = parts[3] + parts[4]  # idle + iowait
+            total = sum(parts)
+            prev_idle, prev_total = _cpu_last_stat
+            _cpu_last_stat = [idle, total]
+            diff_total = total - prev_total
+            diff_idle = idle - prev_idle
+            if diff_total > 0:
+                usage = (1.0 - diff_idle / diff_total) * 100.0
+                usage = max(0.0, min(100.0, usage))
+                return f"{usage:.1f} %"
+    except Exception:
+        pass
+    return "—"
+
+
+def get_realtime_ram_usage() -> str:
+    try:
+        mem_total = 0
+        mem_avail = 0
+        with open("/proc/meminfo", "r") as f:
+            for line in f:
+                if line.startswith("MemTotal:"):
+                    mem_total = int(line.split()[1])
+                elif line.startswith("MemAvailable:"):
+                    mem_avail = int(line.split()[1])
+        if mem_total > 0 and mem_avail > 0:
+            mem_used = mem_total - mem_avail
+            total_gb = mem_total / (1024 * 1024)
+            used_gb = mem_used / (1024 * 1024)
+            pct = (used_gb / total_gb) * 100.0
+            return f"{used_gb:.1f} GB / {total_gb:.1f} GB ({pct:.0f} %)"
+    except Exception:
+        pass
+    return "—"
+
+
+def get_realtime_uptime() -> str:
+    try:
+        with open("/proc/uptime", "r") as f:
+            uptime_seconds = float(f.readline().split()[0])
+            mins, secs = divmod(uptime_seconds, 60)
+            hours, mins = divmod(mins, 60)
+            days, hours = divmod(hours, 24)
+            parts = []
+            if days > 0:
+                parts.append(f"{int(days)}d")
+            if hours > 0:
+                parts.append(f"{int(hours)}h")
+            if mins > 0 or days > 0 or hours > 0:
+                parts.append(f"{int(mins)}m")
+            parts.append(f"{int(secs)}s")
+            return " ".join(parts)
+    except Exception:
+        pass
+    return "—"
+
+
 def _parse_system() -> dict:
     """Return basic system info (OS, CPU, RAM, Kernel, Desktop, plus detailed BIOS, Uptime, etc.)."""
     info = {
@@ -969,6 +1035,8 @@ def _parse_system() -> dict:
         "cpu": "",
         "cpu_cores_threads": "—",
         "ram": "",
+        "cpu_usage": "—",
+        "ram_usage": "—",
         "kernel": "",
         "architecture": "",
         "hostname": "",
@@ -1212,14 +1280,14 @@ def _make_grid_card_content(columns: list[list[tuple[str, str]]], row_widgets_ou
     return grid_box
 
 
-def _nav_button(label: str, page_name: str, app) -> Gtk.Button:
+def _nav_button(label: str, page_name: str, app, gpu_index=None) -> Gtk.Button:
     btn = Gtk.Button(label=label)
     btn.add_css_class("flat")
     btn.add_css_class("suggested-action")
     btn.set_valign(Gtk.Align.CENTER)
     def on_clicked(_):
         if hasattr(app, "open_tab"):
-            app.open_tab(page_name)
+            app.open_tab(page_name, gpu_index=gpu_index)
     btn.connect("clicked", on_clicked)
     return btn
 
@@ -1241,6 +1309,9 @@ def _get_icon_name(field_name: str) -> str:
         "operating system": "system-run-symbolic",
         "processor": "cpu-symbolic",
         "system ram": "memory-symbolic",
+        "ram usage": "memory-symbolic",
+        "cpu usage": "cpu-symbolic",
+        "uptime": "preferences-system-time-symbolic",
         "kernel": "system-symbolic",
         "desktop": "preferences-desktop-appearance-symbolic",
         "windowing system": "application-x-executable-symbolic",
@@ -1290,7 +1361,8 @@ def _make_card(title: str, icon_name: str, rows: list,
                nav_page: str | None, app,
                supported: bool = True,
                row_widgets_out: dict = None,
-               content_widget: Gtk.Widget | None = None) -> Gtk.Box:
+               content_widget: Gtk.Widget | None = None,
+               gpu_index: int | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -1343,7 +1415,7 @@ def _make_card(title: str, icon_name: str, rows: list,
 
     # Navigation button
     if nav_page and supported and app:
-        btn = _nav_button("Open →", nav_page, app)
+        btn = _nav_button("Open →", nav_page, app, gpu_index=gpu_index)
         header.append(btn)
 
     card_box.append(header)
@@ -1423,9 +1495,9 @@ def _get_gpu_logo(vendor_id_str: str) -> str:
         if v == 0x1002:   # AMD
             return "../Images/AMD_logo.png"
         elif v == 0x10de: # NVIDIA
-            return "../Images/Nvidia_logo.png"
+            return "../Images/nvidia_logo.png"
         elif v == 0x8086: # Intel
-            return "../Images/Intel_logo.png"
+            return "../Images/intel-logo.png"
     except Exception:
         pass
     return "../Images/about-us.png"
@@ -1441,20 +1513,86 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     app     : the GPUViewerApp instance (has .view_stack)
     results : the dict from _probe_and_build_tabs  {vulkan: bool, …}
     """
-    # Add CSS styling for cards
+    # Add CSS styling for cards based on active theme
+    prefer_dark = app.config.get_theme_preference() if (app and hasattr(app, 'config')) else True
     css_provider = Gtk.CssProvider()
-    css_provider.load_from_data(b"""
-    .summary-card {
-        border: 1px solid @borders;
-        border-radius: 6px;
-        background-color: @view_bg_color;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-    }
-    
-    .summary-card:disabled {
-        opacity: 0.55;
-    }
-    """)
+    if prefer_dark:
+        card_css = """
+        .summary-card {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            background-color: #242429;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-card:disabled {
+            opacity: 0.55;
+        }
+
+        .summary-card .title-3 {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .summary-card row subtitle {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .summary-card row title {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .summary-card button {
+            background-color: #2e2e36;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .summary-card button:hover {
+            background-color: #383842;
+        }
+        """
+    else:
+        card_css = """
+        .summary-card {
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-card:disabled {
+            opacity: 0.55;
+        }
+
+        .summary-card .title-3 {
+            font-weight: 700;
+            color: #171717;
+        }
+
+        .summary-card row subtitle {
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .summary-card row title {
+            color: #171717;
+            font-weight: 500;
+        }
+
+        .summary-card button {
+            background-color: #f4f4f5;
+            color: #171717;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+        }
+
+        .summary-card button:hover {
+            background-color: #e4e4e7;
+        }
+        """
+    css_provider.load_from_data(card_css.encode("utf-8"))
     Gtk.StyleContext.add_provider_for_display(
         Gdk.Display.get_default(),
         css_provider,
@@ -1513,18 +1651,23 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
         # ── System Information ───────────────────────────────────────────
         sys_data = data["system"]
+        cpu_usage_init = get_realtime_cpu_usage()
+        ram_usage_init = get_realtime_ram_usage()
+        uptime_init = get_realtime_uptime()
+
         sys_columns = [
             [
                 ("Operating System", sys_data.get("os", "—")),
                 ("Processor", sys_data.get("cpu", "—")),
                 ("CPU Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
-                ("System RAM", sys_data.get("ram", "—")),
+                ("CPU Usage", cpu_usage_init),
+                ("RAM Usage", ram_usage_init),
             ],
             [
                 ("Kernel", sys_data.get("kernel", "—")),
                 ("Architecture", sys_data.get("architecture", "—")),
                 ("Hostname", sys_data.get("hostname", "—")),
-                ("Uptime", sys_data.get("uptime", "—")),
+                ("Uptime", uptime_init),
             ],
             [
                 ("Hardware Model", sys_data.get("hardware_model", "—")),
@@ -1534,6 +1677,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 ("Display", sys_data.get("display", "—")),
             ],
         ]
+        sys_widgets = {}
         sys_card = _make_card(
             "System",
             "../Images/about-us.png",
@@ -1541,7 +1685,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             nav_page=None,   # no detail tab for system info
             app=None,
             supported=True,
-            content_widget=_make_grid_card_content(sys_columns),
+            content_widget=_make_grid_card_content(sys_columns, row_widgets_out=sys_widgets),
+            row_widgets_out=sys_widgets,
         )
         sys_card.set_size_request(300, -1)
         flow_box.append(sys_card)
@@ -1668,6 +1813,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     app=app,
                     supported=True,
                     content_widget=content_widget,
+                    gpu_index=i,
                 )
                 card.set_size_request(300, -1)
                 flow_box.append(card)
@@ -1847,7 +1993,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 platform_name = platform.get("name", "Unknown Platform")
                 devices = platform.get("devices", [])
 
-                for dev in devices:
+                for dev_index, dev in enumerate(devices):
                     # Column 1: Platform details
                     platform_col = [
                         ("Platform", platform_name),
@@ -1890,6 +2036,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         app=app,
                         supported=True,
                         content_widget=_make_grid_card_content([platform_col, dev_col_1, dev_col_2]),
+                        gpu_index=dev_index,
                     )
                     card.set_size_request(300, -1)
                     flow_box.append(card)
@@ -1935,6 +2082,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 
             def fetch_stats():
                 try:
+                    # System real-time stats
+                    cpu_u = get_realtime_cpu_usage()
+                    ram_u = get_realtime_ram_usage()
+                    upt_u = get_realtime_uptime()
+
+                    def apply_sys_updates(c=cpu_u, r=ram_u, u=upt_u):
+                        if "CPU Usage" in sys_widgets and c != "—":
+                            sys_widgets["CPU Usage"].set_subtitle(c)
+                        if "RAM Usage" in sys_widgets and r != "—":
+                            sys_widgets["RAM Usage"].set_subtitle(r)
+                        if "Uptime" in sys_widgets and u != "—":
+                            sys_widgets["Uptime"].set_subtitle(u)
+                        return False
+
+                    GLib.idle_add(apply_sys_updates)
+
                     for gpu_index, widgets in stats_widgets_list:
                         stats = get_gpu_stats_for_index(gpu_index)
                         if stats:

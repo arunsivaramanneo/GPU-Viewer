@@ -687,6 +687,17 @@ def openCL(self, tab):
     setMargin(platform_dropdown,30,10,10)
     selectPlatform(platform_dropdown,0)
 
+    # Apply pre-selection requested from the Summary "Open" button.
+    # selectPlatform above populates Devices_dropdown; we now pick the right device.
+    _pending_gpu = getattr(self, '_pending_gpu_index', None)
+    if _pending_gpu is not None:
+        try:
+            model = Devices_dropdown.get_model()
+            if model and _pending_gpu < model.get_n_items():
+                Devices_dropdown.set_selected(_pending_gpu)
+        except Exception as _e:
+            print(f"OpenCL GPU pre-selection error: {_e}")
+        self._pending_gpu_index = None
 
 #    platformGrid.attach_next_to(platform_dropdown, platformLabel, Gtk.PositionType.RIGHT, 21, 1)
 
