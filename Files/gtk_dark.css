@@ -52,7 +52,7 @@ frame {
 }
 
 treeview {
-  background-color: #222222;
+  background-color: #181818;
   color: white;
   border: 2px solid #171717;
   border-style: solid solid none solid;
@@ -60,15 +60,15 @@ treeview {
 }
 
 grid {
-  background-image: linear-gradient(#222222, #222222);
-  background-color: #222222;
+  background-image: linear-gradient(#181818, #181818);
+  background-color: #181818;
   color: white;
   border: 2px solid #171717;
   border-style: none;
 }
 
 textview>border {
-  background-color: #222222;
+  background-color: #181818;
 }
 
 .titlebar box {
@@ -129,8 +129,8 @@ image {
 }
 
 headerbar {
-  background-image: linear-gradient(#222222, #222222);
-  background-color: #222222;
+  background-image: linear-gradient(#181818, #181818);
+  background-color: #181818;
   font-size: medium;
   border-style: none none none none;
   color: #ffffff;
@@ -140,7 +140,7 @@ headerbar {
  * Notebooks *
  *************/
 notebook>header tab {
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
@@ -154,23 +154,23 @@ notebook>header tab {
 }
 
 notebook {
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   border: 2px solid #171717;
   border-style: none none none none;
-  background-color: #222222;
+  background-color: #181818;
   border-radius: 9px;
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
 notebook>header>tabs>tab {
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   min-height: 24px;
   min-width: 24px;
   padding-top: 8px;
   margin-bottom: 6px;
   margin-right: 6px;
   padding-bottom: 8px;
-  background-color: #222222;
+  background-color: #181818;
   color: white;
   font-weight: 600;
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
@@ -244,7 +244,7 @@ button.combo {
   min-height: 16px;
   min-width: 16px;
   background-image: none;
-  background-color: #222222;
+  background-color: #181818;
   outline: none;
 }
 
@@ -254,7 +254,7 @@ button.combo:only-child {
   font-weight: 550;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: inset 0 0 0 2px #fafbfc;
-  background-color: #222222;
+  background-color: #181818;
   color: rgba(0, 0, 0, 0.87);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   outline: none;
@@ -267,14 +267,14 @@ button.combo:hover {
 }
 
 button.dropdown {
-  background-color: #222222;
+  background-color: #181818;
 }
 
 popover.background>arrow,
 popover.background>contents {
   transition: box-shadow 75ms cubic-bezier(0, 0, 0.2, 1);
   padding: 6px;
-  background-color: #222222;
+  background-color: #181818;
   background-clip: border-box;
   border-radius: 12px;
   color: #ffffff;
@@ -328,7 +328,7 @@ scrollbar>range>trough>slider {
 }
 
 entry {
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   min-height: 36px;
   padding: 0 8px;
   border-spacing: 6px;
@@ -336,7 +336,7 @@ entry {
   caret-color: currentColor;
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
   box-shadow: 0 2px 2.4px -1px rgba(0, 0, 0, 0.2), 0 4px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  background-color: #222222;
+  background-color: #181818;
   color: white;
   outline: none;
   border-style: solid;
@@ -362,19 +362,19 @@ entry:focus-within>text>placeholder {
 }
 
 header {
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   transition: all 75ms cubic-bezier(0, 0, 0.2, 1);
   min-height: 24px;
   min-width: 24px;
   padding: 6px 12px;
   border-width: 1px;
   border-color: transparent;
-  background-color: #222222;
+  background-color: #181818;
   border-style: none none none none;
   outline: none;
   background-clip: padding-box;
   box-shadow: none;
-  color: #222222;
+  color: #181818;
   font-weight: 500;
 }
 
@@ -382,17 +382,17 @@ header {
 columnview.view>header>button,
 treeview.view>header>button {
   text-align: left;
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   min-height: 0;
   min-width: 0;
   font-weight: bold;
   color: #fafbfc;
-  background-color: #222222;
+  background-color: #181818;
   background-image: none;
   border-style: none none solid none;
   border: 0px solid #333333;
   border-radius: 0;
-  border-image: linear-gradient(to bottom, #222222 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #222222 80%) 0 1 0 0/0 1px 0 0 stretch;
+  border-image: linear-gradient(to bottom, #181818 20%, rgba(0, 0, 0, 0.11) 20%, rgba(0, 0, 0, 0.11) 80%, #181818 80%) 0 1 0 0/0 1px 0 0 stretch;
 }
 
 columnview.view:selected,
@@ -403,14 +403,14 @@ treeview.view:selected {
 }
 
 listview {
-  background-image: linear-gradient(#222222, #222222);
-  background-color: #222222;
+  background-image: linear-gradient(#181818, #181818);
+  background-color: #181818;
   border-radius: 0px;
 }
 
 dropdown>button {
   -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
-  background-image: linear-gradient(#222222, #222222);
+  background-image: linear-gradient(#181818, #181818);
   border-radius: 10px;
   color: #fafbfc;
   border-style: solid;
@@ -448,15 +448,15 @@ popover.background listview>row {
 
 
 treeview {
-  border-color: #222222;
+  border-color: #181818;
   border-style: solid;
   border-width: 2px;
   border-radius: 12px;
 }
 
 columnview {
-  background-image: linear-gradient(#222222, #222222);
-  border-color: #222222;
+  background-image: linear-gradient(#181818, #181818);
+  border-color: #181818;
   color: white;
   border-style: solid;
 }
