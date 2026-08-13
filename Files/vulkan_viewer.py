@@ -947,54 +947,66 @@ def create_vulkan_tab_content(self):
             with open(Filenames.vulkan_device_queues_file) as file1:
                 for line in file1:
                     if " = " in line:
-                        qRHS.append(vulkan_device_queues_rhs[j])
-                        j = j + 1
+                        rhs_value = vulkan_device_queues_rhs[j] if j < len(vulkan_device_queues_rhs) else ""
+                        qRHS.append(rhs_value)
+                        j += 1
                     else:
                         qRHS.append("")
 
-            qRHS.pop(0)
+            if qRHS and qRHS[0] == "":
+                qRHS.pop(0)
+            if len(qRHS) < len(vulkan_device_queues_lhs):
+                qRHS.extend([""] * (len(vulkan_device_queues_lhs) - len(qRHS)))
+            elif len(qRHS) > len(vulkan_device_queues_lhs):
+                qRHS = qRHS[:len(vulkan_device_queues_lhs)]
 
             groupName = None
+            toprow = None
+            iter2 = None
+            iter3 = None
             for i in range(len(vulkan_device_queues_lhs)):
-                if not (groupName == vulkan_device_queues_lhs[i]):
-                    if "Properties[" in vulkan_device_queues_lhs[i]:
-                        if groupName == None:
-                            toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
-                        else:
+                if i >= len(qRHS):
+                    break
+                rhs_value = qRHS[i].strip('\n') if qRHS[i] is not None else ""
+                lhs_value = vulkan_device_queues_lhs[i]
+                if toprow is None and "Properties[" not in lhs_value:
+                    continue
+                if not (groupName == lhs_value):
+                    if "Properties[" in lhs_value:
+                        if toprow is not None:
                             QueueTab_Store.append(toprow)
-                            toprow = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i])
-                    #    iter1 = QueueTab_Store.append(None,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i],const.BGCOLOR3,fColor])
-                    #    k = 0
-                        groupName = vulkan_device_queues_lhs[i]
+                        toprow = ExpandDataObject((lhs_value.strip('\n')).strip('\t'), rhs_value)
+                        groupName = lhs_value
+                        iter2 = None
+                        iter3 = None
                         continue
-                    if "---" in vulkan_device_queues_lhs[i]:
+                    if "---" in lhs_value:
                         continue
-                    if "\t\t\t" in vulkan_device_queues_lhs[i] and "\t\t\t\t" not in vulkan_device_queues_lhs[i]:
-                        iter3 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''))
-                        iter2.children.append(iter3)
-                    #    iter3 = QueueTab_Store.append(iter2,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),(qRHS[i].strip('\n')).replace('count = ',''),background_color,fColor])
+                    if "\t\t\t" in lhs_value and "\t\t\t\t" not in lhs_value:
+                        if toprow is not None and hasattr(toprow, "children") and iter2 is not None:
+                            iter3 = ExpandDataObject((lhs_value.strip('\n')).strip('\t'), rhs_value.replace('count = ',''))
+                            iter2.children.append(iter3)
                         continue
-                    if "\t\t\t\t" in vulkan_device_queues_lhs[i]:
-                        iter4 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
-                        iter3.children.append(iter4)
-                    #    QueueTab_Store.append(iter3,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
+                    if "\t\t\t\t" in lhs_value:
+                        if toprow is not None and hasattr(toprow, "children") and iter3 is not None:
+                            iter4 = ExpandDataObject((lhs_value.strip('\n')).strip('\t'), rhs_value)
+                            iter3.children.append(iter4)
                         continue
-                    else :
-                        if "queueFlags" in vulkan_device_queues_lhs[i] or "VkQueueFamily" in line:
-                            supportedFlags = qRHS[i].split("|")
-                            iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),"")
-                            toprow.children.append(iter2)
-                        #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t')," ",background_color,fColor])
+                    else:
+                        if "queueFlags" in lhs_value or "VkQueueFamily" in lhs_value:
+                            supportedFlags = rhs_value.split("|") if rhs_value else []
+                            iter2 = ExpandDataObject((lhs_value.strip('\n')).strip('\t'), "")
+                            if toprow is not None and hasattr(toprow, "children"):
+                                toprow.children.append(iter2)
                             for flags in supportedFlags:
-                                iter2_1 = ExpandDataObject(flags.replace("QUEUE_",""),"")
+                                iter2_1 = ExpandDataObject(flags.replace("QUEUE_", ""), "")
                                 iter2.children.append(iter2_1)
-                            #    QueueTab_Store.append(iter2,[flags.replace("QUEUE_",""),"",setBackgroundColor(count),fColor])
-
                         else:
-                            iter2 = ExpandDataObject((vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'))
-                            toprow.children.append(iter2)
-                        #    iter2 = QueueTab_Store.append(iter1,[(vulkan_device_queues_lhs[i].strip('\n')).strip('\t'),qRHS[i].strip('\n'),background_color,fColor])
-            QueueTab_Store.append(toprow)           
+                            iter2 = ExpandDataObject((lhs_value.strip('\n')).strip('\t'), rhs_value)
+                            if toprow is not None and hasattr(toprow, "children"):
+                                toprow.children.append(iter2)
+            if toprow is not None:
+                QueueTab_Store.append(toprow)
         #    TreeQueue.expand_all()
             label = "Queues (%d)" % len(vulkan_device_queue_counts)
             queueColumnLhs.set_title(label)
@@ -1524,9 +1536,23 @@ def create_vulkan_tab_content(self):
             idx = gpu_Dropdown.get_selected() 
             if idx == Gtk.INVALID_LIST_POSITION:
                 idx = 0
-            
+            if idx >= len(gpu_index_map):
+                idx = 0
+
             real_idx = gpu_index_map[idx]
-            device_id = int(gpu_id_list[real_idx].strip(), 16)
+            # Guard against gpu_id_list being shorter than gpu_list
+            if real_idx >= len(gpu_id_list) or not gpu_id_list[real_idx].strip():
+                mem_box.set_visible(False)
+                usage_box.set_visible(False)
+                temp_box.set_visible(False)
+                clock_box.set_visible(False)
+                fan_box.set_visible(False)
+                power_box.set_visible(False)
+                return True
+            try:
+                device_id = int(gpu_id_list[real_idx].strip(), 16)
+            except (ValueError, IndexError):
+                return True
             num_devices = len(gpu_list)
             stats = get_gpu_stats(device_id, num_devices)
             if stats:

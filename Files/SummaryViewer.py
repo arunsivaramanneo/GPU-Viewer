@@ -980,7 +980,27 @@ def get_realtime_cpu_usage() -> str:
             if diff_total > 0:
                 usage = (1.0 - diff_idle / diff_total) * 100.0
                 usage = max(0.0, min(100.0, usage))
-                return f"{usage:.1f} %"
+
+                total_cur_khz = 0.0
+                total_max_khz = 0.0
+                cpu_root = "/sys/devices/system/cpu"
+                for cpu_dir in glob.glob(os.path.join(cpu_root, "cpu[0-9]*", "cpufreq")):
+                    cur_path = os.path.join(cpu_dir, "scaling_cur_freq")
+                    max_path = os.path.join(cpu_dir, "scaling_max_freq")
+                    try:
+                        if os.path.exists(cur_path):
+                            total_cur_khz += float(open(cur_path, "r", encoding="utf-8").read().strip())
+                        if os.path.exists(max_path):
+                            total_max_khz += float(open(max_path, "r", encoding="utf-8").read().strip())
+                    except Exception:
+                        continue
+
+                if total_max_khz > 0:
+                    used_mhz = total_cur_khz / 1000.0
+                    max_mhz = total_max_khz / 1000.0
+                    freq_pct = max(0.0, min(100.0, (used_mhz / max_mhz) * 100.0)) if max_mhz > 0 else 0.0
+                    return f"{used_mhz:.0f} MHz / {max_mhz:.0f} MHz ({freq_pct:.0f} %)"
+                return f"{usage:.0f} %"
     except Exception:
         pass
     return "—"
@@ -1047,6 +1067,7 @@ def _parse_system() -> dict:
         "windowing": "",
         "hardware_model": "",
         "disk_capacity": "",
+        "hard_drives": "",
         "display": "",
     }
     try:
@@ -1190,6 +1211,34 @@ def _parse_system() -> dict:
     except Exception:
         pass
 
+    # Detect hard drives
+    try:
+        if shutil.which("lsblk"):
+            result = subprocess.run(
+                ["lsblk", "-ndbo", "NAME,SIZE,TYPE,SERIAL"],
+                capture_output=True, text=True, timeout=3
+            )
+            drives = []
+            for line in result.stdout.strip().split('\n'):
+                if not line:
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    name = parts[0]
+                    size = parts[1]
+                    drive_type = parts[2]
+                    # Filter for actual drives (disk, nvme, etc.)
+                    if drive_type in ['disk', 'nvme', 'mmc', 'loop']:
+                        if len(parts) >= 4:
+                            serial = parts[3]
+                            drives.append(f"{name} ({size}) - {serial}")
+                        else:
+                            drives.append(f"{name} ({size})")
+            if drives:
+                info["hard_drives"] = ";".join(drives)
+    except Exception:
+        pass
+
     try:
         display_info = []
         if shutil.which("xrandr"):
@@ -1237,22 +1286,68 @@ def _gather_all(results: dict) -> dict:
 # UI helpers
 # ---------------------------------------------------------------------------
 
-def _make_action_row(title: str, subtitle: str) -> Adw.ActionRow:
-    row = Adw.ActionRow()
-    row.set_title(title)
-    row.set_subtitle(subtitle if subtitle else "—")
-    row.set_title_selectable(True)
-    row.set_subtitle_selectable(True)
-
-    icon_name = _get_icon_name(title)
-    try:
-        icon = Gtk.Image.new_from_icon_name(icon_name)
-        icon.set_pixel_size(12)
-        row.add_prefix(icon)
-    except Exception:
-        pass
-
-    return row
+def _make_action_row(title: str, subtitle: str) -> Gtk.Widget:
+    """Create a row widget with title and values connected like a tree structure.
+    Multiple values can be separated by semicolons or newlines."""
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+    box.set_margin_start(8)
+    box.set_margin_end(8)
+    box.set_margin_top(6)
+    box.set_margin_bottom(6)
+    
+    # Title label with wrapping enabled
+    title_label = Gtk.Label(label=title)
+    title_label.add_css_class("body")
+    title_label.set_halign(Gtk.Align.START)
+    title_label.set_wrap(True)
+    title_label.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+    title_label.set_selectable(True)
+    
+    box.append(title_label)
+    
+    # Parse multiple values (split by semicolon or newline)
+    if not subtitle or subtitle in ("—", "-", "N/A"):
+        values = ["—"]
+    else:
+        # Split by semicolon first, then by newline, and clean up
+        values = [v.strip() for v in subtitle.replace('\n', ';').split(';') if v.strip()]
+        if not values:
+            values = ["—"]
+    
+    # Store references to subtitle labels for updates
+    box.subtitle_labels = []
+    
+    # Create a connector and label for each value
+    for idx, value in enumerate(values):
+        value_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        
+        # Tree connector (└─ for items)
+        connector_label = Gtk.Label(label="└─")
+        connector_label.add_css_class("dim-label")
+        connector_label.set_halign(Gtk.Align.START)
+        
+        # Value label with wrapping enabled
+        value_label = Gtk.Label(label=value)
+        value_label.add_css_class("caption")
+        value_label.set_halign(Gtk.Align.START)
+        value_label.set_wrap(True)
+        value_label.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        value_label.set_selectable(True)
+        
+        value_container.append(connector_label)
+        value_container.append(value_label)
+        box.append(value_container)
+        box.subtitle_labels.append(value_label)
+    
+    # Add a set_subtitle method for compatibility with update callbacks
+    def set_subtitle(new_subtitle: str):
+        # Update the first label (for single-value fields)
+        if box.subtitle_labels:
+            box.subtitle_labels[0].set_label(new_subtitle if new_subtitle else "—")
+    box.set_subtitle = set_subtitle
+    box.subtitle_label = box.subtitle_labels[0] if box.subtitle_labels else None
+    
+    return box
 
 
 def _make_status_badge(text: str, good: bool) -> Gtk.Label:
@@ -1266,12 +1361,15 @@ def _make_status_badge(text: str, good: bool) -> Gtk.Label:
 
 
 def _make_grid_card_content(columns: list[list[tuple[str, str]]], row_widgets_out: dict = None) -> Gtk.Widget:
-    grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
+    grid_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
     grid_box.set_hexpand(True)
     for column_rows in columns:
-        col_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        col_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         col_box.set_hexpand(True)
         for title, subtitle in column_rows:
+            # Skip rows that have no meaningful value
+            if not subtitle or subtitle in ("—", "-", "N/A"):
+                continue
             row = _make_action_row(title, subtitle)
             col_box.append(row)
             if row_widgets_out is not None:
@@ -1642,8 +1740,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         flow_box.set_margin_bottom(24)
         flow_box.set_margin_start(12)
         flow_box.set_margin_end(12)
-        flow_box.set_row_spacing(12)
-        flow_box.set_column_spacing(12)
+        flow_box.set_row_spacing(8)
+        flow_box.set_column_spacing(8)
         
         scroll.set_child(flow_box)
 
@@ -1674,6 +1772,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 ("BIOS Info", f"{sys_data.get('bios_version', '—')} ({sys_data.get('bios_date', '—')})" if sys_data.get("bios_version") or sys_data.get("bios_date") else "—"),
                 ("Desktop / Session", f"{sys_data.get('desktop', '—')} ({sys_data.get('windowing', '—')})" if sys_data.get("desktop") or sys_data.get("windowing") else "—"),
                 ("Disk Capacity", sys_data.get("disk_capacity", "—")),
+                ("Hard Drives", sys_data.get("hard_drives", "—")),
                 ("Display", sys_data.get("display", "—")),
             ],
         ]
@@ -1688,7 +1787,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             content_widget=_make_grid_card_content(sys_columns, row_widgets_out=sys_widgets),
             row_widgets_out=sys_widgets,
         )
-        sys_card.set_size_request(300, -1)
+        sys_card.set_size_request(250, -1)
         flow_box.append(sys_card)
 
         # ── GPU Statistics & Details (Multi-GPU support) ─────────────────
@@ -1711,34 +1810,89 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 
                 card_title = f"{matched_name} ({gpu_info['card_name']})"
                 
-                gpu_widgets = {}
-                mem_free = (
-                    (gpu_stats["mem_total"] - gpu_stats["mem_used"])
-                    if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None
-                    else None
-                )
-                gpu_columns = [
-                    [
-                        ("PCI Address", gpu_info.get("pci_address") or "—"),
-                        ("Driver", gpu_info.get("driver") or "—"),
-                        ("VBIOS Version", gpu_info.get("vbios") or "—"),
-                        ("PCIe Link Speed", gpu_info.get("pcie_link_speed") or "—"),
-                        ("PCIe Link Width", gpu_info.get("pcie_link_width") or "—"),
-                    ],
-                    [
-                        ("VRAM Used", f"{gpu_stats['mem_used']} MB" if gpu_stats.get("mem_used") is not None and gpu_stats.get("mem_total") is not None else "—"),
-                        ("VRAM Free", f"{mem_free} MB" if mem_free is not None else "—"),
-                        ("VRAM Total", f"{gpu_stats['mem_total']} MB" if gpu_stats.get("mem_total") is not None else "—"),
-                        ("GPU Usage", f"{gpu_stats['usage']} %" if gpu_stats.get("usage") is not None and gpu_stats["usage"] >= 0 else "—"),
-                        ("Temperature", f"{gpu_stats['temp']} °C" if gpu_stats.get("temp") is not None else "—"),
-                    ],
-                    [
-                        ("GPU Clock", f"{gpu_stats['clock_current']} / {gpu_stats['clock_max']} MHz" if gpu_stats.get("clock_current") is not None and gpu_stats.get("clock_max") is not None else (f"{gpu_stats['clock_current']} MHz" if gpu_stats.get("clock_current") is not None else "—")),
-                        ("Power", f"{gpu_stats['power_usage']} W" if gpu_stats.get("power_usage") is not None and gpu_stats["power_usage"] > 0 else "—"),
-                        ("Fan Speed", f"{gpu_stats['fan_speed']} %" if gpu_stats.get("fan_speed") is not None and gpu_stats['fan_speed'] >= 0 else "—"),
-                    ],
-                ]
+                opencl_hint = {}
+                for platform in data.get("opencl", {}).get("platforms", []):
+                    for device in platform.get("devices", []):
+                        name = (device.get("name") or "").strip().lower()
+                        if not name:
+                            continue
+                        if name in (matched_name.lower(), gpu_info.get("card_name", "").lower()):
+                            opencl_hint = {
+                                "compute_units": device.get("compute_units"),
+                                "instruction_set": device.get("opencl_c_version") or device.get("version"),
+                            }
+                            break
+                    if opencl_hint:
+                        break
+                if opencl_hint:
+                    gpu_info.setdefault("compute_units", opencl_hint.get("compute_units"))
+                    gpu_info.setdefault("instruction_set", opencl_hint.get("instruction_set"))
+                    gpu_stats.setdefault("compute_units", opencl_hint.get("compute_units"))
+                    gpu_stats.setdefault("instruction_set", opencl_hint.get("instruction_set"))
                 
+                gpu_widgets = {}
+
+                def _gpu_val(v, suffix="", threshold=0, threshold_field=None):
+                    """Return formatted string or None if value is unavailable."""
+                    if v is None:
+                        return None
+                    if isinstance(v, (int, float)) and v < threshold:
+                        return None
+                    return f"{v}{suffix}"
+
+                gpu_rows_col1 = []
+                if gpu_info.get("pci_address"):
+                    gpu_rows_col1.append(("PCI Address", gpu_info["pci_address"]))
+                if gpu_info.get("driver"):
+                    gpu_rows_col1.append(("Driver", gpu_info["driver"]))
+                if gpu_info.get("vbios"):
+                    gpu_rows_col1.append(("VBIOS Version", gpu_info["vbios"]))
+                if gpu_info.get("pcie_link_speed"):
+                    gpu_rows_col1.append(("PCIe Link Speed", gpu_info["pcie_link_speed"]))
+                if gpu_info.get("pcie_link_width"):
+                    gpu_rows_col1.append(("PCIe Link Width", gpu_info["pcie_link_width"]))
+
+                gpu_rows_col2 = []
+                mem_used = gpu_stats.get("mem_used")
+                mem_total = gpu_stats.get("mem_total")
+                if mem_used is not None and mem_total is not None and mem_total > 0:
+                    gpu_rows_col2.append(("VRAM", f"{mem_used} / {mem_total} MB"))
+                vram_clock = gpu_stats.get("vram_clock")
+                if vram_clock is not None and vram_clock > 0:
+                    gpu_rows_col2.append(("VRAM Clock", f"{vram_clock} MHz"))
+                vram_type = gpu_stats.get("vram_type") or gpu_info.get("vram_type")
+                if vram_type:
+                    gpu_rows_col2.append(("VRAM Type", str(vram_type)))
+                if gpu_stats.get("usage") is not None and gpu_stats["usage"] >= 0:
+                    gpu_rows_col2.append(("GPU Usage", f"{gpu_stats['usage']} %"))
+                if gpu_stats.get("temp") is not None and gpu_stats["temp"] > 0:
+                    gpu_rows_col2.append(("Temperature", f"{gpu_stats['temp']} °C"))
+
+                gpu_rows_col3 = []
+                clk_cur = gpu_stats.get("clock_current")
+                clk_max = gpu_stats.get("clock_max")
+                if clk_cur is not None and clk_cur > 0:
+                    clk_str = f"{clk_cur} / {clk_max} MHz" if clk_max and clk_max > 0 else f"{clk_cur} MHz"
+                    gpu_rows_col3.append(("GPU Clock", clk_str))
+                if gpu_stats.get("power_usage") is not None and gpu_stats["power_usage"] > 0:
+                    gpu_rows_col3.append(("Power", f"{gpu_stats['power_usage']} W"))
+                if gpu_stats.get("fan_speed") is not None and gpu_stats["fan_speed"] >= 0:
+                    gpu_rows_col3.append(("Fan Speed", f"{gpu_stats['fan_speed']} %"))
+
+                compute_units = gpu_stats.get("compute_units") or gpu_info.get("compute_units")
+                if compute_units:
+                    gpu_rows_col3.append(("Compute Units", str(compute_units)))
+                rop_count = gpu_stats.get("rop_count") or gpu_info.get("rop_count")
+                if rop_count:
+                    gpu_rows_col3.append(("ROPs", str(rop_count)))
+                instruction_set = gpu_stats.get("instruction_set") or gpu_info.get("instruction_set")
+                if instruction_set:
+                    gpu_rows_col3.append(("Instruction Set", str(instruction_set)))
+
+                # Only include non-empty columns
+                gpu_columns = [c for c in [gpu_rows_col1, gpu_rows_col2, gpu_rows_col3] if c]
+
+
                 gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
                 gpu_card = _make_card(
                     card_title,
@@ -1750,7 +1904,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     content_widget=_make_grid_card_content(gpu_columns, row_widgets_out=gpu_widgets),
                     row_widgets_out=gpu_widgets
                 )
-                gpu_card.set_size_request(300, -1)
+                gpu_card.set_size_request(250, -1)
                 flow_box.append(gpu_card)
                 stats_widgets_list.append((gpu_idx, gpu_widgets))
         else:
@@ -1762,46 +1916,49 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 app=None,
                 supported=False,
             )
-            stats_card.set_size_request(300, -1)
+            stats_card.set_size_request(250, -1)
             flow_box.append(stats_card)
 
         # ── Vulkan ───────────────────────────────────────────────────────
         vk_data = data["vulkan"]
         if vk_data["supported"] and vk_data.get("devices"):
             for i, dev in enumerate(vk_data["devices"]):
-                columns = [
-                    [
-                        ("API Version", dev.get("api_version", "—")),
-                        ("Driver", dev.get("driver_name", "—")),
-                        ("Driver Version", dev.get("driver_version", "—")),
-                        ("Driver Info", dev.get("driver_info", "—")),
-                        ("Device Type", dev.get("device_type", "—")),
-                        ("pipelineCacheUUID", dev.get("pipelineCacheUUID","-")),
-                    ],
-                    [
-                        ("Vendor ID", dev.get("vendor_id", "—")),
-                        ("Device ID", dev.get("device_id", "—")),
-                        ("Device UUID", dev.get("device_uuid", "—")),
-                        ("Driver UUID", dev.get("driver_uuid", "—")),
-                        ("Conformance Version", dev.get("conformance_version", "—")),
-                    ],
-                    [
-                        ("Device Formats", str(dev.get("formats_count", "—"))),
-                        ("Device Extensions", str(dev.get("extensions_count", "—"))),
-                        ("Memory Types", str(dev.get("memory_types_count", "—"))),
-                        ("Memory Heaps", str(dev.get("memory_heaps_count", "—"))),
-                        ("Queue Families ", str(dev.get("queue_count", "—"))),
-                    ],
-                    [
-                        ("Instance Extensions", str(vk_data.get("instance_extensions_count", "—"))),
-                        ("Instance Layers", str(vk_data.get("instance_layers_count", "—"))),
-                        ("Instance Version", str(vk_data.get("instance_version", "—"))),
-                    ],
-                ]
+                def _vk_col(fields):
+                    return [(k, v) for k, v in fields if v and v not in ("—", "-")]
+
+                col1 = _vk_col([
+                    ("API Version", dev.get("api_version", "")),
+                    ("Driver", dev.get("driver_name", "")),
+                    ("Driver Version", dev.get("driver_version", "")),
+                    ("Driver Info", dev.get("driver_info", "")),
+                    ("Device Type", dev.get("device_type", "")),
+                    ("Pipeline Cache UUID", dev.get("pipelineCacheUUID", "")),
+                ])
+                col2 = _vk_col([
+                    ("Vendor ID", dev.get("vendor_id", "")),
+                    ("Device ID", dev.get("device_id", "")),
+                    ("Device UUID", dev.get("device_uuid", "")),
+                    ("Driver UUID", dev.get("driver_uuid", "")),
+                    ("Conformance Version", dev.get("conformance_version", "")),
+                ])
+                col3 = _vk_col([
+                    ("Device Formats", str(dev.get("formats_count", "")) if dev.get("formats_count") else ""),
+                    ("Device Extensions", str(dev.get("extensions_count", "")) if dev.get("extensions_count") else ""),
+                    ("Memory Types", str(dev.get("memory_types_count", "")) if dev.get("memory_types_count") else ""),
+                    ("Memory Heaps", str(dev.get("memory_heaps_count", "")) if dev.get("memory_heaps_count") else ""),
+                    ("Queue Families", str(dev.get("queue_count", "")) if dev.get("queue_count") else ""),
+                ])
+                col4 = _vk_col([
+                    ("Instance Extensions", str(vk_data.get("instance_extensions_count", "")) if vk_data.get("instance_extensions_count") else ""),
+                    ("Instance Layers", str(vk_data.get("instance_layers_count", "")) if vk_data.get("instance_layers_count") else ""),
+                    ("Instance Version", str(vk_data.get("instance_version", ""))),
+                ])
                 if dev.get("video_decode_profiles"):
-                    columns[3].append(("Video Decode Profiles", ", ".join(dev["video_decode_profiles"])))
+                    col4.append(("Video Decode Profiles", ", ".join(dev["video_decode_profiles"])))
                 if dev.get("video_encode_profiles"):
-                    columns[3].append(("Video Encode Profiles", ", ".join(dev["video_encode_profiles"])))
+                    col4.append(("Video Encode Profiles", ", ".join(dev["video_encode_profiles"])))
+
+                columns = [c for c in [col1, col2, col3, col4] if c]
 
                 content_widget = _make_grid_card_content(columns)
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
@@ -1815,14 +1972,14 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     content_widget=content_widget,
                     gpu_index=i,
                 )
-                card.set_size_request(300, -1)
+                card.set_size_request(250, -1)
                 flow_box.append(card)
         else:
             card = _make_card(
                 "Vulkan", "../Images/Vulkan.png",
                 [], nav_page=None, app=None, supported=False,
             )
-            card.set_size_request(300, -1)
+            card.set_size_request(250, -1)
             flow_box.append(card)
 
         # ── Vulkan Video ─────────────────────────────────────────────────
@@ -1835,7 +1992,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         ] if vk_data.get("supported") else []
 
         if vk_video_devices:
-            for dev in vk_video_devices:
+            for dev_index, dev in enumerate(vk_video_devices):
                 video_rows = []
                 decode_profiles = dev.get("video_decode_profiles", [])
                 encode_profiles = dev.get("video_encode_profiles", [])
@@ -1844,11 +2001,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 if encode_profiles:
                     video_rows.append(("Video Encode", ", ".join(encode_profiles)))
 
-                label = (
-                    "Vulkan Video"
-                    if len(vk_video_devices) == 1
-                    else f"Vulkan Video – {dev['name']}"
-                )
+                label = f"Vulkan Video – {dev.get('name', 'GPU')}"
                 card = _make_card(
                     label,
                     "../Images/Vulkan-Video.png",
@@ -1856,8 +2009,9 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     nav_page="vulkan_video_page",
                     app=app,
                     supported=True,
+                    gpu_index=dev_index,
                 )
-                card.set_size_request(300, -1)
+                card.set_size_request(250, -1)
                 flow_box.append(card)
         else:
             # Fallback: use the global vulkan_video flag to decide supported state
@@ -1869,7 +2023,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 app=None,
                 supported=vk_video_data["supported"],
             )
-            card.set_size_request(300, -1)
+            card.set_size_request(250, -1)
             flow_box.append(card)
 
         # ── OpenGL ───────────────────────────────────────────────────────
@@ -1900,7 +2054,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 supported=True,
                 content_widget=_make_grid_card_content(gl_columns),
             )
-            card.set_size_request(300, -1)
+            card.set_size_request(250, -1)
             flow_box.append(card)
 
             # Card 2: OpenGL ES (only if data present)
@@ -1924,7 +2078,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     supported=True,
                     content_widget=_make_grid_card_content(es_columns),
                 )
-                es_card.set_size_request(300, -1)
+                es_card.set_size_request(250, -1)
                 flow_box.append(es_card)
 
             # Card 3: EGL (only if data present)
@@ -1948,7 +2102,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     supported=True,
                     content_widget=_make_grid_card_content(egl_columns),
                 )
-                egl_card.set_size_request(300, -1)
+                egl_card.set_size_request(250, -1)
                 flow_box.append(egl_card)
 
             # Card 4: GLX (only if data present)
@@ -1976,14 +2130,14 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     supported=True,
                     content_widget=_make_grid_card_content(glx_columns),
                 )
-                glx_card.set_size_request(300, -1)
+                glx_card.set_size_request(250, -1)
                 flow_box.append(glx_card)
         else:
             card = _make_card(
                 "OpenGL", "../Images/OpenGL.png",
                 [], nav_page=None, app=None, supported=False,
             )
-            card.set_size_request(300, -1)
+            card.set_size_request(250, -1)
             flow_box.append(card)
 
         # ── OpenCL ───────────────────────────────────────────────────────
@@ -2038,7 +2192,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         content_widget=_make_grid_card_content([platform_col, dev_col_1, dev_col_2]),
                         gpu_index=dev_index,
                     )
-                    card.set_size_request(300, -1)
+                    card.set_size_request(250, -1)
                     flow_box.append(card)
         else:
             card = _make_card(
@@ -2046,7 +2200,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 "../Images/OpenCL.svg",
                 [], nav_page=None, app=None, supported=False,
             )
-            card.set_size_request(300, -1)
+            card.set_size_request(250, -1)
             flow_box.append(card)
 
         # ── VDPAU ────────────────────────────────────────────────────────
@@ -2070,7 +2224,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 "VDPAU", "../Images/vdpauinfo.png",
                 [], nav_page=None, app=None, supported=False,
             )
-        card.set_size_request(300, -1)
+        card.set_size_request(250, -1)
         flow_box.append(card)
 
         outer.append(scroll)
@@ -2102,43 +2256,25 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         stats = get_gpu_stats_for_index(gpu_index)
                         if stats:
                             def apply_updates(w=widgets, s=stats):
-                                mem_free = (
-                                    (s["mem_total"] - s["mem_used"])
-                                    if s.get("mem_used") is not None and s.get("mem_total") is not None
-                                    else None
-                                )
-                                if "VRAM Used" in w and s.get("mem_used") is not None:
-                                    w["VRAM Used"].set_subtitle(f"{s['mem_used']} MB" if s["mem_used"] >= 0 else "—")
-                                if "VRAM Free" in w and mem_free is not None:
-                                    w["VRAM Free"].set_subtitle(f"{mem_free} MB" if mem_free >= 0 else "—")
-                                if "VRAM Total" in w and s.get("mem_total") is not None:
-                                    w["VRAM Total"].set_subtitle(f"{s['mem_total']} MB" if s["mem_total"] > 0 else "—")
-                                if "Video Memory" in w and s.get("mem_used") is not None and s.get("mem_total") is not None:
-                                    w["Video Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB" if s["mem_used"] >= 0 and s["mem_total"] > 0 else "—")
-                                if "Memory" in w and s.get("mem_used") is not None and s.get("mem_total") is not None:
-                                    w["Memory"].set_subtitle(f"{s['mem_used']} MB / {s['mem_total']} MB" if s["mem_used"] >= 0 and s["mem_total"] > 0 else "—")
+                                mem_used = s.get("mem_used")
+                                mem_total = s.get("mem_total")
+                                if "VRAM" in w:
+                                    if mem_used is not None and mem_total is not None and mem_total > 0:
+                                        w["VRAM"].set_subtitle(f"{mem_used} / {mem_total} MB")
                                 if "GPU Usage" in w and s.get("usage") is not None:
                                     w["GPU Usage"].set_subtitle(f"{s['usage']} %" if s["usage"] >= 0 else "—")
                                 if "Temperature" in w and s.get("temp") is not None:
                                     w["Temperature"].set_subtitle(f"{s['temp']} °C" if s["temp"] > 0 else "—")
                                 if "GPU Clock" in w:
-                                    if s.get("clock_current") is not None and s.get("clock_max") is not None and s["clock_current"] > 0 and s["clock_max"] > 0:
-                                        w["GPU Clock"].set_subtitle(f"{s['clock_current']} / {s['clock_max']} MHz")
-                                    elif s.get("clock_current") is not None and s["clock_current"] > 0:
-                                        w["GPU Clock"].set_subtitle(f"{s['clock_current']} MHz")
-                                    else:
-                                        w["GPU Clock"].set_subtitle("—")
-                                if "Clock" in w:
-                                    if s.get("clock_current") is not None and s["clock_current"] > 0:
-                                        w["Clock"].set_subtitle(f"{s['clock_current']} MHz")
-                                    else:
-                                        w["Clock"].set_subtitle("—")
+                                    clk_cur = s.get("clock_current")
+                                    clk_max = s.get("clock_max")
+                                    if clk_cur is not None and clk_cur > 0:
+                                        clk_str = f"{clk_cur} / {clk_max} MHz" if clk_max and clk_max > 0 else f"{clk_cur} MHz"
+                                        w["GPU Clock"].set_subtitle(clk_str)
                                 if "Power" in w and s.get("power_usage") is not None:
                                     w["Power"].set_subtitle(f"{s['power_usage']} W" if s["power_usage"] > 0 else "—")
                                 if "Fan Speed" in w and s.get("fan_speed") is not None:
                                     w["Fan Speed"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
-                                if "Fan" in w and s.get("fan_speed") is not None:
-                                    w["Fan"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
                                 return False
                             GLib.idle_add(apply_updates)
                 except Exception as e:

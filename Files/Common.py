@@ -71,7 +71,7 @@ def get_gpu_stats_for_index(gpu_index):
     Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power)
     by direct GPU index corresponding to /sys/class/drm/card{gpu_index}.
     """
-    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1}
+    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1, 'vram_clock': 0, 'vram_type': '', 'compute_units': '', 'rop_count': '', 'instruction_set': ''}
     
     card_path = f"/sys/class/drm/card{gpu_index}/device"
     if not os.path.isdir(card_path):
@@ -102,11 +102,11 @@ def get_gpu_stats_for_index(gpu_index):
                 pass
             
             if pci_addr:
-                cmd = f"nvidia-smi -i {pci_addr} --query-gpu=memory.used,memory.total,temperature.gpu,utilization.gpu,clocks.current.graphics,clocks.max.graphics,fan.speed,power.draw --format=csv,noheader,nounits"
+                cmd = f"nvidia-smi -i {pci_addr} --query-gpu=memory.used,memory.total,temperature.gpu,utilization.gpu,clocks.current.graphics,clocks.max.graphics,clocks.current.memory,clocks.max.memory,fan.speed,power.draw --format=csv,noheader,nounits"
                 lines = fetchContentsFromCommand(cmd)
                 if lines:
                     parts = [p.strip() for p in lines[0].split(',')]
-                    if len(parts) >= 8:
+                    if len(parts) >= 10:
                         def parse_val(val, default=0):
                             if "[n/a]" in val.lower() or "n/a" in val.lower() or not val:
                                 return default
@@ -121,8 +121,10 @@ def get_gpu_stats_for_index(gpu_index):
                         stats['usage'] = parse_val(parts[3], -1)
                         stats['clock_current'] = parse_val(parts[4])
                         stats['clock_max'] = parse_val(parts[5])
-                        stats['fan_speed'] = parse_val(parts[6], -1)
-                        stats['power_usage'] = parse_val(parts[7], -1)
+                        stats['vram_clock'] = parse_val(parts[6])
+                        stats['vram_type'] = 'GDDR'
+                        stats['fan_speed'] = parse_val(parts[8], -1)
+                        stats['power_usage'] = parse_val(parts[9], -1)
                         return stats
 
         elif "0x8086" in vendor_id:
