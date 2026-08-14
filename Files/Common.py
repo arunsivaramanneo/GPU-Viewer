@@ -71,7 +71,7 @@ def get_gpu_stats_for_index(gpu_index):
     Fetches GPU stats (Memory Used, Memory Total, Temperature, Clock Current, Clock Max, Usage, Fan Speed, Power)
     by direct GPU index corresponding to /sys/class/drm/card{gpu_index}.
     """
-    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1, 'vram_clock': 0, 'vram_type': '', 'compute_units': '', 'rop_count': '', 'instruction_set': ''}
+    stats = {'mem_used': 0, 'mem_total': 0, 'temp': 0, 'clock_current': 0, 'clock_max': 0, 'usage': -1, 'fan_speed': -1, 'power_usage': -1, 'vram_clock': 0, 'vram_clock_max': 0, 'vram_type': '', 'compute_units': '', 'rop_count': '', 'instruction_set': ''}
     
     card_path = f"/sys/class/drm/card{gpu_index}/device"
     if not os.path.isdir(card_path):
@@ -122,6 +122,7 @@ def get_gpu_stats_for_index(gpu_index):
                         stats['clock_current'] = parse_val(parts[4])
                         stats['clock_max'] = parse_val(parts[5])
                         stats['vram_clock'] = parse_val(parts[6])
+                        stats['vram_clock_max'] = parse_val(parts[7])
                         stats['vram_type'] = 'GDDR'
                         stats['fan_speed'] = parse_val(parts[8], -1)
                         stats['power_usage'] = parse_val(parts[9], -1)

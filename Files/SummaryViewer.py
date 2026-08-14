@@ -50,6 +50,15 @@ except Exception:
 # Data-gathering helpers (all run in a background thread)
 # ---------------------------------------------------------------------------
 
+def _normalise_video_codec_name(name: str) -> str:
+    """Return a display-friendly codec name such as H.264 or H.265."""
+    if not name:
+        return ""
+    key = name.strip().upper().replace("HEVC", "H265").replace("AVC", "H264")
+    _MAP = {"H264": "H.264", "H265": "H.265", "AV1": "AV1", "VP8": "VP8", "VP9": "VP9"}
+    return _MAP.get(key, key)
+
+
 def _parse_vulkan(results: dict) -> dict:
     """Return key Vulkan fields from the vulkaninfo output file."""
     data = {
@@ -177,66 +186,72 @@ def _parse_vulkan(results: dict) -> dict:
                 conformance_version += f".{conf_patch}"
 
         if device_name:
-            # Extract decode and encode video profiles separately from this GPU block
-            video_decode_profiles = set()
-            video_encode_profiles = set()
+            video_decode_profiles = {}
+            video_encode_profiles = {}
 
-            def _normalise_codec(name: str) -> str:
-                """Return a display-friendly codec name, e.g. H264 → H.264."""
-                _MAP = {"H264": "H.264", "H265": "H.265"}
-                return _MAP.get(name.upper(), name.upper())
+            def _record_profile(op_type: str, codec_name: str, count: int = 1):
+                if not codec_name:
+                    return
+                normalised = _normalise_video_codec_name(codec_name)
+                if not normalised:
+                    return
+                counts = video_decode_profiles if op_type == "DECODE" else video_encode_profiles
+                if count is None or count <= 0:
+                    count = 1
+                counts[normalised] = counts.get(normalised, 0) + count
 
-            # From VIDEO_CODEC_OPERATION_DECODE_*/ENCODE_* flags
-            for match in re.findall(r'VIDEO_CODEC_OPERATION_(DECODE|ENCODE)_(\w+)_BIT_KHR', block):
-                op_type, codec = match
-                normalised = _normalise_codec(codec)
-                if op_type == "DECODE":
-                    video_decode_profiles.add(normalised)
-                else:
-                    video_encode_profiles.add(normalised)
+            placeholder_seen = False
+            placeholder_items = re.findall(r'placeholder\s*=\s*(.*)', block, re.I)
+            for item in placeholder_items:
+                item = item.strip()
+                if not item:
+                    continue
+                placeholder_seen = True
+                match = re.search(r'(?i)\b([A-Za-z0-9.]+)\s+(Decode|Encode)\b', item)
+                if match:
+                    codec, op_type = match.groups()
+                    _record_profile(op_type.upper(), codec, 1)
 
-            # From VK_KHR_video_decode_* extensions (secondary source)
-            for codec in re.findall(r'VK_KHR_video_decode_(\w+)', block):
-                if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                    video_decode_profiles.add(_normalise_codec(codec))
+            if not placeholder_seen:
+                seen_flags = set()
+                for op_type, codec in re.findall(r'VIDEO_CODEC_OPERATION_(DECODE|ENCODE)_(\w+)_BIT_KHR', block):
+                    key = (op_type.upper(), codec.upper())
+                    if key in seen_flags:
+                        continue
+                    seen_flags.add(key)
+                    _record_profile(op_type.upper(), codec, 1)
 
-            # From VK_KHR_video_encode_* extensions (secondary source)
-            for codec in re.findall(r'VK_KHR_video_encode_(\w+)', block):
-                if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
-                    video_encode_profiles.add(_normalise_codec(codec))
+                for codec in re.findall(r'VK_KHR_video_decode_(\w+)', block):
+                    if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
+                        _record_profile("DECODE", codec, 1)
 
-            # Also parse placeholder profile names from the summary section
-            for m in re.findall(r'placeholder\s*=\s*(.*)', block):
-                m = m.strip()
-                if 'Decode' in m:
-                    # Extract codec name from e.g. "AV1 Decode (4:2:0 8-bit) ..."
-                    codec = m.split()[0]
-                    video_decode_profiles.add(_normalise_codec(codec))
-                elif 'Encode' in m:
-                    codec = m.split()[0]
-                    video_encode_profiles.add(_normalise_codec(codec))
+                for codec in re.findall(r'VK_KHR_video_encode_(\w+)', block):
+                    if codec.lower() in ("av1", "h264", "h265", "vp8", "vp9"):
+                        _record_profile("ENCODE", codec, 1)
 
             memory_types_count = len(re.findall(r'memoryTypes\s*\[\s*\d+\s*\]', block, re.I))
             memory_heaps_count = len(re.findall(r'memoryHeaps\s*\[\s*\d+\s*\]', block, re.I))
             queue_count = len(re.findall(r'queueProperties\s*\[\s*\d+\s*\]', block, re.I))
 
+            decode_names = sorted(video_decode_profiles)
+            encode_names = sorted(video_encode_profiles)
             data["devices"].append({
                 "name": device_name,
                 "api_version": api_version,
                 "driver_name": driver_name,
                 "driver_version": driver_version,
                 "device_type": device_type,
-                # Count only supported formats listed under 'Format Properties'
                 "formats_count": formats_count,
                 "extensions_count": extensions_count,
                 "memory_types_count": memory_types_count,
                 "memory_heaps_count": memory_heaps_count,
                 "queue_count": queue_count,
                 "pipelineCacheUUID": pipelineCacheUUID,
-                # Keep combined list for backward compatibility
-                "video_profiles": sorted(video_decode_profiles | video_encode_profiles),
-                "video_decode_profiles": sorted(list(video_decode_profiles)),
-                "video_encode_profiles": sorted(list(video_encode_profiles)),
+                "video_profiles": sorted(set(decode_names) | set(encode_names)),
+                "video_decode_profiles": decode_names,
+                "video_encode_profiles": encode_names,
+                "video_decode_profile_counts": dict(sorted(video_decode_profiles.items())),
+                "video_encode_profile_counts": dict(sorted(video_encode_profiles.items())),
                 "vendor_id": vendor_id,
                 "device_id": device_id,
                 "driver_info": driver_info,
@@ -272,8 +287,12 @@ def _parse_vulkan(results: dict) -> dict:
             pass
 
     instance_ext_match = re.search(r'Instance Extensions\s*:\s*count\s*=\s*(\d+)', content, re.I)
-    instance_version_match = re.search(r'Vulkan Instance Version:*(\d+)*.*(\d+)', content, re.I)
-    data["instance_version"] = instance_version_match.group(0).split(":", 1)[-1].strip()
+    instance_version_match = re.search(r'Vulkan Instance Version\s*:\s*([^\n]+)', content, re.I)
+    if instance_version_match:
+        data["instance_version"] = instance_version_match.group(1).strip()
+    else:
+        version_match = re.search(r'VK_API_VERSION_\d+_\d+', content)
+        data["instance_version"] = version_match.group(0) if version_match else ""
     if instance_ext_match:
         data["instance_extensions_count"] = int(instance_ext_match.group(1))
     else:
@@ -1856,10 +1875,16 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 mem_used = gpu_stats.get("mem_used")
                 mem_total = gpu_stats.get("mem_total")
                 if mem_used is not None and mem_total is not None and mem_total > 0:
-                    gpu_rows_col2.append(("VRAM", f"{mem_used} / {mem_total} MB"))
+                    pct = (mem_used / mem_total) * 100.0 if mem_total else 0.0
+                    gpu_rows_col2.append(("VRAM", f"{mem_used} / {mem_total} MB ({pct:.0f} %)"))
                 vram_clock = gpu_stats.get("vram_clock")
+                vram_clock_max = gpu_stats.get("vram_clock_max")
                 if vram_clock is not None and vram_clock > 0:
-                    gpu_rows_col2.append(("VRAM Clock", f"{vram_clock} MHz"))
+                    if vram_clock_max is not None and vram_clock_max > 0:
+                        pct = (vram_clock / vram_clock_max) * 100.0 if vram_clock_max else 0.0
+                        gpu_rows_col2.append(("VRAM Clock", f"{vram_clock} / {vram_clock_max} MHz ({pct:.0f} %)"))
+                    else:
+                        gpu_rows_col2.append(("VRAM Clock", f"{vram_clock} MHz"))
                 vram_type = gpu_stats.get("vram_type") or gpu_info.get("vram_type")
                 if vram_type:
                     gpu_rows_col2.append(("VRAM Type", str(vram_type)))
@@ -1885,9 +1910,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 rop_count = gpu_stats.get("rop_count") or gpu_info.get("rop_count")
                 if rop_count:
                     gpu_rows_col3.append(("ROPs", str(rop_count)))
-                instruction_set = gpu_stats.get("instruction_set") or gpu_info.get("instruction_set")
-                if instruction_set:
-                    gpu_rows_col3.append(("Instruction Set", str(instruction_set)))
 
                 # Only include non-empty columns
                 gpu_columns = [c for c in [gpu_rows_col1, gpu_rows_col2, gpu_rows_col3] if c]
@@ -1953,10 +1975,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     ("Instance Layers", str(vk_data.get("instance_layers_count", "")) if vk_data.get("instance_layers_count") else ""),
                     ("Instance Version", str(vk_data.get("instance_version", ""))),
                 ])
+                def _format_video_profile_counts(profile_names, profile_counts, mode):
+                    if not profile_names:
+                        return None
+                    parts = []
+                    for profile_name in profile_names:
+                        count = profile_counts.get(profile_name, 0)
+                        label = f"{profile_name} {mode}"
+                        if count > 0:
+                            label = f"{label} - {count}"
+                        parts.append(label)
+                    return "; ".join(parts)
+
                 if dev.get("video_decode_profiles"):
-                    col4.append(("Video Decode Profiles", ", ".join(dev["video_decode_profiles"])))
+                    col4.append(("Video Decode Profiles", _format_video_profile_counts(dev["video_decode_profiles"], dev.get("video_decode_profile_counts", {}), "Decode")))
                 if dev.get("video_encode_profiles"):
-                    col4.append(("Video Encode Profiles", ", ".join(dev["video_encode_profiles"])))
+                    col4.append(("Video Encode Profiles", _format_video_profile_counts(dev["video_encode_profiles"], dev.get("video_encode_profile_counts", {}), "Encode")))
 
                 columns = [c for c in [col1, col2, col3, col4] if c]
 
@@ -1993,13 +2027,25 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
         if vk_video_devices:
             for dev_index, dev in enumerate(vk_video_devices):
+                def _format_video_list(profile_names, profile_counts, mode):
+                    if not profile_names:
+                        return None
+                    parts = []
+                    for profile_name in profile_names:
+                        count = profile_counts.get(profile_name, 0)
+                        label = f"{profile_name} {mode}"
+                        if count > 0:
+                            label = f"{label} - {count}"
+                        parts.append(label)
+                    return "; ".join(parts)
+
                 video_rows = []
                 decode_profiles = dev.get("video_decode_profiles", [])
                 encode_profiles = dev.get("video_encode_profiles", [])
                 if decode_profiles:
-                    video_rows.append(("Video Decode", ", ".join(decode_profiles)))
+                    video_rows.append(("Video Decode", _format_video_list(decode_profiles, dev.get("video_decode_profile_counts", {}), "Decode")))
                 if encode_profiles:
-                    video_rows.append(("Video Encode", ", ".join(encode_profiles)))
+                    video_rows.append(("Video Encode", _format_video_list(encode_profiles, dev.get("video_encode_profile_counts", {}), "Encode")))
 
                 label = f"Vulkan Video – {dev.get('name', 'GPU')}"
                 card = _make_card(
@@ -2260,7 +2306,17 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                                 mem_total = s.get("mem_total")
                                 if "VRAM" in w:
                                     if mem_used is not None and mem_total is not None and mem_total > 0:
-                                        w["VRAM"].set_subtitle(f"{mem_used} / {mem_total} MB")
+                                        pct = (mem_used / mem_total) * 100.0 if mem_total else 0.0
+                                        w["VRAM"].set_subtitle(f"{mem_used} / {mem_total} MB ({pct:.0f} %)")
+                                if "VRAM Clock" in w:
+                                    vram_clock = s.get("vram_clock")
+                                    vram_clock_max = s.get("vram_clock_max")
+                                    if vram_clock is not None and vram_clock > 0:
+                                        if vram_clock_max is not None and vram_clock_max > 0:
+                                            pct = (vram_clock / vram_clock_max) * 100.0 if vram_clock_max else 0.0
+                                            w["VRAM Clock"].set_subtitle(f"{vram_clock} / {vram_clock_max} MHz ({pct:.0f} %)")
+                                        else:
+                                            w["VRAM Clock"].set_subtitle(f"{vram_clock} MHz")
                                 if "GPU Usage" in w and s.get("usage") is not None:
                                     w["GPU Usage"].set_subtitle(f"{s['usage']} %" if s["usage"] >= 0 else "—")
                                 if "Temperature" in w and s.get("temp") is not None:
