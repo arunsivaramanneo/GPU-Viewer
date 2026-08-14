@@ -1479,7 +1479,8 @@ def _make_card(title: str, icon_name: str, rows: list,
                supported: bool = True,
                row_widgets_out: dict = None,
                content_widget: Gtk.Widget | None = None,
-               gpu_index: int | None = None) -> Gtk.Box:
+               gpu_index: int | None = None,
+               extra_nav_actions: list[tuple[str, str]] | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -1530,10 +1531,15 @@ def _make_card(title: str, icon_name: str, rows: list,
         badge = _make_status_badge("Not detected", False)
     header.append(badge)
 
-    # Navigation button
+    # Navigation buttons
     if nav_page and supported and app:
         btn = _nav_button("Open →", nav_page, app, gpu_index=gpu_index)
         header.append(btn)
+
+    if extra_nav_actions and supported and app:
+        for label, page_name in extra_nav_actions:
+            btn = _nav_button(label, page_name, app, gpu_index=gpu_index)
+            header.append(btn)
 
     card_box.append(header)
 
@@ -1993,6 +1999,9 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     col4.append(("Video Encode Profiles", _format_video_profile_counts(dev["video_encode_profiles"], dev.get("video_encode_profile_counts", {}), "Encode")))
 
                 columns = [c for c in [col1, col2, col3, col4] if c]
+                extra_nav_actions = []
+                if dev.get("video_decode_profiles") or dev.get("video_encode_profiles"):
+                    extra_nav_actions.append(("Open Vulkan Video →", "vulkan_video_page"))
 
                 content_widget = _make_grid_card_content(columns)
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
@@ -2005,6 +2014,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     supported=True,
                     content_widget=content_widget,
                     gpu_index=i,
+                    extra_nav_actions=extra_nav_actions,
                 )
                 card.set_size_request(250, -1)
                 flow_box.append(card)
@@ -2012,62 +2022,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             card = _make_card(
                 "Vulkan", "../Images/Vulkan.png",
                 [], nav_page=None, app=None, supported=False,
-            )
-            card.set_size_request(250, -1)
-            flow_box.append(card)
-
-        # ── Vulkan Video ─────────────────────────────────────────────────
-        # Build per-GPU Vulkan Video cards using decode/encode profiles from
-        # the per-device data extracted by _parse_vulkan.
-        vk_video_data = data["vulkan_video"]
-        vk_video_devices = [
-            dev for dev in vk_data.get("devices", [])
-            if dev.get("video_decode_profiles") or dev.get("video_encode_profiles")
-        ] if vk_data.get("supported") else []
-
-        if vk_video_devices:
-            for dev_index, dev in enumerate(vk_video_devices):
-                def _format_video_list(profile_names, profile_counts, mode):
-                    if not profile_names:
-                        return None
-                    parts = []
-                    for profile_name in profile_names:
-                        count = profile_counts.get(profile_name, 0)
-                        label = f"{profile_name} {mode}"
-                        if count > 0:
-                            label = f"{label} - {count}"
-                        parts.append(label)
-                    return "; ".join(parts)
-
-                video_rows = []
-                decode_profiles = dev.get("video_decode_profiles", [])
-                encode_profiles = dev.get("video_encode_profiles", [])
-                if decode_profiles:
-                    video_rows.append(("Video Decode", _format_video_list(decode_profiles, dev.get("video_decode_profile_counts", {}), "Decode")))
-                if encode_profiles:
-                    video_rows.append(("Video Encode", _format_video_list(encode_profiles, dev.get("video_encode_profile_counts", {}), "Encode")))
-
-                label = f"Vulkan Video – {dev.get('name', 'GPU')}"
-                card = _make_card(
-                    label,
-                    "../Images/Vulkan-Video.png",
-                    video_rows,
-                    nav_page="vulkan_video_page",
-                    app=app,
-                    supported=True,
-                    gpu_index=dev_index,
-                )
-                card.set_size_request(250, -1)
-                flow_box.append(card)
-        else:
-            # Fallback: use the global vulkan_video flag to decide supported state
-            card = _make_card(
-                "Vulkan Video",
-                "../Images/Vulkan-Video.png",
-                [],
-                nav_page=None,
-                app=None,
-                supported=vk_video_data["supported"],
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
