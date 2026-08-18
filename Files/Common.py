@@ -64,6 +64,19 @@ class Config:
         self.config["THEME"]["prefer_dark"] = str(prefer_dark)
         self.save()
 
+    def get_summary_card_order(self):
+        raw_order = self.config.get("SUMMARY", "card_order", fallback="")
+        if not raw_order:
+            return []
+        return [item.strip() for item in raw_order.split(",") if item.strip()]
+
+    def set_summary_card_order(self, order):
+        if "SUMMARY" not in self.config:
+            self.config["SUMMARY"] = {}
+        normalized = [str(item).strip() for item in order if str(item).strip()]
+        self.config["SUMMARY"]["card_order"] = ",".join(normalized)
+        self.save()
+
 Adw.init()
 
 def get_gpu_stats_for_index(gpu_index):

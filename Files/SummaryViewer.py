@@ -1397,6 +1397,34 @@ def _make_grid_card_content(columns: list[list[tuple[str, str]]], row_widgets_ou
     return grid_box
 
 
+def _move_card_in_registry(registry, card_id: str, target_index: int):
+    if not registry:
+        return registry
+    current_order = [entry_card_id for entry_card_id, _ in registry]
+    if card_id not in current_order:
+        return registry
+    source_index = current_order.index(card_id)
+    new_index = max(0, min(len(current_order) - 1, target_index))
+    if source_index == new_index:
+        return registry
+    new_order = current_order[:]
+    moved = new_order.pop(source_index)
+    new_order.insert(new_index, moved)
+    widget_map = {entry_card_id: widget for entry_card_id, widget in registry}
+    return [(entry_card_id, widget_map[entry_card_id]) for entry_card_id in new_order]
+
+
+def _apply_registry_order(flow_box: Gtk.FlowBox | None, registry):
+    if flow_box is None or not registry:
+        return
+    widget_map = {entry_card_id: widget for entry_card_id, widget in registry}
+    ordered_widgets = [widget_map[entry_card_id] for entry_card_id, _ in registry]
+    flow_box.remove_all()
+    for widget in ordered_widgets:
+        flow_box.append(widget)
+    flow_box._summary_card_registry = list(registry)
+
+
 def _nav_button(label: str, page_name: str, app, gpu_index=None) -> Gtk.Button:
     btn = Gtk.Button(label=label)
     btn.add_css_class("flat")
@@ -1480,7 +1508,10 @@ def _make_card(title: str, icon_name: str, rows: list,
                row_widgets_out: dict = None,
                content_widget: Gtk.Widget | None = None,
                gpu_index: int | None = None,
-               extra_nav_actions: list[tuple[str, str]] | None = None) -> Gtk.Box:
+               extra_nav_actions: list[tuple[str, str]] | None = None,
+               card_id: str | None = None,
+               allow_reorder: bool = False,
+               flow_box: Gtk.FlowBox | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -1541,6 +1572,11 @@ def _make_card(title: str, icon_name: str, rows: list,
             btn = _nav_button(label, page_name, app, gpu_index=gpu_index)
             header.append(btn)
 
+    # Card-level reorder controls are intentionally removed here. The summary page
+    # uses a single reorder button in the page header to manage the card order like
+    # browser tabs. This keeps the GTK4 runtime compatibility safe and avoids the
+    # unsupported data-access API.
+
     card_box.append(header)
 
     # Separator between header and rows
@@ -1566,6 +1602,10 @@ def _make_card(title: str, icon_name: str, rows: list,
     if not supported:
         frame.set_sensitive(False)
         frame.set_opacity(0.55)
+
+    if card_id is not None:
+        frame._summary_card_id = card_id
+    frame._summary_card_title = title
 
     return frame
 
@@ -1767,7 +1807,81 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         flow_box.set_margin_end(12)
         flow_box.set_row_spacing(8)
         flow_box.set_column_spacing(8)
-        
+        flow_box._summary_card_registry = []
+        flow_box._summary_card_titles = {}
+        if app is not None:
+            app.summary_flow_box = flow_box
+            app.summary_card_titles = flow_box._summary_card_titles
+
+        def _iter_flowbox_children(widget_container):
+            child = widget_container.get_first_child()
+            while child is not None:
+                yield child
+                child = child.get_next_sibling()
+
+        def _apply_summary_card_order(order):
+            if flow_box is None:
+                return
+            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            if not registry:
+                return
+            widget_by_id = {widget_id: widget for widget_id, widget in registry}
+            ordered_widgets = [widget_by_id[widget_id] for widget_id in order if widget_id in widget_by_id]
+            for widget_id in list(widget_by_id):
+                if widget_id not in order:
+                    ordered_widgets.append(widget_by_id[widget_id])
+            flow_box.remove_all()
+            for widget in ordered_widgets:
+                flow_box.append(widget)
+            flow_box._summary_card_registry = [(widget_id, widget_by_id[widget_id]) for widget_id in order if widget_id in widget_by_id]
+            for widget_id in list(widget_by_id):
+                if widget_id not in order:
+                    flow_box._summary_card_registry.append((widget_id, widget_by_id[widget_id]))
+
+        def _move_card_in_summary_order(card_id: str, direction: int):
+            if flow_box is None:
+                return
+            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            if not registry:
+                return
+            current_order = [entry_card_id for entry_card_id, _ in registry]
+            if card_id not in current_order:
+                return
+            index = current_order.index(card_id)
+            new_index = index + direction
+            if new_index < 0 or new_index >= len(current_order):
+                return
+            current_order[index], current_order[new_index] = current_order[new_index], current_order[index]
+            _apply_summary_card_order(current_order)
+            if hasattr(app, "config"):
+                app.config.set_summary_card_order(current_order)
+
+        def add_summary_card(card_id: str, widget: Gtk.Widget):
+            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            if card_id and widget is not None and widget not in [existing_widget for _, existing_widget in registry]:
+                registry.append((card_id, widget))
+                flow_box._summary_card_registry = registry
+                flow_box._summary_card_titles[card_id] = getattr(widget, "_summary_card_title", card_id)
+            return widget
+
+        def restore_summary_card_order():
+            if app is None or not hasattr(app, "config"):
+                return
+            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            if not registry:
+                return
+            saved_order = app.config.get_summary_card_order()
+            if not saved_order:
+                return
+            current_order = [widget_id for widget_id, _ in registry]
+            ordered = [card_id for card_id in saved_order if card_id in current_order]
+            for card_id in current_order:
+                if card_id not in ordered:
+                    ordered.append(card_id)
+            if ordered == current_order:
+                return
+            _apply_summary_card_order(ordered)
+
         scroll.set_child(flow_box)
 
         view_stack = getattr(app, "view_stack", None)
@@ -1807,13 +1921,17 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             "../Images/about-us.png",
             [],
             nav_page=None,   # no detail tab for system info
-            app=None,
+            app=app,
             supported=True,
             content_widget=_make_grid_card_content(sys_columns, row_widgets_out=sys_widgets),
             row_widgets_out=sys_widgets,
+            card_id="system",
+            allow_reorder=True,
+            flow_box=flow_box,
         )
         sys_card.set_size_request(250, -1)
         flow_box.append(sys_card)
+        add_summary_card("system", sys_card)
 
         # ── GPU Statistics & Details (Multi-GPU support) ─────────────────
         gpui_list = data["gpui_stats"] # This is a list of dicts
@@ -1927,13 +2045,17 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     gpu_logo,
                     [],
                     nav_page=None,
-                    app=None,
+                    app=app,
                     supported=True,
                     content_widget=_make_grid_card_content(gpu_columns, row_widgets_out=gpu_widgets),
-                    row_widgets_out=gpu_widgets
+                    row_widgets_out=gpu_widgets,
+                    card_id=f"gpu-{gpu_idx}",
+                    allow_reorder=True,
+                    flow_box=flow_box,
                 )
                 gpu_card.set_size_request(250, -1)
                 flow_box.append(gpu_card)
+                add_summary_card(f"gpu-{gpu_idx}", gpu_card)
                 stats_widgets_list.append((gpu_idx, gpu_widgets))
         else:
             stats_card = _make_card(
@@ -1941,11 +2063,15 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 "../Images/about-us.png",
                 [],
                 nav_page=None,
-                app=None,
+                app=app,
                 supported=False,
+                card_id="gpu-stats",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
             stats_card.set_size_request(250, -1)
             flow_box.append(stats_card)
+            add_summary_card("gpu-stats", stats_card)
 
         # ── Vulkan ───────────────────────────────────────────────────────
         vk_data = data["vulkan"]
@@ -2015,13 +2141,20 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     content_widget=content_widget,
                     gpu_index=i,
                     extra_nav_actions=extra_nav_actions,
+                    card_id=f"vulkan-{i}",
+                    allow_reorder=True,
+                    flow_box=flow_box,
                 )
                 card.set_size_request(250, -1)
                 flow_box.append(card)
+                add_summary_card(f"vulkan-{i}", card)
         else:
             card = _make_card(
                 "Vulkan", "../Images/Vulkan.png",
-                [], nav_page=None, app=None, supported=False,
+                [], nav_page=None, app=app, supported=False,
+                card_id="vulkan-missing",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
@@ -2053,9 +2186,13 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 app=app,
                 supported=True,
                 content_widget=_make_grid_card_content(gl_columns),
+                card_id="opengl",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
+            add_summary_card("opengl", card)
 
             # Card 2: OpenGL ES (only if data present)
             es_version = gl_data.get("es_version", "")
@@ -2077,9 +2214,13 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     app=app,
                     supported=True,
                     content_widget=_make_grid_card_content(es_columns),
+                    card_id="opengl-es",
+                    allow_reorder=True,
+                    flow_box=flow_box,
                 )
                 es_card.set_size_request(250, -1)
                 flow_box.append(es_card)
+                add_summary_card("opengl-es", es_card)
 
             # Card 3: EGL (only if data present)
             egl_version = gl_data.get("egl_version", "")
@@ -2101,9 +2242,13 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     app=app,
                     supported=True,
                     content_widget=_make_grid_card_content(egl_columns),
+                    card_id="egl",
+                    allow_reorder=True,
+                    flow_box=flow_box,
                 )
                 egl_card.set_size_request(250, -1)
                 flow_box.append(egl_card)
+                add_summary_card("egl", egl_card)
 
             # Card 4: GLX (only if data present)
             glx_version = gl_data.get("glx_version", "")
@@ -2129,16 +2274,24 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     app=app,
                     supported=True,
                     content_widget=_make_grid_card_content(glx_columns),
+                    card_id="glx",
+                    allow_reorder=True,
+                    flow_box=flow_box,
                 )
                 glx_card.set_size_request(250, -1)
                 flow_box.append(glx_card)
+                add_summary_card("glx", glx_card)
         else:
             card = _make_card(
                 "OpenGL", "../Images/OpenGL.png",
-                [], nav_page=None, app=None, supported=False,
+                [], nav_page=None, app=app, supported=False,
+                card_id="opengl-missing",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
+            add_summary_card("opengl-missing", card)
 
         # ── OpenCL ───────────────────────────────────────────────────────
         cl_data = data["opencl"]
@@ -2191,17 +2344,25 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         supported=True,
                         content_widget=_make_grid_card_content([platform_col, dev_col_1, dev_col_2]),
                         gpu_index=dev_index,
+                        card_id=f"opencl-{platform_name}-{dev_index}",
+                        allow_reorder=True,
+                        flow_box=flow_box,
                     )
                     card.set_size_request(250, -1)
                     flow_box.append(card)
+                    add_summary_card(f"opencl-{platform_name}-{dev_index}", card)
         else:
             card = _make_card(
                 "OpenCL",
                 "../Images/OpenCL.svg",
-                [], nav_page=None, app=None, supported=False,
+                [], nav_page=None, app=app, supported=False,
+                card_id="opencl-missing",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
+            add_summary_card("opencl-missing", card)
 
         # ── VDPAU ────────────────────────────────────────────────────────
         vd_data = data["vdpau"]
@@ -2218,14 +2379,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 nav_page="vdpau_page",
                 app=app,
                 supported=True,
+                card_id="vdpau",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
         else:
             card = _make_card(
                 "VDPAU", "../Images/vdpauinfo.png",
-                [], nav_page=None, app=None, supported=False,
+                [], nav_page=None, app=app, supported=False,
+                card_id="vdpau-missing",
+                allow_reorder=True,
+                flow_box=flow_box,
             )
         card.set_size_request(250, -1)
         flow_box.append(card)
+
+        restore_summary_card_order()
 
         outer.append(scroll)
 
