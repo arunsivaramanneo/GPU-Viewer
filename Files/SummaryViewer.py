@@ -1865,15 +1865,35 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             return widget
 
         def restore_summary_card_order():
-            if app is None or not hasattr(app, "config"):
-                return
             registry = list(getattr(flow_box, "_summary_card_registry", []))
             if not registry:
                 return
-            saved_order = app.config.get_summary_card_order()
-            if not saved_order:
-                return
             current_order = [widget_id for widget_id, _ in registry]
+            saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
+            if not saved_order:
+                def default_card_priority(card_id):
+                    if card_id.startswith("vulkan-"):
+                        return 0
+                    if card_id == "system":
+                        return 1
+                    if card_id.startswith("gpu-"):
+                        return 2
+                    if card_id.startswith("opengl"):
+                        return 3
+                    if card_id in ("egl", "glx"):
+                        return 4
+                    if card_id.startswith("opencl-"):
+                        return 5
+                    if card_id.startswith("vdpau"):
+                        return 6
+                    return 7
+
+                default_order = sorted(
+                    enumerate(current_order),
+                    key=lambda item: (default_card_priority(item[1]), item[0]),
+                )
+                _apply_summary_card_order([card_id for _, card_id in default_order])
+                return
             ordered = [card_id for card_id in saved_order if card_id in current_order]
             for card_id in current_order:
                 if card_id not in ordered:
@@ -2158,6 +2178,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
+            add_summary_card("vulkan-missing", card)
 
         # ── OpenGL ───────────────────────────────────────────────────────
         gl_data = data["opengl"]
@@ -2393,6 +2414,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             )
         card.set_size_request(250, -1)
         flow_box.append(card)
+        add_summary_card("vdpau" if vd_data["supported"] else "vdpau-missing", card)
 
         restore_summary_card_order()
 
