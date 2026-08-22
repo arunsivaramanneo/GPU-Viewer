@@ -1002,6 +1002,7 @@ def get_realtime_cpu_usage() -> str:
 
                 total_cur_khz = 0.0
                 total_max_khz = 0.0
+                num_cpus = 0
                 cpu_root = "/sys/devices/system/cpu"
                 for cpu_dir in glob.glob(os.path.join(cpu_root, "cpu[0-9]*", "cpufreq")):
                     cur_path = os.path.join(cpu_dir, "scaling_cur_freq")
@@ -1009,19 +1010,121 @@ def get_realtime_cpu_usage() -> str:
                     try:
                         if os.path.exists(cur_path):
                             total_cur_khz += float(open(cur_path, "r", encoding="utf-8").read().strip())
+                            num_cpus += 1
                         if os.path.exists(max_path):
                             total_max_khz += float(open(max_path, "r", encoding="utf-8").read().strip())
                     except Exception:
                         continue
 
-                if total_max_khz > 0:
-                    used_mhz = total_cur_khz / 1000.0
-                    max_mhz = total_max_khz / 1000.0
-                    freq_pct = max(0.0, min(100.0, (used_mhz / max_mhz) * 100.0)) if max_mhz > 0 else 0.0
-                    return f"{used_mhz:.0f} MHz / {max_mhz:.0f} MHz ({freq_pct:.0f} %)"
+                if total_max_khz > 0 and num_cpus > 0:
+                    avg_cur_khz = total_cur_khz / num_cpus
+                    avg_max_khz = total_max_khz / num_cpus
+                    cur_ghz = avg_cur_khz / 1000000.0
+                    max_ghz = avg_max_khz / 1000000.0
+                    return f"{cur_ghz:.2f} GHz / {max_ghz:.2f} GHz ({usage:.0f} %)"
+                elif total_cur_khz > 0 and num_cpus > 0:
+                    avg_cur_khz = total_cur_khz / num_cpus
+                    cur_ghz = avg_cur_khz / 1000000.0
+                    return f"{cur_ghz:.2f} GHz ({usage:.0f} %)"
+                else:
+                    try:
+                        mhz_list = []
+                        with open("/proc/cpuinfo", "r") as f:
+                            for line in f:
+                                if line.startswith("cpu MHz"):
+                                    mhz_list.append(float(line.split(":")[1].strip()))
+                        if mhz_list:
+                            avg_mhz = sum(mhz_list) / len(mhz_list)
+                            cur_ghz = avg_mhz / 1000.0
+                            return f"{cur_ghz:.2f} GHz ({usage:.0f} %)"
+                    except Exception:
+                        pass
                 return f"{usage:.0f} %"
     except Exception:
         pass
+    return "—"
+
+
+def _get_cpu_cache_info() -> str:
+    """Return CPU cache details as a semicolon-separated string for tree row display.
+    e.g. 'L1 Data Cache: 32 KiB; L1 Instruction Cache: 32 KiB; L2 Cache: 512 KiB; L3 Cache: 16 MiB'
+    """
+    caches = []
+    try:
+        index_dirs = sorted(glob.glob("/sys/devices/system/cpu/cpu0/cache/index*"))
+        if index_dirs:
+            for d in index_dirs:
+                level_path = os.path.join(d, "level")
+                type_path = os.path.join(d, "type")
+                size_path = os.path.join(d, "size")
+                if os.path.exists(level_path) and os.path.exists(size_path):
+                    with open(level_path, "r", encoding="utf-8") as f:
+                        level = f.read().strip()
+                    with open(size_path, "r", encoding="utf-8") as f:
+                        size = f.read().strip()
+                    
+                    ctype = ""
+                    if os.path.exists(type_path):
+                        with open(type_path, "r", encoding="utf-8") as f:
+                            ctype = f.read().strip()
+                    
+                    if level == "1" and ctype.lower() == "data":
+                        name = "L1 Data Cache"
+                    elif level == "1" and ctype.lower() == "instruction":
+                        name = "L1 Instruction Cache"
+                    elif ctype and ctype.lower() != "unified":
+                        name = f"L{level} {ctype.capitalize()} Cache"
+                    else:
+                        name = f"L{level} Cache"
+                    
+                    if size.endswith("K") or size.endswith("k"):
+                        try:
+                            k_val = int(size[:-1])
+                            if k_val >= 1024 and k_val % 1024 == 0:
+                                size_formatted = f"{k_val // 1024} MiB"
+                            else:
+                                size_formatted = f"{k_val} KiB"
+                        except Exception:
+                            size_formatted = f"{size[:-1]} KiB"
+                    elif size.endswith("M") or size.endswith("m"):
+                        size_formatted = f"{size[:-1]} MiB"
+                    elif size.endswith("G") or size.endswith("g"):
+                        size_formatted = f"{size[:-1]} GiB"
+                    else:
+                        size_formatted = size
+                    
+                    caches.append(f"{name}: {size_formatted}")
+    except Exception:
+        pass
+
+    if caches:
+        return " ; ".join(caches)
+
+    try:
+        res = subprocess.run(
+            ["lscpu"], capture_output=True, text=True, timeout=3
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                if "cache:" in line.lower():
+                    parts = line.split(":", 1)
+                    k_str = parts[0].strip()
+                    v_str = parts[1].strip()
+                    if k_str.lower().startswith("l1d"):
+                        k_str = "L1 Data Cache"
+                    elif k_str.lower().startswith("l1i"):
+                        k_str = "L1 Instruction Cache"
+                    elif k_str.lower().startswith("l2"):
+                        k_str = "L2 Cache"
+                    elif k_str.lower().startswith("l3"):
+                        k_str = "L3 Cache"
+                    caches.append(f"{k_str}: {v_str}")
+    except Exception:
+        pass
+
+    if caches:
+        return " ; ".join(caches)
+
     return "—"
 
 
@@ -1073,6 +1176,7 @@ def _parse_system() -> dict:
         "os": "",
         "cpu": "",
         "cpu_cores_threads": "—",
+        "cpu_cache": "—",
         "ram": "",
         "cpu_usage": "—",
         "ram_usage": "—",
@@ -1285,6 +1389,7 @@ def _parse_system() -> dict:
     except Exception:
         pass
 
+    info["cpu_cache"] = _get_cpu_cache_info()
     return info
 
 
@@ -1502,6 +1607,85 @@ def _get_icon_name(field_name: str) -> str:
 # Card builders
 # ---------------------------------------------------------------------------
 
+_active_popout_row_widgets = []
+
+def _open_card_in_separate_window(title: str, icon_name: str, rows: list = None,
+                                   content_widget: Gtk.Widget | None = None,
+                                   columns_data: list[list[tuple[str, str]]] | None = None,
+                                   supported: bool = True,
+                                   app = None,
+                                   parent_row_widgets: dict = None):
+    """Open a card in a separate standalone window."""
+    win = Adw.Window()
+    win.set_title(f"{title} - GPU-Viewer")
+    
+    headerbar = Adw.HeaderBar.new()
+    headerbar.add_css_class(css_class='compact')
+    
+    title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+    try:
+        icon_pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_name, 18, 18, True)
+        icon_img = Gtk.Picture.new_for_pixbuf(icon_pb)
+        title_box.append(icon_img)
+    except Exception:
+        icon_img = Gtk.Image.new_from_icon_name("application-x-executable-symbolic")
+        icon_img.set_pixel_size(18)
+        title_box.append(icon_img)
+    
+    title_label = Gtk.Label(label=title)
+    title_label.add_css_class("title-4")
+    title_box.append(title_label)
+    headerbar.set_title_widget(title_box)
+
+    toolbar_view = Adw.ToolbarView.new()
+    toolbar_view.add_top_bar(headerbar)
+    win.set_content(toolbar_view)
+
+    scroll = Gtk.ScrolledWindow()
+    scroll.set_vexpand(True)
+    scroll.set_hexpand(True)
+    scroll.set_margin_start(16)
+    scroll.set_margin_end(16)
+    scroll.set_margin_top(16)
+    scroll.set_margin_bottom(16)
+    toolbar_view.set_content(scroll)
+
+    card_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    scroll.set_child(card_container)
+
+    popout_widgets = {}
+
+    if columns_data and supported:
+        content = _make_grid_card_content(columns_data, row_widgets_out=popout_widgets)
+        card_container.append(content)
+    elif rows and supported:
+        for r_title, r_sub in rows:
+            rw = _make_action_row(r_title, r_sub)
+            card_container.append(rw)
+            popout_widgets[r_title] = rw
+    elif not supported:
+        no_row = Adw.ActionRow()
+        no_row.set_title("Status")
+        no_row.set_subtitle("This subsystem was not detected on your system.")
+        card_container.append(no_row)
+    elif content_widget is not None:
+        card_container.append(content_widget)
+
+    if popout_widgets:
+        _active_popout_row_widgets.append(popout_widgets)
+        def on_popout_closed(window):
+            if popout_widgets in _active_popout_row_widgets:
+                _active_popout_row_widgets.remove(popout_widgets)
+        win.connect("close-request", on_popout_closed)
+
+    # Intentionally omit win.set_transient_for(app.window) so the pop-out window
+    # functions as an independent top-level window that will not be closed or minimized
+    # when the main window is closed or minimized.
+
+    win.set_default_size(680, 500)
+    win.present()
+
+
 def _make_card(title: str, icon_name: str, rows: list,
                nav_page: str | None, app,
                supported: bool = True,
@@ -1511,7 +1695,8 @@ def _make_card(title: str, icon_name: str, rows: list,
                extra_nav_actions: list[tuple[str, str]] | None = None,
                card_id: str | None = None,
                allow_reorder: bool = False,
-               flow_box: Gtk.FlowBox | None = None) -> Gtk.Box:
+               flow_box: Gtk.FlowBox | None = None,
+               columns_data: list[list[tuple[str, str]]] | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
     `rows` is a list of (title, subtitle) tuples.
@@ -1571,6 +1756,28 @@ def _make_card(title: str, icon_name: str, rows: list,
         for label, page_name in extra_nav_actions:
             btn = _nav_button(label, page_name, app, gpu_index=gpu_index)
             header.append(btn)
+
+    # Pop-out button to open card in separate window
+    popout_btn = Gtk.Button()
+    popout_btn.set_icon_name("window-new-symbolic")
+    popout_btn.add_css_class("flat")
+    popout_btn.set_valign(Gtk.Align.CENTER)
+    popout_btn.set_tooltip_text(f"Open {title} in separate window")
+
+    def on_popout_clicked(_):
+        _open_card_in_separate_window(
+            title=title,
+            icon_name=icon_name,
+            rows=rows,
+            content_widget=content_widget,
+            columns_data=columns_data,
+            supported=supported,
+            app=app,
+            parent_row_widgets=row_widgets_out,
+        )
+
+    popout_btn.connect("clicked", on_popout_clicked)
+    header.append(popout_btn)
 
     # Card-level reorder controls are intentionally removed here. The summary page
     # uses a single reorder button in the page header to manage the card order like
@@ -1917,6 +2124,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 ("Operating System", sys_data.get("os", "—")),
                 ("Processor", sys_data.get("cpu", "—")),
                 ("CPU Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
+                ("CPU Cache", sys_data.get("cpu_cache", "—")),
                 ("CPU Usage", cpu_usage_init),
                 ("RAM Usage", ram_usage_init),
             ],
@@ -1948,6 +2156,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             card_id="system",
             allow_reorder=True,
             flow_box=flow_box,
+            columns_data=sys_columns,
         )
         sys_card.set_size_request(250, -1)
         flow_box.append(sys_card)
@@ -2072,6 +2281,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id=f"gpu-{gpu_idx}",
                     allow_reorder=True,
                     flow_box=flow_box,
+                    columns_data=gpu_columns,
                 )
                 gpu_card.set_size_request(250, -1)
                 flow_box.append(gpu_card)
@@ -2164,6 +2374,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id=f"vulkan-{i}",
                     allow_reorder=True,
                     flow_box=flow_box,
+                    columns_data=columns,
                 )
                 card.set_size_request(250, -1)
                 flow_box.append(card)
@@ -2210,6 +2421,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 card_id="opengl",
                 allow_reorder=True,
                 flow_box=flow_box,
+                columns_data=gl_columns,
             )
             card.set_size_request(250, -1)
             flow_box.append(card)
@@ -2238,6 +2450,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id="opengl-es",
                     allow_reorder=True,
                     flow_box=flow_box,
+                    columns_data=es_columns,
                 )
                 es_card.set_size_request(250, -1)
                 flow_box.append(es_card)
@@ -2266,6 +2479,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id="egl",
                     allow_reorder=True,
                     flow_box=flow_box,
+                    columns_data=egl_columns,
                 )
                 egl_card.set_size_request(250, -1)
                 flow_box.append(egl_card)
@@ -2298,6 +2512,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id="glx",
                     allow_reorder=True,
                     flow_box=flow_box,
+                    columns_data=glx_columns,
                 )
                 glx_card.set_size_request(250, -1)
                 flow_box.append(glx_card)
@@ -2368,6 +2583,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         card_id=f"opencl-{platform_name}-{dev_index}",
                         allow_reorder=True,
                         flow_box=flow_box,
+                        columns_data=[platform_col, dev_col_1, dev_col_2],
                     )
                     card.set_size_request(250, -1)
                     flow_box.append(card)
@@ -2422,7 +2638,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
         # Periodic statistics update
         def update_stats_callback():
-            if not outer.get_mapped():
+            if not outer.get_mapped() and not _active_popout_row_widgets:
                 return True
                 
             def fetch_stats():
@@ -2439,6 +2655,14 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                             sys_widgets["RAM Usage"].set_subtitle(r)
                         if "Uptime" in sys_widgets and u != "—":
                             sys_widgets["Uptime"].set_subtitle(u)
+
+                        for pw in _active_popout_row_widgets:
+                            if "CPU Usage" in pw and c != "—":
+                                pw["CPU Usage"].set_subtitle(c)
+                            if "RAM Usage" in pw and r != "—":
+                                pw["RAM Usage"].set_subtitle(r)
+                            if "Uptime" in pw and u != "—":
+                                pw["Uptime"].set_subtitle(u)
                         return False
 
                     GLib.idle_add(apply_sys_updates)
@@ -2449,33 +2673,51 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                             def apply_updates(w=widgets, s=stats):
                                 mem_used = s.get("mem_used")
                                 mem_total = s.get("mem_total")
-                                if "VRAM" in w:
-                                    if mem_used is not None and mem_total is not None and mem_total > 0:
-                                        pct = (mem_used / mem_total) * 100.0 if mem_total else 0.0
-                                        w["VRAM"].set_subtitle(f"{mem_used} / {mem_total} MB ({pct:.0f} %)")
-                                if "VRAM Clock" in w:
-                                    vram_clock = s.get("vram_clock")
-                                    vram_clock_max = s.get("vram_clock_max")
-                                    if vram_clock is not None and vram_clock > 0:
-                                        if vram_clock_max is not None and vram_clock_max > 0:
-                                            pct = (vram_clock / vram_clock_max) * 100.0 if vram_clock_max else 0.0
-                                            w["VRAM Clock"].set_subtitle(f"{vram_clock} / {vram_clock_max} MHz ({pct:.0f} %)")
-                                        else:
-                                            w["VRAM Clock"].set_subtitle(f"{vram_clock} MHz")
+                                vram_str = f"{mem_used} / {mem_total} MB ({(mem_used / mem_total) * 100.0:.0f} %)" if (mem_used is not None and mem_total is not None and mem_total > 0) else None
+                                
+                                vram_clock = s.get("vram_clock")
+                                vram_clock_max = s.get("vram_clock_max")
+                                vram_clock_str = None
+                                if vram_clock is not None and vram_clock > 0:
+                                    if vram_clock_max is not None and vram_clock_max > 0:
+                                        vram_clock_str = f"{vram_clock} / {vram_clock_max} MHz ({(vram_clock / vram_clock_max) * 100.0:.0f} %)"
+                                    else:
+                                        vram_clock_str = f"{vram_clock} MHz"
+
+                                clk_cur = s.get("clock_current")
+                                clk_max = s.get("clock_max")
+                                gpu_clock_str = f"{clk_cur} / {clk_max} MHz" if (clk_cur and clk_cur > 0 and clk_max and clk_max > 0) else (f"{clk_cur} MHz" if clk_cur and clk_cur > 0 else None)
+
+                                if "VRAM" in w and vram_str:
+                                    w["VRAM"].set_subtitle(vram_str)
+                                if "VRAM Clock" in w and vram_clock_str:
+                                    w["VRAM Clock"].set_subtitle(vram_clock_str)
                                 if "GPU Usage" in w and s.get("usage") is not None:
                                     w["GPU Usage"].set_subtitle(f"{s['usage']} %" if s["usage"] >= 0 else "—")
                                 if "Temperature" in w and s.get("temp") is not None:
                                     w["Temperature"].set_subtitle(f"{s['temp']} °C" if s["temp"] > 0 else "—")
-                                if "GPU Clock" in w:
-                                    clk_cur = s.get("clock_current")
-                                    clk_max = s.get("clock_max")
-                                    if clk_cur is not None and clk_cur > 0:
-                                        clk_str = f"{clk_cur} / {clk_max} MHz" if clk_max and clk_max > 0 else f"{clk_cur} MHz"
-                                        w["GPU Clock"].set_subtitle(clk_str)
+                                if "GPU Clock" in w and gpu_clock_str:
+                                    w["GPU Clock"].set_subtitle(gpu_clock_str)
                                 if "Power" in w and s.get("power_usage") is not None:
                                     w["Power"].set_subtitle(f"{s['power_usage']} W" if s["power_usage"] > 0 else "—")
                                 if "Fan Speed" in w and s.get("fan_speed") is not None:
                                     w["Fan Speed"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
+
+                                for pw in _active_popout_row_widgets:
+                                    if "VRAM" in pw and vram_str:
+                                        pw["VRAM"].set_subtitle(vram_str)
+                                    if "VRAM Clock" in pw and vram_clock_str:
+                                        pw["VRAM Clock"].set_subtitle(vram_clock_str)
+                                    if "GPU Usage" in pw and s.get("usage") is not None:
+                                        pw["GPU Usage"].set_subtitle(f"{s['usage']} %" if s["usage"] >= 0 else "—")
+                                    if "Temperature" in pw and s.get("temp") is not None:
+                                        pw["Temperature"].set_subtitle(f"{s['temp']} °C" if s["temp"] > 0 else "—")
+                                    if "GPU Clock" in pw and gpu_clock_str:
+                                        pw["GPU Clock"].set_subtitle(gpu_clock_str)
+                                    if "Power" in pw and s.get("power_usage") is not None:
+                                        pw["Power"].set_subtitle(f"{s['power_usage']} W" if s["power_usage"] > 0 else "—")
+                                    if "Fan Speed" in pw and s.get("fan_speed") is not None:
+                                        pw["Fan Speed"].set_subtitle(f"{s['fan_speed']} %" if s["fan_speed"] >= 0 else "—")
                                 return False
                             GLib.idle_add(apply_updates)
                 except Exception as e:
@@ -2487,7 +2729,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         timeout_id = GLib.timeout_add(1000, update_stats_callback)
         
         def on_destroy(widget):
-            GLib.source_remove(timeout_id)
+            if not _active_popout_row_widgets:
+                GLib.source_remove(timeout_id)
         outer.connect("destroy", on_destroy)
 
         return False  # GLib.idle_add must return False to not repeat
