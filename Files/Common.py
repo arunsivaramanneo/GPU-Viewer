@@ -222,6 +222,114 @@ class CircularGauge(Gtk.DrawingArea):
         cr.restore()
 
 
+class SparklineWidget(Gtk.DrawingArea):
+    """
+    A small Cairo-rendered sparkline that shows the recent history of a metric.
+    Stores up to MAX_POINTS readings in a ring buffer.
+    """
+    MAX_POINTS = 60
+
+    def __init__(self, width=138, height=28, gauge_type="usage"):
+        super().__init__()
+        self.spark_width = width
+        self.spark_height = height
+        self.gauge_type = gauge_type
+        self._values = []
+        self.set_content_width(width)
+        self.set_content_height(height)
+        self.set_draw_func(self._on_draw)
+
+    def push_value(self, value):
+        """Add a new normalised (0-100) value to the history."""
+        if value is None or value < 0:
+            value = 0.0
+        self._values.append(float(value))
+        if len(self._values) > self.MAX_POINTS:
+            self._values.pop(0)
+        self.queue_draw()
+
+    def _get_color(self, is_dark_bg):
+        """Match colors from CircularGauge for consistency."""
+        if self.gauge_type in ("temp", "temp_hotspot", "cpu_temp"):
+            return (0.2, 0.75, 0.95) if is_dark_bg else (0.1, 0.6, 0.8)
+        elif self.gauge_type in ("clock", "vram_clock"):
+            return (0.65, 0.35, 0.95) if is_dark_bg else (0.50, 0.15, 0.80)
+        elif self.gauge_type in ("power", "voltage"):
+            return (0.98, 0.60, 0.10) if is_dark_bg else (0.85, 0.45, 0.0)
+        elif self.gauge_type == "fan":
+            return (0.15, 0.80, 0.75) if is_dark_bg else (0.05, 0.55, 0.55)
+        elif self.gauge_type in ("vram", "gtt", "mem_busy"):
+            return (0.25, 0.70, 1.0) if is_dark_bg else (0.05, 0.45, 0.85)
+        elif self.gauge_type == "cpu":
+            return (0.25, 0.80, 0.45) if is_dark_bg else (0.05, 0.60, 0.30)
+        elif self.gauge_type in ("ram", "swap"):
+            return (0.95, 0.40, 0.70) if is_dark_bg else (0.80, 0.15, 0.50)
+        else:
+            return (0.30, 0.65, 1.0) if is_dark_bg else (0.10, 0.40, 0.85)
+
+    def _on_draw(self, area, cr, width, height):
+        import cairo as _cairo
+        import math
+        try:
+            fg_rgba = self.get_color()
+            fg_r, fg_g, fg_b = fg_rgba.red, fg_rgba.green, fg_rgba.blue
+            is_dark_bg = (fg_r * 0.299 + fg_g * 0.587 + fg_b * 0.114) > 0.5
+        except Exception:
+            is_dark_bg = True
+            fg_r, fg_g, fg_b = 0.9, 0.9, 0.95
+        r, g, b = self._get_color(is_dark_bg)
+        vals = self._values
+        n = len(vals)
+        if n >= 2:
+            pad = 2
+            effective_w = width - 2 * pad
+            effective_h = height - 2 * pad
+            # Filled area
+            cr.save()
+            cr.set_source_rgba(r, g, b, 0.15)
+            cr.move_to(pad, height - pad)
+            for i, v in enumerate(vals):
+                x = pad + (i / (n - 1)) * effective_w
+                y = (height - pad) - (v / 100.0) * effective_h
+                cr.line_to(x, y)
+            cr.line_to(pad + effective_w, height - pad)
+            cr.close_path()
+            cr.fill()
+            cr.restore()
+            # Line
+            cr.save()
+            cr.set_source_rgba(r, g, b, 0.85)
+            cr.set_line_width(1.5)
+            cr.set_line_cap(_cairo.LINE_CAP_ROUND)
+            cr.set_line_join(_cairo.LINE_JOIN_ROUND)
+            first = True
+            for i, v in enumerate(vals):
+                x = pad + (i / (n - 1)) * effective_w
+                y = (height - pad) - (v / 100.0) * effective_h
+                if first:
+                    cr.move_to(x, y)
+                    first = False
+                else:
+                    cr.line_to(x, y)
+            cr.stroke()
+            cr.restore()
+            # Dot at last point
+            cr.save()
+            last_x = pad + effective_w
+            last_y = (height - pad) - (vals[-1] / 100.0) * effective_h
+            cr.set_source_rgba(r, g, b, 1.0)
+            cr.arc(last_x, last_y, 2.5, 0, 2 * math.pi)
+            cr.fill()
+            cr.restore()
+        else:
+            # Baseline
+            cr.save()
+            cr.set_source_rgba(fg_r, fg_g, fg_b, 0.08)
+            cr.set_line_width(1.0)
+            cr.move_to(0, height / 2)
+            cr.line_to(width, height / 2)
+            cr.stroke()
+            cr.restore()
 
 
 
@@ -269,6 +377,15 @@ class Config:
             self.config["SUMMARY"] = {}
         normalized = [str(item).strip() for item in order if str(item).strip()]
         self.config["SUMMARY"]["card_order"] = ",".join(normalized)
+        self.save()
+
+    def get_refresh_interval(self):
+        return self.config.getint("PERFORMANCE", "refresh_interval_ms", fallback=1000)
+
+    def set_refresh_interval(self, interval_ms: int):
+        if "PERFORMANCE" not in self.config:
+            self.config["PERFORMANCE"] = {}
+        self.config["PERFORMANCE"]["refresh_interval_ms"] = str(interval_ms)
         self.save()
 
 Adw.init()

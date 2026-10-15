@@ -556,16 +556,113 @@ else:
             header_buttons_box.set_valign(Gtk.Align.CENTER)
             header_buttons_box.append(self.save_button)
             header_buttons_box.append(self.summary_reorder_button)
+
+            # Refresh interval selector popover
+            _interval_options = ["250 ms", "500 ms", "1 s", "2 s", "5 s"]
+            self._refresh_interval_values = [250, 500, 1000, 2000, 5000]
+            current_interval = self.config.get_refresh_interval()
+            try:
+                _current_idx = self._refresh_interval_values.index(current_interval)
+            except ValueError:
+                _current_idx = 2
+            self._current_refresh_interval_ms = current_interval
+
+            interval_string_list = Gtk.StringList.new(_interval_options)
+            self._interval_dropdown = Gtk.DropDown.new(interval_string_list, None)
+            self._interval_dropdown.set_selected(_current_idx)
+
+            interval_pop_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            interval_pop_box.set_margin_top(10)
+            interval_pop_box.set_margin_bottom(10)
+            interval_pop_box.set_margin_start(12)
+            interval_pop_box.set_margin_end(12)
+            interval_lbl = Gtk.Label(label="Stats Refresh Interval")
+            interval_lbl.add_css_class("caption-heading")
+            interval_lbl.set_halign(Gtk.Align.START)
+            interval_pop_box.append(interval_lbl)
+            interval_pop_box.append(self._interval_dropdown)
+
+            interval_popover = Gtk.Popover()
+            interval_popover.set_child(interval_pop_box)
+
+            self.refresh_menu_button = Gtk.MenuButton()
+            self.refresh_menu_button.set_icon_name("media-playlist-repeat-symbolic")
+            self.refresh_menu_button.add_css_class("flat")
+            self.refresh_menu_button.set_valign(Gtk.Align.CENTER)
+            self.refresh_menu_button.set_tooltip_text("Set stats refresh interval")
+            self.refresh_menu_button.set_popover(interval_popover)
+            self.refresh_menu_button.set_sensitive(False)
+
+            def _on_interval_selected(dropdown, _pspec):
+                idx = dropdown.get_selected()
+                if 0 <= idx < len(self._refresh_interval_values):
+                    ms = self._refresh_interval_values[idx]
+                    self.config.set_refresh_interval(ms)
+                    self._current_refresh_interval_ms = ms
+            self._interval_dropdown.connect("notify::selected", _on_interval_selected)
+
+            # Search toggle button
+            self.search_toggle = Gtk.ToggleButton()
+            self.search_toggle.set_icon_name("system-search-symbolic")
+            self.search_toggle.add_css_class("flat")
+            self.search_toggle.set_valign(Gtk.Align.CENTER)
+            self.search_toggle.set_tooltip_text("Search summary properties (Ctrl+F)")
+            self.search_toggle.set_sensitive(False)
+
+            header_buttons_box.append(self.refresh_menu_button)
+            header_buttons_box.append(self.search_toggle)
             header_buttons_box.append(self.theme_button)
             self.header_bar.pack_end(header_buttons_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
 
+            # Search bar
+            self.search_entry = Gtk.SearchEntry()
+            self.search_entry.set_placeholder_text("Filter summary properties…")
+            self.search_entry.set_hexpand(True)
+
+            self.search_bar = Gtk.SearchBar()
+            self.search_bar.set_child(self.search_entry)
+            self.search_bar.set_show_close_button(True)
+            self.search_bar.connect_entry(self.search_entry)
+
+            def _on_search_toggle(btn):
+                self.search_bar.set_search_mode(btn.get_active())
+                if not btn.get_active():
+                    self.search_entry.set_text("")
+                    self._apply_summary_search("")
+            self.search_toggle.connect("toggled", _on_search_toggle)
+
+            def _on_search_bar_mode_changed(bar, _pspec):
+                self.search_toggle.set_active(bar.get_search_mode())
+            self.search_bar.connect("notify::search-mode-enabled", _on_search_bar_mode_changed)
+
+            def _on_search_changed(entry):
+                visible = self.view_stack.get_visible_child_name()
+                if visible == "summary":
+                    self._apply_summary_search(entry.get_text())
+            self.search_entry.connect("search-changed", _on_search_changed)
+
+            # Keyboard shortcut Ctrl+F
+            key_ctrl = Gtk.EventControllerKey.new()
+            def _on_key_pressed(controller, keyval, keycode, state):
+                if keyval == Gdk.KEY_f and (state & Gdk.ModifierType.CONTROL_MASK):
+                    visible = self.view_stack.get_visible_child_name()
+                    if visible == "summary":
+                        self.search_bar.set_search_mode(True)
+                        self.search_entry.grab_focus()
+                        return True
+                if keyval == Gdk.KEY_Escape and self.search_bar.get_search_mode():
+                    self.search_bar.set_search_mode(False)
+                    return True
+                return False
+            key_ctrl.connect("key-pressed", _on_key_pressed)
+            self.window.add_controller(key_ctrl)
+
             # Create a main box to hold the header bar and the view stack
             main_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
             main_box.append(self.header_bar)
+            main_box.append(self.search_bar)
             main_box.append(self.view_stack)
-
-
 
             # Set the main box as the content of the window
             self.window.set_content(main_box)
@@ -791,6 +888,19 @@ else:
                 if hasattr(self, 'summary_reorder_button'):
                     self.summary_reorder_button.set_sensitive(name == "summary")
 
+                if hasattr(self, 'refresh_menu_button'):
+                    self.refresh_menu_button.set_sensitive(name == "summary")
+
+                if hasattr(self, 'search_toggle'):
+                    self.search_toggle.set_sensitive(name == "summary")
+
+                # Hide search bar when not on summary tab
+                if hasattr(self, 'search_bar') and name != "summary":
+                    self.search_bar.set_search_mode(False)
+                    if hasattr(self, 'search_entry'):
+                        self.search_entry.set_text("")
+                    self._apply_summary_search("")
+
             self.view_stack.connect("notify::visible-child", _on_visible_child_changed)
 
             # Manually trigger the button state update for the initial visible child (Summary)
@@ -814,8 +924,86 @@ else:
 
             if hasattr(self, 'theme_button') and self.theme_button:
                 self.theme_button.set_sensitive(True)
+            if hasattr(self, 'search_toggle') and self.search_toggle:
+                self.search_toggle.set_sensitive(True)
+            if hasattr(self, 'refresh_menu_button') and self.refresh_menu_button:
+                self.refresh_menu_button.set_sensitive(True)
 
             return False  # Do not repeat GLib.idle_add
+
+        def _apply_summary_search(self, query: str):
+            """Show/hide property rows in summary cards based on search query."""
+            flow_box = getattr(self, "summary_flow_box", None)
+            if flow_box is None:
+                return
+            query_lower = query.strip().lower()
+
+            fb_child = flow_box.get_first_child()
+            while fb_child is not None:
+                card_frame = fb_child.get_child() if hasattr(fb_child, "get_child") else fb_child.get_first_child()
+                if card_frame is not None:
+                    card_title = getattr(card_frame, "_summary_card_title", "").lower()
+                    if query_lower and query_lower in card_title:
+                        self._set_widget_tree_visible(card_frame)
+                        fb_child.set_visible(True)
+                    else:
+                        any_visible = self._search_card(card_frame, query_lower)
+                        fb_child.set_visible(not query_lower or any_visible)
+                fb_child = fb_child.get_next_sibling()
+
+        def _search_card(self, card_widget, query_lower: str) -> bool:
+            """Walk card widget tree, show/hide action rows. Return True if any row matched."""
+            if not query_lower:
+                self._set_widget_tree_visible(card_widget)
+                return True
+            card_box = card_widget.get_child() if hasattr(card_widget, "get_child") else None
+            if card_box is None:
+                return True
+            any_match = False
+            child = card_box.get_first_child()
+            while child is not None:
+                if self._search_widget(child, query_lower):
+                    any_match = True
+                child = child.get_next_sibling()
+            return any_match
+
+        def _search_widget(self, widget, query_lower: str) -> bool:
+            """Recursively find _make_action_row boxes matching query."""
+            if isinstance(widget, Gtk.Box) and hasattr(widget, "subtitle_labels"):
+                title_text = ""
+                inner = widget.get_first_child()
+                if inner is not None and isinstance(inner, Gtk.Box):
+                    t_lbl = inner.get_first_child()
+                    if t_lbl and hasattr(t_lbl, "get_label"):
+                        title_text = t_lbl.get_label().lower()
+                elif inner is not None and hasattr(inner, "get_label"):
+                    title_text = inner.get_label().lower()
+
+                value_texts = " ".join(
+                    lbl.get_label().lower() for lbl in widget.subtitle_labels
+                    if hasattr(lbl, "get_label")
+                )
+                matched = query_lower in title_text or query_lower in value_texts
+                widget.set_visible(matched)
+                return matched
+
+            any_match = False
+            child = widget.get_first_child()
+            while child is not None:
+                if self._search_widget(child, query_lower):
+                    any_match = True
+                child = child.get_next_sibling()
+            return any_match
+
+        def _set_widget_tree_visible(self, widget):
+            """Recursively restore visibility of all action row boxes."""
+            if isinstance(widget, Gtk.Box) and hasattr(widget, "subtitle_labels"):
+                widget.set_visible(True)
+                return
+            child = widget.get_first_child()
+            while child is not None:
+                self._set_widget_tree_visible(child)
+                child = child.get_next_sibling()
 
         def show_window(self):
             # Show the window and all its children

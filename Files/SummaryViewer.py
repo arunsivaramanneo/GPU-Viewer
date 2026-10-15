@@ -38,7 +38,7 @@ from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
 
 import const
 import Filenames
-from Common import getLogo, getGpuImage, get_gpu_stats, get_gpu_stats_for_index, fetchContentsFromCommand, CircularGauge
+from Common import getLogo, getGpuImage, get_gpu_stats, get_gpu_stats_for_index, fetchContentsFromCommand, CircularGauge, SparklineWidget
 # Try to reuse the robust clinfo parser when available
 try:
     from OpenCL import ClinfoParser
@@ -154,6 +154,8 @@ def _parse_vulkan(results: dict) -> dict:
                 device_uuid = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("driverUUID"):
                 driver_uuid = stripped.split("=", 1)[-1].strip()
+            elif stripped.startswith("conformanceVersion =") or stripped.startswith("conformanceVersion="):
+                conformance_version = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("conformanceVersion:"):
                 in_conformance = True
                 continue
@@ -186,6 +188,28 @@ def _parse_vulkan(results: dict) -> dict:
                 conformance_version += f".{conf_patch}"
 
         if device_name:
+            # Post-process: count supported formats by scanning 'Format Properties' section
+            try:
+                in_formats = False
+                formats_total = 0
+                for line in block.splitlines():
+                    s = line.strip()
+                    if 'Format Properties' in s:
+                        in_formats = True
+                        continue
+                    if in_formats:
+                        if 'Unsupported Formats' in s:
+                            break
+                        m = re.search(r'Formats:\s*count\s*=\s*(\d+)', s)
+                        if m:
+                            try:
+                                formats_total += int(m.group(1))
+                            except Exception:
+                                continue
+                formats_count = formats_total
+            except Exception:
+                formats_count = 0
+
             video_decode_profiles = {}
             video_encode_profiles = {}
 
@@ -235,7 +259,8 @@ def _parse_vulkan(results: dict) -> dict:
 
             decode_names = sorted(video_decode_profiles)
             encode_names = sorted(video_encode_profiles)
-            data["devices"].append({
+            
+            new_dev = {
                 "name": device_name,
                 "api_version": api_version,
                 "driver_name": driver_name,
@@ -258,33 +283,51 @@ def _parse_vulkan(results: dict) -> dict:
                 "device_uuid": device_uuid,
                 "driver_uuid": driver_uuid,
                 "conformance_version": conformance_version,
-            })
+            }
 
-        # Post-process: count supported formats by scanning 'Format Properties' section
-        try:
-            # Sum numeric "Formats: count = <N>" values found in the
-            # supported 'Format Properties' section (stop at 'Unsupported Formats').
-            in_formats = False
-            formats_total = 0
-            for line in block.splitlines():
-                s = line.strip()
-                if 'Format Properties' in s:
-                    in_formats = True
-                    continue
-                if in_formats:
-                    if 'Unsupported Formats' in s:
-                        break
-                    m = re.search(r'Formats:\s*count\s*=\s*(\d+)', s)
-                    if m:
-                        try:
-                            formats_total += int(m.group(1))
-                        except Exception:
-                            continue
-            formats_count = formats_total
-            if data['devices']:
-                data['devices'][-1]['formats_count'] = formats_count
-        except Exception:
-            pass
+            # Deduplicate / merge device entries for Flatpak or multi-section outputs
+            existing_dev = None
+            for d in data["devices"]:
+                if (device_uuid and d.get("device_uuid") and device_uuid == d["device_uuid"] and
+                    (not d.get("name") or not device_name or d["name"] == device_name)):
+                    existing_dev = d
+                    break
+                if (device_name and d.get("name") == device_name and
+                    ((vendor_id and d.get("vendor_id") == vendor_id and device_id and d.get("device_id") == device_id) or
+                     (not vendor_id or not d.get("vendor_id")))):
+                    existing_dev = d
+                    break
+                if (vendor_id and device_id and d.get("vendor_id") == vendor_id and d.get("device_id") == device_id and
+                    (not d.get("name") or not device_name or d["name"] == device_name)):
+                    existing_dev = d
+                    break
+
+            if existing_dev is not None:
+                for k in ("name", "api_version", "driver_name", "driver_version", "device_type",
+                          "pipelineCacheUUID", "vendor_id", "device_id", "driver_info",
+                          "device_uuid", "driver_uuid", "conformance_version"):
+                    if not existing_dev.get(k) and new_dev.get(k):
+                        existing_dev[k] = new_dev[k]
+                for k in ("formats_count", "extensions_count", "memory_types_count",
+                          "memory_heaps_count", "queue_count"):
+                    existing_dev[k] = max(existing_dev.get(k, 0), new_dev.get(k, 0))
+                
+                merged_decode = sorted(set(existing_dev.get("video_decode_profiles", [])) | set(new_dev.get("video_decode_profiles", [])))
+                merged_encode = sorted(set(existing_dev.get("video_encode_profiles", [])) | set(new_dev.get("video_encode_profiles", [])))
+                existing_dev["video_decode_profiles"] = merged_decode
+                existing_dev["video_encode_profiles"] = merged_encode
+                existing_dev["video_profiles"] = sorted(set(merged_decode) | set(merged_encode))
+                
+                for codec, cnt in new_dev.get("video_decode_profile_counts", {}).items():
+                    existing_dev.setdefault("video_decode_profile_counts", {})[codec] = max(
+                        existing_dev.get("video_decode_profile_counts", {}).get(codec, 0), cnt
+                    )
+                for codec, cnt in new_dev.get("video_encode_profile_counts", {}).items():
+                    existing_dev.setdefault("video_encode_profile_counts", {})[codec] = max(
+                        existing_dev.get("video_encode_profile_counts", {}).get(codec, 0), cnt
+                    )
+            else:
+                data["devices"].append(new_dev)
 
     instance_ext_match = re.search(r'Instance Extensions\s*:\s*count\s*=\s*(\d+)', content, re.I)
     instance_version_match = re.search(r'Vulkan Instance Version\s*:\s*([^\n]+)', content, re.I)
@@ -1585,8 +1628,33 @@ def _make_action_row(title: str, subtitle: str) -> Gtk.Widget:
             box.subtitle_labels[0].set_label(new_subtitle if new_subtitle else "—")
     box.set_subtitle = set_subtitle
     box.subtitle_label = box.subtitle_labels[0] if box.subtitle_labels else None
-    
-    return box
+
+    # Copy button
+    copy_btn = Gtk.Button()
+    copy_btn.set_icon_name("edit-copy-symbolic")
+    copy_btn.add_css_class("flat")
+    copy_btn.set_valign(Gtk.Align.CENTER)
+    copy_btn.set_tooltip_text("Copy to clipboard")
+    copy_btn.set_opacity(0.6)
+
+    def _on_copy_clicked(_btn, title=title, box_ref=box):
+        values = [lbl.get_label() for lbl in box_ref.subtitle_labels
+                  if hasattr(lbl, 'get_label') and lbl.get_label() not in ('—', '')]
+        clip_text = f"{title}: {', '.join(values)}" if values else title
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        clipboard.set(clip_text)
+    copy_btn.connect("clicked", _on_copy_clicked)
+
+    # Outer horizontal wrapper
+    outer_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+    box.set_hexpand(True)
+    outer_box.append(box)
+    outer_box.append(copy_btn)
+    # Copy attributes from inner box to outer box for compatibility
+    outer_box.subtitle_labels = box.subtitle_labels
+    outer_box.set_subtitle = box.set_subtitle
+    outer_box.subtitle_label = box.subtitle_label
+    return outer_box
 
 
 def _make_status_badge(text: str, good: bool) -> Gtk.Label:
@@ -1934,6 +2002,8 @@ def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None,
         if mem_total and mem_total > 0 and "VRAM" in gw:
             vram_pct = (mem_used / mem_total * 100.0) if mem_used else 0
             gw["VRAM"].set_value(vram_pct, subtitle=f"{mem_used}/{mem_total}MB")
+            if "VRAM__spark" in gw:
+                gw["VRAM__spark"].push_value(vram_pct)
 
         if "VRAM Clock" in gw:
             if vram_clock and vram_clock > 0:
@@ -1942,22 +2012,34 @@ def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None,
                 gw["VRAM Clock"].set_value(vc_pct, subtitle=vc_sub, max_value=100.0)
             else:
                 gw["VRAM Clock"].set_value(0, subtitle="N/A")
+            if "VRAM Clock__spark" in gw:
+                gw["VRAM Clock__spark"].push_value(vc_pct if (vram_clock and vram_clock > 0) else 0)
 
         if "Mem Bus" in gw and mem_busy is not None and mem_busy >= 0:
             gw["Mem Bus"].set_value(mem_busy)
+            if "Mem Bus__spark" in gw:
+                gw["Mem Bus__spark"].push_value(float(mem_busy))
 
         if gtt_total and gtt_total > 0 and "GTT Memory" in gw:
             gtt_pct = (gtt_used / gtt_total * 100.0) if gtt_used else 0
             gw["GTT Memory"].set_value(gtt_pct, subtitle=f"{gtt_used}/{gtt_total}MB")
+            if "GTT Memory__spark" in gw:
+                gw["GTT Memory__spark"].push_value(gtt_pct)
 
         if "GPU Usage" in gw and s.get("usage") is not None and s["usage"] >= 0:
             gw["GPU Usage"].set_value(s["usage"])
+            if "GPU Usage__spark" in gw:
+                gw["GPU Usage__spark"].push_value(float(s["usage"]))
 
         if "Temp" in gw and s.get("temp") is not None and s["temp"] > 0:
             gw["Temp"].set_value(s["temp"])
+            if "Temp__spark" in gw:
+                gw["Temp__spark"].push_value(s["temp"] / 110.0 * 100.0)
 
         if "Hotspot" in gw and temp_hotspot is not None and temp_hotspot > 0:
             gw["Hotspot"].set_value(temp_hotspot)
+            if "Hotspot__spark" in gw:
+                gw["Hotspot__spark"].push_value(temp_hotspot / 120.0 * 100.0)
 
         if "GPU Clock" in gw:
             if clk_cur and clk_cur > 0:
@@ -1966,37 +2048,53 @@ def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None,
                 gw["GPU Clock"].set_value(clk_pct, subtitle=clk_sub, max_value=100.0)
             else:
                 gw["GPU Clock"].set_value(0, subtitle="N/A")
+            if "GPU Clock__spark" in gw:
+                gw["GPU Clock__spark"].push_value(clk_pct if (clk_cur and clk_cur > 0) else 0)
 
         if "Voltage" in gw and voltage is not None and voltage > 0:
             gw["Voltage"].set_value(voltage)
+            if "Voltage__spark" in gw:
+                gw["Voltage__spark"].push_value(voltage / 2.0 * 100.0)
 
         if "Power" in gw and s.get("power_usage") is not None and s["power_usage"] > 0:
             gw["Power"].set_value(s["power_usage"])
+            if "Power__spark" in gw:
+                gw["Power__spark"].push_value(s["power_usage"] / 300.0 * 100.0)
 
         if "Fan Speed" in gw and s.get("fan_speed") is not None and s["fan_speed"] >= 0:
             fan_sub = f"{fan_rpm} RPM" if (fan_rpm and fan_rpm > 0) else ""
             gw["Fan Speed"].set_value(s["fan_speed"], subtitle=fan_sub)
+            if "Fan Speed__spark" in gw:
+                gw["Fan Speed__spark"].push_value(float(s["fan_speed"]))
 
     if cpu_usage is not None and "CPU Usage" in gw:
         cpu_pct = _usage_percent(cpu_usage)
         freq_match = re.search(r"^([0-9\.\sGHz/]+)", str(cpu_usage))
         sub = freq_match.group(1).strip() if freq_match else ""
         gw["CPU Usage"].set_value(cpu_pct, subtitle=sub)
+        if "CPU Usage__spark" in gw:
+            gw["CPU Usage__spark"].push_value(cpu_pct)
 
     if cpu_temp is not None and "CPU Temp" in gw and cpu_temp > 0:
         gw["CPU Temp"].set_value(cpu_temp)
+        if "CPU Temp__spark" in gw:
+            gw["CPU Temp__spark"].push_value(cpu_temp / 110.0 * 100.0)
 
     if ram_usage is not None and "RAM Usage" in gw:
         ram_pct = _usage_percent(ram_usage)
         cap_match = re.search(r"([0-9\.]+\s*GB\s*/\s*[0-9\.]+\s*GB)", str(ram_usage))
         sub = cap_match.group(1).replace(" ", "") if cap_match else ""
         gw["RAM Usage"].set_value(ram_pct, subtitle=sub)
+        if "RAM Usage__spark" in gw:
+            gw["RAM Usage__spark"].push_value(ram_pct)
 
     if swap_usage is not None and "Swap" in gw:
         swap_pct = _usage_percent(swap_usage)
         cap_match = re.search(r"([0-9\.]+\s*GB\s*/\s*[0-9\.]+\s*GB)", str(swap_usage))
         sub = cap_match.group(1).replace(" ", "") if cap_match else ""
         gw["Swap"].set_value(swap_pct, subtitle=sub)
+        if "Swap__spark" in gw:
+            gw["Swap__spark"].push_value(swap_pct)
 
 
 
@@ -2023,7 +2121,7 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
     GAUGE_SIZE = 138
 
     def _gauge_cell(title, unit, gauge_type, value, subtitle="", max_value=100.0):
-        """Build a single gauge + label cell with tooltip."""
+        """Build a single gauge + sparkline cell with tooltip."""
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         vbox.set_halign(Gtk.Align.CENTER)
         vbox.set_valign(Gtk.Align.CENTER)
@@ -2040,9 +2138,19 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
         g.set_value(value, subtitle=subtitle)
         g.set_hexpand(True)
         g.set_vexpand(False)
-
         vbox.append(g)
-        return vbox, g
+
+        # Sparkline history chart below gauge
+        spark = SparklineWidget(width=GAUGE_SIZE, height=28, gauge_type=gauge_type)
+        normalized = (value / max_value * 100.0) if max_value > 0 else 0.0
+        spark.push_value(normalized)
+        spark.set_hexpand(True)
+        spark.set_margin_top(2)
+        if tooltip:
+            spark.set_tooltip_text(tooltip)
+        vbox.append(spark)
+
+        return vbox, g, spark
 
     # ---- Derive initial values from gpu_stats ----
     mem_used  = gpu_stats.get("mem_used") or 0
@@ -2120,9 +2228,10 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
     for idx, (key, unit, gtype, init_val, sub, max_v) in enumerate(valid_defs):
         col = idx % 4
         row = idx // 4
-        cell, gauge = _gauge_cell(key, unit, gtype, init_val, sub, max_v)
+        cell, gauge, spark = _gauge_cell(key, unit, gtype, init_val, sub, max_v)
         grid.attach(cell, col, row, 1, 1)
         gauges_out[key] = gauge
+        gauges_out[f"{key}__spark"] = spark
 
 
     outer.append(grid)
@@ -3067,11 +3176,29 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             threading.Thread(target=fetch_stats, daemon=True).start()
             return True
             
-        timeout_id = GLib.timeout_add(1000, update_stats_callback)
-        
+        initial_interval = app.config.get_refresh_interval() if (app and hasattr(app, 'config')) else 1000
+        _timeout_id = [GLib.timeout_add(initial_interval, update_stats_callback)]
+        _last_interval = [initial_interval]
+
+        def _check_interval_change():
+            if app and hasattr(app, '_current_refresh_interval_ms'):
+                new_ms = app._current_refresh_interval_ms
+                if new_ms != _last_interval[0] and _timeout_id[0]:
+                    GLib.source_remove(_timeout_id[0])
+                    _last_interval[0] = new_ms
+                    _timeout_id[0] = GLib.timeout_add(new_ms, update_stats_callback)
+            return True
+
+        _watcher_id = [GLib.timeout_add(1000, _check_interval_change)]
+
         def on_destroy(widget):
             if not _active_popout_windows:
-                GLib.source_remove(timeout_id)
+                if _timeout_id[0]:
+                    GLib.source_remove(_timeout_id[0])
+                    _timeout_id[0] = 0
+                if _watcher_id[0]:
+                    GLib.source_remove(_watcher_id[0])
+                    _watcher_id[0] = 0
         outer.connect("destroy", on_destroy)
 
         return False  # GLib.idle_add must return False to not repeat
