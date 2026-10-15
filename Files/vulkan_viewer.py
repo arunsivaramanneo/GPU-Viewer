@@ -206,7 +206,7 @@ def create_vulkan_tab_content(self):
         valueRHS = [i.strip(':') for i in valueRHS]
 
         for i in range(len(valueRHS)):
-            if "0x" in valueRHS[i]:
+            if valueRHS[i].strip().startswith("0x"):
                 valueRHS[i] = int(valueRHS[i], 16)
                 valueRHS[i] = str("%d" % valueRHS[i])
 
