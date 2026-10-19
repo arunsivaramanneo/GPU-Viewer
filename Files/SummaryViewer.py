@@ -2141,11 +2141,11 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
         vbox.append(g)
 
         # Sparkline history chart below gauge
-        spark = SparklineWidget(width=GAUGE_SIZE, height=28, gauge_type=gauge_type)
+        spark = SparklineWidget(width=GAUGE_SIZE, height=24, gauge_type=gauge_type)
         normalized = (value / max_value * 100.0) if max_value > 0 else 0.0
         spark.push_value(normalized)
         spark.set_hexpand(True)
-        spark.set_margin_top(2)
+        spark.set_margin_top(1)
         if tooltip:
             spark.set_tooltip_text(tooltip)
         vbox.append(spark)
@@ -2731,84 +2731,17 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 
                 card_title = f"{matched_name} ({gpu_info['card_name']})"
                 
-                opencl_hint = {}
-                for platform in data.get("opencl", {}).get("platforms", []):
-                    for device in platform.get("devices", []):
-                        name = (device.get("name") or "").strip().lower()
-                        if not name:
-                            continue
-                        if name in (matched_name.lower(), gpu_info.get("card_name", "").lower()):
-                            opencl_hint = {
-                                "compute_units": device.get("compute_units"),
-                                "instruction_set": device.get("opencl_c_version") or device.get("version"),
-                            }
-                            break
-                    if opencl_hint:
-                        break
-                if opencl_hint:
-                    gpu_info.setdefault("compute_units", opencl_hint.get("compute_units"))
-                    gpu_info.setdefault("instruction_set", opencl_hint.get("instruction_set"))
-                    gpu_stats.setdefault("compute_units", opencl_hint.get("compute_units"))
-                    gpu_stats.setdefault("instruction_set", opencl_hint.get("instruction_set"))
-                
-                # Column 1: PCI Details
-                gpu_rows_col1 = []
-                if gpu_info.get("pci_address"):
-                    gpu_rows_col1.append(("PCI Address", gpu_info["pci_address"]))
-                if gpu_info.get("pcie_link_speed"):
-                    gpu_rows_col1.append(("PCIe Link Speed", gpu_info["pcie_link_speed"]))
-                if gpu_info.get("pcie_link_width"):
-                    gpu_rows_col1.append(("PCIe Link Width", gpu_info["pcie_link_width"]))
-
-                # Column 2: Driver & VBIOS
-                gpu_rows_col2 = []
-                if gpu_info.get("driver"):
-                    gpu_rows_col2.append(("Driver", gpu_info["driver"]))
-                if gpu_info.get("vbios"):
-                    gpu_rows_col2.append(("VBIOS Version", gpu_info["vbios"]))
-                vram_type = gpu_stats.get("vram_type") or gpu_info.get("vram_type")
-                if vram_type:
-                    gpu_rows_col2.append(("VRAM Type", str(vram_type)))
-
-                # Column 3: Architecture Details
-                gpu_rows_col3 = []
-                compute_units = gpu_stats.get("compute_units") or gpu_info.get("compute_units")
-                if compute_units:
-                    gpu_rows_col3.append(("Compute Units", str(compute_units)))
-                rop_count = gpu_stats.get("rop_count") or gpu_info.get("rop_count")
-                if rop_count:
-                    gpu_rows_col3.append(("ROPs", str(rop_count)))
-
-                gpu_columns = [c for c in [gpu_rows_col1, gpu_rows_col2, gpu_rows_col3] if c]
-
-                def _make_gpu_card_builder(cols, stats):
+                def _make_gpu_card_builder(stats):
                     def _builder(out_widgets=None, out_gauges=None, **kwargs):
                         if out_gauges is None:
                             out_gauges = kwargs.get("g_out")
-                        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-                        if cols:
-                            w_dict = {} if out_widgets is None else out_widgets
-                            box.append(_make_grid_card_content(cols, row_widgets_out=w_dict))
-                        g_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-                        g_sep.set_margin_top(4)
-                        g_sep.set_margin_bottom(4)
-                        box.append(g_sep)
-                        g_hdr = Gtk.Label(label="Real-Time Performance")
-                        g_hdr.add_css_class("caption-heading")
-                        g_hdr.set_halign(Gtk.Align.START)
-                        g_hdr.set_margin_start(12)
-                        g_hdr.set_margin_top(2)
-                        g_hdr.set_margin_bottom(2)
-                        box.append(g_hdr)
                         g_dict = {} if out_gauges is None else out_gauges
-                        box.append(_make_gauge_dashboard(stats, g_dict, cpu_usage=cpu_usage_init, ram_usage=ram_usage_init, cpu_temp=cpu_temp_init, swap_usage=swap_usage_init))
-                        return box
+                        return _make_gauge_dashboard(stats, g_dict, cpu_usage=cpu_usage_init, ram_usage=ram_usage_init, cpu_temp=cpu_temp_init, swap_usage=swap_usage_init)
                     return _builder
 
                 gpu_gauge_widgets = {}
-                card_builder = _make_gpu_card_builder(gpu_columns, gpu_stats)
+                card_builder = _make_gpu_card_builder(gpu_stats)
                 content_widget = card_builder(out_gauges=gpu_gauge_widgets)
-
 
                 gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
                 gpu_card = _make_card(
@@ -2823,7 +2756,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     card_id=f"gpu-{gpu_idx}",
                     allow_reorder=True,
                     flow_box=flow_box,
-                    columns_data=gpu_columns,
+                    columns_data=None,
                 )
                 gpu_card.set_size_request(480, -1)
                 flow_box.append(gpu_card)
