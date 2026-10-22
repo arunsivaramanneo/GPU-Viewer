@@ -1685,13 +1685,18 @@ def _make_grid_card_content(columns: list[list[tuple[str, str]]], row_widgets_ou
     return grid_box
 
 
-def _move_card_in_registry(registry, card_id: str, target_index: int):
+def _move_card_in_registry(registry, card_id: str, target_index: int | str):
     if not registry:
         return registry
     current_order = [entry_card_id for entry_card_id, _ in registry]
     if card_id not in current_order:
         return registry
     source_index = current_order.index(card_id)
+    if isinstance(target_index, str):
+        if target_index in current_order:
+            target_index = current_order.index(target_index)
+        else:
+            return registry
     new_index = max(0, min(len(current_order) - 1, target_index))
     if source_index == new_index:
         return registry
@@ -1702,8 +1707,11 @@ def _move_card_in_registry(registry, card_id: str, target_index: int):
     return [(entry_card_id, widget_map[entry_card_id]) for entry_card_id in new_order]
 
 
-def _apply_registry_order(flow_box: Gtk.FlowBox | None, registry):
+def _apply_registry_order(flow_box, registry):
     if flow_box is None or not registry:
+        return
+    if hasattr(flow_box, "apply_reorder"):
+        flow_box.apply_reorder(registry)
         return
     widget_map = {entry_card_id: widget for entry_card_id, widget in registry}
     ordered_widgets = [widget_map[entry_card_id] for entry_card_id, _ in registry]
@@ -1792,9 +1800,271 @@ def _get_icon_name(field_name: str) -> str:
 
 _active_popout_windows = {}
 
+def _make_section_header(title: str, icon_name: str, subtitle: str = "") -> Gtk.Box:
+    box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    box.set_margin_top(16)
+    box.set_margin_bottom(8)
+    box.set_margin_start(4)
+    box.set_margin_end(4)
+
+    icon = Gtk.Image.new_from_icon_name(icon_name)
+    icon.set_pixel_size(18)
+    box.append(icon)
+
+    lbl = Gtk.Label(label=title)
+    lbl.add_css_class("title-4")
+    lbl.add_css_class("summary-tier-header")
+    lbl.set_halign(Gtk.Align.START)
+    box.append(lbl)
+
+    if subtitle:
+        sub = Gtk.Label(label=subtitle)
+        sub.add_css_class("dim-label")
+        sub.add_css_class("caption")
+        sub.set_halign(Gtk.Align.START)
+        sub.set_margin_start(6)
+        box.append(sub)
+
+    return box
+
+
+class SummaryDashboard(Gtk.Box):
+    """
+    Structured 3-Tier Executive Dashboard container for the Summary Tab.
+    Tier 1: Executive Overview (System & GPU Hardware)
+    Tier 2: Real-Time Telemetry & Performance
+    Tier 3: Graphics & Compute Subsystems
+    """
+    def __init__(self, app=None):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=16)
+        self.app = app
+        self.set_margin_start(16)
+        self.set_margin_end(16)
+        self.set_margin_top(14)
+        self.set_margin_bottom(24)
+        self.set_vexpand(True)
+        self.set_hexpand(True)
+
+        self._summary_card_registry = []
+        self._summary_card_titles = {}
+        self._tier_cards = {1: [], 2: [], 3: []}
+
+        # ── Tier 1: Executive Overview ──────────────────────────────────
+        self.tier1_header = _make_section_header("System & Hardware Overview", "computer-symbolic")
+        self.append(self.tier1_header)
+
+        self.tier1_flow = Gtk.FlowBox()
+        self.tier1_flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.tier1_flow.set_max_children_per_line(2)
+        self.tier1_flow.set_min_children_per_line(1)
+        self.tier1_flow.set_row_spacing(12)
+        self.tier1_flow.set_column_spacing(12)
+        self.tier1_flow.set_homogeneous(True)
+        self.tier1_flow.set_hexpand(True)
+        self.append(self.tier1_flow)
+
+        # ── Tier 2: Real-Time Telemetry ─────────────────────────────────
+        self.tier2_header = _make_section_header("Real-Time Telemetry & Performance", "utilities-system-monitor-symbolic", "• Live monitoring")
+        self.append(self.tier2_header)
+
+        self.tier2_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self.tier2_box.set_hexpand(True)
+        self.append(self.tier2_box)
+
+        # ── Tier 3: Graphics & Compute Subsystems ───────────────────────
+        self.tier3_header = _make_section_header("Graphics & Compute APIs", "applications-graphics-symbolic", "• Subsystem capabilities & drivers")
+        self.append(self.tier3_header)
+
+        self.tier3_flow = Gtk.FlowBox()
+        self.tier3_flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.tier3_flow.set_max_children_per_line(2)
+        self.tier3_flow.set_min_children_per_line(1)
+        self.tier3_flow.set_row_spacing(12)
+        self.tier3_flow.set_column_spacing(12)
+        self.tier3_flow.set_homogeneous(False)
+        self.tier3_flow.set_hexpand(True)
+        self.append(self.tier3_flow)
+
+        self._tier_containers = {
+            1: self.tier1_flow,
+            2: self.tier2_box,
+            3: self.tier3_flow,
+        }
+        self._sections = [
+            (self.tier1_header, self.tier1_flow, 1),
+            (self.tier2_header, self.tier2_box, 2),
+            (self.tier3_header, self.tier3_flow, 3),
+        ]
+
+    def add_card(self, tier: int, card_id: str, widget: Gtk.Widget):
+        if not card_id or widget is None:
+            return widget
+        if widget not in [w for _, w in self._summary_card_registry]:
+            self._summary_card_registry.append((card_id, widget))
+            self._summary_card_titles[card_id] = getattr(widget, "_summary_card_title", card_id)
+            self._tier_cards[tier].append((card_id, widget))
+            container = self._tier_containers[tier]
+            container.append(widget)
+        return widget
+
+    def refresh_display(self, app=None):
+        saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
+
+        for tier in (1, 2, 3):
+            tier_entries = self._tier_cards[tier]
+            if saved_order:
+                def _sort_key(item):
+                    c_id = item[0]
+                    return saved_order.index(c_id) if c_id in saved_order else 999
+                tier_entries.sort(key=_sort_key)
+
+            visible_count = 0
+            for card_id, widget in tier_entries:
+                is_popped_out = card_id in _active_popout_windows
+                parent = widget.get_parent()
+                target_to_hide = parent if isinstance(parent, Gtk.FlowBoxChild) else widget
+                if is_popped_out:
+                    target_to_hide.set_visible(False)
+                else:
+                    target_to_hide.set_visible(True)
+                    visible_count += 1
+
+            header, container, _ = self._sections[tier - 1]
+            header.set_visible(visible_count > 0)
+            container.set_visible(visible_count > 0)
+
+    def apply_reorder(self, reordered_registry):
+        self._summary_card_registry = list(reordered_registry)
+        ordered_ids = [c_id for c_id, _ in reordered_registry]
+        widget_by_id = {c_id: w for c_id, w in reordered_registry}
+
+        for tier in (1, 2, 3):
+            tier_ids = [c_id for c_id, _ in self._tier_cards[tier] if c_id in widget_by_id]
+            sorted_tier_ids = sorted(
+                tier_ids,
+                key=lambda c_id: ordered_ids.index(c_id) if c_id in ordered_ids else 999
+            )
+            self._tier_cards[tier] = [(c_id, widget_by_id[c_id]) for c_id in sorted_tier_ids]
+
+            container = self._tier_containers[tier]
+            for c_id in sorted_tier_ids:
+                w = widget_by_id[c_id]
+                parent = w.get_parent()
+                if parent is not None:
+                    if hasattr(parent, "set_child"):
+                        parent.set_child(None)
+                    else:
+                        w.unparent()
+
+            if hasattr(container, "remove_all"):
+                container.remove_all()
+            else:
+                child = container.get_first_child()
+                while child is not None:
+                    next_c = child.get_next_sibling()
+                    container.remove(child)
+                    child = next_c
+
+            for c_id in sorted_tier_ids:
+                if c_id not in _active_popout_windows:
+                    w = widget_by_id[c_id]
+                    parent = w.get_parent()
+                    if parent is not None:
+                        if hasattr(parent, "set_child"):
+                            parent.set_child(None)
+                        else:
+                            w.unparent()
+                    container.append(w)
+
+    def apply_search(self, query: str, app_instance=None):
+        query_lower = query.strip().lower()
+        for tier in (1, 2, 3):
+            tier_entries = self._tier_cards[tier]
+            visible_count = 0
+            for card_id, widget in tier_entries:
+                parent = widget.get_parent()
+                target = parent if isinstance(parent, Gtk.FlowBoxChild) else widget
+                if card_id in _active_popout_windows:
+                    target.set_visible(False)
+                    continue
+
+                card_title = getattr(widget, "_summary_card_title", "").lower()
+                if not query_lower:
+                    self._set_widget_tree_visible(widget)
+                    target.set_visible(True)
+                    visible_count += 1
+                elif query_lower in card_title:
+                    self._set_widget_tree_visible(widget)
+                    target.set_visible(True)
+                    visible_count += 1
+                else:
+                    matched = self._search_card(widget, query_lower)
+                    target.set_visible(matched)
+                    if matched:
+                        visible_count += 1
+
+            header, container, _ = self._sections[tier - 1]
+            header.set_visible(visible_count > 0)
+            container.set_visible(visible_count > 0)
+
+    def _search_card(self, card_widget, query_lower: str) -> bool:
+        if not query_lower:
+            self._set_widget_tree_visible(card_widget)
+            return True
+        card_box = card_widget.get_child() if hasattr(card_widget, "get_child") else None
+        if card_box is None:
+            return True
+        any_match = False
+        child = card_box.get_first_child()
+        while child is not None:
+            if self._search_widget(child, query_lower):
+                any_match = True
+            child = child.get_next_sibling()
+        return any_match
+
+    def _search_widget(self, widget, query_lower: str) -> bool:
+        if isinstance(widget, Gtk.Box) and hasattr(widget, "subtitle_labels"):
+            title_text = ""
+            inner = widget.get_first_child()
+            if inner is not None and isinstance(inner, Gtk.Box):
+                t_lbl = inner.get_first_child()
+                if t_lbl and hasattr(t_lbl, "get_label"):
+                    title_text = t_lbl.get_label().lower()
+            elif inner is not None and hasattr(inner, "get_label"):
+                title_text = inner.get_label().lower()
+
+            value_texts = " ".join(
+                lbl.get_label().lower() for lbl in widget.subtitle_labels
+                if hasattr(lbl, "get_label")
+            )
+            matched = query_lower in title_text or query_lower in value_texts
+            widget.set_visible(matched)
+            return matched
+
+        any_match = False
+        child = widget.get_first_child()
+        while child is not None:
+            if self._search_widget(child, query_lower):
+                any_match = True
+            child = child.get_next_sibling()
+        return any_match
+
+    def _set_widget_tree_visible(self, widget):
+        if isinstance(widget, Gtk.Box) and hasattr(widget, "subtitle_labels"):
+            widget.set_visible(True)
+            return
+        child = widget.get_first_child()
+        while child is not None:
+            self._set_widget_tree_visible(child)
+            child = child.get_next_sibling()
+
+
 def _refresh_flow_box_display(flow_box: Gtk.FlowBox | None, app=None):
-    """Refresh flow_box children to show all cards except those currently popped out."""
+    """Refresh flow_box / dashboard display to show all cards except those currently popped out."""
     if flow_box is None:
+        return
+    if hasattr(flow_box, "refresh_display"):
+        flow_box.refresh_display(app)
         return
     registry = list(getattr(flow_box, "_summary_card_registry", []))
     if not registry:
@@ -1840,7 +2110,7 @@ def _open_card_in_separate_window(title: str, icon_name: str, rows: list = None,
                                    parent_row_widgets: dict = None,
                                    card_id: str | None = None,
                                    card_widget: Gtk.Widget | None = None,
-                                   flow_box: Gtk.FlowBox | None = None,
+                                   flow_box = None,
                                    gpu_index: int | None = None):
     """Open a card in a separate standalone window."""
     if card_id and card_id in _active_popout_windows:
@@ -2249,7 +2519,7 @@ def _make_card(title: str, icon_name: str, rows: list,
                extra_nav_actions: list[tuple[str, str]] | None = None,
                card_id: str | None = None,
                allow_reorder: bool = False,
-               flow_box: Gtk.FlowBox | None = None,
+               flow_box = None,
                columns_data: list[list[tuple[str, str]]] | None = None) -> Gtk.Box:
     """
     Create a styled card widget (an Adw.PreferencesGroup wrapped in a frame).
@@ -2300,6 +2570,17 @@ def _make_card(title: str, icon_name: str, rows: list,
     else:
         badge = _make_status_badge("Not detected", False)
     header.append(badge)
+
+    # Navigation buttons to jump to detail tabs
+    if nav_page and supported and app:
+        nav_btn = _nav_button("Open →", nav_page, app, gpu_index=gpu_index)
+        nav_btn.set_tooltip_text(f"Open {title} tab")
+        header.append(nav_btn)
+
+    if extra_nav_actions and supported and app:
+        for nav_lbl, nav_dest in extra_nav_actions:
+            ext_btn = _nav_button(nav_lbl, nav_dest, app, gpu_index=gpu_index)
+            header.append(ext_btn)
 
     # Pop-out button to open card in separate window
     popout_btn = Gtk.Button()
@@ -2472,6 +2753,11 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         .summary-card button:hover {
             background-color: #383842;
         }
+
+        .summary-tier-header {
+            font-weight: 700;
+            color: #ffffff;
+        }
         """
     else:
         card_css = """
@@ -2509,6 +2795,11 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
         .summary-card button:hover {
             background-color: #e4e4e7;
+        }
+
+        .summary-tier-header {
+            font-weight: 700;
+            color: #171717;
         }
         """
     css_provider.load_from_data(card_css.encode("utf-8"))
@@ -2551,34 +2842,18 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
         scroll.set_vexpand(True)
         scroll.set_hexpand(True)
 
-        # Use a FlowBox for multi-column layout
-        flow_box = Gtk.FlowBox()
-        flow_box.set_homogeneous(False)
-        flow_box.set_min_children_per_line(1)
-        flow_box.set_max_children_per_line(2)  # up to 2 cards per row
-        flow_box.set_selection_mode(Gtk.SelectionMode.NONE)
-        flow_box.set_margin_top(12)
-        flow_box.set_margin_bottom(24)
-        flow_box.set_margin_start(12)
-        flow_box.set_margin_end(12)
-        flow_box.set_row_spacing(8)
-        flow_box.set_column_spacing(8)
-        flow_box._summary_card_registry = []
-        flow_box._summary_card_titles = {}
-        if app is not None:
-            app.summary_flow_box = flow_box
-            app.summary_card_titles = flow_box._summary_card_titles
+        # Dashboard: Option A Structured 3-Tier Executive Dashboard
+        dashboard = SummaryDashboard(app=app)
+        scroll.set_child(dashboard)
 
-        def _iter_flowbox_children(widget_container):
-            child = widget_container.get_first_child()
-            while child is not None:
-                yield child
-                child = child.get_next_sibling()
+        if app is not None:
+            app.summary_flow_box = dashboard
+            app.summary_card_titles = dashboard._summary_card_titles
 
         def _apply_summary_card_order(order):
-            if flow_box is None:
+            if dashboard is None:
                 return
-            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            registry = list(getattr(dashboard, "_summary_card_registry", []))
             if not registry:
                 return
             widget_by_id = {widget_id: widget for widget_id, widget in registry}
@@ -2586,58 +2861,35 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             for card_id in list(widget_by_id):
                 if card_id not in ordered_ids:
                     ordered_ids.append(card_id)
-            flow_box._summary_card_registry = [(card_id, widget_by_id[card_id]) for card_id in ordered_ids]
-            _refresh_flow_box_display(flow_box, app)
-
-        def _move_card_in_summary_order(card_id: str, direction: int):
-            if flow_box is None:
-                return
-            registry = list(getattr(flow_box, "_summary_card_registry", []))
-            if not registry:
-                return
-            current_order = [entry_card_id for entry_card_id, _ in registry]
-            if card_id not in current_order:
-                return
-            index = current_order.index(card_id)
-            new_index = index + direction
-            if new_index < 0 or new_index >= len(current_order):
-                return
-            current_order[index], current_order[new_index] = current_order[new_index], current_order[index]
-            _apply_summary_card_order(current_order)
-            if hasattr(app, "config"):
-                app.config.set_summary_card_order(current_order)
-
-        def add_summary_card(card_id: str, widget: Gtk.Widget):
-            registry = list(getattr(flow_box, "_summary_card_registry", []))
-            if card_id and widget is not None and widget not in [existing_widget for _, existing_widget in registry]:
-                registry.append((card_id, widget))
-                flow_box._summary_card_registry = registry
-                flow_box._summary_card_titles[card_id] = getattr(widget, "_summary_card_title", card_id)
-            return widget
+            reordered = [(card_id, widget_by_id[card_id]) for card_id in ordered_ids]
+            dashboard.apply_reorder(reordered)
+            dashboard.refresh_display(app)
 
         def restore_summary_card_order():
-            registry = list(getattr(flow_box, "_summary_card_registry", []))
+            registry = list(getattr(dashboard, "_summary_card_registry", []))
             if not registry:
                 return
             current_order = [widget_id for widget_id, _ in registry]
             saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
             if not saved_order:
                 def default_card_priority(card_id):
-                    if card_id.startswith("vulkan-"):
-                        return 0
                     if card_id == "system":
+                        return 0
+                    if card_id.startswith("gpu-hw"):
                         return 1
                     if card_id.startswith("gpu-"):
                         return 2
-                    if card_id.startswith("opengl"):
+                    if card_id.startswith("vulkan-"):
                         return 3
-                    if card_id in ("egl", "glx"):
+                    if card_id.startswith("opengl"):
                         return 4
-                    if card_id.startswith("opencl-"):
+                    if card_id in ("egl", "glx"):
                         return 5
-                    if card_id.startswith("vdpau"):
+                    if card_id.startswith("opencl-"):
                         return 6
-                    return 7
+                    if card_id.startswith("vdpau"):
+                        return 7
+                    return 8
 
                 default_order = sorted(
                     enumerate(current_order),
@@ -2650,22 +2902,19 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 if card_id not in ordered:
                     ordered.append(card_id)
             if ordered == current_order:
+                dashboard.refresh_display(app)
                 return
             _apply_summary_card_order(ordered)
 
-        scroll.set_child(flow_box)
-
         view_stack = getattr(app, "view_stack", None)
 
-        # ── System Information ───────────────────────────────────────────
+        # ── Tier 1: Host System Information ──────────────────────────────
         sys_data = data["system"]
         cpu_usage_init = get_realtime_cpu_usage()
         ram_usage_init = get_realtime_ram_usage()
         uptime_init = get_realtime_uptime()
         cpu_temp_init = get_realtime_cpu_temp()
         swap_usage_init = get_realtime_swap_usage()
-
-        cpu_temp_str = f"{cpu_temp_init} °C" if cpu_temp_init is not None else "—"
 
         sys_columns = [
             [
@@ -2679,7 +2928,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 ("Architecture", sys_data.get("architecture", "—")),
                 ("Hostname", sys_data.get("hostname", "—")),
                 ("Uptime", uptime_init),
-                ("CPU Temperature", cpu_temp_str),
                 ("Swap Usage", swap_usage_init),
             ],
             [
@@ -2696,41 +2944,138 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             "System",
             "../Images/about-us.png",
             [],
-            nav_page=None,   # no detail tab for system info
+            nav_page=None,
             app=app,
             supported=True,
             content_widget=_make_grid_card_content(sys_columns, row_widgets_out=sys_widgets),
             row_widgets_out=sys_widgets,
             card_id="system",
             allow_reorder=True,
-            flow_box=flow_box,
+            flow_box=dashboard,
             columns_data=sys_columns,
         )
-        sys_card.set_size_request(250, -1)
-        flow_box.append(sys_card)
-        add_summary_card("system", sys_card)
+        sys_card.set_size_request(280, -1)
+        dashboard.add_card(1, "system", sys_card)
 
-        # ── GPU Statistics & Details (Multi-GPU support) ─────────────────
-        gpui_list = data["gpui_stats"] # This is a list of dicts
+        # ── Multi-GPU Hardware Overview & Real-Time Performance ──────────
+        gpui_list = data["gpui_stats"]
         stats_widgets_list = []
-        gpu_dashboard_specs = []
         vk_devices = data["vulkan"].get("devices", []) if data.get("vulkan") else []
-
-        # Filter out GPU entries with no identifiable vendor/device ID
         known_gpus = [g for g in gpui_list if g.get("vendor_id") or g.get("device_id")]
 
+        # ── Tier 1: Primary GPU Hardware Overview Card(s) ────────────────
         if known_gpus:
             for gpu_info in known_gpus:
                 gpu_idx = gpu_info["card_index"]
                 gpu_stats = gpu_info["stats"]
-                
-                # Match Vulkan name
+
                 matched_name = _match_vulkan_name(gpu_info["vendor_id"], gpu_info["device_id"], vk_devices)
                 if not matched_name:
                     matched_name = _get_gpu_fallback_name(gpu_info["vendor_id"], gpu_info["device_id"])
-                
-                card_title = f"{matched_name} ({gpu_info['card_name']})"
-                
+
+                opencl_hint = {}
+                for platform in data.get("opencl", {}).get("platforms", []):
+                    for device in platform.get("devices", []):
+                        name = (device.get("name") or "").strip().lower()
+                        if not name:
+                            continue
+                        if name in (matched_name.lower(), gpu_info.get("card_name", "").lower()):
+                            opencl_hint = {
+                                "compute_units": device.get("compute_units"),
+                                "instruction_set": device.get("opencl_c_version") or device.get("version"),
+                            }
+                            break
+                    if opencl_hint:
+                        break
+
+                compute_units = gpu_stats.get("compute_units") or gpu_info.get("compute_units") or opencl_hint.get("compute_units")
+                rop_count = gpu_stats.get("rop_count") or gpu_info.get("rop_count")
+
+                col_hw_1 = [
+                    ("Card", gpu_info.get("card_name", f"card{gpu_idx}")),
+                    ("Driver", gpu_info.get("driver", "—")),
+                ]
+                if gpu_info.get("vbios"):
+                    col_hw_1.append(("VBIOS Version", gpu_info["vbios"]))
+                if compute_units:
+                    col_hw_1.append(("Compute Units", str(compute_units)))
+                if rop_count:
+                    col_hw_1.append(("ROPs", str(rop_count)))
+
+                col_hw_2 = []
+                if gpu_info.get("vendor_id") or gpu_info.get("device_id"):
+                    col_hw_2.append(("Vendor / Device ID", f"{gpu_info.get('vendor_id', '—')} : {gpu_info.get('device_id', '—')}"))
+                if gpu_info.get("pci_address"):
+                    col_hw_2.append(("PCI Address", gpu_info["pci_address"]))
+                if gpu_info.get("pcie_link_speed"):
+                    col_hw_2.append(("PCIe Link Speed", gpu_info["pcie_link_speed"]))
+                if gpu_info.get("pcie_link_width"):
+                    col_hw_2.append(("PCIe Link Width", gpu_info["pcie_link_width"]))
+
+                col_hw_3 = []
+                mem_tot = gpu_stats.get("mem_total") or 0
+                if mem_tot > 0:
+                    col_hw_3.append(("VRAM Total", f"{mem_tot} MB"))
+                vram_type = gpu_stats.get("vram_type") or gpu_info.get("vram_type")
+                if vram_type:
+                    col_hw_3.append(("VRAM Type", str(vram_type)))
+
+                if data.get("vulkan", {}).get("supported"):
+                    vk_ver = data["vulkan"].get("instance_version", "")
+                    if vk_devices and gpu_idx < len(vk_devices):
+                        vk_ver = vk_devices[gpu_idx].get("api_version", vk_ver)
+                    col_hw_3.append(("Vulkan Support", f"Detected ({vk_ver})" if vk_ver else "Detected"))
+                else:
+                    col_hw_3.append(("Vulkan Support", "Not detected"))
+
+                if data.get("opengl", {}).get("supported"):
+                    gl_ver = data["opengl"].get("version", "").split()[0] if data["opengl"].get("version") else ""
+                    col_hw_3.append(("OpenGL Support", f"Detected ({gl_ver})" if gl_ver else "Detected"))
+                else:
+                    col_hw_3.append(("OpenGL Support", "Not detected"))
+
+                if data.get("opencl", {}).get("supported"):
+                    col_hw_3.append(("OpenCL Support", "Detected"))
+                else:
+                    col_hw_3.append(("OpenCL Support", "Not detected"))
+
+                if data.get("vdpau", {}).get("supported"):
+                    col_hw_3.append(("VDPAU Support", "Detected"))
+                else:
+                    col_hw_3.append(("VDPAU Support", "Not detected"))
+
+                gpu_hw_columns = [c for c in [col_hw_1, col_hw_2, col_hw_3] if c]
+                gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
+                hw_card_title = f"{matched_name}" if len(known_gpus) == 1 else f"{matched_name} ({gpu_info['card_name']})"
+
+                gpu_hw_card = _make_card(
+                    hw_card_title,
+                    gpu_logo,
+                    [],
+                    nav_page=None,
+                    app=app,
+                    supported=True,
+                    content_widget=_make_grid_card_content(gpu_hw_columns),
+                    card_id=f"gpu-hw-{gpu_idx}",
+                    allow_reorder=True,
+                    flow_box=dashboard,
+                    columns_data=gpu_hw_columns,
+                )
+                gpu_hw_card.set_size_request(280, -1)
+                dashboard.add_card(1, f"gpu-hw-{gpu_idx}", gpu_hw_card)
+
+        # ── Tier 2: Real-Time Telemetry & Performance Dashboard ─────────
+        if known_gpus:
+            for gpu_info in known_gpus:
+                gpu_idx = gpu_info["card_index"]
+                gpu_stats = gpu_info["stats"]
+
+                matched_name = _match_vulkan_name(gpu_info["vendor_id"], gpu_info["device_id"], vk_devices)
+                if not matched_name:
+                    matched_name = _get_gpu_fallback_name(gpu_info["vendor_id"], gpu_info["device_id"])
+
+                perf_card_title = f"Real-Time Telemetry — {matched_name}" if len(known_gpus) == 1 else f"Real-Time Telemetry — {matched_name} ({gpu_info['card_name']})"
+
                 def _make_gpu_card_builder(stats):
                     def _builder(out_widgets=None, out_gauges=None, **kwargs):
                         if out_gauges is None:
@@ -2744,8 +3089,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 content_widget = card_builder(out_gauges=gpu_gauge_widgets)
 
                 gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
-                gpu_card = _make_card(
-                    card_title,
+                gpu_perf_card = _make_card(
+                    perf_card_title,
                     gpu_logo,
                     [],
                     nav_page=None,
@@ -2755,17 +3100,15 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     content_builder=card_builder,
                     card_id=f"gpu-{gpu_idx}",
                     allow_reorder=True,
-                    flow_box=flow_box,
+                    flow_box=dashboard,
                     columns_data=None,
                 )
-                gpu_card.set_size_request(480, -1)
-                flow_box.append(gpu_card)
-                add_summary_card(f"gpu-{gpu_idx}", gpu_card)
+                gpu_perf_card.set_hexpand(True)
+                dashboard.add_card(2, f"gpu-{gpu_idx}", gpu_perf_card)
                 stats_widgets_list.append((gpu_idx, {}, gpu_gauge_widgets))
 
-
-
-        # ── Vulkan ───────────────────────────────────────────────────────
+        # ── Tier 3: Graphics & Compute Subsystems (APIs) ─────────────────
+        # ── Vulkan
         vk_data = data["vulkan"]
         if vk_data["supported"] and vk_data.get("devices"):
             for i, dev in enumerate(vk_data["devices"]):
@@ -2835,26 +3178,23 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     extra_nav_actions=extra_nav_actions,
                     card_id=f"vulkan-{i}",
                     allow_reorder=True,
-                    flow_box=flow_box,
+                    flow_box=dashboard,
                     columns_data=columns,
                 )
-                card.set_size_request(250, -1)
-                flow_box.append(card)
-                add_summary_card(f"vulkan-{i}", card)
+                card.set_size_request(280, -1)
+                dashboard.add_card(3, f"vulkan-{i}", card)
         else:
             card = _make_card(
                 "Vulkan", "../Images/Vulkan.png",
                 [], nav_page=None, app=app, supported=False,
                 card_id="vulkan-missing",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
             )
-            card.set_size_request(250, -1)
-            flow_box.append(card)
-            add_summary_card("vulkan-missing", card)
+            card.set_size_request(280, -1)
+            dashboard.add_card(3, "vulkan-missing", card)
 
-
-        # ── OpenGL (Unified Core, ES, EGL, GLX) ──────────────────────────
+        # ── OpenGL (Unified Core, ES, EGL, GLX)
         gl_data = data["opengl"]
         if gl_data["supported"] and gl_data.get("renderer"):
             renderer_label = gl_data["renderer"]
@@ -2912,25 +3252,23 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 content_widget=_make_grid_card_content(gl_columns),
                 card_id="opengl",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
                 columns_data=gl_columns,
             )
-            card.set_size_request(250, -1)
-            flow_box.append(card)
-            add_summary_card("opengl", card)
+            card.set_size_request(280, -1)
+            dashboard.add_card(3, "opengl", card)
         else:
             card = _make_card(
                 "OpenGL", "../Images/OpenGL.png",
                 [], nav_page=None, app=app, supported=False,
                 card_id="opengl-missing",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
             )
-            card.set_size_request(250, -1)
-            flow_box.append(card)
-            add_summary_card("opengl-missing", card)
+            card.set_size_request(280, -1)
+            dashboard.add_card(3, "opengl-missing", card)
 
-        # ── OpenCL ───────────────────────────────────────────────────────
+        # ── OpenCL
         cl_data = data["opencl"]
         if cl_data["supported"] and cl_data.get("platforms"):
             for platform in cl_data["platforms"]:
@@ -2983,12 +3321,11 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         gpu_index=dev_index,
                         card_id=f"opencl-{platform_name}-{dev_index}",
                         allow_reorder=True,
-                        flow_box=flow_box,
+                        flow_box=dashboard,
                         columns_data=[platform_col, dev_col_1, dev_col_2],
                     )
-                    card.set_size_request(250, -1)
-                    flow_box.append(card)
-                    add_summary_card(f"opencl-{platform_name}-{dev_index}", card)
+                    card.set_size_request(280, -1)
+                    dashboard.add_card(3, f"opencl-{platform_name}-{dev_index}", card)
         else:
             card = _make_card(
                 "OpenCL",
@@ -2996,13 +3333,12 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 [], nav_page=None, app=app, supported=False,
                 card_id="opencl-missing",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
             )
-            card.set_size_request(250, -1)
-            flow_box.append(card)
-            add_summary_card("opencl-missing", card)
+            card.set_size_request(280, -1)
+            dashboard.add_card(3, "opencl-missing", card)
 
-        # ── VDPAU ────────────────────────────────────────────────────────
+        # ── VDPAU
         vd_data = data["vdpau"]
         if vd_data["supported"]:
             rows = []
@@ -3019,7 +3355,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 supported=True,
                 card_id="vdpau",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
             )
         else:
             card = _make_card(
@@ -3027,11 +3363,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 [], nav_page=None, app=app, supported=False,
                 card_id="vdpau-missing",
                 allow_reorder=True,
-                flow_box=flow_box,
+                flow_box=dashboard,
             )
-        card.set_size_request(250, -1)
-        flow_box.append(card)
-        add_summary_card("vdpau" if vd_data["supported"] else "vdpau-missing", card)
+        card.set_size_request(280, -1)
+        dashboard.add_card(3, "vdpau" if vd_data["supported"] else "vdpau-missing", card)
 
         restore_summary_card_order()
 
@@ -3050,17 +3385,14 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     upt_u = get_realtime_uptime()
                     cpu_t = get_realtime_cpu_temp()
                     swap_u = get_realtime_swap_usage()
-                    cpu_t_str = f"{cpu_t} °C" if cpu_t is not None else "—"
 
-                    def apply_sys_updates(c=cpu_u, r=ram_u, u=upt_u, ct=cpu_t_str, su=swap_u):
+                    def apply_sys_updates(c=cpu_u, r=ram_u, u=upt_u, su=swap_u):
                         if "CPU Usage" in sys_widgets and c != "—":
                             sys_widgets["CPU Usage"].set_subtitle(c)
                         if "RAM Usage" in sys_widgets and r != "—":
                             sys_widgets["RAM Usage"].set_subtitle(r)
                         if "Uptime" in sys_widgets and u != "—":
                             sys_widgets["Uptime"].set_subtitle(u)
-                        if "CPU Temperature" in sys_widgets and ct != "—":
-                            sys_widgets["CPU Temperature"].set_subtitle(ct)
                         if "Swap Usage" in sys_widgets and su != "—":
                             sys_widgets["Swap Usage"].set_subtitle(su)
 
@@ -3072,8 +3404,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                                 pw["RAM Usage"].set_subtitle(r)
                             if "Uptime" in pw and u != "—":
                                 pw["Uptime"].set_subtitle(u)
-                            if "CPU Temperature" in pw and ct != "—":
-                                pw["CPU Temperature"].set_subtitle(ct)
                             if "Swap Usage" in pw and su != "—":
                                 pw["Swap Usage"].set_subtitle(su)
                         return False

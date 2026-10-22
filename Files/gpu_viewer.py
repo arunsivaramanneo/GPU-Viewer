@@ -535,10 +535,13 @@ else:
                     order[index], order[target] = order[target], order[index]
                     widget_map = {entry_card_id: widget for entry_card_id, widget in registry}
                     reordered = [(entry_card_id, widget_map[entry_card_id]) for entry_card_id in order]
-                    flow_box.remove_all()
-                    for _, widget in reordered:
-                        flow_box.append(widget)
-                    flow_box._summary_card_registry = reordered
+                    if hasattr(flow_box, "apply_reorder"):
+                        flow_box.apply_reorder(reordered)
+                    else:
+                        flow_box.remove_all()
+                        for _, widget in reordered:
+                            flow_box.append(widget)
+                        flow_box._summary_card_registry = reordered
                     if hasattr(self, "config"):
                         self.config.set_summary_card_order(order)
                     _refresh_summary_order_list()
@@ -935,6 +938,9 @@ else:
             """Show/hide property rows in summary cards based on search query."""
             flow_box = getattr(self, "summary_flow_box", None)
             if flow_box is None:
+                return
+            if hasattr(flow_box, "apply_search"):
+                flow_box.apply_search(query, self)
                 return
             query_lower = query.strip().lower()
 
