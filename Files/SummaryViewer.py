@@ -850,6 +850,10 @@ def _parse_gpui_stats(results: dict) -> list:
             
             vendor_id = ""
             device_id = ""
+            subsystem_vendor = ""
+            subsystem_device = ""
+            revision = ""
+            vram_vendor = ""
             driver = ""
             vbios = ""
             pci_address = ""
@@ -869,6 +873,38 @@ def _parse_gpui_stats(results: dict) -> list:
                 try:
                     with open(f"{device_path}/device", "r") as f:
                         device_id = f.read().strip()
+                except Exception:
+                    pass
+
+            # Subsystem Vendor & Device ID
+            if os.path.exists(f"{device_path}/subsystem_vendor"):
+                try:
+                    with open(f"{device_path}/subsystem_vendor", "r") as f:
+                        subsystem_vendor = f.read().strip()
+                except Exception:
+                    pass
+            if os.path.exists(f"{device_path}/subsystem_device"):
+                try:
+                    with open(f"{device_path}/subsystem_device", "r") as f:
+                        subsystem_device = f.read().strip()
+                except Exception:
+                    pass
+
+            # Revision
+            if os.path.exists(f"{device_path}/revision"):
+                try:
+                    with open(f"{device_path}/revision", "r") as f:
+                        revision = f.read().strip()
+                except Exception:
+                    pass
+
+            # VRAM Vendor (AMD sysfs mem_info_vram_vendor)
+            if os.path.exists(f"{device_path}/mem_info_vram_vendor"):
+                try:
+                    with open(f"{device_path}/mem_info_vram_vendor", "r") as f:
+                        raw_v_vendor = f.read().strip()
+                        if raw_v_vendor:
+                            vram_vendor = raw_v_vendor.title()
                 except Exception:
                     pass
             
@@ -945,6 +981,10 @@ def _parse_gpui_stats(results: dict) -> list:
                 "card_name": card_name,
                 "vendor_id": vendor_id,
                 "device_id": device_id,
+                "subsystem_vendor": subsystem_vendor,
+                "subsystem_device": subsystem_device,
+                "revision": revision,
+                "vram_vendor": vram_vendor,
                 "driver": driver,
                 "vbios": vbios,
                 "pci_address": pci_address,
@@ -1538,14 +1578,25 @@ METRIC_TOOLTIPS = {
     "Display": "Connected monitor displays and output screen resolutions.",
 
     # GPU Card Details
+    "Card": "Operating system DRM device node identifier (e.g. card0, card1).",
     "PCI Address": "PCI Express bus, device, and function address identifier of the graphics card.",
     "PCIe Link Speed": "Current negotiated PCIe link transfer speed (e.g. 8.0 GT/s PCIe Gen 3 / Gen 4).",
     "PCIe Link Width": "Current negotiated PCIe lane width (e.g. x16, x8, x4).",
     "Driver": "Active kernel and userspace graphics driver.",
     "VBIOS Version": "Video BIOS firmware version installed on the graphics card.",
+    "Vendor / Device ID": "PCI Vendor ID and Device ID assigned by the hardware manufacturer.",
+    "Subsystem ID": "PCI Subsystem Vendor and Subsystem Device ID identifying the specific board or OEM model.",
+    "Revision": "Hardware silicon revision / stepping of the graphics processor die.",
+    "VRAM Total": "Total physical dedicated video memory (VRAM) installed on the graphics card.",
     "VRAM Type": "Memory technology generation used for video RAM (e.g. GDDR6, GDDR5, HBM2, DDR4).",
+    "VRAM Vendor": "Manufacturer of the onboard video memory chips (e.g. Samsung, Micron, SK Hynix).",
+    "GTT / Shared Memory": "Total Graphics Translation Table (GTT) / system RAM shared with the GPU.",
+    "Max Core Clock": "Maximum engine / boost operating frequency of the graphics core in MHz.",
+    "Max Memory Clock": "Maximum operating frequency of the video memory (VRAM) in MHz.",
     "Compute Units": "Number of hardware compute units / streaming multiprocessors / execution units.",
     "ROPs": "Render Output Units (Raster Operations Pipelines) responsible for final pixel processing.",
+    "Architecture": "GPU microarchitecture or instruction set family.",
+    "Device UUID": "Universally Unique Identifier (UUID) of the physical graphics device.",
 
     # Subsystems
     "API Version": "Supported application programming interface version specification.",
@@ -2651,7 +2702,7 @@ def _make_card(title: str, icon_name: str, rows: list,
 # Public entry point
 # ---------------------------------------------------------------------------
 
-def _match_vulkan_name(vendor_id_str, device_id_str, vk_devices):
+def _match_vulkan_device(vendor_id_str, device_id_str, vk_devices):
     if not vendor_id_str or not device_id_str:
         return None
     try:
@@ -2665,12 +2716,32 @@ def _match_vulkan_name(vendor_id_str, device_id_str, vk_devices):
                     v2 = int(vk_vendor, 16)
                     d2 = int(vk_device, 16)
                     if v1 == v2 and d1 == d2:
-                        return dev.get("name")
+                        return dev
                 except ValueError:
                     pass
     except ValueError:
         pass
     return None
+
+
+def _match_vulkan_name(vendor_id_str, device_id_str, vk_devices):
+    dev = _match_vulkan_device(vendor_id_str, device_id_str, vk_devices)
+    return dev.get("name") if dev else None
+
+
+def _format_device_type(raw_type: str) -> str:
+    if not raw_type:
+        return ""
+    # Strip either prefix (most-specific first)
+    t = raw_type
+    for prefix in ("VK_PHYSICAL_DEVICE_TYPE_", "PHYSICAL_DEVICE_TYPE_"):
+        if t.startswith(prefix):
+            t = t[len(prefix):]
+            break
+    t = t.replace("_", " ").title()
+    t = re.sub(r'\bGpu\b', 'GPU', t)
+    t = re.sub(r'\bCpu\b', 'CPU', t)
+    return t.strip()
 
 
 def _get_gpu_fallback_name(vendor_id_str, device_id_str):
@@ -2990,21 +3061,42 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
                 compute_units = gpu_stats.get("compute_units") or gpu_info.get("compute_units") or opencl_hint.get("compute_units")
                 rop_count = gpu_stats.get("rop_count") or gpu_info.get("rop_count")
+                instruction_set = (
+                    gpu_stats.get("instruction_set")
+                    or gpu_info.get("instruction_set")
+                    or opencl_hint.get("instruction_set")
+                )
+
+                vk_dev = _match_vulkan_device(gpu_info.get("vendor_id"), gpu_info.get("device_id"), vk_devices)
+                if not vk_dev and vk_devices and gpu_idx < len(vk_devices):
+                    vk_dev = vk_devices[gpu_idx]
+
+                dev_type = ""
+                if vk_dev and vk_dev.get("device_type"):
+                    dev_type = _format_device_type(vk_dev["device_type"])
 
                 col_hw_1 = [
                     ("Card", gpu_info.get("card_name", f"card{gpu_idx}")),
-                    ("Driver", gpu_info.get("driver", "—")),
                 ]
+                if dev_type:
+                    col_hw_1.append(("Device Type", dev_type))
+                col_hw_1.append(("Driver", gpu_info.get("driver", "—")))
                 if gpu_info.get("vbios"):
                     col_hw_1.append(("VBIOS Version", gpu_info["vbios"]))
                 if compute_units:
                     col_hw_1.append(("Compute Units", str(compute_units)))
                 if rop_count:
                     col_hw_1.append(("ROPs", str(rop_count)))
+                if instruction_set:
+                    col_hw_1.append(("Architecture", str(instruction_set)))
 
                 col_hw_2 = []
                 if gpu_info.get("vendor_id") or gpu_info.get("device_id"):
                     col_hw_2.append(("Vendor / Device ID", f"{gpu_info.get('vendor_id', '—')} : {gpu_info.get('device_id', '—')}"))
+                if gpu_info.get("subsystem_vendor") and gpu_info.get("subsystem_device"):
+                    col_hw_2.append(("Subsystem ID", f"{gpu_info['subsystem_vendor']} : {gpu_info['subsystem_device']}"))
+                if gpu_info.get("revision"):
+                    col_hw_2.append(("Revision", gpu_info["revision"]))
                 if gpu_info.get("pci_address"):
                     col_hw_2.append(("PCI Address", gpu_info["pci_address"]))
                 if gpu_info.get("pcie_link_speed"):
@@ -3019,30 +3111,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 vram_type = gpu_stats.get("vram_type") or gpu_info.get("vram_type")
                 if vram_type:
                     col_hw_3.append(("VRAM Type", str(vram_type)))
-
-                if data.get("vulkan", {}).get("supported"):
-                    vk_ver = data["vulkan"].get("instance_version", "")
-                    if vk_devices and gpu_idx < len(vk_devices):
-                        vk_ver = vk_devices[gpu_idx].get("api_version", vk_ver)
-                    col_hw_3.append(("Vulkan Support", f"Detected ({vk_ver})" if vk_ver else "Detected"))
-                else:
-                    col_hw_3.append(("Vulkan Support", "Not detected"))
-
-                if data.get("opengl", {}).get("supported"):
-                    gl_ver = data["opengl"].get("version", "").split()[0] if data["opengl"].get("version") else ""
-                    col_hw_3.append(("OpenGL Support", f"Detected ({gl_ver})" if gl_ver else "Detected"))
-                else:
-                    col_hw_3.append(("OpenGL Support", "Not detected"))
-
-                if data.get("opencl", {}).get("supported"):
-                    col_hw_3.append(("OpenCL Support", "Detected"))
-                else:
-                    col_hw_3.append(("OpenCL Support", "Not detected"))
-
-                if data.get("vdpau", {}).get("supported"):
-                    col_hw_3.append(("VDPAU Support", "Detected"))
-                else:
-                    col_hw_3.append(("VDPAU Support", "Not detected"))
+                vram_vendor = gpu_info.get("vram_vendor")
+                if vram_vendor:
+                    col_hw_3.append(("VRAM Vendor", str(vram_vendor)))
+                gtt_tot = gpu_stats.get("gtt_total") or 0
+                if gtt_tot > 0:
+                    col_hw_3.append(("GTT / Shared Memory", f"{gtt_tot} MB"))
+                clk_max = gpu_stats.get("clock_max") or 0
+                if clk_max > 0:
+                    col_hw_3.append(("Max Core Clock", f"{clk_max} MHz"))
+                vclk_max = gpu_stats.get("vram_clock_max") or 0
+                if vclk_max > 0:
+                    col_hw_3.append(("Max Memory Clock", f"{vclk_max} MHz"))
+                if vk_dev and vk_dev.get("device_uuid"):
+                    uuid_str = vk_dev["device_uuid"].strip()
+                    if uuid_str and set(uuid_str.replace("-", "")) != {"0"} and len(col_hw_3) < 4:
+                        col_hw_3.append(("Device UUID", uuid_str))
 
                 gpu_hw_columns = [c for c in [col_hw_1, col_hw_2, col_hw_3] if c]
                 gpu_logo = _get_gpu_logo(gpu_info.get("vendor_id", ""))
