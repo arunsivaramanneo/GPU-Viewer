@@ -1065,6 +1065,58 @@ def _parse_vulkan_video(results: dict) -> dict:
 
 
 _cpu_last_stat = [0, 0]  # [idle, total]
+_net_last_bytes = {}      # {iface: (rx_bytes, tx_bytes, timestamp)}
+
+
+def get_realtime_net_speed() -> tuple[float, float]:
+    """Return (download_Mbps, upload_Mbps) summed across all active non-loopback interfaces.
+
+    Reads /proc/net/dev and computes byte-deltas since the last call.
+    Returns (0.0, 0.0) when there is not yet enough history (first call) or on error.
+    """
+    global _net_last_bytes
+    import time
+    try:
+        now = time.monotonic()
+        rx_total = 0
+        tx_total = 0
+        with open("/proc/net/dev", "r") as f:
+            lines = f.readlines()
+        current = {}
+        for line in lines[2:]:          # skip the two header lines
+            parts = line.split(":")
+            if len(parts) < 2:
+                continue
+            iface = parts[0].strip()
+            if iface == "lo":           # skip loopback
+                continue
+            fields = parts[1].split()
+            if len(fields) < 9:
+                continue
+            rx_bytes = int(fields[0])
+            tx_bytes = int(fields[8])
+            current[iface] = (rx_bytes, tx_bytes)
+
+        down_mbps = 0.0
+        up_mbps   = 0.0
+        for iface, (rx, tx) in current.items():
+            if iface in _net_last_bytes:
+                prev_rx, prev_tx, prev_t = _net_last_bytes[iface]
+                dt = now - prev_t
+                if dt > 0:
+                    down_mbps += max(0.0, (rx - prev_rx) / dt) / 1e6 * 8  # bytes/s → Mbit/s
+                    up_mbps   += max(0.0, (tx - prev_tx) / dt) / 1e6 * 8
+            _net_last_bytes[iface] = (rx, tx, now)
+
+        # Prune disappeared interfaces
+        for iface in list(_net_last_bytes.keys()):
+            if iface not in current:
+                del _net_last_bytes[iface]
+
+        return (down_mbps, up_mbps)
+    except Exception:
+        return (0.0, 0.0)
+
 
 def get_realtime_cpu_usage() -> str:
     global _cpu_last_stat
@@ -1558,6 +1610,8 @@ METRIC_TOOLTIPS = {
     "CPU Temp": "Processor Temperature — Thermal package/core temperature of the central processor in Celsius (°C).",
     "RAM Usage": "System Memory — Amount and percentage of physical RAM currently allocated and in use.",
     "Swap": "Swap Space — Amount and percentage of virtual disk swap space utilized by the system.",
+    "Net Down": "Network Download Speed — Real-time inbound data rate summed across all active network interfaces in Mbit/s.",
+    "Net Up": "Network Upload Speed — Real-time outbound data rate summed across all active network interfaces in Mbit/s.",
 
     # System Information
     "Operating System": "Current Linux operating system distribution and version.",
@@ -2302,7 +2356,8 @@ def _usage_percent(value):
     return float(match.group(1)) if match else 0.0
 
 
-def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None, cpu_temp=None, swap_usage=None):
+def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None, cpu_temp=None, swap_usage=None,
+                       net_down_mbps: float = None, net_up_mbps: float = None):
     """Update a dictionary of CircularGauge instances from stats, CPU usage, RAM usage, CPU temp, and Swap."""
     if not gw:
         return
@@ -2417,11 +2472,28 @@ def _update_gauge_dict(gw: dict, s: dict = None, cpu_usage=None, ram_usage=None,
         if "Swap__spark" in gw:
             gw["Swap__spark"].push_value(swap_pct)
 
+    NET_MAX = 1000.0
+    if net_down_mbps is not None and "Net Down" in gw:
+        down_pct = min(net_down_mbps / NET_MAX * 100.0, 100.0)
+        down_sub = f"{net_down_mbps:.1f} Mb/s" if net_down_mbps >= 0.01 else "0 Mb/s"
+        gw["Net Down"].set_value(down_pct, subtitle=down_sub)
+        if "Net Down__spark" in gw:
+            gw["Net Down__spark"].push_value(down_pct)
+
+    if net_up_mbps is not None and "Net Up" in gw:
+        up_pct = min(net_up_mbps / NET_MAX * 100.0, 100.0)
+        up_sub = f"{net_up_mbps:.1f} Mb/s" if net_up_mbps >= 0.01 else "0 Mb/s"
+        gw["Net Up"].set_value(up_pct, subtitle=up_sub)
+        if "Net Up__spark" in gw:
+            gw["Net Up__spark"].push_value(up_pct)
+
 
 
 def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
                           cpu_usage=0.0, ram_usage=0.0,
-                          cpu_temp=None, swap_usage=None) -> Gtk.Widget:
+                          cpu_temp=None, swap_usage=None,
+                          net_down_mbps: float = 0.0,
+                          net_up_mbps: float = 0.0) -> Gtk.Widget:
     """
     Build the speedometer / circular-gauge dashboard for a single GPU card.
     Only metrics with valid real-time data are rendered.
@@ -2544,6 +2616,17 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
         swap_match = re.search(r"([0-9\.]+\s*GB\s*/\s*[0-9\.]+\s*GB)", str(swap_usage))
         swap_sub = swap_match.group(1).replace(" ", "") if swap_match else ""
         valid_defs.append(("Swap", "%", "swap", swap_pct, swap_sub, 100.0))
+
+    # Network speed gauges — always shown, even at 0 Mbit/s, to give a live sparkline
+    # Use a generous 1000 Mbit/s as max so the arc fills usefully at lower speeds.
+    # The subtitle shows the raw Mbit/s value.
+    NET_MAX = 1000.0
+    net_down_sub = f"{net_down_mbps:.1f} Mb/s" if net_down_mbps >= 0.01 else "0 Mb/s"
+    net_up_sub   = f"{net_up_mbps:.1f} Mb/s"   if net_up_mbps   >= 0.01 else "0 Mb/s"
+    valid_defs.append(("Net Down", "%", "net_down",
+                        min(net_down_mbps / NET_MAX * 100.0, 100.0), net_down_sub, 100.0))
+    valid_defs.append(("Net Up", "%", "net_up",
+                        min(net_up_mbps / NET_MAX * 100.0, 100.0), net_up_sub, 100.0))
 
 
     for idx, (key, unit, gtype, init_val, sub, max_v) in enumerate(valid_defs):
@@ -3469,6 +3552,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     upt_u = get_realtime_uptime()
                     cpu_t = get_realtime_cpu_temp()
                     swap_u = get_realtime_swap_usage()
+                    net_down, net_up = get_realtime_net_speed()
 
                     def apply_sys_updates(c=cpu_u, r=ram_u, u=upt_u, su=swap_u):
                         if "CPU Usage" in sys_widgets and c != "—":
@@ -3499,9 +3583,11 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                         gauge_widgets = item[2] if len(item) == 3 else item[1]
                         stats = get_gpu_stats_for_index(gpu_index) if gpu_index is not None else {}
                         
-                        def apply_updates(gw=gauge_widgets, s=stats, g_idx=gpu_index, c=cpu_u, r=ram_u, ct=cpu_t, su=swap_u):
+                        def apply_updates(gw=gauge_widgets, s=stats, g_idx=gpu_index, c=cpu_u, r=ram_u, ct=cpu_t, su=swap_u,
+                                          nd=net_down, nu=net_up):
                             # Update main card gauges
-                            _update_gauge_dict(gw, s, cpu_usage=c, ram_usage=r, cpu_temp=ct, swap_usage=su)
+                            _update_gauge_dict(gw, s, cpu_usage=c, ram_usage=r, cpu_temp=ct, swap_usage=su,
+                                               net_down_mbps=nd, net_up_mbps=nu)
 
                             # Update popped-out standalone window gauges
                             for p_key in ("gpu-stats", f"gpu-{g_idx}" if g_idx is not None else "gpu-0"):
@@ -3510,7 +3596,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                                     pg_all = popout_info.get("gauges", {})
                                     if isinstance(pg_all, dict):
                                         pg = pg_all.get(g_idx, pg_all) if g_idx in pg_all else pg_all
-                                        _update_gauge_dict(pg, s, cpu_usage=c, ram_usage=r, cpu_temp=ct, swap_usage=su)
+                                        _update_gauge_dict(pg, s, cpu_usage=c, ram_usage=r, cpu_temp=ct, swap_usage=su,
+                                                           net_down_mbps=nd, net_up_mbps=nu)
 
                             return False
                         GLib.idle_add(apply_updates)

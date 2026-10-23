@@ -94,6 +94,10 @@ class CircularGauge(Gtk.DrawingArea):
             return (0.05, 0.60, 0.30) if not is_dark_bg else (0.25, 0.80, 0.45)  # Emerald Green
         elif self.gauge_type in ("ram", "swap"):
             return (0.80, 0.15, 0.50) if not is_dark_bg else (0.95, 0.40, 0.70)  # Magenta Pink
+        elif self.gauge_type == "net_down":
+            return (0.00, 0.60, 0.40) if not is_dark_bg else (0.10, 0.85, 0.55)  # Teal Green (download)
+        elif self.gauge_type == "net_up":
+            return (0.70, 0.30, 0.00) if not is_dark_bg else (0.95, 0.50, 0.10)  # Deep Orange (upload)
         else:
             return (0.10, 0.40, 0.85) if not is_dark_bg else (0.30, 0.65, 1.0)   # Cobalt Blue
 
@@ -265,6 +269,10 @@ class SparklineWidget(Gtk.DrawingArea):
             return (0.25, 0.80, 0.45) if is_dark_bg else (0.05, 0.60, 0.30)
         elif self.gauge_type in ("ram", "swap"):
             return (0.95, 0.40, 0.70) if is_dark_bg else (0.80, 0.15, 0.50)
+        elif self.gauge_type == "net_down":
+            return (0.10, 0.85, 0.55) if is_dark_bg else (0.00, 0.60, 0.40)  # Teal Green (download)
+        elif self.gauge_type == "net_up":
+            return (0.95, 0.50, 0.10) if is_dark_bg else (0.70, 0.30, 0.00)  # Deep Orange (upload)
         else:
             return (0.30, 0.65, 1.0) if is_dark_bg else (0.10, 0.40, 0.85)
 
