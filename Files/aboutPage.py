@@ -56,7 +56,7 @@ class AboutPage(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.grid = Gtk.Grid()
         
-        title = "About GPU-Viewer v4.02"
+        title = "About GPU-Viewer v4.04"
         self.column_view = Gtk.ColumnView()
         self.column_view.props.show_row_separators = True
         self.column_view.props.single_click_activate = False
