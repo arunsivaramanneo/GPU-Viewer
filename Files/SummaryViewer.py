@@ -837,6 +837,9 @@ def _parse_gpui_stats(results: dict) -> list:
         for card_dir in card_dirs:
             # card_dir is /sys/class/drm/card1 etc.
             card_name = os.path.basename(card_dir) # e.g. "card1"
+            # Exclude connector symlinks like card1-DP-1 or card1-eDP-1
+            if not re.fullmatch(r'card\d+', card_name):
+                continue
             # Get the card index from the name (digits only)
             m = re.search(r'\d+', card_name)
             if not m:
@@ -976,6 +979,9 @@ def _parse_gpui_stats(results: dict) -> list:
                     'fan_speed': -1, 'power_usage': -1
                 }
             
+            if not vendor_id and not device_id:
+                continue
+
             gpu_info = {
                 "card_index": card_index,
                 "card_name": card_name,
@@ -2984,6 +2990,10 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
 
     def _bg_worker():
         data = _gather_all(results)
+        if app is not None:
+            app.summary_data = data
+            if hasattr(app, "_on_summary_data_ready"):
+                GLib.idle_add(app._on_summary_data_ready, data)
         GLib.idle_add(_build_ui, data)
 
     def _build_ui(data: dict):

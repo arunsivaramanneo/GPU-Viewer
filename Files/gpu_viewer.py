@@ -44,6 +44,7 @@ from OpenCL import openCL
 from VdpauViewer import vdpauinfo
 from VulkanVideoViewer import VulkanVideo
 from SummaryViewer import create_summary_page
+from GpuZViewer import GpuZView
 from pathlib import Path
 
 # Define the main application class.
@@ -142,6 +143,8 @@ else:
             # Call the parent constructor, providing a unique application ID
             super().__init__(application_id="io.github.arunsivaramanneo.GPUViewer", **kwargs)
             self.config = Config()
+            self.gpuz_view = None
+            self.current_view_mode = "dashboard"
             self.connect("activate", self.on_activate)    
 
         def _on_save_button_clicked(self, button):
@@ -612,8 +615,17 @@ else:
             self.search_toggle.set_tooltip_text("Search summary properties (Ctrl+F)")
             self.search_toggle.set_sensitive(False)
 
+            # GPU-Z Mode Toggle Button
+            self.gpuz_toggle_btn = Gtk.Button()
+            self.gpuz_toggle_btn.set_icon_name("applications-graphics-symbolic")
+            self.gpuz_toggle_btn.add_css_class("flat")
+            self.gpuz_toggle_btn.set_valign(Gtk.Align.CENTER)
+            self.gpuz_toggle_btn.set_tooltip_text("Switch to GPU-Z View Mode (Ctrl+Z)")
+            self.gpuz_toggle_btn.connect("clicked", lambda _: self.toggle_view_mode())
+
             header_buttons_box.append(self.refresh_menu_button)
             header_buttons_box.append(self.search_toggle)
+            header_buttons_box.append(self.gpuz_toggle_btn)
             header_buttons_box.append(self.theme_button)
             self.header_bar.pack_end(header_buttons_box)
             self.header_bar.set_title_widget(title_widget=self.switcher)
@@ -645,7 +657,7 @@ else:
                     self._apply_summary_search(entry.get_text())
             self.search_entry.connect("search-changed", _on_search_changed)
 
-            # Keyboard shortcut Ctrl+F
+            # Keyboard shortcuts: Ctrl+F (Search) and Ctrl+Z (Toggle GPU-Z Mode)
             key_ctrl = Gtk.EventControllerKey.new()
             def _on_key_pressed(controller, keyval, keycode, state):
                 if keyval == Gdk.KEY_f and (state & Gdk.ModifierType.CONTROL_MASK):
@@ -654,6 +666,9 @@ else:
                         self.search_bar.set_search_mode(True)
                         self.search_entry.grab_focus()
                         return True
+                if keyval == Gdk.KEY_z and (state & Gdk.ModifierType.CONTROL_MASK):
+                    self.toggle_view_mode()
+                    return True
                 if keyval == Gdk.KEY_Escape and self.search_bar.get_search_mode():
                     self.search_bar.set_search_mode(False)
                     return True
@@ -667,14 +682,62 @@ else:
             main_box.append(self.search_bar)
             main_box.append(self.view_stack)
 
-            # Set the main box as the content of the window
-            self.window.set_content(main_box)
+            # Root stack allows switching between standard Dashboard and compact GPU-Z mode
+            self.root_stack = Gtk.Stack()
+            self.root_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+            self.root_stack.set_transition_duration(200)
+            self.root_stack.add_named(main_box, "dashboard")
+
+            # Set the root stack as the content of the window
+            self.window.set_content(self.root_stack)
             self.window.connect("close-request", quit)
 
             # Fix #4: Show the window immediately so the user sees it right
             # away, then kick off tab-building asynchronously.
             self.show_window()
             GLib.idle_add(self._start_loading_tabs)
+
+        def _on_summary_data_ready(self, data):
+            """Called when Summary tab background worker finishes gathering stats."""
+            self.summary_data = data
+            if getattr(self, "gpuz_view", None) is not None:
+                self.gpuz_view.update_summary_data(data)
+
+        def set_view_mode(self, mode: str):
+            """Switch between 'dashboard' and 'gpuz' view modes."""
+            if mode == "gpuz":
+                if getattr(self, "gpuz_view", None) is None:
+                    self.gpuz_view = GpuZView(self, getattr(self, "_results", {}), getattr(self, "summary_data", {}))
+                    self.root_stack.add_named(self.gpuz_view, "gpuz")
+                else:
+                    if hasattr(self, "summary_data") and self.summary_data:
+                        self.gpuz_view.update_summary_data(self.summary_data)
+
+                self._prev_width = self.window.get_width()
+                self._prev_height = self.window.get_height()
+
+                self.window.set_size_request(460, 680)
+                self.window.set_default_size(480, 740)
+                self.root_stack.set_visible_child_name("gpuz")
+                self.window.set_title("GPU-Viewer — GPU-Z Mode")
+                self.current_view_mode = "gpuz"
+                if hasattr(self, "config"):
+                    self.config.set_view_mode("gpuz")
+            else:
+                self.window.set_size_request(750, 500)
+                prev_w = getattr(self, "_prev_width", 950)
+                prev_h = getattr(self, "_prev_height", 680)
+                self.window.set_default_size(max(prev_w, 900), max(prev_h, 650))
+                self.root_stack.set_visible_child_name("dashboard")
+                self.window.set_title("GPU-Viewer v3.2")
+                self.current_view_mode = "dashboard"
+                if hasattr(self, "config"):
+                    self.config.set_view_mode("dashboard")
+
+        def toggle_view_mode(self):
+            """Toggle between standard Dashboard mode and GPU-Z mode."""
+            target = "gpuz" if getattr(self, "current_view_mode", "dashboard") == "dashboard" else "dashboard"
+            self.set_view_mode(target)
 
         def refresh_tabs(self):
             """Clears and re-creates all tabs in the view stack."""
@@ -759,6 +822,7 @@ else:
             ready the inner stack simply switches to its "content" child — the outer
             ViewStack page never moves, so tabs never jump or reorder.
             """
+            self._results = results
             # Debug: print probe results for troubleshooting OpenCL tab
             pass
 
@@ -931,6 +995,10 @@ else:
                 self.search_toggle.set_sensitive(True)
             if hasattr(self, 'refresh_menu_button') and self.refresh_menu_button:
                 self.refresh_menu_button.set_sensitive(True)
+
+            # Check if launched with --gpuz / -z flag or saved view_mode preference
+            if "--gpuz" in sys.argv or "-z" in sys.argv or (hasattr(self, "config") and self.config.get_view_mode() == "gpuz"):
+                GLib.idle_add(lambda: self.set_view_mode("gpuz"))
 
             return False  # Do not repeat GLib.idle_add
 

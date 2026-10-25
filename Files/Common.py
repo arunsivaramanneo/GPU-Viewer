@@ -397,6 +397,15 @@ class Config:
         self.config["PERFORMANCE"]["refresh_interval_ms"] = str(interval_ms)
         self.save()
 
+    def get_view_mode(self):
+        return self.config.get("GENERAL", "view_mode", fallback="dashboard")
+
+    def set_view_mode(self, mode: str):
+        if "GENERAL" not in self.config:
+            self.config["GENERAL"] = {}
+        self.config["GENERAL"]["view_mode"] = str(mode)
+        self.save()
+
 Adw.init()
 
 def get_gpu_stats_for_index(gpu_index):
