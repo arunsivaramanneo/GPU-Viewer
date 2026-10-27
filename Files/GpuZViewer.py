@@ -46,7 +46,7 @@ from SummaryViewer import (
     get_realtime_cpu_temp,
     get_realtime_ram_usage,
 )
-from GpuDatabase import lookup_gpu_specs, calculate_bandwidth
+
 
 
 # ---------------------------------------------------------------------------
@@ -63,8 +63,8 @@ GPUZ_CSS = """
     border: 1px solid rgba(128, 128, 128, 0.25);
     border-radius: 8px;
     background-color: @card_bg_color;
-    padding: 8px;
-    margin-bottom: 8px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
 }
 
 .gpuz-header-title {
@@ -73,7 +73,7 @@ GPUZ_CSS = """
 }
 
 .gpuz-field-label {
-    font-size: 9pt;
+    font-size: 8.5pt;
     color: alpha(@window_fg_color, 0.7);
     font-weight: 600;
 }
@@ -86,7 +86,8 @@ GPUZ_CSS = """
 .gpuz-field-box {
     border: 1px solid rgba(128, 128, 128, 0.18);
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 3px 8px;
+    min-height: 22px;
     background-color: alpha(@window_fg_color, 0.04);
 }
 
@@ -132,6 +133,30 @@ GPUZ_CSS = """
     background-color: alpha(@window_fg_color, 0.03);
 }
 """
+
+
+def _clean_device_type(raw_type: str) -> str:
+    """Format Vulkan/OpenCL device types like PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU into Integrated GPU."""
+    if not raw_type:
+        return "—"
+    t = str(raw_type).strip()
+    for prefix in ("VK_PHYSICAL_DEVICE_TYPE_", "PHYSICAL_DEVICE_TYPE_"):
+        if t.startswith(prefix):
+            t = t[len(prefix):]
+            break
+    t = t.replace("_", " ").title()
+    t = re.sub(r'\bGpu\b', 'GPU', t)
+    t = re.sub(r'\bCpu\b', 'CPU', t)
+    return t.strip() or "—"
+
+
+def _clean_version(ver_str: str) -> str:
+    """Strip redundant packed integers like (4211051) and trailing whitespace."""
+    if not ver_str:
+        return "—"
+    s = str(ver_str).strip()
+    s = re.sub(r'\s*\(\d+\)$', '', s).strip()
+    return s if s else "—"
 
 
 class GpuZView(Gtk.Box):
@@ -311,9 +336,14 @@ class GpuZView(Gtk.Box):
 
     def _get_vulkan_device(self, vendor_id, device_id) -> dict | None:
         """Find matching Vulkan device entry. Returns None if no device matches."""
-        if not vendor_id and not device_id:
-            return None
         vk_devices = self.summary_data.get("vulkan", {}).get("devices", [])
+        if not vk_devices:
+            return None
+        if not vendor_id and not device_id:
+            idx = getattr(self, "selected_gpu_idx", 0)
+            if 0 <= idx < len(vk_devices):
+                return vk_devices[idx]
+            return vk_devices[0]
         try:
             v_int = int(vendor_id, 16) if vendor_id else None
             d_int = int(device_id, 16) if device_id else None
@@ -379,24 +409,32 @@ class GpuZView(Gtk.Box):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
 
-        self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        self.card_content_box.set_margin_start(10)
-        self.card_content_box.set_margin_end(10)
-        self.card_content_box.set_margin_top(8)
-        self.card_content_box.set_margin_bottom(12)
+        self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.card_content_box.set_margin_start(8)
+        self.card_content_box.set_margin_end(8)
+        self.card_content_box.set_margin_top(6)
+        self.card_content_box.set_margin_bottom(8)
 
         self._refresh_graphics_card_content()
         scroll.set_child(self.card_content_box)
         return scroll
 
     def _refresh_graphics_card_content(self):
-        """Regenerate the Graphics Card spec sheet for the selected GPU."""
+        """Regenerate the Graphics Card metrics sheet for the selected GPU.
+
+        Shows live API version data and GPU hardware metrics instead of a
+        static database lookup — covering Vulkan, OpenGL, EGL, OpenCL,
+        Vulkan Video, VDPAU and GPU hardware stats.
+        """
         # Clear previous children
         child = self.card_content_box.get_first_child()
         while child:
             nxt = child.get_next_sibling()
             self.card_content_box.remove(child)
             child = nxt
+
+        # Reset live-update label registry for this GPU
+        self._hw_live_labels = {}
 
         gpu = self._get_current_gpu()
         gpu_name = self._get_gpu_display_name(gpu)
@@ -405,8 +443,12 @@ class GpuZView(Gtk.Box):
         vk_dev = self._get_vulkan_device(v_id, d_id) or {}
         stats = gpu.get("stats", {}) or get_gpu_stats_for_index(gpu.get("card_index", 0)) or {}
 
-        # Look up physical specifications database
-        specs = lookup_gpu_specs(v_id, d_id, gpu_name)
+        # Pull parsed summary blobs (populated by background worker)
+        vk_data   = self.summary_data.get("vulkan",       {})
+        gl_data   = self.summary_data.get("opengl",       {})
+        cl_data   = self.summary_data.get("opencl",       {})
+        vv_data   = self.summary_data.get("vulkan_video", {})
+        vdpau_data = self.summary_data.get("vdpau",       {})
 
         # ── Header Box: Logo + Name ────────────────────────────────────
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -439,83 +481,306 @@ class GpuZView(Gtk.Box):
         header_box.append(title_box)
         self.card_content_box.append(header_box)
 
-        # ── Specifications Grid ────────────────────────────────────────
-        grid_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        grid_frame.add_css_class("gpuz-card-frame")
+        # Helper: build a 2-column dual-field row inside a parent box
+        def _add_dual_row(parent, l1, v1, l2, v2, live_key1=None, live_key2=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            row_box.set_homogeneous(True)
+            row_box.append(self._make_field_cell(l1, v1, live_key=live_key1))
+            if l2 or v2:
+                row_box.append(self._make_field_cell(l2, v2, live_key=live_key2))
+            else:
+                spacer = Gtk.Box()
+                spacer.set_hexpand(True)
+                row_box.append(spacer)
+            parent.append(row_box)
 
-        # Prepare field values
-        chip_val = specs.get("chip", "—")
-        rev_val = gpu.get("revision", "—")
-        node_val = specs.get("node", "—")
-        die_val = specs.get("die_size", "—")
-        trans_val = specs.get("transistors", "—")
-        rel_val = specs.get("release", "—")
+        # Helper: build a full-width single-field row
+        def _add_single_row(parent, label, value, live_key=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            cell = self._make_field_cell(label, value, live_key=live_key)
+            cell.set_hexpand(True)
+            row_box.append(cell)
+            parent.append(row_box)
+
+        # Helper: section header label
+        def _make_section(title) -> Gtk.Box:
+            frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            frame.add_css_class("gpuz-card-frame")
+            hdr = Gtk.Label(label=title)
+            hdr.add_css_class("gpuz-field-label")
+            hdr.set_halign(Gtk.Align.START)
+            frame.append(hdr)
+            sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            sep.set_margin_bottom(1)
+            frame.append(sep)
+            return frame
+
+        # ── GPU Hardware Stats ─────────────────────────────────────────
+        hw_frame = _make_section("GPU Hardware")
+
+        dev_id_display = f"{v_id.upper()} / {d_id.upper()}" if v_id or d_id else "—"
+        driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
+        if vk_dev.get("driver_version"):
+            driver_val += f"  {vk_dev['driver_version']}"
         bios_val = gpu.get("vbios") or "—"
-        
-        dev_id_display = f"{v_id.upper()} {d_id.upper()}" if v_id or d_id else "—"
-        sub_vendor_display = gpu.get("subsystem_vendor", "—")
-        if gpu.get("subsystem_device"):
-            sub_vendor_display += f" ({gpu['subsystem_device']})"
-        
-        rops_val = stats.get("rop_count") or specs.get("rops_tmus", "—")
-        shaders_val = specs.get("shaders") or (f"{stats.get('compute_units')} CUs" if stats.get("compute_units") else "—")
-        bus_interface = f"{gpu.get('pcie_link_width', 'PCIe')} @ {gpu.get('pcie_link_speed', '—')}"
+        bus_interface = (
+            f"{gpu.get('pcie_link_width', '')}  @  {gpu.get('pcie_link_speed', '—')}".strip(" @")
+            if gpu.get("pcie_link_width") else "—"
+        )
 
         vram_tot = stats.get("mem_total", 0)
         vram_size_display = f"{vram_tot} MB" if vram_tot > 0 else "—"
-        vram_type = stats.get("vram_type") or gpu.get("vram_type") or "GDDR"
-        vram_vendor = gpu.get("vram_vendor", "—")
-        bus_width = specs.get("bus_width", "—")
-        
-        mem_clk = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
-        bw_val = calculate_bandwidth(mem_clk, int(bus_width.split()[0])) if (bus_width and bus_width[0].isdigit()) else "—"
+        vram_type = stats.get("vram_type") or gpu.get("vram_type") or "—"
+        vram_used = stats.get("mem_used", 0)
+        vram_used_display = f"{vram_used} MB" if vram_used > 0 else "—"
 
-        driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
-        if vk_dev.get("driver_version"):
-            driver_val += f" {vk_dev['driver_version']}"
-            
-        core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get('clock_current', 0) > 0 else "—"
-        boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get('clock_max', 0) > 0 else "—"
+        core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get("clock_current", 0) > 0 else "—"
+        boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get("clock_max", 0) > 0 else "—"
+        mem_clk = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
         mem_clk_disp = f"{mem_clk} MHz" if mem_clk > 0 else "—"
 
-        # Check Resizable BAR from heap properties or PCIe
-        rebar_val = "Enabled" if any("DEVICE_LOCAL" in h and "HOST_VISIBLE" in h for h in vk_dev.get("heaps", [])) else "Supported"
+        temp_val = stats.get("temp", 0)
+        temp_disp = f"{temp_val} °C" if temp_val and temp_val > 0 else "—"
+        power_val = stats.get("power_usage", -1)
+        power_disp = f"{power_val} W" if power_val and power_val >= 0 else "—"
+        usage_val = stats.get("usage", -1)
+        usage_disp = f"{usage_val} %" if usage_val and usage_val >= 0 else "—"
+        fan_val = stats.get("fan_speed", -1)
+        fan_disp = f"{fan_val} %" if fan_val and fan_val >= 0 else "—"
 
-        # Add 2-column key-value rows
-        def _add_dual_row(l1, v1, l2, v2):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            row_box.set_hexpand(True)
+        gtt_used = stats.get("gtt_used", 0)
+        gtt_total = stats.get("gtt_total", 0)
+        if gtt_total > 0:
+            gtt_disp = f"{gtt_used} / {gtt_total} MB"
+        elif gtt_used > 0:
+            gtt_disp = f"{gtt_used} MB"
+        else:
+            gtt_disp = "—"
 
-            # Left Cell
-            c1 = self._make_field_cell(l1, v1)
-            row_box.append(c1)
+        _add_dual_row(hw_frame, "Device ID",    dev_id_display,   "Driver",      driver_val)
+        _add_dual_row(hw_frame, "VBIOS",        bios_val,         "PCIe Link",   bus_interface)
+        _add_dual_row(hw_frame, "VRAM Total",   vram_size_display,"VRAM Type",   vram_type)
+        _add_dual_row(hw_frame, "VRAM Used",    vram_used_display,"GPU Usage",   usage_disp,
+                      live_key1="hw_vram_used", live_key2="hw_usage")
+        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Clock",   core_clk)
+        _add_dual_row(hw_frame, "Boost Clock",  boost_clk,        "Memory Clock",mem_clk_disp)
+        _add_dual_row(hw_frame, "Temperature",  temp_disp,        "Power Draw",  power_disp,
+                      live_key1="hw_temp", live_key2="hw_power")
+        _add_dual_row(hw_frame, "Fan Speed",    fan_disp,         "",            "",
+                      live_key1="hw_fan")
+        self.card_content_box.append(hw_frame)
 
-            # Right Cell
-            c2 = self._make_field_cell(l2, v2)
-            row_box.append(c2)
+        # ── Vulkan ────────────────────────────────────────────────────
+        vk_frame = _make_section("Vulkan")
+        vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
+        vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
+        vk_drv_name = (vk_dev.get("driver_name") or "—").strip()
+        vk_drv_ver  = _clean_version(vk_dev.get("driver_version", "—"))
+        vk_drv_info = (vk_dev.get("driver_info") or "—").strip()
+        vk_dev_type = _clean_device_type(vk_dev.get("device_type", "—"))
+        vk_conform  = (vk_dev.get("conformance_version") or "—").strip()
+        vk_vendor_id = (vk_dev.get("vendor_id") or "—").strip()
+        vk_device_id = (vk_dev.get("device_id") or "—").strip()
+        vk_ext_cnt  = str(vk_dev.get("extensions_count", 0)) if vk_dev.get("extensions_count") else "—"
+        vk_fmt_cnt  = str(vk_dev.get("formats_count", 0)) if vk_dev.get("formats_count") else "—"
+        vk_mem_types = str(vk_dev.get("memory_types_count", 0)) if vk_dev.get("memory_types_count") else "—"
+        vk_mem_heaps = str(vk_dev.get("memory_heaps_count", 0)) if vk_dev.get("memory_heaps_count") else "—"
+        vk_queue_fam = str(vk_dev.get("queue_count", 0)) if vk_dev.get("queue_count") else "—"
+        vk_inst_ext_cnt = str(vk_data.get("instance_extensions_count", 0)) if vk_data.get("instance_extensions_count") else "—"
+        vk_inst_layers_cnt = str(vk_data.get("instance_layers_count", 0)) if vk_data.get("instance_layers_count") else "—"
+        vk_pipeline_uuid = (vk_dev.get("pipelineCacheUUID") or "—").strip()
+        vk_uuid     = (vk_dev.get("device_uuid") or "—").strip()
+        vk_drv_uuid = (vk_dev.get("driver_uuid") or "—").strip()
 
-            grid_frame.append(row_box)
+        # Ray tracing and Mesh shader support
+        vk_exts = vk_dev.get("extensions", [])
+        has_rt = vk_dev.get("has_ray_tracing")
+        if has_rt is None:
+            exts_lower = [e.lower() for e in vk_exts]
+            has_rt = any("ray_tracing" in e or "ray_query" in e or "acceleration_structure" in e for e in exts_lower)
+        has_mesh = vk_dev.get("has_mesh_shader")
+        if has_mesh is None:
+            exts_lower = [e.lower() for e in vk_exts]
+            has_mesh = any("mesh_shader" in e for e in exts_lower)
 
-        _add_dual_row("GPU Code", chip_val, "Revision", rev_val)
-        _add_dual_row("Technology", node_val, "Die Size", die_val)
-        _add_dual_row("Transistors", trans_val, "Release Date", rel_val)
-        _add_dual_row("BIOS Version", bios_val, "UEFI Support", "Supported")
-        _add_dual_row("Device ID", dev_id_display, "Subvendor", sub_vendor_display)
-        _add_dual_row("ROPs / TMUs", str(rops_val), "Shaders / CUs", str(shaders_val))
-        _add_dual_row("DirectX API", specs.get("directx", "12.0"), "Bus Interface", bus_interface)
-        _add_dual_row("Memory Type", vram_type, "Bus Width", str(bus_width))
-        _add_dual_row("Memory Size", vram_size_display, "Bandwidth", bw_val)
-        _add_dual_row("Memory Vendor", vram_vendor, "Driver Version", driver_val)
-        _add_dual_row("GPU Clock", core_clk, "Boost Clock", boost_clk)
-        _add_dual_row("Memory Clock", mem_clk_disp, "Resizable BAR", rebar_val)
+        # Fallback to inspecting vulkaninfo output directly if extensions list wasn't populated
+        if not vk_exts and not has_rt and not has_mesh and os.path.exists(Filenames.vulkaninfo_output_file):
+            try:
+                with open(Filenames.vulkaninfo_output_file, "r") as f:
+                    v_content = f.read()
+                blocks = re.split(r'\nGPU\d+:', "\n" + v_content)
+                target_block = None
+                dev_name = vk_dev.get("name") or vk_dev.get("deviceName", "")
+                dev_id = vk_dev.get("device_id") or d_id
+                for b in blocks[1:]:
+                    if dev_name and dev_name in b:
+                        target_block = b
+                        break
+                    if dev_id and dev_id in b:
+                        target_block = b
+                        break
+                if not target_block and blocks[1:]:
+                    target_block = blocks[1]
+                if target_block:
+                    has_rt = (
+                        bool(re.search(r'\b(vk_khr_ray_tracing_pipeline|vk_khr_ray_query|vk_nv_ray_tracing|vk_khr_acceleration_structure)\b', target_block, re.I))
+                        or bool(re.search(r'\b(raytracingpipeline|rayquery|accelerationstructure|raytracing|raytracingpositionfetch)\s*=\s*true\b', target_block, re.I))
+                    )
+                    has_mesh = (
+                        bool(re.search(r'\b(vk_ext_mesh_shader|vk_nv_mesh_shader)\b', target_block, re.I))
+                        or bool(re.search(r'\b(meshshader|taskshader)\s*=\s*true\b', target_block, re.I))
+                    )
+            except Exception:
+                pass
 
-        self.card_content_box.append(grid_frame)
+        vk_rt_str = "Supported" if has_rt else "Not Available"
+        vk_mesh_str = "Supported" if has_mesh else "Not Available"
 
-        # ── Computing Capabilities Checkboxes ──────────────────────────
+        _add_dual_row(vk_frame, "API Version",        vk_api,             "Instance Ver.",   vk_inst_ver)
+        _add_dual_row(vk_frame, "Driver Name",        vk_drv_name,        "Driver Ver.",     vk_drv_ver)
+        if vk_drv_info and vk_drv_info not in ("—", "-"):
+            _add_single_row(vk_frame, "Driver Info", vk_drv_info)
+        _add_dual_row(vk_frame, "Device Type",        vk_dev_type,        "Conformance",     vk_conform)
+        _add_dual_row(vk_frame, "Vendor ID",          vk_vendor_id,       "Device ID",       vk_device_id)
+        _add_dual_row(vk_frame, "Device Extensions",  vk_ext_cnt,         "Device Formats",  vk_fmt_cnt)
+        _add_dual_row(vk_frame, "Instance Ext.",      vk_inst_ext_cnt,    "Instance Layers", vk_inst_layers_cnt)
+        _add_dual_row(vk_frame, "Memory Types",       vk_mem_types,       "Memory Heaps",    vk_mem_heaps)
+        _add_dual_row(vk_frame, "Queue Families",     vk_queue_fam,       "",                "")
+        _add_dual_row(vk_frame, "Ray Tracing",        vk_rt_str,          "Mesh Shaders",    vk_mesh_str)
+        if vk_pipeline_uuid and vk_pipeline_uuid not in ("—", "-"):
+            _add_single_row(vk_frame, "Pipeline Cache UUID", vk_pipeline_uuid)
+        if vk_uuid and vk_uuid not in ("—", "-"):
+            _add_single_row(vk_frame, "Device UUID", vk_uuid)
+        if vk_drv_uuid and vk_drv_uuid not in ("—", "-"):
+            _add_single_row(vk_frame, "Driver UUID", vk_drv_uuid)
+
+        def _format_video_profile_counts(profile_names, profile_counts, mode):
+            if not profile_names:
+                return None
+            parts = []
+            for profile_name in profile_names:
+                count = profile_counts.get(profile_name, 0)
+                label = f"{profile_name} {mode}"
+                if count > 0:
+                    label = f"{label} - {count}"
+                parts.append(label)
+            return "; ".join(parts)
+
+        if vk_dev.get("video_decode_profiles"):
+            decode_text = _format_video_profile_counts(
+                vk_dev["video_decode_profiles"],
+                vk_dev.get("video_decode_profile_counts", {}),
+                "Decode"
+            )
+            if decode_text:
+                _add_single_row(vk_frame, "Video Decode Profiles", decode_text)
+
+        if vk_dev.get("video_encode_profiles"):
+            encode_text = _format_video_profile_counts(
+                vk_dev["video_encode_profiles"],
+                vk_dev.get("video_encode_profile_counts", {}),
+                "Encode"
+            )
+            if encode_text:
+                _add_single_row(vk_frame, "Video Encode Profiles", encode_text)
+
+        self.card_content_box.append(vk_frame)
+
+        # ── OpenGL & EGL ─────────────────────────────────────────────
+        gl_frame = _make_section("OpenGL / EGL")
+        gl_vendor   = gl_data.get("vendor", "—")
+        gl_renderer = gl_data.get("renderer", "—")
+        gl_version  = gl_data.get("version", "—")
+        gl_glsl     = gl_data.get("shading_language_version", "—")
+        gl_es_ver   = gl_data.get("es_version", "—")
+        gl_glx_ver  = gl_data.get("glx_version", "—")
+        egl_version = gl_data.get("egl_version", "—")
+        gl_ext_cnt  = str(gl_data.get("extensions_count", 0)) if gl_data.get("extensions_count") else "—"
+        egl_ext_cnt = str(gl_data.get("egl_count", 0)) if gl_data.get("egl_count") else "—"
+        glx_ext_cnt = str(gl_data.get("glx_extension_count", 0)) if gl_data.get("glx_extension_count") else "—"
+        glx_vis_cnt = str(gl_data.get("glx_visual_count", 0)) if gl_data.get("glx_visual_count") else "—"
+        fbcfg_cnt   = str(gl_data.get("fbconfig_count", 0)) if gl_data.get("fbconfig_count") else "—"
+        es_ext_cnt  = str(gl_data.get("es_extensions_count", 0)) if gl_data.get("es_extensions_count") else "—"
+
+        _add_dual_row(gl_frame, "Vendor",         gl_vendor,    "Renderer",       gl_renderer)
+        _add_dual_row(gl_frame, "OpenGL Version", gl_version,   "GLSL Version",   gl_glsl)
+        _add_dual_row(gl_frame, "OpenGL ES",      gl_es_ver,    "GLX Version",    gl_glx_ver)
+        _add_dual_row(gl_frame, "EGL Version",    egl_version,  "EGL Extensions", egl_ext_cnt)
+        _add_dual_row(gl_frame, "GL Extensions",  gl_ext_cnt,   "GLX Extensions", glx_ext_cnt)
+        _add_dual_row(gl_frame, "ES Extensions",  es_ext_cnt,   "GLX Visuals",    glx_vis_cnt)
+        _add_dual_row(gl_frame, "FB Configs",     fbcfg_cnt,    "",               "")
+        self.card_content_box.append(gl_frame)
+
+        # ── OpenCL ────────────────────────────────────────────────────
+        cl_frame = _make_section("OpenCL")
+        cl_platforms = cl_data.get("platforms", [])
+        if cl_platforms:
+            plat0 = cl_platforms[0]
+            cl_plat_name = plat0.get("name", "—")
+            cl_plat_ver  = plat0.get("version", "—")
+            cl_plat_ext  = str(plat0.get("extensions_count", 0)) if plat0.get("extensions_count") else "—"
+            cl_plat_cnt  = str(len(cl_platforms))
+            cl_devs = plat0.get("devices", [])
+            if cl_devs:
+                dev0 = cl_devs[0]
+                cl_dev_name  = dev0.get("name", "—")
+                cl_dev_type  = dev0.get("device_type", "—")
+                cl_dev_ver   = dev0.get("version", "—")
+                cl_opencl_c  = dev0.get("opencl_c_version", "—")
+                cl_cus       = str(dev0.get("compute_units", "—"))
+                cl_wgs       = str(dev0.get("workgroup_size", "—"))
+                cl_gmem      = dev0.get("global_memory", "—")
+                cl_lmem      = dev0.get("local_memory", "—")
+                cl_clk       = str(dev0.get("max_clock", "—"))
+                cl_drv_ver   = dev0.get("driver_version", "—")
+                cl_dev_ext   = str(dev0.get("extensions_count", 0)) if dev0.get("extensions_count") else "—"
+            else:
+                cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
+                cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
+        else:
+            cl_plat_name = cl_plat_ver = cl_plat_ext = cl_plat_cnt = "—"
+            cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
+            cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
+
+        _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
+        _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
+        _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
+        _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
+        _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
+        _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
+        _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
+        _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
+        self.card_content_box.append(cl_frame)
+
+        # ── Vulkan Video ──────────────────────────────────────────────
+        vv_frame = _make_section("Vulkan Video")
+        vv_supported = "Yes" if vv_data.get("supported") else "No"
+        vv_profiles  = vv_data.get("profiles", [])
+        vv_codecs    = ", ".join(vv_profiles) if vv_profiles else "—"
+        vv_count     = str(len(vv_profiles)) if vv_profiles else "0"
+        # Decode / Encode split
+        vv_decode = ", ".join(p for p in vv_profiles if "DECODE" in p.upper() or p.upper() in ("H264","H265","AV1","VP8","VP9","HEVC")) or "—"
+        vv_encode = ", ".join(p for p in vv_profiles if "ENCODE" in p.upper()) or "—"
+        _add_dual_row(vv_frame, "Supported",    vv_supported, "Codec Count",   vv_count)
+        _add_single_row(vv_frame, "Codecs",     vv_codecs)
+        self.card_content_box.append(vv_frame)
+
+        # ── VDPAU ─────────────────────────────────────────────────────
+        vdpau_frame = _make_section("VDPAU")
+        vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
+        vdpau_api  = vdpau_data.get("api_version", "—")
+        vdpau_rend = vdpau_data.get("renderer", "—")
+        _add_dual_row(vdpau_frame, "Supported",  vdpau_supported, "API Version", vdpau_api)
+        _add_single_row(vdpau_frame, "Renderer", vdpau_rend)
+        self.card_content_box.append(vdpau_frame)
+
+        # ── API Support Badges ─────────────────────────────────────────
         tech_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         tech_frame.add_css_class("gpuz-card-frame")
 
-        tech_title = Gtk.Label(label="Computing Technologies")
+        tech_title = Gtk.Label(label="API Support")
         tech_title.add_css_class("gpuz-field-label")
         tech_title.set_halign(Gtk.Align.START)
         tech_frame.append(tech_title)
@@ -528,24 +793,25 @@ class GpuZView(Gtk.Box):
         tech_flow.set_column_spacing(6)
         tech_flow.set_homogeneous(True)
 
-        # Determine capabilities
-        has_vulkan = self.results.get("vulkan", False)
-        has_opengl = self.results.get("opengl", False)
-        has_opencl = self.results.get("opencl", False)
-        has_vulkan_video = self.results.get("vulkan_video", False)
-        has_vdpau = self.results.get("vdpau", False)
-        has_raytracing = any("ray_tracing" in ext.lower() or "ray_query" in ext.lower()
-                             for ext in vk_dev.get("extensions", []))
+        # Determine live capabilities from parsed data
+        has_vulkan       = bool(vk_dev) or vk_data.get("supported", False)
+        has_opengl       = bool(gl_data.get("version"))
+        has_egl          = bool(gl_data.get("egl_version")) or gl_data.get("egl_count", 0) > 0
+        has_opencl       = bool(cl_platforms) or cl_data.get("supported", False)
+        has_vulkan_video = vv_data.get("supported", False) or bool(vv_profiles)
+        has_vdpau        = vdpau_data.get("supported", False)
+        has_raytracing   = has_rt
+        has_mesh_shaders = has_mesh
 
         techs = [
-            ("OpenCL", has_opencl),
-            ("Vulkan", has_vulkan),
-            ("OpenGL", has_opengl),
-            ("Ray Tracing", has_raytracing),
-            ("Vulkan Video", has_vulkan_video),
-            ("VDPAU", has_vdpau),
-            ("EGL", True),
-            ("Direct Rendering", True),
+            ("Vulkan",        has_vulkan),
+            ("OpenGL",        has_opengl),
+            ("EGL",           has_egl),
+            ("OpenCL",        has_opencl),
+            ("Vulkan Video",  has_vulkan_video),
+            ("VDPAU",         has_vdpau),
+            ("Ray Tracing",   has_raytracing),
+            ("Mesh Shaders",  has_mesh_shaders),
         ]
 
         for name, supported in techs:
@@ -555,23 +821,47 @@ class GpuZView(Gtk.Box):
         tech_frame.append(tech_flow)
         self.card_content_box.append(tech_frame)
 
-    def _make_field_cell(self, label: str, value: str) -> Gtk.Box:
-        """Create a compact GPU-Z field with label and read-only value."""
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+    def _make_field_cell(self, label: str, value: str, live_key: str = None) -> Gtk.Box:
+        """Create a compact GPU-Z field with label and read-only value.
+
+        Args:
+            label:    Header label text.
+            value:    Initial value text.
+            live_key: If set, the value label is registered in
+                      ``self._hw_live_labels[live_key]`` so that the sensor
+                      polling loop can update it without rebuilding the whole tab.
+        """
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         box.add_css_class("gpuz-field-box")
         box.set_hexpand(True)
+        box.set_valign(Gtk.Align.CENTER)
 
         lbl = Gtk.Label(label=label)
         lbl.add_css_class("gpuz-field-label")
         lbl.set_halign(Gtk.Align.START)
+        lbl.set_valign(Gtk.Align.CENTER)
+        lbl.set_xalign(0)
         box.append(lbl)
 
-        val = Gtk.Label(label=str(value))
+        clean_val = str(value).strip() if value is not None and str(value).strip() else "—"
+        clean_val = re.sub(r'\s*\(\d+\)$', '', clean_val).strip()
+
+        val = Gtk.Label(label=clean_val)
         val.add_css_class("gpuz-field-value")
-        val.set_halign(Gtk.Align.START)
+        val.set_halign(Gtk.Align.END)
+        val.set_valign(Gtk.Align.CENTER)
+        val.set_hexpand(True)
         val.set_selectable(True)
-        val.set_ellipsize(Pango.EllipsizeMode.END)
+        val.set_wrap(True)
+        val.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        val.set_xalign(1)
         box.append(val)
+
+        if live_key is not None:
+            if not hasattr(self, "_hw_live_labels"):
+                self._hw_live_labels = {}
+            self._hw_live_labels[live_key] = val
+
         return box
 
     def _make_tech_badge(self, name: str, supported: bool) -> Gtk.Widget:
@@ -726,6 +1016,38 @@ class GpuZView(Gtk.Box):
         except Exception:
             pass
 
+        # ── Real-time updates for GPU Hardware tab labels ──────────────────
+        # Update Temperature, Power Draw, Fan Speed, GPU Usage and VRAM Used
+        # in-place without triggering a full tab rebuild (avoids flicker and
+        # scroll resets).
+        live = getattr(self, "_hw_live_labels", {})
+        if live:
+            temp_v = stats.get("temp", 0)
+            if "hw_temp" in live:
+                live["hw_temp"].set_label(
+                    f"{temp_v} °C" if temp_v and temp_v > 0 else "—"
+                )
+            pwr_v = stats.get("power_usage", -1)
+            if "hw_power" in live:
+                live["hw_power"].set_label(
+                    f"{pwr_v} W" if pwr_v is not None and pwr_v >= 0 else "—"
+                )
+            fan_v = stats.get("fan_speed", -1)
+            if "hw_fan" in live:
+                live["hw_fan"].set_label(
+                    f"{fan_v} %" if fan_v is not None and fan_v >= 0 else "—"
+                )
+            usage_v = stats.get("usage", -1)
+            if "hw_usage" in live:
+                live["hw_usage"].set_label(
+                    f"{usage_v} %" if usage_v is not None and usage_v >= 0 else "—"
+                )
+            vram_used_v = stats.get("mem_used", 0)
+            if "hw_vram_used" in live:
+                live["hw_vram_used"].set_label(
+                    f"{vram_used_v} MB" if vram_used_v and vram_used_v > 0 else "—"
+                )
+
     # -----------------------------------------------------------------------
     # Tab 3: Advanced API & Subsystem Inspector
     # -----------------------------------------------------------------------
@@ -790,18 +1112,75 @@ class GpuZView(Gtk.Box):
 
         rows = []
         if idx == 0:  # Vulkan
+            vk_exts = vk_dev.get("extensions", [])
+            has_rt = vk_dev.get("has_ray_tracing")
+            if has_rt is None:
+                exts_lower = [e.lower() for e in vk_exts]
+                has_rt = any("ray_tracing" in e or "ray_query" in e or "acceleration_structure" in e for e in exts_lower)
+            has_mesh = vk_dev.get("has_mesh_shader")
+            if has_mesh is None:
+                exts_lower = [e.lower() for e in vk_exts]
+                has_mesh = any("mesh_shader" in e for e in exts_lower)
+
+            if not vk_exts and not has_rt and not has_mesh and os.path.exists(Filenames.vulkaninfo_output_file):
+                try:
+                    with open(Filenames.vulkaninfo_output_file, "r") as f:
+                        v_content = f.read()
+                    blocks = re.split(r'\nGPU\d+:', "\n" + v_content)
+                    target_block = None
+                    dev_name = vk_dev.get("name") or vk_dev.get("deviceName", "")
+                    dev_id = vk_dev.get("device_id") or d_id
+                    for b in blocks[1:]:
+                        if dev_name and dev_name in b:
+                            target_block = b
+                            break
+                        if dev_id and dev_id in b:
+                            target_block = b
+                            break
+                    if not target_block and blocks[1:]:
+                        target_block = blocks[1]
+                    if target_block:
+                        has_rt = (
+                            bool(re.search(r'\b(vk_khr_ray_tracing_pipeline|vk_khr_ray_query|vk_nv_ray_tracing|vk_khr_acceleration_structure)\b', target_block, re.I))
+                            or bool(re.search(r'\b(raytracingpipeline|rayquery|accelerationstructure|raytracing|raytracingpositionfetch)\s*=\s*true\b', target_block, re.I))
+                        )
+                        has_mesh = (
+                            bool(re.search(r'\b(vk_ext_mesh_shader|vk_nv_mesh_shader)\b', target_block, re.I))
+                            or bool(re.search(r'\b(meshshader|taskshader)\s*=\s*true\b', target_block, re.I))
+                        )
+                except Exception:
+                    pass
+
+            rt_disp = "Supported" if has_rt else "Not Available"
+            mesh_disp = "Supported" if has_mesh else "Not Available"
+
             rows = [
-                ("Vulkan API Version", vk_dev.get("api_version") or self.summary_data.get("vulkan", {}).get("instance_version", "—")),
-                ("Driver Version", vk_dev.get("driver_version", "—")),
-                ("Conformance Version", vk_dev.get("conformance_version", "—")),
-                ("Device Type", vk_dev.get("device_type", "—")),
-                ("Extensions Count", str(vk_dev.get("extensions_count", 0))),
+                ("Vulkan API Version", _clean_version(vk_dev.get("api_version") or self.summary_data.get("vulkan", {}).get("instance_version", "—"))),
+                ("Instance Version", _clean_version(self.summary_data.get("vulkan", {}).get("instance_version", "—"))),
+                ("Driver Name", (vk_dev.get("driver_name") or "—").strip()),
+                ("Driver Version", _clean_version(vk_dev.get("driver_version", "—"))),
+                ("Driver Info", (vk_dev.get("driver_info") or "—").strip()),
+                ("Device Type", _clean_device_type(vk_dev.get("device_type", "—"))),
+                ("Conformance Version", (vk_dev.get("conformance_version") or "—").strip()),
+                ("Vendor ID", (vk_dev.get("vendor_id") or "—").strip()),
+                ("Device ID", (vk_dev.get("device_id") or "—").strip()),
+                ("Device Extensions Count", str(vk_dev.get("extensions_count", 0))),
                 ("Supported Formats", str(vk_dev.get("formats_count", 0))),
                 ("Memory Types", str(vk_dev.get("memory_types_count", 0))),
                 ("Memory Heaps", str(vk_dev.get("memory_heaps_count", 0))),
                 ("Queue Families", str(vk_dev.get("queue_count", 0))),
-                ("Device UUID", vk_dev.get("device_uuid", "—")),
+                ("Instance Extensions", str(self.summary_data.get("vulkan", {}).get("instance_extensions_count", 0))),
+                ("Instance Layers", str(self.summary_data.get("vulkan", {}).get("instance_layers_count", 0))),
+                ("Ray Tracing", rt_disp),
+                ("Mesh Shaders", mesh_disp),
+                ("Pipeline Cache UUID", (vk_dev.get("pipelineCacheUUID") or "—").strip()),
+                ("Device UUID", (vk_dev.get("device_uuid") or "—").strip()),
+                ("Driver UUID", (vk_dev.get("driver_uuid") or "—").strip()),
             ]
+            if vk_dev.get("video_decode_profiles"):
+                rows.append(("Video Decode Profiles", "; ".join(vk_dev["video_decode_profiles"])))
+            if vk_dev.get("video_encode_profiles"):
+                rows.append(("Video Encode Profiles", "; ".join(vk_dev["video_encode_profiles"])))
         elif idx == 1:  # OpenGL
             gl_data = self.summary_data.get("opengl", {})
             rows = [

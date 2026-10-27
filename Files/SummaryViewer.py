@@ -90,6 +90,7 @@ def _parse_vulkan(results: dict) -> dict:
         device_type = ""
         formats_count = 0
         extensions_count = 0
+        extensions = []
         memory_types_count = 0
         memory_heaps_count = 0
         queue_count = 0
@@ -124,7 +125,7 @@ def _parse_vulkan(results: dict) -> dict:
                     except Exception:
                         api_version = raw
                 else:
-                    api_version = raw
+                    api_version = re.sub(r'\s*\(\d+\)$', '', raw).strip()
             elif stripped.startswith("driverName"):
                 driver_name = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("driverVersion"):
@@ -139,7 +140,7 @@ def _parse_vulkan(results: dict) -> dict:
                     except Exception:
                         driver_version = raw
                 else:
-                    driver_version = raw
+                    driver_version = re.sub(r'\s*\(\d+\)$', '', raw).strip()
             elif stripped.startswith("deviceType"):
                 device_type = stripped.split("=", 1)[-1].strip()
             elif stripped.startswith("pipelineCacheUUID"):
@@ -159,9 +160,12 @@ def _parse_vulkan(results: dict) -> dict:
             elif stripped.startswith("conformanceVersion:"):
                 in_conformance = True
                 continue
-            elif stripped.startswith("VK_") and "extension" in stripped.lower():
+            elif stripped.startswith("VK_") and ("extension" in stripped.lower() or "revision" in stripped.lower()):
                 # Count extensions in this GPU block
                 extensions_count += 1
+                ext_name = stripped.split()[0].strip().rstrip(":")
+                if ext_name not in extensions:
+                    extensions.append(ext_name)
 
             if in_conformance:
                 if "=" in stripped:
@@ -257,6 +261,22 @@ def _parse_vulkan(results: dict) -> dict:
             memory_heaps_count = len(re.findall(r'memoryHeaps\s*\[\s*\d+\s*\]', block, re.I))
             queue_count = len(re.findall(r'queueProperties\s*\[\s*\d+\s*\]', block, re.I))
 
+            extensions_count = max(extensions_count, len(extensions))
+            exts_lower = [e.lower() for e in extensions]
+            lower_block = block.lower()
+
+            has_ray_tracing = (
+                any("ray_tracing" in e or "ray_query" in e or "acceleration_structure" in e for e in exts_lower)
+                or bool(re.search(r'\b(raytracingpipeline|rayquery|accelerationstructure|raytracing|raytracingpositionfetch)\s*=\s*true\b', block, re.I))
+                or any(ext in lower_block for ext in ("vk_khr_ray_tracing_pipeline", "vk_khr_ray_query", "vk_nv_ray_tracing", "vk_khr_acceleration_structure"))
+            )
+
+            has_mesh_shader = (
+                any("mesh_shader" in e for e in exts_lower)
+                or bool(re.search(r'\b(meshshader|taskshader)\s*=\s*true\b', block, re.I))
+                or any(ext in lower_block for ext in ("vk_ext_mesh_shader", "vk_nv_mesh_shader"))
+            )
+
             decode_names = sorted(video_decode_profiles)
             encode_names = sorted(video_encode_profiles)
             
@@ -268,6 +288,9 @@ def _parse_vulkan(results: dict) -> dict:
                 "device_type": device_type,
                 "formats_count": formats_count,
                 "extensions_count": extensions_count,
+                "extensions": extensions,
+                "has_ray_tracing": has_ray_tracing,
+                "has_mesh_shader": has_mesh_shader,
                 "memory_types_count": memory_types_count,
                 "memory_heaps_count": memory_heaps_count,
                 "queue_count": queue_count,
@@ -311,6 +334,11 @@ def _parse_vulkan(results: dict) -> dict:
                 for k in ("formats_count", "extensions_count", "memory_types_count",
                           "memory_heaps_count", "queue_count"):
                     existing_dev[k] = max(existing_dev.get(k, 0), new_dev.get(k, 0))
+                
+                merged_exts = sorted(set(existing_dev.get("extensions", [])) | set(new_dev.get("extensions", [])))
+                existing_dev["extensions"] = merged_exts
+                existing_dev["has_ray_tracing"] = bool(existing_dev.get("has_ray_tracing") or new_dev.get("has_ray_tracing"))
+                existing_dev["has_mesh_shader"] = bool(existing_dev.get("has_mesh_shader") or new_dev.get("has_mesh_shader"))
                 
                 merged_decode = sorted(set(existing_dev.get("video_decode_profiles", [])) | set(new_dev.get("video_decode_profiles", [])))
                 merged_encode = sorted(set(existing_dev.get("video_encode_profiles", [])) | set(new_dev.get("video_encode_profiles", [])))
@@ -1668,6 +1696,8 @@ METRIC_TOOLTIPS = {
     "GLSL Version": "OpenGL Shading Language version supported by the driver.",
     "Renderer": "Active graphics rendering device name reported by the driver.",
     "Vendor": "Hardware manufacturer or graphics driver vendor.",
+    "Ray Tracing": "Hardware-accelerated ray tracing and ray query support (VK_KHR_ray_tracing_pipeline, VK_KHR_ray_query, etc.).",
+    "Mesh Shaders": "Mesh and task shader pipeline support replacing traditional geometry pipelines (VK_EXT_mesh_shader, VK_NV_mesh_shader).",
 }
 
 
@@ -3313,6 +3343,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     ("Memory Types", str(dev.get("memory_types_count", "")) if dev.get("memory_types_count") else ""),
                     ("Memory Heaps", str(dev.get("memory_heaps_count", "")) if dev.get("memory_heaps_count") else ""),
                     ("Queue Families", str(dev.get("queue_count", "")) if dev.get("queue_count") else ""),
+                    ("Ray Tracing", "Supported" if dev.get("has_ray_tracing") else "Not Available"),
+                    ("Mesh Shaders", "Supported" if dev.get("has_mesh_shader") else "Not Available"),
                 ])
                 col4 = _vk_col([
                     ("Instance Extensions", str(vk_data.get("instance_extensions_count", "")) if vk_data.get("instance_extensions_count") else ""),
