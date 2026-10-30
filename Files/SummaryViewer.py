@@ -1794,7 +1794,7 @@ def _make_action_row(title: str, subtitle: str) -> Gtk.Widget:
     copy_btn.add_css_class("flat")
     copy_btn.set_valign(Gtk.Align.CENTER)
     copy_btn.set_tooltip_text("Copy to clipboard")
-    copy_btn.set_opacity(0.6)
+    copy_btn.set_opacity(0.0)
 
     def _on_copy_clicked(_btn, title=title, box_ref=box):
         values = [lbl.get_label() for lbl in box_ref.subtitle_labels
@@ -1809,6 +1809,17 @@ def _make_action_row(title: str, subtitle: str) -> Gtk.Widget:
     box.set_hexpand(True)
     outer_box.append(box)
     outer_box.append(copy_btn)
+    motion = Gtk.EventControllerMotion()
+
+    def _show_copy_button(_controller, _x, _y):
+        copy_btn.set_opacity(0.6)
+
+    def _hide_copy_button(_controller):
+        copy_btn.set_opacity(0.0)
+
+    motion.connect("enter", _show_copy_button)
+    motion.connect("leave", _hide_copy_button)
+    outer_box.add_controller(motion)
     # Copy attributes from inner box to outer box for compatibility
     outer_box.subtitle_labels = box.subtitle_labels
     outer_box.set_subtitle = box.set_subtitle
@@ -2067,15 +2078,8 @@ class SummaryDashboard(Gtk.Box):
         return widget
 
     def refresh_display(self, app=None):
-        saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
-
         for tier in (1, 2, 3):
             tier_entries = self._tier_cards[tier]
-            if saved_order:
-                def _sort_key(item):
-                    c_id = item[0]
-                    return saved_order.index(c_id) if c_id in saved_order else 999
-                tier_entries.sort(key=_sort_key)
 
             visible_count = 0
             for card_id, widget in tier_entries:
@@ -2230,8 +2234,8 @@ def _refresh_flow_box_display(flow_box: Gtk.FlowBox | None, app=None):
         return
     widget_by_id = {widget_id: widget for widget_id, widget in registry}
     current_order = [widget_id for widget_id, _ in registry]
-    saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
-    order_to_use = saved_order if saved_order else current_order
+    # Always preserve the setup-derived order. User card reordering is disabled.
+    order_to_use = current_order
     ordered_ids = [card_id for card_id in order_to_use if card_id in widget_by_id]
     for card_id in current_order:
         if card_id not in ordered_ids:
@@ -3081,42 +3085,9 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             registry = list(getattr(dashboard, "_summary_card_registry", []))
             if not registry:
                 return
-            current_order = [widget_id for widget_id, _ in registry]
-            saved_order = app.config.get_summary_card_order() if app is not None and hasattr(app, "config") else []
-            if not saved_order:
-                def default_card_priority(card_id):
-                    if card_id == "system":
-                        return 0
-                    if card_id.startswith("gpu-hw"):
-                        return 1
-                    if card_id.startswith("gpu-"):
-                        return 2
-                    if card_id.startswith("vulkan-"):
-                        return 3
-                    if card_id.startswith("opengl"):
-                        return 4
-                    if card_id in ("egl", "glx"):
-                        return 5
-                    if card_id.startswith("opencl-"):
-                        return 6
-                    if card_id.startswith("vdpau"):
-                        return 7
-                    return 8
-
-                default_order = sorted(
-                    enumerate(current_order),
-                    key=lambda item: (default_card_priority(item[1]), item[0]),
-                )
-                _apply_summary_card_order([card_id for _, card_id in default_order])
-                return
-            ordered = [card_id for card_id in saved_order if card_id in current_order]
-            for card_id in current_order:
-                if card_id not in ordered:
-                    ordered.append(card_id)
-            if ordered == current_order:
-                dashboard.refresh_display(app)
-                return
-            _apply_summary_card_order(ordered)
+            # Card order follows the hardware/system setup discovered by the
+            # application. There is intentionally no user-saved reorder override.
+            dashboard.refresh_display(app)
 
         view_stack = getattr(app, "view_stack", None)
 

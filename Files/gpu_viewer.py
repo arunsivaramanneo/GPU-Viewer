@@ -374,6 +374,8 @@ else:
 
             self.window.set_default_size(target_w, target_h)
             self.window.set_size_request(750, 500)
+            self._dashboard_width = target_w
+            self._dashboard_height = target_h
     
             style_manager = Adw.StyleManager.get_default()
             prefer_dark_theme = self.config.get_theme_preference()
@@ -457,111 +459,11 @@ else:
                     self.close_tab_button.set_sensitive(False)
             self.close_tab_button.connect("clicked", _on_close_tab_clicked)
 
-            self.summary_reorder_button = Gtk.Button.new()
-            self.summary_reorder_button.add_css_class("flat")
-            self.summary_reorder_button.set_valign(Gtk.Align.CENTER)
-            self.summary_reorder_button.set_icon_name("view-list-symbolic")
-            self.summary_reorder_button.set_tooltip_text("Reorder summary cards")
-            self.summary_reorder_button.set_sensitive(False)
-
-            def _show_summary_reorder_popover(button):
-                flow_box = getattr(self, "summary_flow_box", None)
-                if flow_box is None:
-                    return
-                registry = list(getattr(flow_box, "_summary_card_registry", []))
-                if not registry:
-                    return
-
-                popover = Gtk.Popover.new()
-                popover.set_parent(button)
-                popover.set_position(Gtk.PositionType.BOTTOM)
-                box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-                box.set_margin_top(8)
-                box.set_margin_bottom(8)
-                box.set_margin_start(8)
-                box.set_margin_end(8)
-
-                header = Gtk.Label(label="Reorder cards")
-                header.add_css_class("title-4")
-                header.set_halign(Gtk.Align.START)
-                box.append(header)
-
-                list_box = Gtk.ListBox()
-                list_box.set_selection_mode(Gtk.SelectionMode.NONE)
-
-                def _refresh_summary_order_list():
-                    child = list_box.get_first_child()
-                    while child is not None:
-                        next_child = child.get_next_sibling()
-                        list_box.remove(child)
-                        child = next_child
-
-                    registry = list(getattr(flow_box, "_summary_card_registry", []))
-                    for entry_card_id, widget in registry:
-                        title = getattr(widget, "_summary_card_title", entry_card_id)
-                        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-                        row.set_margin_top(4)
-                        row.set_margin_bottom(4)
-                        row.set_margin_start(4)
-                        row.set_margin_end(4)
-
-                        label = Gtk.Label(label=title)
-                        label.set_halign(Gtk.Align.START)
-                        label.set_hexpand(True)
-                        row.append(label)
-
-                        up_button = Gtk.Button(icon_name="go-up-symbolic")
-                        up_button.add_css_class("flat")
-                        up_button.set_tooltip_text("Move up")
-                        up_button.connect("clicked", lambda *_ , card_id=entry_card_id: _move_summary_card(card_id, -1, flow_box))
-                        row.append(up_button)
-
-                        down_button = Gtk.Button(icon_name="go-down-symbolic")
-                        down_button.add_css_class("flat")
-                        down_button.set_tooltip_text("Move down")
-                        down_button.connect("clicked", lambda *_ , card_id=entry_card_id: _move_summary_card(card_id, 1, flow_box))
-                        row.append(down_button)
-
-                        list_box.append(row)
-
-                def _move_summary_card(card_id, direction, flow_box):
-                    registry = list(getattr(flow_box, "_summary_card_registry", []))
-                    if not registry:
-                        return
-                    order = [entry_card_id for entry_card_id, _ in registry]
-                    if card_id not in order:
-                        return
-                    index = order.index(card_id)
-                    target = index + direction
-                    if target < 0 or target >= len(order):
-                        return
-                    order[index], order[target] = order[target], order[index]
-                    widget_map = {entry_card_id: widget for entry_card_id, widget in registry}
-                    reordered = [(entry_card_id, widget_map[entry_card_id]) for entry_card_id in order]
-                    if hasattr(flow_box, "apply_reorder"):
-                        flow_box.apply_reorder(reordered)
-                    else:
-                        flow_box.remove_all()
-                        for _, widget in reordered:
-                            flow_box.append(widget)
-                        flow_box._summary_card_registry = reordered
-                    if hasattr(self, "config"):
-                        self.config.set_summary_card_order(order)
-                    _refresh_summary_order_list()
-
-                _refresh_summary_order_list()
-                box.append(list_box)
-                popover.set_child(box)
-                popover.popup()
-
-            self.summary_reorder_button.connect("clicked", _show_summary_reorder_popover)
-
             # Create a box to hold the buttons
             header_buttons_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
             header_buttons_box.set_halign(Gtk.Align.END)
             header_buttons_box.set_valign(Gtk.Align.CENTER)
             header_buttons_box.append(self.save_button)
-            header_buttons_box.append(self.summary_reorder_button)
 
             # Refresh interval selector popover
             _interval_options = ["250 ms", "500 ms", "1 s", "2 s", "5 s"]
@@ -713,8 +615,9 @@ else:
                     if hasattr(self, "summary_data") and self.summary_data:
                         self.gpuz_view.update_summary_data(self.summary_data)
 
-                self._prev_width = self.window.get_width()
-                self._prev_height = self.window.get_height()
+                if self.current_view_mode == "dashboard":
+                    self._dashboard_width = self.window.get_width()
+                    self._dashboard_height = self.window.get_height()
 
                 self.window.set_size_request(460, 680)
                 self.window.set_default_size(480, 740)
@@ -725,9 +628,13 @@ else:
                     self.config.set_view_mode("gpuz")
             else:
                 self.window.set_size_request(750, 500)
-                prev_w = getattr(self, "_prev_width", 950)
-                prev_h = getattr(self, "_prev_height", 680)
-                self.window.set_default_size(max(prev_w, 900), max(prev_h, 650))
+                dashboard_w = getattr(self, "_dashboard_width", 950)
+                dashboard_h = getattr(self, "_dashboard_height", 650)
+                screen_w, screen_h = getScreenSize()
+                self.window.set_default_size(
+                    min(max(dashboard_w, 900), screen_w),
+                    min(max(dashboard_h, 650), screen_h),
+                )
                 self.root_stack.set_visible_child_name("dashboard")
                 self.window.set_title("GPU-Viewer v3.2")
                 self.current_view_mode = "dashboard"
@@ -951,9 +858,6 @@ else:
                 # Enable save button only for API detail tabs (not Summary or About)
                 if hasattr(self, 'save_button') and self.save_button:
                     self.save_button.set_sensitive(name not in ("summary", "page3"))
-
-                if hasattr(self, 'summary_reorder_button'):
-                    self.summary_reorder_button.set_sensitive(name == "summary")
 
                 if hasattr(self, 'refresh_menu_button'):
                     self.refresh_menu_button.set_sensitive(name == "summary")

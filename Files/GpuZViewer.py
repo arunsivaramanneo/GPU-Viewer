@@ -290,6 +290,8 @@ class GpuZView(Gtk.Box):
         # Bottom Bar: Multi-GPU selector
         self.bottom_bar = self._build_bottom_bar()
         self.append(self.bottom_bar)
+        self.view_stack.connect("notify::visible-child-name", self._on_view_changed)
+        self._update_gpu_selector_visibility()
 
         # Connect cleanup on destroy
         self.connect("destroy", self._on_destroy)
@@ -1615,6 +1617,13 @@ class GpuZView(Gtk.Box):
             self.selected_gpu_idx = idx
             self._refresh_graphics_card_content()
             self._update_sensors()
+
+    def _on_view_changed(self, _stack, _pspec):
+        self._update_gpu_selector_visibility()
+
+    def _update_gpu_selector_visibility(self):
+        visible_name = self.view_stack.get_visible_child_name()
+        self.bottom_bar.set_visible(visible_name != "system")
 
     # -----------------------------------------------------------------------
     # Sensor Polling Loop
