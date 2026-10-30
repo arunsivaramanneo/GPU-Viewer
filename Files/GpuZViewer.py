@@ -21,7 +21,7 @@ Provides:
   - Graphics Card Tab: High-density specification sheet (Architecture, BIOS,
     IDs, Bus, Shaders, Memory, Clocks, Computing Checkboxes).
   - Sensors Tab: Real-time telemetry monitoring with sparkline graphs.
-  - Advanced Tab: Subsystem capability inspector (Vulkan, OpenGL, OpenCL, etc.).
+  - System Tab: Machine & OS system information inspector (CPU, RAM, OS, BIOS).
   - Bottom Bar: Multi-GPU switcher dropdown.
 """
 
@@ -59,11 +59,11 @@ GPUZ_CSS = """
     padding: 6px;
 }
 
-.gpuz-card-frame {
-    border: 1px solid rgba(128, 128, 128, 0.25);
+.gpuz-header-frame {
+    border: 1px solid rgba(128, 128, 128, 0.22);
     border-radius: 8px;
     background-color: @card_bg_color;
-    padding: 6px 8px;
+    padding: 8px 12px;
     margin-bottom: 6px;
 }
 
@@ -72,15 +72,61 @@ GPUZ_CSS = """
     font-weight: 700;
 }
 
-.gpuz-field-label {
-    font-size: 8.5pt;
-    color: alpha(@window_fg_color, 0.7);
-    font-weight: 600;
+.gpuz-section-box {
+    margin-top: 6px;
+    margin-bottom: 6px;
 }
 
-.gpuz-field-value {
-    font-size: 9pt;
+.gpuz-section-header {
+    margin-top: 4px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+}
+
+.gpuz-section-title {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: @accent_color;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.gpuz-section-sep {
+    opacity: 0.25;
+    margin-top: 2px;
+    margin-bottom: 6px;
+}
+
+/* Classic GTK Frame for each field */
+.gpuz-field-frame {
+    border: 1px solid rgba(128, 128, 128, 0.28);
+    border-radius: 6px;
+    background-color: alpha(@window_fg_color, 0.025);
+    margin: 2px 0;
+}
+
+.gpuz-field-frame:hover {
+    border-color: alpha(@accent_color, 0.45);
+    background-color: alpha(@window_fg_color, 0.045);
+}
+
+.gpuz-frame-label {
+    font-size: 8pt;
+    font-weight: 700;
+    color: alpha(@window_fg_color, 0.72);
+    padding: 0 4px;
+    margin-left: 6px;
+}
+
+.gpuz-frame-content {
+    padding: 3px 8px 5px 8px;
+    min-height: 24px;
+}
+
+.gpuz-frame-value {
+    font-size: 9.5pt;
     font-weight: 600;
+    color: @window_fg_color;
 }
 
 .gpuz-field-box {
@@ -94,7 +140,7 @@ GPUZ_CSS = """
 .gpuz-tech-badge {
     border: 1px solid rgba(128, 128, 128, 0.25);
     border-radius: 4px;
-    padding: 3px 8px;
+    padding: 4px 8px;
     font-size: 8.5pt;
     font-weight: 600;
 }
@@ -233,10 +279,10 @@ class GpuZView(Gtk.Box):
             self.sensors_page, "sensors", "Sensors", "utilities-system-monitor-symbolic"
         )
 
-        # Build Tab 3: Advanced
-        self.advanced_page = self._build_advanced_tab()
+        # Build Tab 3: System Information (replaces legacy Advanced tab)
+        self.system_page = self._build_system_tab()
         self.view_stack.add_titled_with_icon(
-            self.advanced_page, "advanced", "Advanced", "emblem-system-symbolic"
+            self.system_page, "system", "System", "computer-symbolic"
         )
 
         self.append(self.view_stack)
@@ -362,6 +408,157 @@ class GpuZView(Gtk.Box):
                     pass
         return None
 
+    def _get_opencl_device_for_gpu(self, gpu: dict) -> tuple[dict | None, dict | None]:
+        """
+        Find and return the matching (platform, device) tuple for the specified GPU dict.
+        Matches based on PCIe topology, Vendor ID, Device ID, device name, and device type.
+        Returns (None, None) if no matching OpenCL device is found.
+        """
+        cl_data = self.summary_data.get("opencl", {})
+        platforms = cl_data.get("platforms", [])
+        if not platforms or not gpu:
+            return None, None
+
+        candidates = []
+        for plat in platforms:
+            for dev in plat.get("devices", []):
+                candidates.append((plat, dev))
+
+        if not candidates:
+            return None, None
+
+        v_id = gpu.get("vendor_id", "")
+        d_id = gpu.get("device_id", "")
+        pci_addr = (gpu.get("pci_address") or "").lower().strip()
+        gpu_name = self._get_gpu_display_name(gpu).lower()
+
+        try:
+            gpu_v_int = int(v_id, 16) if v_id else None
+        except ValueError:
+            gpu_v_int = None
+
+        try:
+            gpu_d_int = int(d_id, 16) if d_id else None
+        except ValueError:
+            gpu_d_int = None
+
+        # Filter candidates of the same vendor to rank relative index
+        same_vendor_candidates = []
+        for plat, dev in candidates:
+            dev_v = dev.get("vendor_id", "")
+            try:
+                dev_v_int = int(dev_v, 16) if dev_v else None
+            except ValueError:
+                dev_v_int = None
+            if gpu_v_int and dev_v_int and gpu_v_int == dev_v_int:
+                same_vendor_candidates.append((plat, dev))
+            else:
+                d_vend = (dev.get("vendor") or "").lower()
+                p_name = (plat.get("name") or "").lower()
+                if gpu_v_int == 0x1002 and ("amd" in d_vend or "advanced micro" in d_vend or "radeon" in d_vend or "amd" in p_name or "rusticl" in p_name):
+                    same_vendor_candidates.append((plat, dev))
+                elif gpu_v_int == 0x10de and ("nvidia" in d_vend or "nvidia" in p_name or "cuda" in p_name):
+                    same_vendor_candidates.append((plat, dev))
+                elif gpu_v_int == 0x8086 and ("intel" in d_vend or "intel" in p_name):
+                    same_vendor_candidates.append((plat, dev))
+
+        # Check relative index among same-vendor GPUs
+        same_vendor_gpus = [
+            g for g in self.gpus
+            if g.get("vendor_id") and gpu_v_int and int(g.get("vendor_id"), 16) == gpu_v_int
+        ]
+        relative_gpu_idx = 0
+        if gpu in same_vendor_gpus:
+            relative_gpu_idx = same_vendor_gpus.index(gpu)
+
+        best_candidate = None
+        best_score = -999
+
+        for plat, dev in candidates:
+            score = 0
+            dev_type = (dev.get("device_type") or "").upper()
+            is_gpu = "GPU" in dev_type or "ACCELERATOR" in dev_type
+            if is_gpu:
+                score += 50
+            else:
+                score -= 30
+
+            # 1. PCIe topology / bus address
+            dev_pci = (dev.get("pci_address") or "").lower()
+            if pci_addr and dev_pci:
+                clean_pci = re.sub(r'^[0-9a-f]+:', '', pci_addr)
+                if clean_pci in dev_pci or pci_addr in dev_pci:
+                    score += 300
+
+            # 2. Vendor ID / Name
+            dev_v = dev.get("vendor_id", "")
+            try:
+                dev_v_int = int(dev_v, 16) if dev_v else None
+            except ValueError:
+                dev_v_int = None
+
+            if gpu_v_int is not None and dev_v_int is not None:
+                if gpu_v_int == dev_v_int:
+                    score += 120
+                else:
+                    score -= 300
+            else:
+                d_vend = (dev.get("vendor") or "").lower()
+                p_name = (plat.get("name") or "").lower()
+                d_name = (dev.get("name") or "").lower()
+                if gpu_v_int == 0x1002:
+                    if any(w in d_vend or w in p_name or w in d_name for w in ["amd", "advanced micro", "radeon", "rusticl"]):
+                        score += 60
+                    elif any(w in d_vend or w in p_name for w in ["nvidia", "intel"]):
+                        score -= 200
+                elif gpu_v_int == 0x10de:
+                    if any(w in d_vend or w in p_name or w in d_name for w in ["nvidia", "cuda", "geforce", "quadro"]):
+                        score += 60
+                    elif any(w in d_vend or w in p_name for w in ["amd", "intel"]):
+                        score -= 200
+                elif gpu_v_int == 0x8086:
+                    if any(w in d_vend or w in p_name or w in d_name for w in ["intel", "arc", "iris", "xe"]):
+                        score += 60
+                    elif any(w in d_vend or w in p_name for w in ["amd", "nvidia"]):
+                        score -= 200
+
+            # 3. Device ID
+            dev_d = dev.get("device_id", "")
+            try:
+                dev_d_int = int(dev_d, 16) if dev_d else None
+            except ValueError:
+                dev_d_int = None
+
+            if gpu_d_int is not None and dev_d_int is not None:
+                if gpu_d_int == dev_d_int:
+                    score += 150
+
+            # 4. Name substrings
+            d_name = (dev.get("name") or "").lower()
+            board = (dev.get("board_name") or "").lower()
+            for token in re.findall(r'[A-Za-z0-9]+', gpu_name):
+                if len(token) >= 3 and token not in ("gpu", "card", "graphics", "device"):
+                    if token in d_name or token in board:
+                        score += 25
+
+            # 5. Relative index match among same vendor
+            if (plat, dev) in same_vendor_candidates:
+                cand_idx = same_vendor_candidates.index((plat, dev))
+                if cand_idx == relative_gpu_idx:
+                    score += 40
+
+            if score > best_score:
+                best_score = score
+                best_candidate = (plat, dev)
+
+        if best_candidate and best_score > 0:
+            return best_candidate
+
+        if len(self.gpus) == 1 and len(candidates) == 1:
+            return candidates[0]
+
+        return None, None
+
     def _get_gpu_display_name(self, gpu: dict) -> str:
         """Resolve clean display name for the GPU."""
         v_id = gpu.get("vendor_id", "")
@@ -386,19 +583,78 @@ class GpuZView(Gtk.Box):
             pass
         return f"Graphics Card ({gpu.get('card_name', 'GPU')})"
 
+    def _resolve_image_path(self, filename: str) -> str:
+        """Resolve an image filename safely across development and installed environments."""
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        candidate = os.path.join(base_dir, "Images", filename)
+        if os.path.exists(candidate):
+            return candidate
+        for prefix in ("../Images", "Images"):
+            p = os.path.join(prefix, filename)
+            if os.path.exists(p):
+                return p
+        return os.path.join(base_dir, "Images", filename)
+
     def _get_vendor_logo_path(self, vendor_id_str: str) -> str:
         """Return vendor logo image path."""
         try:
             v = int(vendor_id_str, 16)
             if v == 0x1002:
-                return "../Images/AMD_logo.png"
+                return self._resolve_image_path("AMD_logo.png")
             elif v == 0x10de:
-                return "../Images/nvidia_logo.png"
+                return self._resolve_image_path("nvidia_logo.png")
             elif v == 0x8086:
-                return "../Images/intel-logo.png"
+                return self._resolve_image_path("intel-logo.png")
         except Exception:
             pass
-        return "../Images/about-us.png"
+        return self._resolve_image_path("about-us.png")
+
+    def _get_distro_logo_path(self, os_str: str) -> str:
+        """Return the official Linux distribution logo image path based on OS name."""
+        query = (os_str or "").lower()
+        if not query or query == "—":
+            if os.path.exists("/etc/os-release"):
+                try:
+                    with open("/etc/os-release", "r") as f:
+                        query = f.read().lower()
+                except Exception:
+                    pass
+
+        mapping = [
+            ("cachy", "CachyOS_Logo.png"),
+            ("nobara", "nobara.png"),
+            ("endeavour", "endeavouros-icon.png"),
+            ("reborn", "RebornOS_Icon.png"),
+            ("rhino", "Rhino_Linux.png"),
+            ("solus", "Solus.svg"),
+            ("nixos", "NixOS.png"),
+            ("steam", "Steam_icon_logo.png"),
+            ("anduin", "anduinos_logo.svg"),
+            ("kubuntu", "Kubuntu_logo.png"),
+            ("lubuntu", "Lubuntu_logo.svg"),
+            ("xubuntu", "xubuntu.png"),
+            ("budgie", "Ubuntu_Budgie.png"),
+            ("studio", "Ubuntu_Studio.png"),
+            ("pop", "pop_os.png"),
+            ("mint", "linux_mint.png"),
+            ("manjaro", "Manjaro-log.png"),
+            ("fedora", "Fedora_icon.png"),
+            ("arch", "arch.png"),
+            ("debian", "debian.png"),
+            ("ubuntu", "Ubuntu.png"),
+            ("suse", "open_suse.png"),
+            ("opensuse", "open_suse.png"),
+            ("elementary", "elementaryOS.png"),
+            ("zorin", "Zorin_Logo.svg"),
+            ("mx", "MX_Linux_logo.svg"),
+            ("lite", "Linux-Lite-Logo.png"),
+            ("mandriva", "Mandriva.png"),
+        ]
+        for key, img_name in mapping:
+            if key in query:
+                return self._resolve_image_path(img_name)
+
+        return self._resolve_image_path("about-us.png")
 
     # -----------------------------------------------------------------------
     # Tab 1: Graphics Card Specification Sheet
@@ -451,14 +707,14 @@ class GpuZView(Gtk.Box):
         vdpau_data = self.summary_data.get("vdpau",       {})
 
         # ── Header Box: Logo + Name ────────────────────────────────────
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        header_box.add_css_class("gpuz-card-frame")
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        header_box.add_css_class("gpuz-header-frame")
 
         logo_path = self._get_vendor_logo_path(v_id)
         try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 42, 42, True)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 46, 46, True)
             logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
-            logo_img.set_size_request(42, 42)
+            logo_img.set_size_request(46, 46)
             header_box.append(logo_img)
         except Exception:
             pass
@@ -482,13 +738,13 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(header_box)
 
         # Helper: build a 2-column dual-field row inside a parent box
-        def _add_dual_row(parent, l1, v1, l2, v2, live_key1=None, live_key2=None):
+        def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             row_box.set_hexpand(True)
             row_box.set_homogeneous(True)
-            row_box.append(self._make_field_cell(l1, v1, live_key=live_key1))
+            row_box.append(self._make_field_frame(l1, v1, live_key=live_key1))
             if l2 or v2:
-                row_box.append(self._make_field_cell(l2, v2, live_key=live_key2))
+                row_box.append(self._make_field_frame(l2, v2, live_key=live_key2))
             else:
                 spacer = Gtk.Box()
                 spacer.set_hexpand(True)
@@ -499,26 +755,38 @@ class GpuZView(Gtk.Box):
         def _add_single_row(parent, label, value, live_key=None):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             row_box.set_hexpand(True)
-            cell = self._make_field_cell(label, value, live_key=live_key)
+            cell = self._make_field_frame(label, value, live_key=live_key)
             cell.set_hexpand(True)
             row_box.append(cell)
             parent.append(row_box)
 
-        # Helper: section header label
-        def _make_section(title) -> Gtk.Box:
-            frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            frame.add_css_class("gpuz-card-frame")
+        # Helper: section header with optional icon
+        def _make_section(title, icon_name=None) -> Gtk.Box:
+            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            sect_box.add_css_class("gpuz-section-box")
+
+            hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            hdr_box.add_css_class("gpuz-section-header")
+
+            if icon_name:
+                icon = Gtk.Image.new_from_icon_name(icon_name)
+                icon.set_pixel_size(14)
+                hdr_box.append(icon)
+
             hdr = Gtk.Label(label=title)
-            hdr.add_css_class("gpuz-field-label")
+            hdr.add_css_class("gpuz-section-title")
             hdr.set_halign(Gtk.Align.START)
-            frame.append(hdr)
+            hdr_box.append(hdr)
+            sect_box.append(hdr_box)
+
             sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-            sep.set_margin_bottom(1)
-            frame.append(sep)
-            return frame
+            sep.add_css_class("gpuz-section-sep")
+            sect_box.append(sep)
+
+            return sect_box
 
         # ── GPU Hardware Stats ─────────────────────────────────────────
-        hw_frame = _make_section("GPU Hardware")
+        hw_frame = _make_section("GPU Hardware", "video-display-symbolic")
 
         dev_id_display = f"{v_id.upper()} / {d_id.upper()}" if v_id or d_id else "—"
         driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
@@ -534,7 +802,7 @@ class GpuZView(Gtk.Box):
         vram_size_display = f"{vram_tot} MB" if vram_tot > 0 else "—"
         vram_type = stats.get("vram_type") or gpu.get("vram_type") or "—"
         vram_used = stats.get("mem_used", 0)
-        vram_used_display = f"{vram_used} MB" if vram_used > 0 else "—"
+        vram_used_display = f"{vram_used} MB" if vram_used is not None and vram_used >= 0 else "—"
 
         core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get("clock_current", 0) > 0 else "—"
         boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get("clock_max", 0) > 0 else "—"
@@ -542,19 +810,28 @@ class GpuZView(Gtk.Box):
         mem_clk_disp = f"{mem_clk} MHz" if mem_clk > 0 else "—"
 
         temp_val = stats.get("temp", 0)
-        temp_disp = f"{temp_val} °C" if temp_val and temp_val > 0 else "—"
+        temp_disp = f"{temp_val} °C" if temp_val is not None and temp_val > 0 else "—"
         power_val = stats.get("power_usage", -1)
-        power_disp = f"{power_val} W" if power_val and power_val >= 0 else "—"
+        power_disp = f"{power_val} W" if power_val is not None and power_val >= 0 else "—"
         usage_val = stats.get("usage", -1)
-        usage_disp = f"{usage_val} %" if usage_val and usage_val >= 0 else "—"
+        usage_disp = f"{usage_val} %" if usage_val is not None and usage_val >= 0 else "—"
+        
         fan_val = stats.get("fan_speed", -1)
-        fan_disp = f"{fan_val} %" if fan_val and fan_val >= 0 else "—"
+        fan_rpm = stats.get("fan_rpm", -1)
+        if fan_val is not None and fan_val >= 0 and fan_rpm is not None and fan_rpm > 0:
+            fan_disp = f"{fan_val} % ({fan_rpm} RPM)"
+        elif fan_val is not None and fan_val >= 0:
+            fan_disp = f"{fan_val} %"
+        elif fan_rpm is not None and fan_rpm >= 0:
+            fan_disp = f"{fan_rpm} RPM"
+        else:
+            fan_disp = "—"
 
         gtt_used = stats.get("gtt_used", 0)
         gtt_total = stats.get("gtt_total", 0)
         if gtt_total > 0:
             gtt_disp = f"{gtt_used} / {gtt_total} MB"
-        elif gtt_used > 0:
+        elif gtt_used is not None and gtt_used >= 0:
             gtt_disp = f"{gtt_used} MB"
         else:
             gtt_disp = "—"
@@ -564,8 +841,10 @@ class GpuZView(Gtk.Box):
         _add_dual_row(hw_frame, "VRAM Total",   vram_size_display,"VRAM Type",   vram_type)
         _add_dual_row(hw_frame, "VRAM Used",    vram_used_display,"GPU Usage",   usage_disp,
                       live_key1="hw_vram_used", live_key2="hw_usage")
-        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Clock",   core_clk)
-        _add_dual_row(hw_frame, "Boost Clock",  boost_clk,        "Memory Clock",mem_clk_disp)
+        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Clock",   core_clk,
+                      live_key1="hw_gtt", live_key2="hw_clock")
+        _add_dual_row(hw_frame, "Boost Clock",  boost_clk,        "Memory Clock",mem_clk_disp,
+                      live_key2="hw_mem_clock")
         _add_dual_row(hw_frame, "Temperature",  temp_disp,        "Power Draw",  power_disp,
                       live_key1="hw_temp", live_key2="hw_power")
         _add_dual_row(hw_frame, "Fan Speed",    fan_disp,         "",            "",
@@ -573,7 +852,7 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(hw_frame)
 
         # ── Vulkan ────────────────────────────────────────────────────
-        vk_frame = _make_section("Vulkan")
+        vk_frame = _make_section("Vulkan", "image-x-generic-symbolic")
         vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
         vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
         vk_drv_name = (vk_dev.get("driver_name") or "—").strip()
@@ -689,7 +968,7 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(vk_frame)
 
         # ── OpenGL & EGL ─────────────────────────────────────────────
-        gl_frame = _make_section("OpenGL / EGL")
+        gl_frame = _make_section("OpenGL / EGL", "applications-engineering-symbolic")
         gl_vendor   = gl_data.get("vendor", "—")
         gl_renderer = gl_data.get("renderer", "—")
         gl_version  = gl_data.get("version", "—")
@@ -714,35 +993,32 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(gl_frame)
 
         # ── OpenCL ────────────────────────────────────────────────────
-        cl_frame = _make_section("OpenCL")
+        cl_frame = _make_section("OpenCL", "system-run-symbolic")
+        matched_plat, matched_dev = self._get_opencl_device_for_gpu(gpu)
         cl_platforms = cl_data.get("platforms", [])
-        if cl_platforms:
-            plat0 = cl_platforms[0]
-            cl_plat_name = plat0.get("name", "—")
-            cl_plat_ver  = plat0.get("version", "—")
-            cl_plat_ext  = str(plat0.get("extensions_count", 0)) if plat0.get("extensions_count") else "—"
-            cl_plat_cnt  = str(len(cl_platforms))
-            cl_devs = plat0.get("devices", [])
-            if cl_devs:
-                dev0 = cl_devs[0]
-                cl_dev_name  = dev0.get("name", "—")
-                cl_dev_type  = dev0.get("device_type", "—")
-                cl_dev_ver   = dev0.get("version", "—")
-                cl_opencl_c  = dev0.get("opencl_c_version", "—")
-                cl_cus       = str(dev0.get("compute_units", "—"))
-                cl_wgs       = str(dev0.get("workgroup_size", "—"))
-                cl_gmem      = dev0.get("global_memory", "—")
-                cl_lmem      = dev0.get("local_memory", "—")
-                cl_clk       = str(dev0.get("max_clock", "—"))
-                cl_drv_ver   = dev0.get("driver_version", "—")
-                cl_dev_ext   = str(dev0.get("extensions_count", 0)) if dev0.get("extensions_count") else "—"
-            else:
-                cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
-                cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
+        cl_plat_cnt = str(len(cl_platforms)) if cl_platforms else "0"
+
+        if matched_plat and matched_dev:
+            cl_plat_name = matched_plat.get("name", "—")
+            cl_plat_ver  = matched_plat.get("version", "—")
+            cl_plat_ext  = str(matched_plat.get("extensions_count", 0)) if matched_plat.get("extensions_count") else "—"
+            cl_dev_name  = matched_dev.get("name", "—")
+            cl_dev_type  = matched_dev.get("device_type", "—")
+            cl_dev_ver   = matched_dev.get("version", "—")
+            cl_opencl_c  = matched_dev.get("opencl_c_version", "—")
+            cl_cus       = str(matched_dev.get("compute_units", "—"))
+            cl_wgs       = str(matched_dev.get("workgroup_size", "—"))
+            cl_gmem      = matched_dev.get("global_memory", "—")
+            cl_lmem      = matched_dev.get("local_memory", "—")
+            cl_clk       = str(matched_dev.get("max_clock", "—"))
+            cl_drv_ver   = matched_dev.get("driver_version", "—")
+            cl_dev_ext   = str(matched_dev.get("extensions_count", 0)) if matched_dev.get("extensions_count") else "—"
+            has_gpu_opencl = True
         else:
-            cl_plat_name = cl_plat_ver = cl_plat_ext = cl_plat_cnt = "—"
+            cl_plat_name = cl_plat_ver = cl_plat_ext = "—"
             cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
             cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
+            has_gpu_opencl = False
 
         _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
         _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
@@ -755,7 +1031,7 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(cl_frame)
 
         # ── Vulkan Video ──────────────────────────────────────────────
-        vv_frame = _make_section("Vulkan Video")
+        vv_frame = _make_section("Vulkan Video", "video-x-generic-symbolic")
         vv_supported = "Yes" if vv_data.get("supported") else "No"
         vv_profiles  = vv_data.get("profiles", [])
         vv_codecs    = ", ".join(vv_profiles) if vv_profiles else "—"
@@ -768,7 +1044,7 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(vv_frame)
 
         # ── VDPAU ─────────────────────────────────────────────────────
-        vdpau_frame = _make_section("VDPAU")
+        vdpau_frame = _make_section("VDPAU", "media-playback-start-symbolic")
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
         vdpau_api  = vdpau_data.get("api_version", "—")
         vdpau_rend = vdpau_data.get("renderer", "—")
@@ -777,13 +1053,7 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(vdpau_frame)
 
         # ── API Support Badges ─────────────────────────────────────────
-        tech_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        tech_frame.add_css_class("gpuz-card-frame")
-
-        tech_title = Gtk.Label(label="API Support")
-        tech_title.add_css_class("gpuz-field-label")
-        tech_title.set_halign(Gtk.Align.START)
-        tech_frame.append(tech_title)
+        tech_frame = _make_section("API Support", "preferences-system-symbolic")
 
         tech_flow = Gtk.FlowBox()
         tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -797,7 +1067,7 @@ class GpuZView(Gtk.Box):
         has_vulkan       = bool(vk_dev) or vk_data.get("supported", False)
         has_opengl       = bool(gl_data.get("version"))
         has_egl          = bool(gl_data.get("egl_version")) or gl_data.get("egl_count", 0) > 0
-        has_opencl       = bool(cl_platforms) or cl_data.get("supported", False)
+        has_opencl       = has_gpu_opencl
         has_vulkan_video = vv_data.get("supported", False) or bool(vv_profiles)
         has_vdpau        = vdpau_data.get("supported", False)
         has_raytracing   = has_rt
@@ -821,48 +1091,57 @@ class GpuZView(Gtk.Box):
         tech_frame.append(tech_flow)
         self.card_content_box.append(tech_frame)
 
-    def _make_field_cell(self, label: str, value: str, live_key: str = None) -> Gtk.Box:
-        """Create a compact GPU-Z field with label and read-only value.
+    def _make_field_frame(self, label: str, value: str, live_key: str = None, registry: dict = None) -> Gtk.Frame:
+        """Create a Classic GTK Frame with the field name embedded in the upper border
+        and the content left-justified inside the frame.
 
         Args:
-            label:    Header label text.
+            label:    Header label text for the frame.
             value:    Initial value text.
             live_key: If set, the value label is registered in
-                      ``self._hw_live_labels[live_key]`` so that the sensor
-                      polling loop can update it without rebuilding the whole tab.
+                      ``registry[live_key]`` (defaults to ``self._hw_live_labels``)
+                      so that the polling loop can update it in real time.
+            registry: Optional target dictionary for live label registration.
         """
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        box.add_css_class("gpuz-field-box")
-        box.set_hexpand(True)
-        box.set_valign(Gtk.Align.CENTER)
+        frame = Gtk.Frame()
+        frame.add_css_class("gpuz-field-frame")
+        frame.set_hexpand(True)
 
-        lbl = Gtk.Label(label=label)
-        lbl.add_css_class("gpuz-field-label")
-        lbl.set_halign(Gtk.Align.START)
-        lbl.set_valign(Gtk.Align.CENTER)
-        lbl.set_xalign(0)
-        box.append(lbl)
+        hdr_lbl = Gtk.Label(label=f" {label} ")
+        hdr_lbl.add_css_class("gpuz-frame-label")
+        hdr_lbl.set_halign(Gtk.Align.START)
+        frame.set_label_widget(hdr_lbl)
+
+        content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        content_box.add_css_class("gpuz-frame-content")
 
         clean_val = str(value).strip() if value is not None and str(value).strip() else "—"
         clean_val = re.sub(r'\s*\(\d+\)$', '', clean_val).strip()
 
         val = Gtk.Label(label=clean_val)
-        val.add_css_class("gpuz-field-value")
-        val.set_halign(Gtk.Align.END)
-        val.set_valign(Gtk.Align.CENTER)
+        val.add_css_class("gpuz-frame-value")
+        val.set_halign(Gtk.Align.START)
+        val.set_xalign(0.0)
         val.set_hexpand(True)
         val.set_selectable(True)
         val.set_wrap(True)
         val.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        val.set_xalign(1)
-        box.append(val)
+        content_box.append(val)
+
+        frame.set_child(content_box)
 
         if live_key is not None:
-            if not hasattr(self, "_hw_live_labels"):
-                self._hw_live_labels = {}
-            self._hw_live_labels[live_key] = val
+            target_reg = registry if registry is not None else getattr(self, "_hw_live_labels", None)
+            if target_reg is not None:
+                target_reg[live_key] = val
+            elif registry is None:
+                if not hasattr(self, "_hw_live_labels"):
+                    self._hw_live_labels = {}
+                self._hw_live_labels[live_key] = val
 
-        return box
+        return frame
+
+    _make_field_cell = _make_field_frame
 
     def _make_tech_badge(self, name: str, supported: bool) -> Gtk.Widget:
         """Create a GPU-Z style capability checkbox / badge."""
@@ -999,6 +1278,14 @@ class GpuZView(Gtk.Box):
         volt = stats.get("voltage", 0.0)
         _set_val("voltage", volt, f"{volt:.3f} V" if volt > 0 else "—")
 
+        # Dynamic max adjustment for sensors sparklines
+        vram_tot = stats.get("mem_total", 0)
+        if vram_tot > 0 and "vram_used" in self.sensor_widgets:
+            self.sensor_widgets["vram_used"]["max"] = vram_tot
+        gtt_tot = stats.get("gtt_total", 0)
+        if gtt_tot > 0 and "gtt_used" in self.sensor_widgets:
+            self.sensor_widgets["gtt_used"]["max"] = gtt_tot
+
         # CPU & RAM
         if cpu_temp_val is not None:
             _set_val("cpu_temp", cpu_temp_val)
@@ -1017,15 +1304,12 @@ class GpuZView(Gtk.Box):
             pass
 
         # ── Real-time updates for GPU Hardware tab labels ──────────────────
-        # Update Temperature, Power Draw, Fan Speed, GPU Usage and VRAM Used
-        # in-place without triggering a full tab rebuild (avoids flicker and
-        # scroll resets).
         live = getattr(self, "_hw_live_labels", {})
         if live:
             temp_v = stats.get("temp", 0)
             if "hw_temp" in live:
                 live["hw_temp"].set_label(
-                    f"{temp_v} °C" if temp_v and temp_v > 0 else "—"
+                    f"{temp_v} °C" if temp_v is not None and temp_v > 0 else "—"
                 )
             pwr_v = stats.get("power_usage", -1)
             if "hw_power" in live:
@@ -1033,10 +1317,16 @@ class GpuZView(Gtk.Box):
                     f"{pwr_v} W" if pwr_v is not None and pwr_v >= 0 else "—"
                 )
             fan_v = stats.get("fan_speed", -1)
+            fan_rpm_v = stats.get("fan_rpm", -1)
             if "hw_fan" in live:
-                live["hw_fan"].set_label(
-                    f"{fan_v} %" if fan_v is not None and fan_v >= 0 else "—"
-                )
+                if fan_v is not None and fan_v >= 0 and fan_rpm_v is not None and fan_rpm_v > 0:
+                    live["hw_fan"].set_label(f"{fan_v} % ({fan_rpm_v} RPM)")
+                elif fan_v is not None and fan_v >= 0:
+                    live["hw_fan"].set_label(f"{fan_v} %")
+                elif fan_rpm_v is not None and fan_rpm_v >= 0:
+                    live["hw_fan"].set_label(f"{fan_rpm_v} RPM")
+                else:
+                    live["hw_fan"].set_label("—")
             usage_v = stats.get("usage", -1)
             if "hw_usage" in live:
                 live["hw_usage"].set_label(
@@ -1045,208 +1335,224 @@ class GpuZView(Gtk.Box):
             vram_used_v = stats.get("mem_used", 0)
             if "hw_vram_used" in live:
                 live["hw_vram_used"].set_label(
-                    f"{vram_used_v} MB" if vram_used_v and vram_used_v > 0 else "—"
+                    f"{vram_used_v} MB" if vram_used_v is not None and vram_used_v >= 0 else "—"
+                )
+            gtt_u = stats.get("gtt_used", 0)
+            gtt_t = stats.get("gtt_total", 0)
+            if "hw_gtt" in live:
+                if gtt_t > 0:
+                    live["hw_gtt"].set_label(f"{gtt_u} / {gtt_t} MB")
+                elif gtt_u is not None and gtt_u >= 0:
+                    live["hw_gtt"].set_label(f"{gtt_u} MB")
+                else:
+                    live["hw_gtt"].set_label("—")
+            clk_v = stats.get("clock_current", 0)
+            if "hw_clock" in live:
+                live["hw_clock"].set_label(
+                    f"{clk_v} MHz" if clk_v and clk_v > 0 else "—"
+                )
+            mclk_v = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
+            if "hw_mem_clock" in live:
+                live["hw_mem_clock"].set_label(
+                    f"{mclk_v} MHz" if mclk_v and mclk_v > 0 else "—"
                 )
 
+        # ── Real-time updates for System tab labels ──────────────────────
+        sys_live = getattr(self, "_sys_live_labels", {})
+        if sys_live:
+            if "sys_cpu_usage" in sys_live:
+                sys_live["sys_cpu_usage"].set_label(cpu_usage_str if cpu_usage_str else "—")
+            if "sys_cpu_temp" in sys_live:
+                sys_live["sys_cpu_temp"].set_label(
+                    f"{cpu_temp_val} °C" if cpu_temp_val and cpu_temp_val > 0 else "—"
+                )
+            if "sys_ram_usage" in sys_live:
+                sys_live["sys_ram_usage"].set_label(ram_usage_str if ram_usage_str else "—")
+            if "sys_uptime" in sys_live:
+                try:
+                    with open("/proc/uptime", "r") as f:
+                        upt = float(f.readline().split()[0])
+                        m, s = divmod(upt, 60)
+                        h, m = divmod(m, 60)
+                        d, h = divmod(h, 24)
+                        parts = []
+                        if d > 0: parts.append(f"{int(d)}d")
+                        if h > 0: parts.append(f"{int(h)}h")
+                        if m > 0: parts.append(f"{int(m)}m")
+                        if not parts: parts.append(f"{int(s)}s")
+                        sys_live["sys_uptime"].set_label(" ".join(parts))
+                except Exception:
+                    pass
+
     # -----------------------------------------------------------------------
-    # Tab 3: Advanced API & Subsystem Inspector
+    # Tab 3: System Information Inspector
     # -----------------------------------------------------------------------
 
-    def _build_advanced_tab(self) -> Gtk.Widget:
+    def _build_system_tab(self) -> Gtk.Widget:
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        box.set_margin_start(10)
-        box.set_margin_end(10)
-        box.set_margin_top(8)
-        box.set_margin_bottom(12)
+        self.sys_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.sys_content_box.set_margin_start(8)
+        self.sys_content_box.set_margin_end(8)
+        self.sys_content_box.set_margin_top(6)
+        self.sys_content_box.set_margin_bottom(8)
 
-        # Category Dropdown
-        cat_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        cat_box.add_css_class("gpuz-card-frame")
-
-        cat_lbl = Gtk.Label(label="Subsystem:")
-        cat_lbl.add_css_class("gpuz-field-label")
-        cat_box.append(cat_lbl)
-
-        categories = [
-            "Vulkan Limits & Properties",
-            "OpenGL & GLX Capabilities",
-            "OpenCL Platform & Devices",
-            "Vulkan Video Codecs",
-            "VDPAU Hardware Decoding",
-            "System & OS Details",
-        ]
-        string_list = Gtk.StringList.new(categories)
-        self.adv_dropdown = Gtk.DropDown.new(string_list, None)
-        self.adv_dropdown.set_hexpand(True)
-        cat_box.append(self.adv_dropdown)
-        box.append(cat_box)
-
-        # Content container
-        self.adv_content_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        self.adv_content_frame.add_css_class("gpuz-card-frame")
-        box.append(self.adv_content_frame)
-
-        self.adv_dropdown.connect("notify::selected", lambda *_: self._refresh_advanced_content())
-        self._refresh_advanced_content()
-
-        scroll.set_child(box)
+        self._refresh_system_content()
+        scroll.set_child(self.sys_content_box)
         return scroll
 
-    def _refresh_advanced_content(self):
-        """Display property list for the selected category."""
-        child = self.adv_content_frame.get_first_child()
+    def _refresh_system_content(self):
+        """Build the System Information page with hardware, OS, and processor details."""
+        child = self.sys_content_box.get_first_child()
         while child:
             nxt = child.get_next_sibling()
-            self.adv_content_frame.remove(child)
+            self.sys_content_box.remove(child)
             child = nxt
 
-        idx = self.adv_dropdown.get_selected()
-        gpu = self._get_current_gpu()
-        v_id = gpu.get("vendor_id", "")
-        d_id = gpu.get("device_id", "")
-        vk_dev = self._get_vulkan_device(v_id, d_id) or {}
+        if not hasattr(self, "_sys_live_labels"):
+            self._sys_live_labels = {}
+        else:
+            self._sys_live_labels.clear()
 
-        rows = []
-        if idx == 0:  # Vulkan
-            vk_exts = vk_dev.get("extensions", [])
-            has_rt = vk_dev.get("has_ray_tracing")
-            if has_rt is None:
-                exts_lower = [e.lower() for e in vk_exts]
-                has_rt = any("ray_tracing" in e or "ray_query" in e or "acceleration_structure" in e for e in exts_lower)
-            has_mesh = vk_dev.get("has_mesh_shader")
-            if has_mesh is None:
-                exts_lower = [e.lower() for e in vk_exts]
-                has_mesh = any("mesh_shader" in e for e in exts_lower)
+        sys_data = self.summary_data.get("system", {}) or {}
 
-            if not vk_exts and not has_rt and not has_mesh and os.path.exists(Filenames.vulkaninfo_output_file):
-                try:
-                    with open(Filenames.vulkaninfo_output_file, "r") as f:
-                        v_content = f.read()
-                    blocks = re.split(r'\nGPU\d+:', "\n" + v_content)
-                    target_block = None
-                    dev_name = vk_dev.get("name") or vk_dev.get("deviceName", "")
-                    dev_id = vk_dev.get("device_id") or d_id
-                    for b in blocks[1:]:
-                        if dev_name and dev_name in b:
-                            target_block = b
-                            break
-                        if dev_id and dev_id in b:
-                            target_block = b
-                            break
-                    if not target_block and blocks[1:]:
-                        target_block = blocks[1]
-                    if target_block:
-                        has_rt = (
-                            bool(re.search(r'\b(vk_khr_ray_tracing_pipeline|vk_khr_ray_query|vk_nv_ray_tracing|vk_khr_acceleration_structure)\b', target_block, re.I))
-                            or bool(re.search(r'\b(raytracingpipeline|rayquery|accelerationstructure|raytracing|raytracingpositionfetch)\s*=\s*true\b', target_block, re.I))
-                        )
-                        has_mesh = (
-                            bool(re.search(r'\b(vk_ext_mesh_shader|vk_nv_mesh_shader)\b', target_block, re.I))
-                            or bool(re.search(r'\b(meshshader|taskshader)\s*=\s*true\b', target_block, re.I))
-                        )
-                except Exception:
-                    pass
+        # Helpers
+        def _make_section(title, icon_name=None) -> Gtk.Box:
+            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            sect_box.add_css_class("gpuz-section-box")
 
-            rt_disp = "Supported" if has_rt else "Not Available"
-            mesh_disp = "Supported" if has_mesh else "Not Available"
+            hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            hdr_box.add_css_class("gpuz-section-header")
 
-            rows = [
-                ("Vulkan API Version", _clean_version(vk_dev.get("api_version") or self.summary_data.get("vulkan", {}).get("instance_version", "—"))),
-                ("Instance Version", _clean_version(self.summary_data.get("vulkan", {}).get("instance_version", "—"))),
-                ("Driver Name", (vk_dev.get("driver_name") or "—").strip()),
-                ("Driver Version", _clean_version(vk_dev.get("driver_version", "—"))),
-                ("Driver Info", (vk_dev.get("driver_info") or "—").strip()),
-                ("Device Type", _clean_device_type(vk_dev.get("device_type", "—"))),
-                ("Conformance Version", (vk_dev.get("conformance_version") or "—").strip()),
-                ("Vendor ID", (vk_dev.get("vendor_id") or "—").strip()),
-                ("Device ID", (vk_dev.get("device_id") or "—").strip()),
-                ("Device Extensions Count", str(vk_dev.get("extensions_count", 0))),
-                ("Supported Formats", str(vk_dev.get("formats_count", 0))),
-                ("Memory Types", str(vk_dev.get("memory_types_count", 0))),
-                ("Memory Heaps", str(vk_dev.get("memory_heaps_count", 0))),
-                ("Queue Families", str(vk_dev.get("queue_count", 0))),
-                ("Instance Extensions", str(self.summary_data.get("vulkan", {}).get("instance_extensions_count", 0))),
-                ("Instance Layers", str(self.summary_data.get("vulkan", {}).get("instance_layers_count", 0))),
-                ("Ray Tracing", rt_disp),
-                ("Mesh Shaders", mesh_disp),
-                ("Pipeline Cache UUID", (vk_dev.get("pipelineCacheUUID") or "—").strip()),
-                ("Device UUID", (vk_dev.get("device_uuid") or "—").strip()),
-                ("Driver UUID", (vk_dev.get("driver_uuid") or "—").strip()),
-            ]
-            if vk_dev.get("video_decode_profiles"):
-                rows.append(("Video Decode Profiles", "; ".join(vk_dev["video_decode_profiles"])))
-            if vk_dev.get("video_encode_profiles"):
-                rows.append(("Video Encode Profiles", "; ".join(vk_dev["video_encode_profiles"])))
-        elif idx == 1:  # OpenGL
-            gl_data = self.summary_data.get("opengl", {})
-            rows = [
-                ("OpenGL Vendor", gl_data.get("vendor", "—")),
-                ("Renderer", gl_data.get("renderer", "—")),
-                ("OpenGL Version", gl_data.get("version", "—")),
-                ("GLSL Version", gl_data.get("glsl_version", "—")),
-                ("Core Profile", gl_data.get("profile", "—")),
-                ("Direct Rendering", "Yes" if gl_data.get("direct_rendering") else "No"),
-                ("Extensions Count", str(gl_data.get("extensions_count", 0))),
-                ("Framebuffer Configs", str(gl_data.get("fbconfigs_count", 0))),
-            ]
-        elif idx == 2:  # OpenCL
-            cl_data = self.summary_data.get("opencl", {})
-            platforms = cl_data.get("platforms", [])
-            p_name = platforms[0].get("name", "—") if platforms else "—"
-            dev_name = platforms[0].get("devices", [{}])[0].get("name", "—") if platforms else "—"
-            cus = platforms[0].get("devices", [{}])[0].get("compute_units", "—") if platforms else "—"
-            rows = [
-                ("OpenCL Platform", p_name),
-                ("OpenCL Device", dev_name),
-                ("Compute Units", str(cus)),
-                ("Platform Count", str(len(platforms))),
-            ]
-        elif idx == 3:  # Vulkan Video
-            vv_data = self.summary_data.get("vulkan_video", {})
-            codecs = vv_data.get("codecs", [])
-            rows = [
-                ("Vulkan Video Supported", "Yes" if vv_data.get("supported") else "No"),
-                ("Supported Codecs", ", ".join(codecs) if codecs else "None detected"),
-            ]
-        elif idx == 4:  # VDPAU
-            vdpau_data = self.summary_data.get("vdpau", {})
-            rows = [
-                ("VDPAU Supported", "Yes" if vdpau_data.get("supported") else "No"),
-                ("VDPAU API Version", vdpau_data.get("api_version", "—")),
-                ("VDPAU Renderer", vdpau_data.get("renderer", "—")),
-            ]
-        else:  # System & OS
-            sys_data = self.summary_data.get("system", {})
-            rows = [
-                ("Operating System", sys_data.get("os", "—")),
-                ("Kernel Version", sys_data.get("kernel", "—")),
-                ("Desktop / Session", sys_data.get("desktop", "—")),
-                ("Processor", sys_data.get("processor", "—")),
-                ("Architecture", sys_data.get("architecture", "—")),
-            ]
+            if icon_name:
+                icon = Gtk.Image.new_from_icon_name(icon_name)
+                icon.set_pixel_size(14)
+                hdr_box.append(icon)
 
-        for label, val in rows:
-            r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            r.add_css_class("gpuz-sensor-row")
-            r.set_hexpand(True)
+            hdr = Gtk.Label(label=title)
+            hdr.add_css_class("gpuz-section-title")
+            hdr.set_halign(Gtk.Align.START)
+            hdr_box.append(hdr)
+            sect_box.append(hdr_box)
 
-            l_w = Gtk.Label(label=label)
-            l_w.add_css_class("gpuz-field-label")
-            l_w.set_halign(Gtk.Align.START)
-            l_w.set_hexpand(True)
-            r.append(l_w)
+            sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            sep.add_css_class("gpuz-section-sep")
+            sect_box.append(sep)
 
-            v_w = Gtk.Label(label=str(val))
-            v_w.add_css_class("gpuz-field-value")
-            v_w.set_halign(Gtk.Align.END)
-            v_w.set_selectable(True)
-            r.append(v_w)
+            return sect_box
 
-            self.adv_content_frame.append(r)
+        def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            row_box.set_homogeneous(True)
+            row_box.append(self._make_field_frame(l1, v1, live_key=live_key1, registry=self._sys_live_labels))
+            if l2 or v2:
+                row_box.append(self._make_field_frame(l2, v2, live_key=live_key2, registry=self._sys_live_labels))
+            else:
+                spacer = Gtk.Box()
+                spacer.set_hexpand(True)
+                row_box.append(spacer)
+            parent.append(row_box)
+
+        def _add_single_row(parent, label, value, live_key=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            cell = self._make_field_frame(label, value, live_key=live_key, registry=self._sys_live_labels)
+            cell.set_hexpand(True)
+            row_box.append(cell)
+            parent.append(row_box)
+
+        # ── Header: OS / System Summary Frame with Distro Logo ─────────
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        header_box.add_css_class("gpuz-header-frame")
+
+        os_str = sys_data.get("os", "")
+        distro_logo_path = self._get_distro_logo_path(os_str)
+        logo_loaded = False
+        if distro_logo_path and os.path.exists(distro_logo_path):
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(distro_logo_path, 46, 46, True)
+                logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
+                logo_img.set_size_request(46, 46)
+                logo_img.set_valign(Gtk.Align.CENTER)
+                header_box.append(logo_img)
+                logo_loaded = True
+            except Exception:
+                pass
+
+        if not logo_loaded:
+            sys_icon = Gtk.Image.new_from_icon_name("computer-symbolic")
+            sys_icon.set_pixel_size(44)
+            sys_icon.set_valign(Gtk.Align.CENTER)
+            header_box.append(sys_icon)
+
+        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        title_box.set_valign(Gtk.Align.CENTER)
+        sys_title = os_str if os_str else "Linux System"
+        title_lbl = Gtk.Label(label=sys_title)
+        title_lbl.add_css_class("gpuz-header-title")
+        title_lbl.set_halign(Gtk.Align.START)
+        title_lbl.set_wrap(True)
+        title_lbl.set_max_width_chars(32)
+        title_box.append(title_lbl)
+
+        host_model = sys_data.get("hardware_model") or sys_data.get("hostname") or "System Information"
+        kernel_ver = sys_data.get("kernel")
+        sub_text = f"{host_model} • Linux {kernel_ver}" if kernel_ver else host_model
+        host_lbl = Gtk.Label(label=sub_text)
+        host_lbl.add_css_class("dim-label")
+        host_lbl.set_halign(Gtk.Align.START)
+        title_box.append(host_lbl)
+
+        header_box.append(title_box)
+        self.sys_content_box.append(header_box)
+
+        # ── Section 1: Operating System & Session ───────────────────────
+        os_frame = _make_section("Operating System", "computer-symbolic")
+        _add_dual_row(os_frame, "OS Name", sys_data.get("os", "—"), "Kernel", sys_data.get("kernel", "—"))
+        _add_dual_row(os_frame, "Desktop", sys_data.get("desktop", "—"), "Windowing", sys_data.get("windowing", "—"))
+        _add_dual_row(os_frame, "Hostname", sys_data.get("hostname", "—"), "Uptime", sys_data.get("uptime", "—"),
+                      live_key2="sys_uptime")
+        self.sys_content_box.append(os_frame)
+
+        # ── Section 2: Motherboard & BIOS ──────────────────────────────
+        hw_frame = _make_section("Motherboard & BIOS", "preferences-desktop-display-symbolic")
+        hw_model = sys_data.get("hardware_model", "—")
+        if hw_model and hw_model != "—":
+            _add_single_row(hw_frame, "Hardware Model", hw_model)
+        _add_dual_row(hw_frame, "BIOS Version", sys_data.get("bios_version", "—"),
+                      "BIOS Date", sys_data.get("bios_date", "—"))
+        self.sys_content_box.append(hw_frame)
+
+        # ── Section 3: Processor (CPU) ──────────────────────────────────
+        cpu_frame = _make_section("Processor (CPU)", "cpu-symbolic")
+        cpu_name = sys_data.get("cpu", "—")
+        _add_single_row(cpu_frame, "Processor", cpu_name)
+        _add_dual_row(cpu_frame, "Architecture", sys_data.get("architecture", "—"),
+                      "Cores / Threads", sys_data.get("cpu_cores_threads", "—"))
+        cpu_cache = sys_data.get("cpu_cache", "—")
+        if cpu_cache and cpu_cache != "—":
+            _add_single_row(cpu_frame, "CPU Cache", cpu_cache)
+
+        cpu_u = get_realtime_cpu_usage()
+        cpu_t = get_realtime_cpu_temp()
+        cpu_t_disp = f"{cpu_t} °C" if cpu_t and cpu_t > 0 else "—"
+        _add_dual_row(cpu_frame, "CPU Load", cpu_u, "CPU Temperature", cpu_t_disp,
+                      live_key1="sys_cpu_usage", live_key2="sys_cpu_temp")
+        self.sys_content_box.append(cpu_frame)
+
+        # ── Section 4: Memory & Storage ────────────────────────────────
+        mem_frame = _make_section("Memory & Storage", "drive-harddisk-symbolic")
+        ram_tot = sys_data.get("ram", "—")
+        ram_u = get_realtime_ram_usage()
+        _add_dual_row(mem_frame, "Total RAM", ram_tot, "RAM Usage", ram_u,
+                      live_key2="sys_ram_usage")
+        disk_cap = sys_data.get("disk_capacity", "—")
+        if disk_cap and disk_cap != "—":
+            _add_single_row(mem_frame, "Storage", disk_cap)
+        self.sys_content_box.append(mem_frame)
 
     # -----------------------------------------------------------------------
     # Bottom Bar: Multi-GPU Switcher
@@ -1300,7 +1606,7 @@ class GpuZView(Gtk.Box):
             self.gpu_dropdown.set_selected(self.selected_gpu_idx)
 
         self._refresh_graphics_card_content()
-        self._refresh_advanced_content()
+        self._refresh_system_content()
         self._update_sensors()
 
     def _on_gpu_selected(self, dropdown, _pspec):
@@ -1308,7 +1614,6 @@ class GpuZView(Gtk.Box):
         if 0 <= idx < len(self.gpus):
             self.selected_gpu_idx = idx
             self._refresh_graphics_card_content()
-            self._refresh_advanced_content()
             self._update_sensors()
 
     # -----------------------------------------------------------------------

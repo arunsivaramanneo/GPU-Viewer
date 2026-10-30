@@ -545,6 +545,9 @@ def _parse_opencl(results: dict) -> dict:
                         "local_memory": "",
                         "vendor": "",
                         "vendor_id": "",
+                        "pci_address": "",
+                        "board_name": "",
+                        "device_id": "",
                         "max_clock": "",
                         "unified_memory": "",
                         "conformance_test": "",
@@ -572,6 +575,12 @@ def _parse_opencl(results: dict) -> dict:
                             dev["vendor"] = val
                         elif key == "Device Vendor ID":
                             dev["vendor_id"] = val
+                        elif "PCI" in key or "Topology" in key:
+                            dev["pci_address"] = val
+                        elif "Board Name" in key:
+                            dev["board_name"] = val
+                        elif key in ("Device ID", "Device ID (AMD)", "Device PCI ID"):
+                            dev["device_id"] = val
                         elif key == "Max clock frequency":
                             dev["max_clock"] = val
                         elif key == "Unified memory for Host and Device":
@@ -697,6 +706,9 @@ def _parse_opencl(results: dict) -> dict:
                         "workgroup_size": "",
                         "vendor": "",
                         "vendor_id": "",
+                        "pci_address": "",
+                        "board_name": "",
+                        "device_id": "",
                         "max_clock": "",
                         "unified_memory": "",
                         "conformance_test": "",
@@ -727,6 +739,12 @@ def _parse_opencl(results: dict) -> dict:
                         current_device["vendor"] = value
                     elif key == "Device Vendor ID":
                         current_device["vendor_id"] = value
+                    elif "PCI" in key or "Topology" in key:
+                        current_device["pci_address"] = value
+                    elif "Board Name" in key:
+                        current_device["board_name"] = value
+                    elif key in ("Device ID", "Device ID (AMD)", "Device PCI ID"):
+                        current_device["device_id"] = value
                     elif key == "Max clock frequency":
                         current_device["max_clock"] = value
                     elif key == "Unified memory for Host and Device":
