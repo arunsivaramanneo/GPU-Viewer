@@ -38,7 +38,7 @@ from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
 
 import const
 import Filenames
-from Common import getLogo, getGpuImage, get_gpu_stats, get_gpu_stats_for_index, fetchContentsFromCommand, CircularGauge, SparklineWidget
+from Common import getLogo, getGpuImage, get_gpu_stats, get_gpu_stats_for_index, fetchContentsFromCommand, CircularGauge, SparklineWidget, parse_vulkan_devices
 # Try to reuse the robust clinfo parser when available
 try:
     from OpenCL import ClinfoParser
@@ -77,12 +77,11 @@ def _parse_vulkan(results: dict) -> dict:
     except Exception:
         return data
 
-    # Parse each GPU block: GPU0, GPU1 …
-    gpu_blocks = re.split(r'\nGPU\d+:', "\n" + content)
-    # gpu_blocks[0] is the preamble (instance version etc.)
-    # gpu_blocks[1..] are per-device blocks
+    # Parse and deduplicate GPU blocks, including Flatpak/multi-ICD duplicates.
+    vulkan_devices = parse_vulkan_devices(content)
 
-    for block in gpu_blocks[1:]:
+    for device in vulkan_devices:
+        block = device["block"]
         device_name = ""
         api_version = ""
         driver_name = ""

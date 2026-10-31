@@ -27,7 +27,7 @@ Adw.init()
 import const
 import Filenames
 import subprocess
-from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo
+from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo, parse_vulkan_devices
 
 def VulkanVideo(videoTab):
 
@@ -338,31 +338,36 @@ def VulkanVideo(videoTab):
         GLib.idle_add(update_ui)
 
     def on_gpu_dropdown_changed(combo,dummy):
-        text = combo.props.selected_item
-        for gpu in range(len(gpu_list)):
-            if gpu_list[gpu] in text.get_string():
-                tabs_loading_count["count"] = 4
-                for tab in tab_spinners:
-                    tab_spinners[tab].start()
-                    tab_spinners[tab].set_visible(True)
-                    tab_content_containers[tab][1].set_visible(True)
-                    tab_content_containers[tab][0].set_visible(False)
-                    
-                import threading
-                def load_all_bg(selected_gpu):
-                    try:
-                        vProfiles(selected_gpu)
-                        vDefinitions(selected_gpu)
-                        vCapabitlies(selected_gpu)
-                        vFormats(selected_gpu)
-                    except Exception as e:
-                        import traceback
-                        traceback.print_exc()
-                threading.Thread(target=load_all_bg, args=(gpu,), daemon=True).start()
+        idx = combo.props.selected
+        if idx == Gtk.INVALID_LIST_POSITION:
+            idx = 0
+        if not gpu_index_map or idx >= len(gpu_index_map):
+            return
 
-                gpu_image = getGpuImage(gpu_list[gpu])
+        gpu = gpu_index_map[idx]
+        tabs_loading_count["count"] = 4
+        for tab in tab_spinners:
+            tab_spinners[tab].start()
+            tab_spinners[tab].set_visible(True)
+            tab_content_containers[tab][1].set_visible(True)
+            tab_content_containers[tab][0].set_visible(False)
+
+        import threading
+        def load_all_bg(selected_gpu):
+            try:
+                vProfiles(selected_gpu)
+                vDefinitions(selected_gpu)
+                vCapabitlies(selected_gpu)
+                vFormats(selected_gpu)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+        threading.Thread(target=load_all_bg, args=(gpu,), daemon=True).start()
+
+        if idx < len(gpu_list):
+            gpu_image = getGpuImage(gpu_list[idx])
+            if gpu_image is not None:
                 image_renderer.set_pixbuf(gpu_image)
-                break
 
 
 
@@ -381,7 +386,15 @@ def VulkanVideo(videoTab):
     h_box.append(label)
 
     # Create a list with some dummy device names
-    gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
+    try:
+        with open(Filenames.vulkaninfo_output_file, "r") as f:
+            vulkan_devices = parse_vulkan_devices(f.read())
+    except Exception:
+        vulkan_devices = []
+    gpu_list = [
+        device["name"] for device in vulkan_devices
+        if "Video Profiles" in device["block"]
+    ]
     
     # Create the gpu_dropdown, populated from the list of strings
     gpu_Dropdown = Gtk.DropDown()
@@ -391,18 +404,11 @@ def VulkanVideo(videoTab):
     gpu_Dropdown.set_margin_start(10)
     h_box.append(gpu_Dropdown)
     
-    unique_gpus = []
-    for i in range(len(gpu_list)):
-        # Re-use the cached vulkaninfo file — avoids spawning vulkaninfo once per GPU
-        check_cmd = (
-            f"cat {Filenames.vulkaninfo_output_file} "
-            f"| awk '/GPU{i}/{{flag=1;next}}/GPU{i+1}/{{flag=0}}flag' "
-            f"| grep 'Video Profiles'"
-        )
-        if fetchContentsFromCommand(check_cmd):
-            if gpu_list[i] not in unique_gpus:
-                unique_gpus.append(gpu_list[i])
-                gpu_Dropdown_list.append(gpu_list[i])
+    gpu_index_map = []
+    for device in vulkan_devices:
+        if "Video Profiles" in device["block"]:
+            gpu_Dropdown_list.append(device["name"])
+            gpu_index_map.append(device["index"])
     # Add the horizontal box to the main vertical box
     videoTab.append(h_box)
     

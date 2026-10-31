@@ -28,7 +28,7 @@ import threading
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, GObject, Adw, GdkPixbuf, Pango, GLib
-from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats
+from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats, parse_vulkan_devices
 import Filenames
 import re
 import os
@@ -1266,7 +1266,11 @@ def create_vulkan_tab_content(self):
         idx = gpu_dropdown.props.selected
         if idx == Gtk.INVALID_LIST_POSITION:
             idx = 0
-            
+        if not gpu_index_map:
+            return
+        if idx >= len(gpu_index_map):
+            idx = 0
+
         text = gpu_index_map[idx]
 
         # Reset and show the loading spinner
@@ -1299,7 +1303,7 @@ def create_vulkan_tab_content(self):
         background_thread.daemon = True
         background_thread.start()
 
-        gpu_image = getGpuImage(gpu_list[text])
+        gpu_image = getGpuImage(gpu_list[idx])
         if gpu_image is not None:
             image_renderer.set_pixbuf(gpu_image)
 
@@ -1331,8 +1335,14 @@ def create_vulkan_tab_content(self):
 
     # Create a list with some dummy device names
     if not hasattr(self, '_cached_gpu_list'):
-        self._cached_gpu_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_name_command)
-        self._cached_gpu_id_list = fetchContentsFromCommand(Filenames.fetch_vulkaninfo_ouput_command+Filenames.fetch_device_id_command)
+        try:
+            with open(Filenames.vulkaninfo_output_file, "r") as f:
+                vulkan_devices = parse_vulkan_devices(f.read())
+        except Exception:
+            vulkan_devices = []
+        self._cached_gpu_list = [device["name"] for device in vulkan_devices]
+        self._cached_gpu_id_list = [device["device_id"] for device in vulkan_devices]
+        self._cached_gpu_index_map = [device["index"] for device in vulkan_devices]
     gpu_list = self._cached_gpu_list
     gpu_id_list = self._cached_gpu_id_list
     
@@ -1342,13 +1352,9 @@ def create_vulkan_tab_content(self):
     gpu_Dropdown_list = Gtk.StringList()
     gpu_Dropdown.set_model(gpu_Dropdown_list)
     
-    gpu_index_map = []
-    unique_gpus = []
-    for i, gpu in enumerate(gpu_list):
-        if gpu not in unique_gpus:
-            unique_gpus.append(gpu)
-            gpu_index_map.append(i)
-            gpu_Dropdown_list.append(gpu)
+    gpu_index_map = list(getattr(self, '_cached_gpu_index_map', []))
+    for gpu in gpu_list:
+        gpu_Dropdown_list.append(gpu)
     gpu_Dropdown.set_margin_start(10)
     gpu_Dropdown.set_margin_end(10)
     h_box.append(gpu_Dropdown)
@@ -1529,12 +1535,13 @@ def create_vulkan_tab_content(self):
             idx = gpu_Dropdown.get_selected() 
             if idx == Gtk.INVALID_LIST_POSITION:
                 idx = 0
+            if not gpu_index_map:
+                return True
             if idx >= len(gpu_index_map):
                 idx = 0
 
-            real_idx = gpu_index_map[idx]
-            # Guard against gpu_id_list being shorter than gpu_list
-            if real_idx >= len(gpu_id_list) or not gpu_id_list[real_idx].strip():
+            # gpu_id_list is aligned with the unique dropdown entries.
+            if idx >= len(gpu_id_list) or not gpu_id_list[idx].strip():
                 mem_box.set_visible(False)
                 usage_box.set_visible(False)
                 temp_box.set_visible(False)
@@ -1543,7 +1550,7 @@ def create_vulkan_tab_content(self):
                 power_box.set_visible(False)
                 return True
             try:
-                device_id = int(gpu_id_list[real_idx].strip(), 16)
+                device_id = int(gpu_id_list[idx].strip(), 16)
             except (ValueError, IndexError):
                 return True
             num_devices = len(gpu_list)
@@ -2526,6 +2533,10 @@ def create_vulkan_tab_content(self):
         if child_name == "formats":
             idx = gpu_Dropdown.props.selected
             if idx == Gtk.INVALID_LIST_POSITION:
+                idx = 0
+            if not gpu_index_map:
+                return
+            if idx >= len(gpu_index_map):
                 idx = 0
             text = gpu_index_map[idx]
             if formats_loaded_for_gpu.get("gpu") != text:

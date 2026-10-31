@@ -30,6 +30,7 @@ import os
 import glob
 import configparser
 import math
+import re
 
 # Custom Cairo Circular Gauge / Speedometer for GPU Stats
 class CircularGauge(Gtk.DrawingArea):
@@ -936,6 +937,106 @@ def copyContentsFromFile(fileName):
 def fetchContentsFromCommand(command):
     process = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
     return process.communicate()[0].splitlines()
+
+def parse_vulkan_devices(content):
+    """
+    Parse vulkaninfo GPU blocks and remove duplicate Flatpak/multi-ICD views.
+
+    Physical and software devices are both retained. deviceUUID is the strongest
+    identity and prevents identical PCI hardware, including separate cards of
+    the same model, from being merged when UUIDs are available. For older output
+    without UUIDs, only software-device identities are safely deduplicated.
+    """
+    if not content:
+        return []
+
+    blocks = re.split(r"(?m)(?=^GPU\s*\d+\s*:)", content)
+    devices = []
+    for block in blocks:
+        match = re.match(r"(?m)^GPU\s*(\d+)\s*:\s*(.*)$", block)
+        if not match:
+            continue
+
+        gpu_index = int(match.group(1))
+        name = ""
+        vendor_id = ""
+        device_id = ""
+        device_uuid = ""
+        driver_name = ""
+        driver_uuid = ""
+        device_type = ""
+
+        for line in block.splitlines():
+            stripped = line.strip()
+            if "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+            if key == "deviceName":
+                name = value
+            elif key in ("vendorID", "vendorId"):
+                vendor_id = value
+            elif key in ("deviceID", "deviceId"):
+                device_id = value
+            elif key == "deviceUUID":
+                device_uuid = value
+            elif key == "driverName":
+                driver_name = value
+            elif key == "driverUUID":
+                driver_uuid = value
+            elif key == "deviceType":
+                device_type = value
+
+        if not name:
+            name = match.group(2).strip() or f"GPU {gpu_index}"
+
+        duplicate = False
+        for previous in devices:
+            previous_uuid = previous["device_uuid"]
+
+            if device_uuid and previous_uuid:
+                if device_uuid.upper() == previous_uuid.upper():
+                    duplicate = True
+                    break
+                continue
+
+            name_lower = name.lower()
+            previous_name = previous["name"].lower()
+            is_software = (
+                "llvmpipe" in name_lower
+                or "lavapipe" in name_lower
+                or "swiftshader" in name_lower
+                or "software" in device_type.lower()
+            )
+            previous_is_software = (
+                "llvmpipe" in previous_name
+                or "lavapipe" in previous_name
+                or "swiftshader" in previous_name
+                or "software" in previous["device_type"].lower()
+            )
+            if is_software and previous_is_software:
+                if (name_lower == previous_name
+                        and driver_name.lower() == previous["driver_name"].lower()):
+                    duplicate = True
+                    break
+
+        if duplicate:
+            continue
+
+        devices.append({
+            "index": gpu_index,
+            "name": name,
+            "vendor_id": vendor_id,
+            "device_id": device_id,
+            "device_uuid": device_uuid,
+            "driver_name": driver_name,
+            "driver_uuid": driver_uuid,
+            "device_type": device_type,
+            "block": block,
+        })
+
+    return devices
 
 def createMainFile(filename,command):
     with open(filename,"w") as file:
