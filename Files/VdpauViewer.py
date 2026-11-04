@@ -23,7 +23,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk,GObject,Gio,Adw
 Adw.init()
 
-from Common import createSubTab, create_scrollbar
+from Common import createSubTab, create_scrollbar, create_sidebar_toggle
 
 class DataObject(GObject.GObject):
     def __init__(self, column1: str,column2: str,column3: str,column4: str,column5: str):
@@ -460,7 +460,8 @@ def vdpauinfo(tab2):
 	split_view.set_sidebar(sidebar_page)
 	split_view.set_content(content_page)
     
-    # Add the split view to its new container
+	# Add the split view to its new container
+	create_sidebar_toggle(split_view_container, split_view)
 	split_view_container.append(split_view)
 
 	decoderCapabilities()

@@ -56,25 +56,35 @@ from SummaryViewer import (
 GPUZ_CSS = """
 .gpuz-container {
     background-color: @view_bg_color;
-    padding: 6px;
+    padding: 10px;
 }
 
 .gpuz-header-frame {
     border: 1px solid rgba(128, 128, 128, 0.22);
-    border-radius: 8px;
-    background-color: @card_bg_color;
-    padding: 8px 12px;
-    margin-bottom: 6px;
+    border-radius: 10px;
+    background-image: linear-gradient(
+        90deg,
+        alpha(@accent_bg_color, 0.12),
+        alpha(@card_bg_color, 0.95)
+    );
+    padding: 10px 14px;
+    margin-bottom: 8px;
 }
 
 .gpuz-header-title {
-    font-size: 13pt;
+    font-size: 15pt;
     font-weight: 700;
+    letter-spacing: 0.1px;
 }
 
 .gpuz-section-box {
     margin-top: 6px;
     margin-bottom: 6px;
+    padding: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.32);
+    border-radius: 10px;
+    background-color: @card_bg_color;
+    box-shadow: 0 2px 5px alpha(@window_fg_color, 0.08);
 }
 
 .gpuz-section-header {
@@ -92,7 +102,7 @@ GPUZ_CSS = """
 }
 
 .gpuz-section-sep {
-    opacity: 0.25;
+    opacity: 0.4;
     margin-top: 2px;
     margin-bottom: 6px;
 }
@@ -103,6 +113,7 @@ GPUZ_CSS = """
     border-radius: 6px;
     background-color: alpha(@window_fg_color, 0.025);
     margin: 2px 0;
+    transition: 150ms ease-in-out;
 }
 
 .gpuz-field-frame:hover {
@@ -120,13 +131,20 @@ GPUZ_CSS = """
 
 .gpuz-frame-content {
     padding: 3px 8px 5px 8px;
-    min-height: 24px;
+    min-height: 28px;
 }
 
 .gpuz-frame-value {
     font-size: 9.5pt;
     font-weight: 600;
     color: @window_fg_color;
+}
+
+.gpuz-card-frame {
+    border: 1px solid rgba(128, 128, 128, 0.18);
+    border-radius: 10px;
+    background-color: @card_bg_color;
+    padding: 4px 8px;
 }
 
 .gpuz-field-box {
@@ -137,24 +155,37 @@ GPUZ_CSS = """
     background-color: alpha(@window_fg_color, 0.04);
 }
 
-.gpuz-tech-badge {
-    border: 1px solid rgba(128, 128, 128, 0.25);
+.gpuz-api-checkbox {
+    border: 0;
     border-radius: 4px;
     padding: 4px 8px;
-    font-size: 8.5pt;
+    font-size: 9pt;
     font-weight: 600;
+    background-color: transparent;
+    opacity: 1;
+    min-height: 28px;
 }
 
-.gpuz-tech-supported {
-    background-color: alpha(#2ec27e, 0.15);
+.gpuz-api-supported {
     color: #2ec27e;
-    border-color: alpha(#2ec27e, 0.4);
 }
 
-.gpuz-tech-unsupported {
-    background-color: alpha(@window_fg_color, 0.04);
-    color: alpha(@window_fg_color, 0.4);
-    border-color: alpha(@window_fg_color, 0.1);
+.gpuz-api-supported check {
+    color: white;
+    background-color: #2ec27e;
+    border-color: #25a969;
+    -gtk-icon-size: 14px;
+}
+
+.gpuz-api-unsupported {
+    color: #e01b24;
+}
+
+.gpuz-api-unsupported check {
+    color: #e01b24;
+    background-color: #ffffff;
+    border-color: #e01b24;
+    -gtk-icon-size: 14px;
 }
 
 .gpuz-sensor-row {
@@ -175,8 +206,9 @@ GPUZ_CSS = """
 
 .gpuz-bottom-bar {
     border-top: 1px solid rgba(128, 128, 128, 0.2);
-    padding: 6px 10px;
-    background-color: alpha(@window_fg_color, 0.03);
+    padding: 8px 12px;
+    background-color: alpha(@card_bg_color, 0.96);
+    box-shadow: 0 -1px 4px alpha(@window_fg_color, 0.06);
 }
 """
 
@@ -218,6 +250,7 @@ class GpuZView(Gtk.Box):
         self.summary_data = summary_data or {}
         self.selected_gpu_idx = 0
         self.sensor_timer_id = 0
+        self.add_css_class("gpuz-container")
 
         # Inject GPU-Z CSS provider
         css_prov = Gtk.CssProvider()
@@ -666,12 +699,13 @@ class GpuZView(Gtk.Box):
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
+        self.card_scroll = scroll
 
         self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.card_content_box.set_margin_start(8)
-        self.card_content_box.set_margin_end(8)
-        self.card_content_box.set_margin_top(6)
-        self.card_content_box.set_margin_bottom(8)
+        self.card_content_box.set_margin_start(12)
+        self.card_content_box.set_margin_end(12)
+        self.card_content_box.set_margin_top(8)
+        self.card_content_box.set_margin_bottom(12)
 
         self._refresh_graphics_card_content()
         scroll.set_child(self.card_content_box)
@@ -748,9 +782,7 @@ class GpuZView(Gtk.Box):
             if l2 or v2:
                 row_box.append(self._make_field_frame(l2, v2, live_key=live_key2))
             else:
-                spacer = Gtk.Box()
-                spacer.set_hexpand(True)
-                row_box.append(spacer)
+                row_box.get_first_child().set_hexpand(True)
             parent.append(row_box)
 
         # Helper: build a full-width single-field row
@@ -1054,12 +1086,12 @@ class GpuZView(Gtk.Box):
         _add_single_row(vdpau_frame, "Renderer", vdpau_rend)
         self.card_content_box.append(vdpau_frame)
 
-        # ── API Support Badges ─────────────────────────────────────────
+        # ── API Support Checkboxes ─────────────────────────────────────
         tech_frame = _make_section("API Support", "preferences-system-symbolic")
 
         tech_flow = Gtk.FlowBox()
         tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
-        tech_flow.set_max_children_per_line(4)
+        tech_flow.set_max_children_per_line(6)
         tech_flow.set_min_children_per_line(2)
         tech_flow.set_row_spacing(6)
         tech_flow.set_column_spacing(6)
@@ -1146,22 +1178,23 @@ class GpuZView(Gtk.Box):
     _make_field_cell = _make_field_frame
 
     def _make_tech_badge(self, name: str, supported: bool) -> Gtk.Widget:
-        """Create a GPU-Z style capability checkbox / badge."""
-        badge = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        badge.add_css_class("gpuz-tech-badge")
+        """Create a non-interactive API-support checkbox."""
+        checkbox = Gtk.CheckButton(label=name)
+        checkbox.set_active(supported)
+        checkbox.set_hexpand(True)
+        checkbox.add_css_class("gpuz-api-checkbox")
         if supported:
-            badge.add_css_class("gpuz-tech-supported")
-            icon = Gtk.Image.new_from_icon_name("object-select-symbolic")
+            checkbox.add_css_class("gpuz-api-supported")
         else:
-            badge.add_css_class("gpuz-tech-unsupported")
-            icon = Gtk.Image.new_from_icon_name("window-close-symbolic")
-        icon.set_pixel_size(12)
-        badge.append(icon)
+            checkbox.add_css_class("gpuz-api-unsupported")
 
-        lbl = Gtk.Label(label=name)
-        lbl.set_halign(Gtk.Align.START)
-        badge.append(lbl)
-        return badge
+        checkbox.connect(
+            "toggled",
+            lambda button: button.set_active(supported)
+            if button.get_active() != supported
+            else None,
+        )
+        return checkbox
 
     # -----------------------------------------------------------------------
     # Tab 2: Sensors Telemetry
@@ -1171,15 +1204,22 @@ class GpuZView(Gtk.Box):
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
+        self.sensors_scroll = scroll
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        box.set_margin_start(10)
-        box.set_margin_end(10)
-        box.set_margin_top(8)
-        box.set_margin_bottom(12)
+        box.set_margin_start(12)
+        box.set_margin_end(12)
+        box.set_margin_top(10)
+        box.set_margin_bottom(14)
 
         sensors_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         sensors_frame.add_css_class("gpuz-card-frame")
+        sensors_grid = Gtk.Grid()
+        sensors_grid.set_column_spacing(12)
+        sensors_grid.set_row_spacing(2)
+        sensors_grid.set_column_homogeneous(True)
+        sensors_grid.set_hexpand(True)
+        sensors_frame.append(sensors_grid)
 
         self.sensor_widgets = {}
 
@@ -1201,7 +1241,7 @@ class GpuZView(Gtk.Box):
             ("ram_used", "System RAM Used", "", "ram", 0, 100),
         ]
 
-        for key, title, unit, gauge_type, min_v, max_v in sensor_defs:
+        for index, (key, title, unit, gauge_type, min_v, max_v) in enumerate(sensor_defs):
             row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
             row.add_css_class("gpuz-sensor-row")
             row.set_hexpand(True)
@@ -1221,7 +1261,7 @@ class GpuZView(Gtk.Box):
             sparkline = SparklineWidget(width=100, height=20, gauge_type=gauge_type)
             row.append(sparkline)
 
-            sensors_frame.append(row)
+            sensors_grid.attach(row, index % 2, index // 2, 1, 1)
             self.sensor_widgets[key] = {
                 "label": v_lbl,
                 "sparkline": sparkline,
@@ -1394,12 +1434,13 @@ class GpuZView(Gtk.Box):
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
+        self.system_scroll = scroll
 
         self.sys_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.sys_content_box.set_margin_start(8)
-        self.sys_content_box.set_margin_end(8)
-        self.sys_content_box.set_margin_top(6)
-        self.sys_content_box.set_margin_bottom(8)
+        self.sys_content_box.set_margin_start(12)
+        self.sys_content_box.set_margin_end(12)
+        self.sys_content_box.set_margin_top(8)
+        self.sys_content_box.set_margin_bottom(12)
 
         self._refresh_system_content()
         scroll.set_child(self.sys_content_box)
@@ -1453,9 +1494,7 @@ class GpuZView(Gtk.Box):
             if l2 or v2:
                 row_box.append(self._make_field_frame(l2, v2, live_key=live_key2, registry=self._sys_live_labels))
             else:
-                spacer = Gtk.Box()
-                spacer.set_hexpand(True)
-                row_box.append(spacer)
+                row_box.get_first_child().set_hexpand(True)
             parent.append(row_box)
 
         def _add_single_row(parent, label, value, live_key=None):
@@ -1617,6 +1656,14 @@ class GpuZView(Gtk.Box):
             self.selected_gpu_idx = idx
             self._refresh_graphics_card_content()
             self._update_sensors()
+            self._scroll_gpu_pages_to_top()
+
+    def _scroll_gpu_pages_to_top(self):
+        """Reset GPU-Z page positions when switching GPUs."""
+        for scroll_name in ("card_scroll", "sensors_scroll", "system_scroll"):
+            scroll = getattr(self, scroll_name, None)
+            if scroll is not None:
+                scroll.get_vadjustment().set_value(0)
 
     def _on_view_changed(self, _stack, _pspec):
         self._update_gpu_selector_visibility()

@@ -27,7 +27,7 @@ Adw.init()
 import const
 import Filenames
 import subprocess
-from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo, parse_vulkan_devices
+from Common import copyContentsFromFile, getGpuImage,create_scrollbar, getRamInGb,createSubTab,getDriverVersion,getDeviceSize, setMargin,fetchContentsFromCommand,getVulkanVersion,createMainFile,getLogo, parse_vulkan_devices, create_sidebar_toggle
 
 def VulkanVideo(videoTab):
 
@@ -651,6 +651,7 @@ def VulkanVideo(videoTab):
     split_view.set_content(content_page)
     
     # Add the split view to its new container
+    create_sidebar_toggle(split_view_container, split_view)
     split_view_container.append(split_view)
     
     # Add the split view container to the main vertical box

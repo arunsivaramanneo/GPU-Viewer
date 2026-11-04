@@ -28,7 +28,7 @@ import threading
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, GObject, Adw, GdkPixbuf, Pango, GLib
-from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats, parse_vulkan_devices
+from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bind_expander,bind2,copyContentsFromFile,getVulkanVersion,getDriverVersion,getRamInGb,getLogo,bind1,add_tree_node,add_tree_node2,ExpandDataObject,createMainFile, getGpuImage, setMargin,getDeviceSize,bind3,ExpandDataObject2,bind,bind4, get_gpu_stats, parse_vulkan_devices, create_sidebar_toggle
 import Filenames
 import re
 import os
@@ -2574,6 +2574,7 @@ def create_vulkan_tab_content(self):
     split_view.set_content(content_page)
     
     # Add the split view to its new container
+    create_sidebar_toggle(split_view_container, split_view)
     split_view_container.append(split_view)
     
     # Add the split view container to the main vertical box

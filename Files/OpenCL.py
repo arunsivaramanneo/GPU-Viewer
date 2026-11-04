@@ -23,7 +23,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk,Gio,Adw,GdkPixbuf
 
-from Common import setup_expander, createSubTab, create_scrollbar, bind_expander,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node,getGpuImage
+from Common import setup_expander, createSubTab, create_scrollbar, bind_expander,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node,getGpuImage, create_sidebar_toggle
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -689,6 +689,7 @@ def openCL(self, tab):
     split_view.set_content(content_page)
     
     # Add the split view to its new container
+    create_sidebar_toggle(split_view_container, split_view)
     split_view_container.append(split_view)
     
     # The Platform Drop Down

@@ -33,7 +33,7 @@ from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf,Pango
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab,getLogo
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab,getLogo, create_sidebar_toggle
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -1571,6 +1571,7 @@ def OpenGL(self, tab):
     split_view.set_sidebar(sidebar_page)
     split_view.set_content(content_page)
 
+    create_sidebar_toggle(opengl_box, split_view)
     opengl_box.append(split_view)
 
     sidebar_listbox.connect("row-activated", on_row_activated)
@@ -1579,4 +1580,3 @@ def OpenGL(self, tab):
     opengl_info()
 
     return tab
-

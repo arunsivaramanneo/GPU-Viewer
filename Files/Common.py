@@ -23,6 +23,34 @@ gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 
 from gi.repository import Gtk,GdkPixbuf,Gdk,Gio,GObject,Adw,GLib,Pango
+
+
+def create_sidebar_toggle(container: Gtk.Box, split_view: Adw.NavigationSplitView) -> Gtk.ToggleButton:
+    """Add a compact button that collapses and restores an API tab sidebar."""
+    toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+    toolbar.set_halign(Gtk.Align.END)
+    toolbar.set_margin_start(6)
+    toolbar.set_margin_end(6)
+    toolbar.set_margin_top(4)
+    toolbar.set_margin_bottom(2)
+
+    button = Gtk.ToggleButton()
+    button.set_icon_name("sidebar-show-symbolic")
+    button.set_tooltip_text("Hide sidebar")
+    button.add_css_class("flat")
+    button.add_css_class("sidebar-toggle")
+
+    def on_toggled(toggle):
+        hidden = toggle.get_active()
+        split_view.set_collapsed(hidden)
+        split_view.set_show_content(hidden)
+        toggle.set_icon_name("sidebar-hide-symbolic" if hidden else "sidebar-show-symbolic")
+        toggle.set_tooltip_text("Show sidebar" if hidden else "Hide sidebar")
+
+    button.connect("toggled", on_toggled)
+    toolbar.append(button)
+    container.append(toolbar)
+    return button
 import cairo as _cairo
 
 
