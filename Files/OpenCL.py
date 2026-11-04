@@ -235,11 +235,21 @@ def openCL(self, tab):
     def populate_store(store, props, skip_top=False, add_children=True):
         store.remove_all()
         for key, value, children in props:
-            if ("Extensions" in key or "Built-in kernels" in key or "Atomic" in key or "features" in key or "all versions" in key or "USM" in key) and "n/a" not in value.lower():
+            is_expandable_list = (
+                "Extensions" in key
+                or "Built-in kernels" in key
+                or "Atomic" in key
+                or "features" in key
+                or "all versions" in key
+                or "USM" in key
+                or "with version" in key
+                or key in ("SPIR-V extensions", "SPIR-V capabilities", "SPIRV extensions", "SPIRV capabilities")
+            )
+            if is_expandable_list and "n/a" not in value.lower():
                 # Handle long lists as expandable
                 all_children = []
                 if value:
-                    if "with Version" in key or "with version" in key or "features" in key or "all versions" in key or "IL" in key:
+                    if "with Version" in key or "with version" in key or "features" in key or "all versions" in key or "IL" in key or key in ("SPIR-V extensions", "SPIR-V capabilities", "SPIRV extensions", "SPIRV capabilities"):
                         if "  " in value:
                             parts = re.split(r'\s{2,}', value, maxsplit=1)
                             all_children.append(ExpandDataObject(parts[0].strip(), parts[1].strip()))
@@ -275,8 +285,74 @@ def openCL(self, tab):
                     store.append(toprow)
             else:
                 toprow = ExpandDataObject(key, value)
-                for sub_key, sub_val in children:
-                    toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                spirv_keys = {"SPIR-V extensions", "SPIR-V capabilities", "SPIRV extensions", "SPIRV capabilities"}
+                il_keys = {"IL version", "ILs with version"}
+                index = 0
+                while index < len(children):
+                    sub_key, sub_val = children[index][:2]
+
+                    if sub_key in il_keys:
+                        all_children = []
+                        if sub_key == "IL version" and sub_val:
+                            for il_value in sub_val.split():
+                                all_children.append(ExpandDataObject(il_value, ""))
+                        elif sub_key == "ILs with version":
+                            if sub_val:
+                                parts = re.split(r'\s{2,}', sub_val, maxsplit=1)
+                                if len(parts) == 2:
+                                    all_children.append(ExpandDataObject(parts[0].strip(), parts[1].strip()))
+                                else:
+                                    all_children.append(ExpandDataObject(sub_val.strip(), ""))
+
+                            index += 1
+                            while index < len(children) and children[index][0] == "SPIR-V":
+                                il_val = children[index][1]
+                                all_children.append(ExpandDataObject("SPIR-V", il_val.strip()))
+                                index += 1
+
+                        if sub_key == "IL version":
+                            il_row = ExpandDataObject(sub_key, str(len(all_children)))
+                            il_row.children = all_children
+                            toprow.children.append(il_row)
+                            index += 1
+                        else:
+                            il_row = ExpandDataObject(sub_key, str(len(all_children)))
+                            il_row.children = all_children
+                            toprow.children.append(il_row)
+
+                    elif sub_key in spirv_keys:
+                        section_children = []
+                        index += 1
+                        while index < len(children):
+                            next_key = children[index][0]
+                            if next_key in spirv_keys:
+                                break
+                            section_children.append((children[index][0], children[index][1]))
+                            index += 1
+
+                        all_children = []
+                        if sub_val:
+                            if " (" in sub_val and "capabilities" in sub_key.lower():
+                                left, right = sub_val.split(" (", 1)
+                                all_children.append(ExpandDataObject(left.strip(), "(" + right.strip()))
+                            else:
+                                all_children.append(ExpandDataObject(sub_val.strip(), ""))
+                        for child_key, child_val in section_children:
+                            if "capabilities" in sub_key.lower() and not child_val and " (" in child_key:
+                                left, right = child_key.split(" (", 1)
+                                all_children.append(ExpandDataObject(left.strip(), "(" + right.strip()))
+                            elif " (" in child_val and "capabilities" in sub_key.lower():
+                                left, right = child_val.split(" (", 1)
+                                all_children.append(ExpandDataObject(left.strip(), "(" + right.strip()))
+                            else:
+                                all_children.append(ExpandDataObject(child_key, child_val))
+
+                        spirv_row = ExpandDataObject(sub_key, str(len(all_children)))
+                        spirv_row.children = all_children
+                        toprow.children.append(spirv_row)
+                    else:
+                        toprow.children.append(ExpandDataObject(sub_key, sub_val))
+                        index += 1
                 store.append(toprow)
 
     def getDeviceDetails(value):
