@@ -27,6 +27,8 @@ glxinfo/vulkaninfo/clinfo with the combination of grep, CAT , AWK commands and
 displayed in the front-end. There is no hard OpenGL Programming involved, until
 glxinfo, vulkaninfo and clinfo works the GPU-viewer will also work
 
+<img width="1778" height="1294" alt="Screenshot From 2026-11-05 22-00-54" src="https://github.com/user-attachments/assets/f026f90f-1ebf-43ca-beef-a7052b4790d0" />
+
 Light Theme
 ![Screenshot From 2026-02-27 17-49-05](https://github.com/user-attachments/assets/2c8145dd-1e93-4c53-b69b-aecff3ada902)
 
