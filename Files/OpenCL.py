@@ -162,7 +162,8 @@ def openCL(self, tab):
             getDeviceQueueExecutionCapabilities(real_idx)
         
             gpu_image = getGpuImage(selected.get_string())
-            image_renderer.set_pixbuf(gpu_image)
+            if gpu_image is not None and image_renderer is not None:
+                image_renderer.set_pixbuf(gpu_image)
 
 
     def getDeviceNames(value):
@@ -170,7 +171,6 @@ def openCL(self, tab):
         
         platform = oclPlatforms[value]
         Devices_list = Gtk.StringList()
-        Devices_dropdown.set_model(Devices_list)
         
         oclDeviceNames = [d["name"] for d in platform["devices"]]
 
@@ -185,6 +185,11 @@ def openCL(self, tab):
                 unique_names.append(name)
                 gpu_index_map.append(i)
                 Devices_list.append(name)
+
+        Devices_dropdown.set_model(Devices_list)
+        if len(unique_names) > 0:
+            Devices_dropdown.set_selected(0)
+            selectDevice(Devices_dropdown, None)
 
     def getPlatfromDetails(value):
         if value >= len(oclPlatforms): return
@@ -357,24 +362,32 @@ def openCL(self, tab):
 
     def getDeviceDetails(value):
         platform_idx = platform_dropdown.props.selected
+        if platform_idx == Gtk.INVALID_LIST_POSITION or platform_idx < 0:
+            platform_idx = 0
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceDetails_Store, cats["Device Information"])
 
     def getDeviceMemoryImageDetails(value):
         platform_idx = platform_dropdown.props.selected
+        if platform_idx == Gtk.INVALID_LIST_POSITION or platform_idx < 0:
+            platform_idx = 0
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceMemoryImage_store, cats["Device Memory & Image Information"])
 
     def getDeviceVectorDetails(value):
         platform_idx = platform_dropdown.props.selected
+        if platform_idx == Gtk.INVALID_LIST_POSITION or platform_idx < 0:
+            platform_idx = 0
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceVector_store, cats["Device Vector Information"])
 
     def getDeviceExtensionDetails(value):
         platform_idx = platform_dropdown.props.selected
+        if platform_idx == Gtk.INVALID_LIST_POSITION or platform_idx < 0:
+            platform_idx = 0
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceExtensionDetails_Store, cats["Device Extensions with Version"], skip_top=True)
@@ -387,15 +400,17 @@ def openCL(self, tab):
 
     def getDeviceQueueExecutionCapabilities(value):
         platform_idx = platform_dropdown.props.selected
+        if platform_idx == Gtk.INVALID_LIST_POSITION or platform_idx < 0:
+            platform_idx = 0
         cats = get_device_categories(platform_idx, value)
         if cats:
             populate_store(DeviceQueueExecution_store, cats["Queue & Execution Capabilities"])
 
     def selectPlatform(dropdown,dummy):
-        selected =dropdown.props.selected_item
-        value = 0
-        if selected is not None:
-            value = dropdown.props.selected
+        selected = dropdown.props.selected_item
+        value = dropdown.props.selected
+        if value == Gtk.INVALID_LIST_POSITION or value < 0:
+            value = 0
         getDeviceNames(value)
         getPlatfromDetails(value)
 
@@ -679,7 +694,11 @@ def openCL(self, tab):
         content_stack.set_visible_child_name(child_name)
         
     sidebar_listbox.connect("row-activated", on_row_activated)
-    sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
+    sidebar_listbox.connect("row-selected", lambda lb, row: on_row_activated(lb, row) if row else None)
+    first_row = sidebar_listbox.get_row_at_index(0)
+    if first_row:
+        sidebar_listbox.select_row(first_row)
+        on_row_activated(sidebar_listbox, first_row)
 
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
     content_page = Adw.NavigationPage.new(content_stack, "Content")
@@ -762,7 +781,9 @@ def openCL(self, tab):
     setMargin(numberOfDevicesEntry,30,10,10)
 
     setMargin(platform_dropdown,30,10,10)
-    selectPlatform(platform_dropdown,0)
+    if platform_names:
+        platform_dropdown.set_selected(0)
+    selectPlatform(platform_dropdown, 0)
 
     # Apply pre-selection requested from the Summary "Open" button.
     # selectPlatform above populates Devices_dropdown; we now pick the right device.
@@ -772,6 +793,7 @@ def openCL(self, tab):
             model = Devices_dropdown.get_model()
             if model and _pending_gpu < model.get_n_items():
                 Devices_dropdown.set_selected(_pending_gpu)
+                selectDevice(Devices_dropdown, None)
         except Exception as _e:
             print(f"OpenCL GPU pre-selection error: {_e}")
         self._pending_gpu_index = None

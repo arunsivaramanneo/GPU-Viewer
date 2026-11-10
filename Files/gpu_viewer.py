@@ -19,6 +19,7 @@
 import sys, os
 
 os.environ["PYTHONSAFEPATH"] = "1"
+os.environ.setdefault("RUSTICL_ENABLE", "radeonsi")
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
@@ -86,7 +87,8 @@ def isOpenclSupported():
         clinfo_process.wait()
         clinfo_process.communicate()
     clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
-    return len(clinfo_output) > 10 and clinfo_process.returncode == 0 and "Device Name" in clinfo_output
+    clinfo_text = "".join(clinfo_output) if isinstance(clinfo_output, (list, tuple)) else str(clinfo_output)
+    return len(clinfo_output) > 10 and clinfo_process.returncode == 0 and "Device Name" in clinfo_text
 
 def isVdpauinfoSupported():
     with open(Filenames.vdpauinfo_output_file, "w") as file:
@@ -294,6 +296,8 @@ else:
             It toggles the Adw.StyleManager's color scheme.
             """
             self.theme_button.set_sensitive(False)
+            if getattr(self, "gpuz_view", None) is not None and hasattr(self.gpuz_view, "theme_btn"):
+                self.gpuz_view.theme_btn.set_sensitive(False)
             prefer_dark_theme = not self.config.get_theme_preference()
             self._apply_theme(prefer_dark_theme)
 
@@ -325,6 +329,10 @@ else:
             self._css_provider.load_from_file(fname)
             Gtk.StyleContext.add_provider_for_display(display, self._css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+            # Synchronize GPU-Z view theme if active
+            if getattr(self, "gpuz_view", None) is not None and hasattr(self.gpuz_view, "apply_theme"):
+                self.gpuz_view.apply_theme(state)
 
             # Update constants
             const.update_theme_constants(state)
@@ -615,6 +623,9 @@ else:
                     if hasattr(self, "summary_data") and self.summary_data:
                         self.gpuz_view.update_summary_data(self.summary_data)
 
+                if hasattr(self.gpuz_view, "apply_theme") and hasattr(self, "config"):
+                    self.gpuz_view.apply_theme(self.config.get_theme_preference())
+
                 if self.current_view_mode == "dashboard":
                     self._dashboard_width = self.window.get_width()
                     self._dashboard_height = self.window.get_height()
@@ -778,8 +789,19 @@ else:
                 """Build tab widgets on the main thread to avoid GTK thread issues."""
                 builder = self._tab_builders[page_name]
                 def _build_on_main():
-                    real_widget = builder()
-                    return _reveal_content(page_name, real_widget)
+                    try:
+                        real_widget = builder()
+                        return _reveal_content(page_name, real_widget)
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
+                        err_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
+                        err_box.set_valign(Gtk.Align.CENTER)
+                        err_box.set_halign(Gtk.Align.CENTER)
+                        lbl = Gtk.Label(label=f"Failed to load {page_name}: {e}")
+                        lbl.add_css_class("error")
+                        err_box.append(lbl)
+                        return _reveal_content(page_name, err_box)
                 GLib.idle_add(_build_on_main)
 
             def _reveal_content(page_name, real_widget):
@@ -895,6 +917,8 @@ else:
 
             if hasattr(self, 'theme_button') and self.theme_button:
                 self.theme_button.set_sensitive(True)
+            if getattr(self, "gpuz_view", None) is not None and hasattr(self.gpuz_view, "theme_btn"):
+                self.gpuz_view.theme_btn.set_sensitive(True)
             if hasattr(self, 'search_toggle') and self.search_toggle:
                 self.search_toggle.set_sensitive(True)
             if hasattr(self, 'refresh_menu_button') and self.refresh_menu_button:

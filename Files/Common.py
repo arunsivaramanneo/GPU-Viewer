@@ -1358,17 +1358,13 @@ class ExpandDataObject(GObject.GObject):
         self.children = []
 
 def add_tree_node(item):
-    if not (item):
-            print("no item")
-            return model
+    if not item:
+        return None
     else:        
         if type(item) == Gtk.TreeListRow:
             item = item.get_item()
 
-            print("converteu")
-            print(item)  
-            
-        if not item.children:
+        if not item or not item.children:
             return None
         store = Gio.ListStore.new(ExpandDataObject)
         for child in item.children:

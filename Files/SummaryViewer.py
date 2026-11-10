@@ -2346,9 +2346,7 @@ def _open_card_in_separate_window(title: str, icon_name: str, rows: list = None,
             card_container.append(rw)
             popout_widgets[r_title] = rw
     elif not supported:
-        no_row = Adw.ActionRow()
-        no_row.set_title("Status")
-        no_row.set_subtitle("This subsystem was not detected on your system.")
+        no_row = _make_action_row("Status", "This subsystem was not detected on your system.")
         card_container.append(no_row)
     elif content_widget is not None:
         card_container.append(content_widget)
@@ -2815,9 +2813,7 @@ def _make_card(title: str, icon_name: str, rows: list,
     if content_widget is not None and supported:
         card_box.append(content_widget)
     elif not supported:
-        no_row = Adw.ActionRow()
-        no_row.set_title("Status")
-        no_row.set_subtitle("This subsystem was not detected on your system.")
+        no_row = _make_action_row("Status", "This subsystem was not detected on your system.")
         card_box.append(no_row)
     else:
         for row_title, row_subtitle in rows:

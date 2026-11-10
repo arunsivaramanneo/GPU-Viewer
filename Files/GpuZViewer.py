@@ -53,117 +53,124 @@ from SummaryViewer import (
 # GPU-Z CSS Styling
 # ---------------------------------------------------------------------------
 
-GPUZ_CSS = """
+def get_gpuz_css(is_dark: bool = True) -> str:
+    """Return GPU-Z CSS tailored to match the application dashboard theme."""
+    if is_dark:
+        return """
 .gpuz-container {
-    background-color: @view_bg_color;
-    padding: 10px;
+    background-color: #222222;
+    color: #ffffff;
+    padding: 6px;
 }
 
 .gpuz-header-frame {
-    border: 1px solid rgba(128, 128, 128, 0.22);
-    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
     background-image: linear-gradient(
         90deg,
-        alpha(@accent_bg_color, 0.12),
-        alpha(@card_bg_color, 0.95)
+        rgba(36, 95, 218, 0.18),
+        #242429
     );
-    padding: 10px 14px;
-    margin-bottom: 8px;
+    background-color: #242429;
+    padding: 6px 10px;
+    margin-bottom: 4px;
 }
 
 .gpuz-header-title {
-    font-size: 15pt;
+    font-size: 13pt;
     font-weight: 700;
+    color: #ffffff;
     letter-spacing: 0.1px;
 }
 
 .gpuz-section-box {
-    margin-top: 6px;
-    margin-bottom: 6px;
-    padding: 10px;
-    border: 1px solid rgba(128, 128, 128, 0.32);
-    border-radius: 10px;
-    background-color: @card_bg_color;
-    box-shadow: 0 2px 5px alpha(@window_fg_color, 0.08);
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background-color: #242429;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .gpuz-section-header {
-    margin-top: 4px;
-    margin-bottom: 2px;
+    margin-top: 1px;
+    margin-bottom: 1px;
     padding-left: 2px;
 }
 
 .gpuz-section-title {
-    font-size: 8.5pt;
+    font-size: 8pt;
     font-weight: 800;
-    color: @accent_color;
-    letter-spacing: 0.8px;
+    color: #78aeed;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
 }
 
 .gpuz-section-sep {
-    opacity: 0.4;
-    margin-top: 2px;
-    margin-bottom: 6px;
+    background-color: rgba(255, 255, 255, 0.10);
+    opacity: 0.35;
+    margin-top: 1px;
+    margin-bottom: 3px;
 }
 
 /* Classic GTK Frame for each field */
 .gpuz-field-frame {
-    border: 1px solid rgba(128, 128, 128, 0.28);
-    border-radius: 6px;
-    background-color: alpha(@window_fg_color, 0.025);
-    margin: 2px 0;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 5px;
+    background-color: #1a1a1e;
+    margin: 1px 0;
     transition: 150ms ease-in-out;
 }
 
 .gpuz-field-frame:hover {
-    border-color: alpha(@accent_color, 0.45);
-    background-color: alpha(@window_fg_color, 0.045);
+    border-color: rgba(120, 174, 237, 0.45);
+    background-color: #222228;
 }
 
 .gpuz-frame-label {
-    font-size: 8pt;
+    font-size: 7.5pt;
     font-weight: 700;
-    color: alpha(@window_fg_color, 0.72);
-    padding: 0 4px;
-    margin-left: 6px;
+    color: rgba(255, 255, 255, 0.70);
+    padding: 0 3px;
+    margin-left: 4px;
 }
 
 .gpuz-frame-content {
-    padding: 3px 8px 5px 8px;
-    min-height: 28px;
+    padding: 1px 6px 3px 6px;
+    min-height: 20px;
 }
 
 .gpuz-frame-value {
-    font-size: 9.5pt;
+    font-size: 9pt;
     font-weight: 600;
-    color: @window_fg_color;
+    color: #ffffff;
 }
 
 .gpuz-card-frame {
-    border: 1px solid rgba(128, 128, 128, 0.18);
-    border-radius: 10px;
-    background-color: @card_bg_color;
-    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background-color: #242429;
+    padding: 3px 6px;
 }
 
 .gpuz-field-box {
-    border: 1px solid rgba(128, 128, 128, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 4px;
-    padding: 3px 8px;
-    min-height: 22px;
-    background-color: alpha(@window_fg_color, 0.04);
+    padding: 2px 6px;
+    min-height: 20px;
+    background-color: #1a1a1e;
 }
 
 .gpuz-api-checkbox {
     border: 0;
     border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 9pt;
+    padding: 2px 5px;
+    font-size: 8.5pt;
     font-weight: 600;
     background-color: transparent;
     opacity: 1;
-    min-height: 28px;
+    min-height: 22px;
 }
 
 .gpuz-api-supported {
@@ -174,7 +181,178 @@ GPUZ_CSS = """
     color: white;
     background-color: #2ec27e;
     border-color: #25a969;
-    -gtk-icon-size: 14px;
+    -gtk-icon-size: 13px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+.gpuz-api-unsupported {
+    color: #e01b24;
+}
+
+.gpuz-api-unsupported check {
+    color: #e01b24;
+    background-color: #281818;
+    border-color: #e01b24;
+    -gtk-icon-size: 13px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+.gpuz-sensor-row {
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gpuz-sensor-title {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.gpuz-sensor-val {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #78aeed;
+    font-family: monospace;
+}
+
+.gpuz-bottom-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 5px 10px;
+    background-color: #1e1e22;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
+}
+"""
+    else:
+        return """
+.gpuz-container {
+    background-color: #dcdcdc;
+    color: rgba(0, 0, 0, 0.87);
+    padding: 6px;
+}
+
+.gpuz-header-frame {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-image: linear-gradient(
+        90deg,
+        rgba(36, 95, 218, 0.10),
+        #ffffff
+    );
+    background-color: #ffffff;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+}
+
+.gpuz-header-title {
+    font-size: 13pt;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.87);
+    letter-spacing: 0.1px;
+}
+
+.gpuz-section-box {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding: 6px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.gpuz-section-header {
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-left: 2px;
+}
+
+.gpuz-section-title {
+    font-size: 8pt;
+    font-weight: 800;
+    color: #1c71d8;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.gpuz-section-sep {
+    background-color: rgba(0, 0, 0, 0.10);
+    opacity: 0.35;
+    margin-top: 1px;
+    margin-bottom: 3px;
+}
+
+/* Classic GTK Frame for each field */
+.gpuz-field-frame {
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 5px;
+    background-color: #f6f6f8;
+    margin: 1px 0;
+    transition: 150ms ease-in-out;
+}
+
+.gpuz-field-frame:hover {
+    border-color: rgba(28, 113, 216, 0.45);
+    background-color: #eef4fc;
+}
+
+.gpuz-frame-label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.65);
+    padding: 0 3px;
+    margin-left: 4px;
+}
+
+.gpuz-frame-content {
+    padding: 1px 6px 3px 6px;
+    min-height: 20px;
+}
+
+.gpuz-frame-value {
+    font-size: 9pt;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.gpuz-card-frame {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 3px 6px;
+}
+
+.gpuz-field-box {
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 4px;
+    padding: 2px 6px;
+    min-height: 20px;
+    background-color: #f6f6f8;
+}
+
+.gpuz-api-checkbox {
+    border: 0;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    background-color: transparent;
+    opacity: 1;
+    min-height: 22px;
+}
+
+.gpuz-api-supported {
+    color: #2ec27e;
+}
+
+.gpuz-api-supported check {
+    color: white;
+    background-color: #2ec27e;
+    border-color: #25a969;
+    -gtk-icon-size: 13px;
+    min-width: 14px;
+    min-height: 14px;
 }
 
 .gpuz-api-unsupported {
@@ -185,32 +363,39 @@ GPUZ_CSS = """
     color: #e01b24;
     background-color: #ffffff;
     border-color: #e01b24;
-    -gtk-icon-size: 14px;
+    -gtk-icon-size: 13px;
+    min-width: 14px;
+    min-height: 14px;
 }
 
 .gpuz-sensor-row {
-    padding: 4px 6px;
-    border-bottom: 1px solid rgba(128, 128, 128, 0.12);
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .gpuz-sensor-title {
-    font-size: 9.5pt;
+    font-size: 9pt;
     font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
 }
 
 .gpuz-sensor-val {
-    font-size: 9.5pt;
+    font-size: 9pt;
     font-weight: 700;
+    color: #1c71d8;
     font-family: monospace;
 }
 
 .gpuz-bottom-bar {
-    border-top: 1px solid rgba(128, 128, 128, 0.2);
-    padding: 8px 12px;
-    background-color: alpha(@card_bg_color, 0.96);
-    box-shadow: 0 -1px 4px alpha(@window_fg_color, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 5px 10px;
+    background-color: #ebebed;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
 }
 """
+
+
+GPUZ_CSS = get_gpuz_css(True)
 
 
 def _clean_device_type(raw_type: str) -> str:
@@ -250,18 +435,9 @@ class GpuZView(Gtk.Box):
         self.summary_data = summary_data or {}
         self.selected_gpu_idx = 0
         self.sensor_timer_id = 0
+        self._css_provider = None
+        self.theme_btn = None
         self.add_css_class("gpuz-container")
-
-        # Inject GPU-Z CSS provider
-        css_prov = Gtk.CssProvider()
-        css_prov.load_from_data(GPUZ_CSS.encode("utf-8"))
-        display = Gdk.Display.get_default()
-        if display:
-            Gtk.StyleContext.add_provider_for_display(
-                display,
-                css_prov,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-            )
 
         self.set_vexpand(True)
         self.set_hexpand(True)
@@ -288,14 +464,15 @@ class GpuZView(Gtk.Box):
 
         # Theme toggle on top right
         if hasattr(self.app, "_on_theme_button_clicked"):
-            theme_btn = Gtk.Button()
-            theme_btn.set_icon_name("weather-clear-night-symbolic")
-            theme_btn.add_css_class("flat")
-            theme_btn.set_tooltip_text("Toggle Dark / Light Theme")
-            theme_btn.connect("clicked", self.app._on_theme_button_clicked)
-            self.header_bar.pack_end(theme_btn)
+            self.theme_btn = Gtk.Button()
+            self.theme_btn.add_css_class("flat")
+            self.theme_btn.connect("clicked", self._on_theme_btn_clicked)
+            self.header_bar.pack_end(self.theme_btn)
 
         self.append(self.header_bar)
+
+        # Apply initial theme matching dashboard
+        self.apply_theme()
 
         # Extract GPUs
         self.gpus = self._extract_gpu_list()
@@ -331,6 +508,36 @@ class GpuZView(Gtk.Box):
 
         # Start sensor polling
         self._start_sensor_polling()
+
+    def _on_theme_btn_clicked(self, button):
+        if hasattr(self.app, "_on_theme_button_clicked"):
+            self.app._on_theme_button_clicked(button)
+
+    def apply_theme(self, is_dark: bool = None):
+        """Synchronize GPU-Z styling and theme toggle with the application theme preference."""
+        if is_dark is None:
+            is_dark = self.app.config.get_theme_preference() if (self.app and hasattr(self.app, 'config')) else True
+        self.is_dark = is_dark
+        if hasattr(self, 'theme_btn') and self.theme_btn:
+            self.theme_btn.set_icon_name("display-brightness-symbolic" if is_dark else "weather-clear-night-symbolic")
+            self.theme_btn.set_tooltip_text("Switch to Light Theme" if is_dark else "Switch to Dark Theme")
+            self.theme_btn.set_sensitive(True)
+
+        css_data = get_gpuz_css(is_dark)
+        display = Gdk.Display.get_default()
+        if hasattr(self, '_css_provider') and self._css_provider and display:
+            try:
+                Gtk.StyleContext.remove_provider_for_display(display, self._css_provider)
+            except Exception:
+                pass
+        self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_data(css_data.encode("utf-8"))
+        if display:
+            Gtk.StyleContext.add_provider_for_display(
+                display,
+                self._css_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_USER,
+            )
 
     # -----------------------------------------------------------------------
     # Multi-GPU List & Data Helpers
@@ -443,16 +650,16 @@ class GpuZView(Gtk.Box):
                     pass
         return None
 
-    def _get_opencl_device_for_gpu(self, gpu: dict) -> tuple[dict | None, dict | None]:
+    def _get_all_opencl_devices_for_gpu(self, gpu: dict) -> list[tuple[dict, dict]]:
         """
-        Find and return the matching (platform, device) tuple for the specified GPU dict.
+        Find and return ALL matching (platform, device) tuples for the specified GPU dict.
         Matches based on PCIe topology, Vendor ID, Device ID, device name, and device type.
-        Returns (None, None) if no matching OpenCL device is found.
+        Returns a list of (platform, device) tuples sorted by match score descending.
         """
         cl_data = self.summary_data.get("opencl", {})
         platforms = cl_data.get("platforms", [])
         if not platforms or not gpu:
-            return None, None
+            return []
 
         candidates = []
         for plat in platforms:
@@ -460,7 +667,7 @@ class GpuZView(Gtk.Box):
                 candidates.append((plat, dev))
 
         if not candidates:
-            return None, None
+            return []
 
         v_id = gpu.get("vendor_id", "")
         d_id = gpu.get("device_id", "")
@@ -506,8 +713,7 @@ class GpuZView(Gtk.Box):
         if gpu in same_vendor_gpus:
             relative_gpu_idx = same_vendor_gpus.index(gpu)
 
-        best_candidate = None
-        best_score = -999
+        scored_candidates = []
 
         for plat, dev in candidates:
             score = 0
@@ -524,6 +730,8 @@ class GpuZView(Gtk.Box):
                 clean_pci = re.sub(r'^[0-9a-f]+:', '', pci_addr)
                 if clean_pci in dev_pci or pci_addr in dev_pci:
                     score += 300
+                else:
+                    score -= 200
 
             # 2. Vendor ID / Name
             dev_v = dev.get("vendor_id", "")
@@ -567,6 +775,8 @@ class GpuZView(Gtk.Box):
             if gpu_d_int is not None and dev_d_int is not None:
                 if gpu_d_int == dev_d_int:
                     score += 150
+                else:
+                    score -= 300
 
             # 4. Name substrings
             d_name = (dev.get("name") or "").lower()
@@ -582,15 +792,26 @@ class GpuZView(Gtk.Box):
                 if cand_idx == relative_gpu_idx:
                     score += 40
 
-            if score > best_score:
-                best_score = score
-                best_candidate = (plat, dev)
+            if score > 0:
+                scored_candidates.append((score, (plat, dev)))
 
-        if best_candidate and best_score > 0:
-            return best_candidate
+        if scored_candidates:
+            scored_candidates.sort(key=lambda x: x[0], reverse=True)
+            return [cand for _, cand in scored_candidates]
 
         if len(self.gpus) == 1 and len(candidates) == 1:
-            return candidates[0]
+            dev_type = (candidates[0][1].get("device_type") or "").upper()
+            if "GPU" in dev_type or "ACCELERATOR" in dev_type:
+                return [candidates[0]]
+
+        return []
+
+    def _get_opencl_device_for_gpu(self, gpu: dict) -> tuple[dict | None, dict | None]:
+        """Find and return the best matching (platform, device) tuple for the GPU."""
+        all_devs = self._get_all_opencl_devices_for_gpu(gpu)
+        if all_devs:
+            return all_devs[0]
+        return None, None
 
         return None, None
 
@@ -701,11 +922,11 @@ class GpuZView(Gtk.Box):
         scroll.set_vexpand(True)
         self.card_scroll = scroll
 
-        self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.card_content_box.set_margin_start(12)
-        self.card_content_box.set_margin_end(12)
-        self.card_content_box.set_margin_top(8)
-        self.card_content_box.set_margin_bottom(12)
+        self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.card_content_box.set_margin_start(8)
+        self.card_content_box.set_margin_end(8)
+        self.card_content_box.set_margin_top(6)
+        self.card_content_box.set_margin_bottom(8)
 
         self._refresh_graphics_card_content()
         scroll.set_child(self.card_content_box)
@@ -742,170 +963,13 @@ class GpuZView(Gtk.Box):
         vv_data   = self.summary_data.get("vulkan_video", {})
         vdpau_data = self.summary_data.get("vdpau",       {})
 
-        # ── Header Box: Logo + Name ────────────────────────────────────
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
-        header_box.add_css_class("gpuz-header-frame")
+        # ── Pre-compute API Capabilities & Devices ──────────────────────
+        # OpenCL matching
+        matched_devices = self._get_all_opencl_devices_for_gpu(gpu)
+        has_gpu_opencl = bool(matched_devices)
 
-        logo_path = self._get_vendor_logo_path(v_id)
-        try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 46, 46, True)
-            logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
-            logo_img.set_size_request(46, 46)
-            header_box.append(logo_img)
-        except Exception:
-            pass
-
-        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        title_box.set_valign(Gtk.Align.CENTER)
-        name_lbl = Gtk.Label(label=gpu_name)
-        name_lbl.add_css_class("gpuz-header-title")
-        name_lbl.set_halign(Gtk.Align.START)
-        name_lbl.set_wrap(True)
-        name_lbl.set_max_width_chars(32)
-        title_box.append(name_lbl)
-
-        sub_text = f"Card: {gpu.get('card_name', 'card0')} • PCI: {gpu.get('pci_address', '—')}"
-        sub_lbl = Gtk.Label(label=sub_text)
-        sub_lbl.add_css_class("dim-label")
-        sub_lbl.set_halign(Gtk.Align.START)
-        title_box.append(sub_lbl)
-
-        header_box.append(title_box)
-        self.card_content_box.append(header_box)
-
-        # Helper: build a 2-column dual-field row inside a parent box
-        def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            row_box.set_hexpand(True)
-            row_box.set_homogeneous(True)
-            row_box.append(self._make_field_frame(l1, v1, live_key=live_key1))
-            if l2 or v2:
-                row_box.append(self._make_field_frame(l2, v2, live_key=live_key2))
-            else:
-                row_box.get_first_child().set_hexpand(True)
-            parent.append(row_box)
-
-        # Helper: build a full-width single-field row
-        def _add_single_row(parent, label, value, live_key=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            row_box.set_hexpand(True)
-            cell = self._make_field_frame(label, value, live_key=live_key)
-            cell.set_hexpand(True)
-            row_box.append(cell)
-            parent.append(row_box)
-
-        # Helper: section header with optional icon
-        def _make_section(title, icon_name=None) -> Gtk.Box:
-            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            sect_box.add_css_class("gpuz-section-box")
-
-            hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            hdr_box.add_css_class("gpuz-section-header")
-
-            if icon_name:
-                icon = Gtk.Image.new_from_icon_name(icon_name)
-                icon.set_pixel_size(14)
-                hdr_box.append(icon)
-
-            hdr = Gtk.Label(label=title)
-            hdr.add_css_class("gpuz-section-title")
-            hdr.set_halign(Gtk.Align.START)
-            hdr_box.append(hdr)
-            sect_box.append(hdr_box)
-
-            sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-            sep.add_css_class("gpuz-section-sep")
-            sect_box.append(sep)
-
-            return sect_box
-
-        # ── GPU Hardware Stats ─────────────────────────────────────────
-        hw_frame = _make_section("GPU Hardware", "video-display-symbolic")
-
-        dev_id_display = f"{v_id.upper()} / {d_id.upper()}" if v_id or d_id else "—"
-        driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
-        if vk_dev.get("driver_version"):
-            driver_val += f"  {vk_dev['driver_version']}"
-        bios_val = gpu.get("vbios") or "—"
-        bus_interface = (
-            f"{gpu.get('pcie_link_width', '')}  @  {gpu.get('pcie_link_speed', '—')}".strip(" @")
-            if gpu.get("pcie_link_width") else "—"
-        )
-
-        vram_tot = stats.get("mem_total", 0)
-        vram_size_display = f"{vram_tot} MB" if vram_tot > 0 else "—"
-        vram_type = stats.get("vram_type") or gpu.get("vram_type") or "—"
-        vram_used = stats.get("mem_used", 0)
-        vram_used_display = f"{vram_used} MB" if vram_used is not None and vram_used >= 0 else "—"
-
-        core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get("clock_current", 0) > 0 else "—"
-        boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get("clock_max", 0) > 0 else "—"
-        mem_clk = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
-        mem_clk_disp = f"{mem_clk} MHz" if mem_clk > 0 else "—"
-
-        temp_val = stats.get("temp", 0)
-        temp_disp = f"{temp_val} °C" if temp_val is not None and temp_val > 0 else "—"
-        power_val = stats.get("power_usage", -1)
-        power_disp = f"{power_val} W" if power_val is not None and power_val >= 0 else "—"
-        usage_val = stats.get("usage", -1)
-        usage_disp = f"{usage_val} %" if usage_val is not None and usage_val >= 0 else "—"
-        
-        fan_val = stats.get("fan_speed", -1)
-        fan_rpm = stats.get("fan_rpm", -1)
-        if fan_val is not None and fan_val >= 0 and fan_rpm is not None and fan_rpm > 0:
-            fan_disp = f"{fan_val} % ({fan_rpm} RPM)"
-        elif fan_val is not None and fan_val >= 0:
-            fan_disp = f"{fan_val} %"
-        elif fan_rpm is not None and fan_rpm >= 0:
-            fan_disp = f"{fan_rpm} RPM"
-        else:
-            fan_disp = "—"
-
-        gtt_used = stats.get("gtt_used", 0)
-        gtt_total = stats.get("gtt_total", 0)
-        if gtt_total > 0:
-            gtt_disp = f"{gtt_used} / {gtt_total} MB"
-        elif gtt_used is not None and gtt_used >= 0:
-            gtt_disp = f"{gtt_used} MB"
-        else:
-            gtt_disp = "—"
-
-        _add_dual_row(hw_frame, "Device ID",    dev_id_display,   "Driver",      driver_val)
-        _add_dual_row(hw_frame, "VBIOS",        bios_val,         "PCIe Link",   bus_interface)
-        _add_dual_row(hw_frame, "VRAM Total",   vram_size_display,"VRAM Type",   vram_type)
-        _add_dual_row(hw_frame, "VRAM Used",    vram_used_display,"GPU Usage",   usage_disp,
-                      live_key1="hw_vram_used", live_key2="hw_usage")
-        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Clock",   core_clk,
-                      live_key1="hw_gtt", live_key2="hw_clock")
-        _add_dual_row(hw_frame, "Boost Clock",  boost_clk,        "Memory Clock",mem_clk_disp,
-                      live_key2="hw_mem_clock")
-        _add_dual_row(hw_frame, "Temperature",  temp_disp,        "Power Draw",  power_disp,
-                      live_key1="hw_temp", live_key2="hw_power")
-        _add_dual_row(hw_frame, "Fan Speed",    fan_disp,         "",            "",
-                      live_key1="hw_fan")
-        self.card_content_box.append(hw_frame)
-
-        # ── Vulkan ────────────────────────────────────────────────────
-        vk_frame = _make_section("Vulkan", "image-x-generic-symbolic")
-        vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
-        vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
-        vk_drv_name = (vk_dev.get("driver_name") or "—").strip()
-        vk_drv_ver  = _clean_version(vk_dev.get("driver_version", "—"))
-        vk_drv_info = (vk_dev.get("driver_info") or "—").strip()
-        vk_dev_type = _clean_device_type(vk_dev.get("device_type", "—"))
-        vk_conform  = (vk_dev.get("conformance_version") or "—").strip()
-        vk_vendor_id = (vk_dev.get("vendor_id") or "—").strip()
-        vk_device_id = (vk_dev.get("device_id") or "—").strip()
-        vk_ext_cnt  = str(vk_dev.get("extensions_count", 0)) if vk_dev.get("extensions_count") else "—"
-        vk_fmt_cnt  = str(vk_dev.get("formats_count", 0)) if vk_dev.get("formats_count") else "—"
-        vk_mem_types = str(vk_dev.get("memory_types_count", 0)) if vk_dev.get("memory_types_count") else "—"
-        vk_mem_heaps = str(vk_dev.get("memory_heaps_count", 0)) if vk_dev.get("memory_heaps_count") else "—"
-        vk_queue_fam = str(vk_dev.get("queue_count", 0)) if vk_dev.get("queue_count") else "—"
-        vk_inst_ext_cnt = str(vk_data.get("instance_extensions_count", 0)) if vk_data.get("instance_extensions_count") else "—"
-        vk_inst_layers_cnt = str(vk_data.get("instance_layers_count", 0)) if vk_data.get("instance_layers_count") else "—"
-        vk_pipeline_uuid = (vk_dev.get("pipelineCacheUUID") or "—").strip()
-        vk_uuid     = (vk_dev.get("device_uuid") or "—").strip()
-        vk_drv_uuid = (vk_dev.get("driver_uuid") or "—").strip()
+        # Vulkan Video profiles
+        vv_profiles = vv_data.get("profiles", [])
 
         # Ray tracing and Mesh shader support
         vk_exts = vk_dev.get("extensions", [])
@@ -948,6 +1012,213 @@ class GpuZView(Gtk.Box):
             except Exception:
                 pass
 
+        has_vulkan       = bool(vk_dev) or vk_data.get("supported", False)
+        has_opengl       = bool(gl_data.get("version"))
+        has_egl          = bool(gl_data.get("egl_version")) or gl_data.get("egl_count", 0) > 0
+        has_opencl       = has_gpu_opencl
+        has_vulkan_video = vv_data.get("supported", False) or bool(vv_profiles)
+        has_vdpau        = vdpau_data.get("supported", False)
+        has_raytracing   = bool(has_rt)
+        has_mesh_shaders = bool(has_mesh)
+
+        # ── Header Box: Logo + Name ────────────────────────────────────
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        header_box.add_css_class("gpuz-header-frame")
+
+        logo_path = self._get_vendor_logo_path(v_id)
+        try:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 38, 38, True)
+            logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
+            logo_img.set_size_request(38, 38)
+            header_box.append(logo_img)
+        except Exception:
+            pass
+
+        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+        title_box.set_valign(Gtk.Align.CENTER)
+        name_lbl = Gtk.Label(label=gpu_name)
+        name_lbl.add_css_class("gpuz-header-title")
+        name_lbl.set_halign(Gtk.Align.START)
+        name_lbl.set_wrap(True)
+        name_lbl.set_max_width_chars(32)
+        title_box.append(name_lbl)
+
+        sub_text = f"Card: {gpu.get('card_name', 'card0')} • PCI: {gpu.get('pci_address', '—')}"
+        sub_lbl = Gtk.Label(label=sub_text)
+        sub_lbl.add_css_class("dim-label")
+        sub_lbl.set_halign(Gtk.Align.START)
+        title_box.append(sub_lbl)
+
+        header_box.append(title_box)
+        self.card_content_box.append(header_box)
+
+        # Helper: build a 2-column dual-field row inside a parent box
+        def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            row_box.set_homogeneous(True)
+            row_box.append(self._make_field_frame(l1, v1, live_key=live_key1))
+            if l2 or v2:
+                row_box.append(self._make_field_frame(l2, v2, live_key=live_key2))
+            else:
+                row_box.get_first_child().set_hexpand(True)
+            parent.append(row_box)
+
+        # Helper: build a full-width single-field row
+        def _add_single_row(parent, label, value, live_key=None):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box.set_hexpand(True)
+            cell = self._make_field_frame(label, value, live_key=live_key)
+            cell.set_hexpand(True)
+            row_box.append(cell)
+            parent.append(row_box)
+
+        # Helper: section header with optional icon
+        def _make_section(title, icon_name=None) -> Gtk.Box:
+            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            sect_box.add_css_class("gpuz-section-box")
+
+            hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            hdr_box.add_css_class("gpuz-section-header")
+
+            if icon_name:
+                icon = Gtk.Image.new_from_icon_name(icon_name)
+                icon.set_pixel_size(14)
+                hdr_box.append(icon)
+
+            hdr = Gtk.Label(label=title)
+            hdr.add_css_class("gpuz-section-title")
+            hdr.set_halign(Gtk.Align.START)
+            hdr_box.append(hdr)
+            sect_box.append(hdr_box)
+
+            sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            sep.add_css_class("gpuz-section-sep")
+            sect_box.append(sep)
+
+            return sect_box
+
+        # ── API Support (Directly below Header) ────────────────────────
+        tech_frame = _make_section("API Support", "preferences-system-symbolic")
+
+        tech_flow = Gtk.FlowBox()
+        tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        tech_flow.set_max_children_per_line(8)
+        tech_flow.set_min_children_per_line(4)
+        tech_flow.set_row_spacing(2)
+        tech_flow.set_column_spacing(4)
+        tech_flow.set_homogeneous(True)
+
+        techs = [
+            ("Vulkan",        has_vulkan),
+            ("OpenGL",        has_opengl),
+            ("EGL",           has_egl),
+            ("OpenCL",        has_opencl),
+            ("Vulkan Video",  has_vulkan_video),
+            ("VDPAU",         has_vdpau),
+            ("Ray Tracing",   has_raytracing),
+            ("Mesh Shaders",  has_mesh_shaders),
+        ]
+
+        for name, supported in techs:
+            b = self._make_tech_badge(name, supported)
+            tech_flow.append(b)
+
+        tech_frame.append(tech_flow)
+        self.card_content_box.append(tech_frame)
+
+        # ── GPU Hardware Stats ─────────────────────────────────────────
+        hw_frame = _make_section("GPU Hardware", "video-display-symbolic")
+
+        dev_id_display = f"{v_id.upper()} / {d_id.upper()}" if v_id or d_id else "—"
+        driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
+        if vk_dev.get("driver_version"):
+            driver_val += f"  {vk_dev['driver_version']}"
+        bios_val = gpu.get("vbios") or "—"
+        bus_interface = (
+            f"{gpu.get('pcie_link_width', '')}  @  {gpu.get('pcie_link_speed', '—')}".strip(" @")
+            if gpu.get("pcie_link_width") else "—"
+        )
+
+        vram_tot = stats.get("mem_total", 0)
+        vram_used = stats.get("mem_used", 0)
+        if vram_tot > 0:
+            vram_disp = f"{vram_used} / {vram_tot} MB"
+        elif vram_used is not None and vram_used >= 0:
+            vram_disp = f"{vram_used} MB"
+        else:
+            vram_disp = "—"
+        vram_type = stats.get("vram_type") or gpu.get("vram_type") or "—"
+
+        core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get("clock_current", 0) > 0 else "—"
+        boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get("clock_max", 0) > 0 else "—"
+        mem_clk = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
+        mem_clk_disp = f"{mem_clk} MHz" if mem_clk > 0 else "—"
+
+        temp_val = stats.get("temp", 0)
+        temp_disp = f"{temp_val} °C" if temp_val is not None and temp_val > 0 else "—"
+        power_val = stats.get("power_usage", -1)
+        power_disp = f"{power_val} W" if power_val is not None and power_val >= 0 else "—"
+        usage_val = stats.get("usage", -1)
+        usage_disp = f"{usage_val} %" if usage_val is not None and usage_val >= 0 else "—"
+        
+        fan_val = stats.get("fan_speed", -1)
+        fan_rpm = stats.get("fan_rpm", -1)
+        if fan_val is not None and fan_val >= 0 and fan_rpm is not None and fan_rpm > 0:
+            fan_disp = f"{fan_val} % ({fan_rpm} RPM)"
+        elif fan_val is not None and fan_val >= 0:
+            fan_disp = f"{fan_val} %"
+        elif fan_rpm is not None and fan_rpm >= 0:
+            fan_disp = f"{fan_rpm} RPM"
+        else:
+            fan_disp = "—"
+
+        gtt_used = stats.get("gtt_used", 0)
+        gtt_total = stats.get("gtt_total", 0)
+        if gtt_total > 0:
+            gtt_disp = f"{gtt_used} / {gtt_total} MB"
+        elif gtt_used is not None and gtt_used >= 0:
+            gtt_disp = f"{gtt_used} MB"
+        else:
+            gtt_disp = "—"
+
+        _add_dual_row(hw_frame, "Device ID",    dev_id_display,   "Driver",      driver_val)
+        _add_dual_row(hw_frame, "VBIOS",        bios_val,         "PCIe Link",   bus_interface)
+        _add_dual_row(hw_frame, "VRAM",         vram_disp,        "VRAM Type",   vram_type,
+                      live_key1="hw_vram")
+        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Usage",   usage_disp,
+                      live_key1="hw_gtt", live_key2="hw_usage")
+        _add_dual_row(hw_frame, "GPU Clock",    core_clk,         "Boost Clock", boost_clk,
+                      live_key1="hw_clock")
+        _add_dual_row(hw_frame, "Memory Clock", mem_clk_disp,     "Temperature", temp_disp,
+                      live_key1="hw_mem_clock", live_key2="hw_temp")
+        _add_dual_row(hw_frame, "Power Draw",   power_disp,       "Fan Speed",   fan_disp,
+                      live_key1="hw_power", live_key2="hw_fan")
+        self.card_content_box.append(hw_frame)
+
+        # ── Vulkan ────────────────────────────────────────────────────
+        vk_frame = _make_section("Vulkan", "image-x-generic-symbolic")
+        vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
+        vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
+        vk_drv_name = (vk_dev.get("driver_name") or "—").strip()
+        vk_drv_ver  = _clean_version(vk_dev.get("driver_version", "—"))
+        vk_drv_info = (vk_dev.get("driver_info") or "—").strip()
+        vk_dev_type = _clean_device_type(vk_dev.get("device_type", "—"))
+        vk_conform  = (vk_dev.get("conformance_version") or "—").strip()
+        vk_vendor_id = (vk_dev.get("vendor_id") or "—").strip()
+        vk_device_id = (vk_dev.get("device_id") or "—").strip()
+        vk_ext_cnt  = str(vk_dev.get("extensions_count", 0)) if vk_dev.get("extensions_count") else "—"
+        vk_fmt_cnt  = str(vk_dev.get("formats_count", 0)) if vk_dev.get("formats_count") else "—"
+        vk_mem_types = str(vk_dev.get("memory_types_count", 0)) if vk_dev.get("memory_types_count") else "—"
+        vk_mem_heaps = str(vk_dev.get("memory_heaps_count", 0)) if vk_dev.get("memory_heaps_count") else "—"
+        vk_queue_fam = str(vk_dev.get("queue_count", 0)) if vk_dev.get("queue_count") else "—"
+        vk_inst_ext_cnt = str(vk_data.get("instance_extensions_count", 0)) if vk_data.get("instance_extensions_count") else "—"
+        vk_inst_layers_cnt = str(vk_data.get("instance_layers_count", 0)) if vk_data.get("instance_layers_count") else "—"
+        vk_pipeline_uuid = (vk_dev.get("pipelineCacheUUID") or "—").strip()
+        vk_uuid     = (vk_dev.get("device_uuid") or "—").strip()
+        vk_drv_uuid = (vk_dev.get("driver_uuid") or "—").strip()
+
+        # Ray tracing and Mesh shader support (pre-computed)
         vk_rt_str = "Supported" if has_rt else "Not Available"
         vk_mesh_str = "Supported" if has_mesh else "Not Available"
 
@@ -1028,46 +1299,67 @@ class GpuZView(Gtk.Box):
 
         # ── OpenCL ────────────────────────────────────────────────────
         cl_frame = _make_section("OpenCL", "system-run-symbolic")
-        matched_plat, matched_dev = self._get_opencl_device_for_gpu(gpu)
         cl_platforms = cl_data.get("platforms", [])
         cl_plat_cnt = str(len(cl_platforms)) if cl_platforms else "0"
 
-        if matched_plat and matched_dev:
-            cl_plat_name = matched_plat.get("name", "—")
-            cl_plat_ver  = matched_plat.get("version", "—")
-            cl_plat_ext  = str(matched_plat.get("extensions_count", 0)) if matched_plat.get("extensions_count") else "—"
-            cl_dev_name  = matched_dev.get("name", "—")
-            cl_dev_type  = matched_dev.get("device_type", "—")
-            cl_dev_ver   = matched_dev.get("version", "—")
-            cl_opencl_c  = matched_dev.get("opencl_c_version", "—")
-            cl_cus       = str(matched_dev.get("compute_units", "—"))
-            cl_wgs       = str(matched_dev.get("workgroup_size", "—"))
-            cl_gmem      = matched_dev.get("global_memory", "—")
-            cl_lmem      = matched_dev.get("local_memory", "—")
-            cl_clk       = str(matched_dev.get("max_clock", "—"))
-            cl_drv_ver   = matched_dev.get("driver_version", "—")
-            cl_dev_ext   = str(matched_dev.get("extensions_count", 0)) if matched_dev.get("extensions_count") else "—"
-            has_gpu_opencl = True
+        if matched_devices:
+            for idx, (matched_plat, matched_dev) in enumerate(matched_devices):
+                if idx > 0:
+                    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+                    sep.add_css_class("gpuz-section-sep")
+                    cl_frame.append(sep)
+
+                if len(matched_devices) > 1:
+                    inst_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+                    inst_box.set_margin_top(2)
+                    inst_box.set_margin_bottom(2)
+                    inst_lbl = Gtk.Label(label=f"OpenCL Device #{idx + 1} — {matched_plat.get('name', 'Platform')}")
+                    inst_lbl.add_css_class("gpuz-frame-label")
+                    inst_lbl.set_halign(Gtk.Align.START)
+                    inst_box.append(inst_lbl)
+                    cl_frame.append(inst_box)
+
+                cl_plat_name = matched_plat.get("name", "—")
+                cl_plat_ver  = matched_plat.get("version", "—")
+                cl_plat_ext  = str(matched_plat.get("extensions_count", 0)) if matched_plat.get("extensions_count") else "—"
+                cl_dev_name  = matched_dev.get("name", "—")
+                cl_dev_type  = matched_dev.get("device_type", "—")
+                cl_dev_ver   = matched_dev.get("version", "—")
+                cl_opencl_c  = matched_dev.get("opencl_c_version", "—")
+                cl_cus       = str(matched_dev.get("compute_units", "—"))
+                cl_wgs       = str(matched_dev.get("workgroup_size", "—"))
+                cl_gmem      = matched_dev.get("global_memory", "—")
+                cl_lmem      = matched_dev.get("local_memory", "—")
+                cl_clk       = str(matched_dev.get("max_clock", "—"))
+                cl_drv_ver   = matched_dev.get("driver_version", "—")
+                cl_dev_ext   = str(matched_dev.get("extensions_count", 0)) if matched_dev.get("extensions_count") else "—"
+
+                _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
+                _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
+                _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
+                _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
+                _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
+                _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
+                _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
+                _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
         else:
             cl_plat_name = cl_plat_ver = cl_plat_ext = "—"
             cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
             cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
-            has_gpu_opencl = False
-
-        _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
-        _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
-        _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
-        _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
-        _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
-        _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
-        _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
-        _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
+            _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
+            _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
+            _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
+            _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
+            _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
+            _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
+            _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
+            _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
         self.card_content_box.append(cl_frame)
 
         # ── Vulkan Video ──────────────────────────────────────────────
         vv_frame = _make_section("Vulkan Video", "video-x-generic-symbolic")
         vv_supported = "Yes" if vv_data.get("supported") else "No"
-        vv_profiles  = vv_data.get("profiles", [])
+        # vv_profiles is pre-computed
         vv_codecs    = ", ".join(vv_profiles) if vv_profiles else "—"
         vv_count     = str(len(vv_profiles)) if vv_profiles else "0"
         # Decode / Encode split
@@ -1085,45 +1377,6 @@ class GpuZView(Gtk.Box):
         _add_dual_row(vdpau_frame, "Supported",  vdpau_supported, "API Version", vdpau_api)
         _add_single_row(vdpau_frame, "Renderer", vdpau_rend)
         self.card_content_box.append(vdpau_frame)
-
-        # ── API Support Checkboxes ─────────────────────────────────────
-        tech_frame = _make_section("API Support", "preferences-system-symbolic")
-
-        tech_flow = Gtk.FlowBox()
-        tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
-        tech_flow.set_max_children_per_line(6)
-        tech_flow.set_min_children_per_line(2)
-        tech_flow.set_row_spacing(6)
-        tech_flow.set_column_spacing(6)
-        tech_flow.set_homogeneous(True)
-
-        # Determine live capabilities from parsed data
-        has_vulkan       = bool(vk_dev) or vk_data.get("supported", False)
-        has_opengl       = bool(gl_data.get("version"))
-        has_egl          = bool(gl_data.get("egl_version")) or gl_data.get("egl_count", 0) > 0
-        has_opencl       = has_gpu_opencl
-        has_vulkan_video = vv_data.get("supported", False) or bool(vv_profiles)
-        has_vdpau        = vdpau_data.get("supported", False)
-        has_raytracing   = has_rt
-        has_mesh_shaders = has_mesh
-
-        techs = [
-            ("Vulkan",        has_vulkan),
-            ("OpenGL",        has_opengl),
-            ("EGL",           has_egl),
-            ("OpenCL",        has_opencl),
-            ("Vulkan Video",  has_vulkan_video),
-            ("VDPAU",         has_vdpau),
-            ("Ray Tracing",   has_raytracing),
-            ("Mesh Shaders",  has_mesh_shaders),
-        ]
-
-        for name, supported in techs:
-            b = self._make_tech_badge(name, supported)
-            tech_flow.append(b)
-
-        tech_frame.append(tech_flow)
-        self.card_content_box.append(tech_frame)
 
     def _make_field_frame(self, label: str, value: str, live_key: str = None, registry: dict = None) -> Gtk.Frame:
         """Create a Classic GTK Frame with the field name embedded in the upper border
@@ -1207,15 +1460,15 @@ class GpuZView(Gtk.Box):
         self.sensors_scroll = scroll
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
-        box.set_margin_top(10)
-        box.set_margin_bottom(14)
+        box.set_margin_start(8)
+        box.set_margin_end(8)
+        box.set_margin_top(6)
+        box.set_margin_bottom(8)
 
         sensors_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         sensors_frame.add_css_class("gpuz-card-frame")
         sensors_grid = Gtk.Grid()
-        sensors_grid.set_column_spacing(12)
+        sensors_grid.set_column_spacing(10)
         sensors_grid.set_row_spacing(2)
         sensors_grid.set_column_homogeneous(True)
         sensors_grid.set_hexpand(True)
@@ -1242,7 +1495,7 @@ class GpuZView(Gtk.Box):
         ]
 
         for index, (key, title, unit, gauge_type, min_v, max_v) in enumerate(sensor_defs):
-            row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             row.add_css_class("gpuz-sensor-row")
             row.set_hexpand(True)
 
@@ -1255,10 +1508,10 @@ class GpuZView(Gtk.Box):
             v_lbl = Gtk.Label(label="—")
             v_lbl.add_css_class("gpuz-sensor-val")
             v_lbl.set_halign(Gtk.Align.END)
-            v_lbl.set_size_request(85, -1)
+            v_lbl.set_size_request(80, -1)
             row.append(v_lbl)
 
-            sparkline = SparklineWidget(width=100, height=20, gauge_type=gauge_type)
+            sparkline = SparklineWidget(width=90, height=18, gauge_type=gauge_type)
             row.append(sparkline)
 
             sensors_grid.attach(row, index % 2, index // 2, 1, 1)
@@ -1286,7 +1539,7 @@ class GpuZView(Gtk.Box):
         ram_usage_str = get_realtime_ram_usage()
 
         def _set_val(key, val_num, display_text=None):
-            w = self.sensor_widgets.get(key)
+            w = getattr(self, "sensor_widgets", {}).get(key)
             if not w:
                 return
             lbl = w["label"]
@@ -1322,11 +1575,12 @@ class GpuZView(Gtk.Box):
 
         # Dynamic max adjustment for sensors sparklines
         vram_tot = stats.get("mem_total", 0)
-        if vram_tot > 0 and "vram_used" in self.sensor_widgets:
-            self.sensor_widgets["vram_used"]["max"] = vram_tot
+        sensor_widgets = getattr(self, "sensor_widgets", {})
+        if vram_tot > 0 and "vram_used" in sensor_widgets:
+            sensor_widgets["vram_used"]["max"] = vram_tot
         gtt_tot = stats.get("gtt_total", 0)
-        if gtt_tot > 0 and "gtt_used" in self.sensor_widgets:
-            self.sensor_widgets["gtt_used"]["max"] = gtt_tot
+        if gtt_tot > 0 and "gtt_used" in sensor_widgets:
+            sensor_widgets["gtt_used"]["max"] = gtt_tot
 
         # CPU & RAM
         if cpu_temp_val is not None:
@@ -1374,11 +1628,15 @@ class GpuZView(Gtk.Box):
                 live["hw_usage"].set_label(
                     f"{usage_v} %" if usage_v is not None and usage_v >= 0 else "—"
                 )
+            vram_tot_v = stats.get("mem_total", 0)
             vram_used_v = stats.get("mem_used", 0)
-            if "hw_vram_used" in live:
-                live["hw_vram_used"].set_label(
-                    f"{vram_used_v} MB" if vram_used_v is not None and vram_used_v >= 0 else "—"
-                )
+            if "hw_vram" in live:
+                if vram_tot_v > 0:
+                    live["hw_vram"].set_label(f"{vram_used_v} / {vram_tot_v} MB")
+                elif vram_used_v is not None and vram_used_v >= 0:
+                    live["hw_vram"].set_label(f"{vram_used_v} MB")
+                else:
+                    live["hw_vram"].set_label("—")
             gtt_u = stats.get("gtt_used", 0)
             gtt_t = stats.get("gtt_total", 0)
             if "hw_gtt" in live:
@@ -1436,11 +1694,11 @@ class GpuZView(Gtk.Box):
         scroll.set_vexpand(True)
         self.system_scroll = scroll
 
-        self.sys_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.sys_content_box.set_margin_start(12)
-        self.sys_content_box.set_margin_end(12)
-        self.sys_content_box.set_margin_top(8)
-        self.sys_content_box.set_margin_bottom(12)
+        self.sys_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.sys_content_box.set_margin_start(8)
+        self.sys_content_box.set_margin_end(8)
+        self.sys_content_box.set_margin_top(6)
+        self.sys_content_box.set_margin_bottom(8)
 
         self._refresh_system_content()
         scroll.set_child(self.sys_content_box)
@@ -1463,7 +1721,7 @@ class GpuZView(Gtk.Box):
 
         # Helpers
         def _make_section(title, icon_name=None) -> Gtk.Box:
-            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             sect_box.add_css_class("gpuz-section-box")
 
             hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
@@ -1506,7 +1764,7 @@ class GpuZView(Gtk.Box):
             parent.append(row_box)
 
         # ── Header: OS / System Summary Frame with Distro Logo ─────────
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         header_box.add_css_class("gpuz-header-frame")
 
         os_str = sys_data.get("os", "")
@@ -1514,9 +1772,9 @@ class GpuZView(Gtk.Box):
         logo_loaded = False
         if distro_logo_path and os.path.exists(distro_logo_path):
             try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(distro_logo_path, 46, 46, True)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(distro_logo_path, 38, 38, True)
                 logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
-                logo_img.set_size_request(46, 46)
+                logo_img.set_size_request(38, 38)
                 logo_img.set_valign(Gtk.Align.CENTER)
                 header_box.append(logo_img)
                 logo_loaded = True
@@ -1692,3 +1950,10 @@ class GpuZView(Gtk.Box):
         if self.sensor_timer_id:
             GLib.source_remove(self.sensor_timer_id)
             self.sensor_timer_id = 0
+        display = Gdk.Display.get_default()
+        if hasattr(self, '_css_provider') and self._css_provider and display:
+            try:
+                Gtk.StyleContext.remove_provider_for_display(display, self._css_provider)
+            except Exception:
+                pass
+            self._css_provider = None

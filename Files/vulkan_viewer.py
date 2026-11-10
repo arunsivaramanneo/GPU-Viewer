@@ -751,9 +751,9 @@ def create_vulkan_tab_content(self):
     def MemoryTypes(GPUname):
         
         # -------------------------------------------- Commands --------------------------------------------------
-        fetch_vulkan_device_memory_types_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/memoryTypes: */{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' "%(Filenames.vulkaninfo_output_file,GPUname)
+        fetch_vulkan_device_memory_types_command = "cat %s | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/memoryTypes: */{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag'| awk '/./' " %(Filenames.vulkaninfo_output_file,GPUname)
         fetch_vulkan_device_memory_types_lhs_command = "cat %s | %s | awk '/./'" %(Filenames.vulkan_device_memory_types_file,Filenames.remove_rhs_Command)
-        fetch_vulkan_device_memory_types_rhs_command = "cat %s | grep -o heapIndex.* | grep -o '= .*' " %(Filenames.vulkan_device_memory_types_file)
+        fetch_vulkan_device_memory_types_rhs_command = "cat %s | grep -oE 'heapIndex.*|count.*' | grep -o '= .*' " %(Filenames.vulkan_device_memory_types_file)
         fetch_vulkan_device_memory_types_property_flags_command = "cat %s | grep propertyFlags | grep -o  =.* | grep -o ' .*' |  %s " %(Filenames.vulkan_device_memory_types_file,Filenames.remove_rhs_Command)
         #os.system("cat /tmp/gpu-viewer/vulkaninfo.txt | awk '/GPU%d/{flag=1;next}/VkPhysicalDeviceFeatures:/{flag=0}flag'|awk '/VkPhysicalDeviceMemoryProperties:/{flag=1; next}/VkPhysicalDeviceFeatures:/{flag=0} flag' > /tmp/gpu-viewer/VKDMemoryType.txt" % GPUname)
 
@@ -769,7 +769,7 @@ def create_vulkan_tab_content(self):
         mRhs = []
         with open(Filenames.vulkan_device_memory_types_file) as file1:
             for line in file1:
-                if "heapIndex" in line:
+                if "heapIndex" in line or "count" in line:
                     mRhs.append(vulkan_memory_types_rhs[j].strip('= '))
                     j = j + 1
                 else:
