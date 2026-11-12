@@ -32,6 +32,7 @@ from Common import fetchContentsFromCommand, create_scrollbar,setup_expander,bin
 import Filenames
 import re
 import os
+from VulkanVideoViewer import build_vulkan_video_content
 
 class DataObject(GObject.GObject):
     def __init__(self, column1: str,column2: str):
@@ -1272,6 +1273,18 @@ def create_vulkan_tab_content(self):
             idx = 0
 
         text = gpu_index_map[idx]
+        video_supported = vulkan_video_support.get(text, False)
+        if video_sidebar_heading is not None:
+            video_sidebar_heading.set_visible(video_supported)
+            lb_video.set_visible(video_supported)
+        if not video_supported and content_stack.get_visible_child_name() in {
+            "video-profiles", "profile-definition", "video-capabilities", "video-formats"
+        }:
+            for other_listbox in _all_listboxes:
+                if other_listbox is not lb_instance:
+                    other_listbox.unselect_all()
+            lb_instance.select_row(lb_instance.get_row_at_index(0))
+            content_stack.set_visible_child_name("system-information")
 
         # Reset and show the loading spinner
         tabs_loading_count["count"] = 7  # Omit Formats for lazy loading
@@ -1302,6 +1315,8 @@ def create_vulkan_tab_content(self):
         background_thread = threading.Thread(target=load_tabs_background)
         background_thread.daemon = True
         background_thread.start()
+        if video_supported and video_load_for_gpu_fn is not None:
+            video_load_for_gpu_fn(text)
 
         gpu_image = getGpuImage(gpu_list[idx])
         if gpu_image is not None:
@@ -1334,7 +1349,7 @@ def create_vulkan_tab_content(self):
     h_box.append(label)
 
     # Create a list with some dummy device names
-    if not hasattr(self, '_cached_gpu_list'):
+    if not hasattr(self, '_cached_gpu_list') or not hasattr(self, '_cached_vulkan_video_support'):
         try:
             with open(Filenames.vulkaninfo_output_file, "r") as f:
                 vulkan_devices = parse_vulkan_devices(f.read())
@@ -1343,8 +1358,13 @@ def create_vulkan_tab_content(self):
         self._cached_gpu_list = [device["name"] for device in vulkan_devices]
         self._cached_gpu_id_list = [device["device_id"] for device in vulkan_devices]
         self._cached_gpu_index_map = [device["index"] for device in vulkan_devices]
+        self._cached_vulkan_video_support = {
+            device["index"]: "Video Profiles" in device["block"]
+            for device in vulkan_devices
+        }
     gpu_list = self._cached_gpu_list
     gpu_id_list = self._cached_gpu_id_list
+    vulkan_video_support = self._cached_vulkan_video_support
     
     # Create the gpu_dropdown, populated from the list of strings
     gpu_Dropdown = Gtk.DropDown()
@@ -1637,42 +1657,185 @@ def create_vulkan_tab_content(self):
 
     # Create the sidebar content using a Gtk.ListBox for tabs
     sidebar_listbox = Gtk.ListBox.new()
-    sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-    sidebar_listbox.set_vexpand(True)
-    sidebar_listbox.add_css_class(css_class="boxed-list")
-    sidebar_listbox.add_css_class(css_class="card")
-#    sidebar_listbox.add_css_class(css_class="toolbar")
-    sidebar_listbox.add_css_class(css_class="sidebar")
+    # ── Create the content view using a Gtk.Stack to switch pages ──────────
+    content_stack = Gtk.Stack.new()
 
+    # Dictionaries to store spinners and content containers for each tab
+    tab_spinners = {}
+    tab_content_containers = {}
+    video_text_views = {}
 
-#    sidebar_listbox.add_css_class(css_class="frame")
-    # Set the show-separators property to False
-    sidebar_listbox.set_show_separators(True)
-    
-    # Add the tabs to the sidebar ListBox
+    # ── GROUPED SIDEBAR ─────────────────────────────────────────────────────
+    # The sidebar is a vertical box containing labelled section headers
+    # and a boxed-list Gtk.ListBox per group.  All ListBoxes share one
+    # Gtk.SingleSelection-compatible row-activated signal that switches the
+    # shared content_stack.
+
+    sidebar_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+    sidebar_vbox.set_vexpand(True)
+
+    # Track every (listbox, row-index) → stack-child-name mapping
+    # so row-activated can find the right stack page no matter which
+    # group the click came from.
+    _all_listboxes  = []   # list of Gtk.ListBox instances (one per group)
+    _row_stack_map  = {}   # (listbox_id, row_index) → stack child name
+
+    def _make_group_header(title):
+        """Section label that visually separates sidebar groups."""
+        hdr = Gtk.Label(label=title)
+        hdr.add_css_class("heading")
+        hdr.set_halign(Gtk.Align.FILL)
+        hdr.set_hexpand(True)
+        hdr.set_xalign(0.5)
+        hdr.set_margin_top(10)
+        hdr.set_margin_bottom(6)
+        return hdr
+
+    def _make_group_listbox():
+        glb = Gtk.ListBox.new()
+        glb.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        glb.set_vexpand(False)
+        glb.add_css_class("boxed-list")
+        glb.add_css_class("sidebar")
+        glb.set_show_separators(True)
+        return glb
+
+    _listbox_row_counts = {}   # id(listbox) → number of rows appended so far
+
+    def _add_sidebar_row(listbox, label_text, stack_child_name):
+        """Create one text-only sidebar row and register it."""
+        row = Gtk.ListBoxRow()
+        row_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        row_box.set_halign(Gtk.Align.FILL)
+        row_box.set_hexpand(True)
+        row_box.set_margin_top(6)
+        row_box.set_margin_bottom(6)
+        row_box.set_margin_start(10)
+        row_box.set_margin_end(10)
+        lbl = Gtk.Label(label=label_text)
+        lbl.set_halign(Gtk.Align.FILL)
+        lbl.set_xalign(0.5)
+        lbl.set_valign(Gtk.Align.CENTER)
+        lbl.set_hexpand(True)
+        lbl.set_wrap(True)
+        row_box.append(lbl)
+        row.set_child(row_box)
+        listbox.append(row)
+        # Track row index via manual counter (avoids relying on observe_children)
+        lid = id(listbox)
+        row_index = _listbox_row_counts.get(lid, 0)
+        _listbox_row_counts[lid] = row_index + 1
+        _row_stack_map[(lid, row_index)] = stack_child_name
+        return row
+
+    def _connect_group(listbox):
+        """Wire row-activated for a group listbox."""
+        _all_listboxes.append(listbox)
+
+        def on_row_activated(emitting_lb, row):
+            # Deselect all other groups
+            for other_lb in _all_listboxes:
+                if other_lb is not emitting_lb:
+                    other_lb.unselect_all()
+            row_idx = row.get_index()
+            child_name = _row_stack_map.get((id(emitting_lb), row_idx))
+            if child_name:
+                content_stack.set_visible_child_name(child_name)
+                # Lazy-load Formats when first visited
+                if child_name == "formats":
+                    idx = gpu_Dropdown.props.selected
+                    if idx == Gtk.INVALID_LIST_POSITION:
+                        idx = 0
+                    if gpu_index_map and idx < len(gpu_index_map):
+                        text = gpu_index_map[idx]
+                        if formats_loaded_for_gpu.get("gpu") != text:
+                            formats_loaded_for_gpu["gpu"] = text
+                            if "Formats" in tab_spinners:
+                                tab_spinners["Formats"].start()
+                                tab_spinners["Formats"].set_visible(True)
+                            if "Formats" in tab_content_containers:
+                                cb, sb = tab_content_containers["Formats"]
+                                cb.set_visible(False)
+                                sb.set_visible(True)
+                            import threading
+                            def _load_formats_lazy():
+                                try:
+                                    Formats(text)
+                                except Exception as e:
+                                    print(f"Error loading Formats lazily: {e}")
+                            threading.Thread(target=_load_formats_lazy, daemon=True).start()
+
+        listbox.connect("row-activated", on_row_activated)
+
+    # ── GROUP 1: INSTANCE & PLATFORM ───────────────────────────────────────
+    sidebar_vbox.append(_make_group_header("PLATFORM & INSTANCE"))
+    lb_instance = _make_group_listbox()
+    _add_sidebar_row(lb_instance, "Vulkan & System Summary", "system-information")
+    _add_sidebar_row(lb_instance, "Instance Extensions", "instance-extensions")
+    _add_sidebar_row(lb_instance, "Instance Layers", "instance-layers")
+    _add_sidebar_row(lb_instance, "Surface Types & Capabilities", "surface")
+    _connect_group(lb_instance)
+    sidebar_vbox.append(lb_instance)
+
+    # ── GROUP 2: PHYSICAL DEVICE ────────────────────────────────────────────
+    sidebar_vbox.append(_make_group_header("PHYSICAL DEVICE"))
+    lb_device = _make_group_listbox()
+    _add_sidebar_row(lb_device, "Properties", "properties")
+    _add_sidebar_row(lb_device, "Features", "features")
+    _add_sidebar_row(lb_device, "Limits", "limits")
+    _add_sidebar_row(lb_device, "Extensions", "extensions")
+    _add_sidebar_row(lb_device, "Formats & Capabilities", "formats")
+    _add_sidebar_row(lb_device, "Memory Types", "memory-types")
+    _add_sidebar_row(lb_device, "Memory Heaps", "memory-heaps")
+    _add_sidebar_row(lb_device, "Queue Families", "queues")
+    _connect_group(lb_device)
+    sidebar_vbox.append(lb_device)
+
+    # ── GROUP 3: VULKAN VIDEO ───────────────────────────────────────────────
+    # Detect Vulkan Video support (reuse already-cached file, no extra process)
+    _has_vulkan_video = any(vulkan_video_support.values())
+
+    lb_video = _make_group_listbox()
+    video_sidebar_heading = None
+    video_load_for_gpu_fn = None   # set below if supported
+
+    if _has_vulkan_video:
+        video_sidebar_heading = _make_group_header("VULKAN VIDEO")
+        sidebar_vbox.append(video_sidebar_heading)
+        video_tabs_defs = [
+            ("Video Profiles", "video-profiles"),
+            ("Profile Definition", "profile-definition"),
+            ("Video Capabilities", "video-capabilities"),
+            ("Video Formats", "video-formats"),
+        ]
+        for _lbl, _stack_id in video_tabs_defs:
+            _add_sidebar_row(lb_video, _lbl, _stack_id)
+        _connect_group(lb_video)
+        sidebar_vbox.append(lb_video)
+
+        # Inject Vulkan Video content into the shared content_stack
+        video_load_for_gpu_fn = build_vulkan_video_content(
+            gpu_index_map_in=None,       # resolved later via closure
+            gpu_list_in=None,
+            content_stack=content_stack,
+            tab_spinners=tab_spinners,
+            tab_content_containers=tab_content_containers,
+        )
+
+    # Alias sidebar_listbox → lb_instance so the existing select-first logic works
+    sidebar_listbox = lb_instance
+
+    # Map old tab names to new stack child names for all non-video tabs
+    # (the content-building loop below still uses the old `tabs` list)
     tabs = [
         "System Information", "Limits", "Properties", "Extensions",
         "Features", "Formats", "Memory Types", "Memory Heaps", "Queues",
         "Instance Extensions", "Instance Layers", "Surface"
     ]
-    # Vulkan Video pages are handled by the separate Vulkan Video tab.
-    # Create the content view using a Gtk.Stack to switch pages
-    content_stack = Gtk.Stack.new()
-    
-    # Dictionary to store spinners for each tab (for lazy loading UI)
-    tab_spinners = {}
-    tab_content_containers = {}
-    video_text_views = {}
 
     # Create the content pages for each tab and add them to the stack
     for tab_name in tabs:
-        row = Gtk.ListBoxRow()
-        label = Gtk.Label.new(tab_name)
-        # Add padding to the label inside the row
-        label.set_margin_top(10)
-        label.set_margin_bottom(10)
-        row.set_child(label)
-        sidebar_listbox.append(row)
+        row = None  # rows already added to group listboxes above
 
 
         # Create a box for the content of this specific tab
@@ -2512,71 +2675,32 @@ def create_vulkan_tab_content(self):
             print(f"GPU pre-selection error: {_e}")
         self._pending_gpu_index = None
 
-    # Create a scrolled window for the sidebar list
+    # ── Sidebar scroll window wraps the grouped sidebar vbox ───────────────
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
-    sidebar_scrolled_window.set_child(sidebar_listbox)
+    sidebar_scrolled_window.set_child(sidebar_vbox)
 
     formats_loaded_for_gpu = {"gpu": None}
 
-    # Connect the listbox signal to change the stack page
-    def on_row_activated(listbox, row):
-        # Get the label from the activated row to find the tab's name
-        tab_label = row.get_child()
-        tab_name = tab_label.get_label()
-        
-        # The name for the stack child is the tab name, with spaces replaced by dashes and lowercase
-        child_name = tab_name.replace(" ", "-").lower()
+    # row-activated is now handled inside _connect_group() for each group.
+    # Select the first row of the first group to show System Information.
+    lb_instance.select_row(lb_instance.get_row_at_index(0))
+    content_stack.set_visible_child_name("system-information")
 
-        # Set the visible child of the stack using its name
-        content_stack.set_visible_child_name(child_name)
-        
-        if child_name == "formats":
-            idx = gpu_Dropdown.props.selected
-            if idx == Gtk.INVALID_LIST_POSITION:
-                idx = 0
-            if not gpu_index_map:
-                return
-            if idx >= len(gpu_index_map):
-                idx = 0
-            text = gpu_index_map[idx]
-            if formats_loaded_for_gpu.get("gpu") != text:
-                formats_loaded_for_gpu["gpu"] = text
-                
-                if "Formats" in tab_spinners:
-                    tab_spinners["Formats"].start()
-                    tab_spinners["Formats"].set_visible(True)
-                if "Formats" in tab_content_containers:
-                    content_box, spinner_box = tab_content_containers["Formats"]
-                    content_box.set_visible(False)
-                    spinner_box.set_visible(True)
-                    
-                import threading
-                def load_formats_lazy():
-                    try:
-                        Formats(text)
-                    except Exception as e:
-                        print(f"Error loading Formats lazily: {e}")
-                threading.Thread(target=load_formats_lazy, daemon=True).start()
-        
-    sidebar_listbox.connect("row-activated", on_row_activated)
-    sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
-#    content_stack.set_visible_child_name("System Information")
-    # Set a minimum width for the sidebar
-
-
+    # Wire Vulkan Video GPU changes to the video loader (if supported).
+    # This is called from on_gpu_dropdown_changed when the GPU selector changes.
     # Create the Adw.NavigationPage wrappers for the sidebar and content
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
     content_page = Adw.NavigationPage.new(content_stack, "Content")
     self.vulkan_content_stack = content_stack
-    
+
     # Set the sidebar and content for the split view using the new pages
     split_view.set_sidebar(sidebar_page)
     split_view.set_content(content_page)
-    
+
     # Add the split view to its new container
     create_sidebar_toggle(split_view_container, split_view)
     split_view_container.append(split_view)
-    
+
     # Add the split view container to the main vertical box
     box.append(split_view_container)
     

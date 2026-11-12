@@ -427,34 +427,61 @@ def openCL(self, tab):
     split_view.set_vexpand(True)
     split_view.set_hexpand(True)
 
-    # Create the sidebar content using a Gtk.ListBox for tabs
-    sidebar_listbox = Gtk.ListBox.new()
-    sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-    sidebar_listbox.set_vexpand(True)
-    sidebar_listbox.add_css_class(css_class="boxed-list")
-    sidebar_listbox.add_css_class(css_class="sidebar")
-    sidebar_listbox.set_show_separators(True)
+    sidebar_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+    sidebar_vbox.set_vexpand(True)
 
     tabs = [
-        "Platform Information", "Device Information", "Device Extensions", "Device Memory  \n \t    &\nImage Information",
-        "Queue Capabilities\n \t\t&\nExecution Capabilities", "Device Vector Information"
+        "Platform Information", "Device Information", "Device Extensions",
+        "Device Memory and Image Information", "Queue Capabilities and Execution",
+        "Device Vector Information"
     ]
 
+    sidebar_groups = [
+        ("PLATFORM", ["Platform Information"]),
+        ("DEVICE", ["Device Information", "Device Extensions"]),
+        ("DEVICE RESOURCES & EXECUTION", [
+            "Device Memory and Image Information",
+            "Queue Capabilities and Execution",
+            "Device Vector Information",
+        ]),
+    ]
+    sidebar_listboxes = []
+    for section_title, row_labels in sidebar_groups:
+        heading = Gtk.Label.new(section_title)
+        heading.add_css_class("heading")
+        heading.set_halign(Gtk.Align.FILL)
+        heading.set_hexpand(True)
+        heading.set_xalign(0.5)
+        heading.set_wrap(True)
+        heading.set_margin_top(10)
+        heading.set_margin_bottom(6)
+        sidebar_vbox.append(heading)
+
+        group_listbox = Gtk.ListBox.new()
+        group_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        group_listbox.add_css_class("boxed-list")
+        group_listbox.add_css_class("sidebar")
+        group_listbox.set_show_separators(True)
+        for row_label in row_labels:
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label.new(row_label)
+            label.set_halign(Gtk.Align.FILL)
+            label.set_hexpand(True)
+            label.set_xalign(0.5)
+            label.set_wrap(True)
+            label.set_margin_top(6)
+            label.set_margin_bottom(6)
+            label.set_valign(Gtk.Align.CENTER)
+            row.set_child(label)
+            group_listbox.append(row)
+        sidebar_listboxes.append(group_listbox)
+        sidebar_vbox.append(group_listbox)
 
     content_stack = Gtk.Stack.new()
     self.opencl_content_stack = content_stack
 
     # Create the content pages for each tab and add them to the stack
     for tab_name in tabs:
-        row = Gtk.ListBoxRow()
-        label = Gtk.Label.new(tab_name)
-        # Add padding to the label inside the row
-        label.set_margin_top(10)
-        label.set_margin_bottom(10)
-        row.set_child(label)
-        sidebar_listbox.append(row)
-
-
         # Create a box for the content of this specific tab
         content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
 
@@ -680,9 +707,12 @@ def openCL(self, tab):
         content_stack.add_titled(content_box, tab_name.replace(" ", "-").lower(), tab_name)
 
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
-    sidebar_scrolled_window.set_child(sidebar_listbox)
+    sidebar_scrolled_window.set_child(sidebar_vbox)
 
     def on_row_activated(listbox, row):
+        for other_listbox in sidebar_listboxes:
+            if other_listbox is not listbox:
+                other_listbox.unselect_all()
         # Get the label from the activated row to find the tab's name
         tab_label = row.get_child()
         tab_name = tab_label.get_label()
@@ -693,12 +723,14 @@ def openCL(self, tab):
         # Set the visible child of the stack using its name
         content_stack.set_visible_child_name(child_name)
         
-    sidebar_listbox.connect("row-activated", on_row_activated)
-    sidebar_listbox.connect("row-selected", lambda lb, row: on_row_activated(lb, row) if row else None)
-    first_row = sidebar_listbox.get_row_at_index(0)
+    for group_listbox in sidebar_listboxes:
+        group_listbox.connect("row-activated", on_row_activated)
+        group_listbox.connect("row-selected", lambda lb, row: on_row_activated(lb, row) if row else None)
+    first_listbox = sidebar_listboxes[0]
+    first_row = first_listbox.get_row_at_index(0)
     if first_row:
-        sidebar_listbox.select_row(first_row)
-        on_row_activated(sidebar_listbox, first_row)
+        first_listbox.select_row(first_row)
+        on_row_activated(first_listbox, first_row)
 
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
     content_page = Adw.NavigationPage.new(content_stack, "Content")

@@ -654,11 +654,15 @@ def OpenGL(self, tab):
     def create_sidebar_row(label_text, sensitive=True, css_class=None):
         row = Gtk.ListBoxRow()
         label = Gtk.Label.new(label_text)
+        label.set_halign(Gtk.Align.FILL)
+        label.set_hexpand(True)
         label.set_xalign(0.5)
+        label.set_wrap(True)
         label.set_margin_start(12)
         label.set_margin_end(12)
-        label.set_margin_top(8)
-        label.set_margin_bottom(8)
+        label.set_margin_top(6)
+        label.set_margin_bottom(6)
+        label.set_valign(Gtk.Align.CENTER)
         if css_class:
             label.add_css_class(css_class=css_class)
         row.set_child(label)
@@ -860,19 +864,6 @@ def OpenGL(self, tab):
         fbconfig_toggle.set_name("glx-fbconfig")
         profile_group.add(fbconfig_toggle)
 
-        visuals_button = Gtk.ToggleButton.new_with_label("GLX Visuals (0)")
-        fbconfig_button = Gtk.ToggleButton.new_with_label("GLX FBConfig (0)")
-        visuals_button.set_active(True)
-        visuals_button.set_valign(Gtk.Align.CENTER)
-        fbconfig_button.set_valign(Gtk.Align.CENTER)
-
-        toggle_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
-        toggle_box.set_valign(Gtk.Align.CENTER)
-        toggle_box.append(visuals_button)
-        toggle_box.append(fbconfig_button)
-
-        page.append(toggle_box)
-
         frameBufferColumnView = Gtk.ColumnView()
         frameBufferColumnView.props.show_row_separators = True
         frameBufferColumnView.props.show_column_separators = True
@@ -934,39 +925,12 @@ def OpenGL(self, tab):
             else:
                 populate_lines(fbconfig_lines)
 
-        def sync_toggle_buttons(profile):
-            visuals_button.handler_block_by_func(on_visuals_toggled)
-            fbconfig_button.handler_block_by_func(on_fbconfig_toggled)
-            visuals_button.set_active(profile == "glx-visuals")
-            fbconfig_button.set_active(profile == "glx-fbconfig")
-            visuals_button.handler_unblock_by_func(on_visuals_toggled)
-            fbconfig_button.handler_unblock_by_func(on_fbconfig_toggled)
-
         def on_group_changed(group, pspec):
             profile = group.get_active_name()
             if not profile:
                 return
-            sync_toggle_buttons(profile)
             set_active_profile(profile)
 
-        def on_visuals_toggled(button):
-            if button.get_active():
-                profile_group.set_active_name("glx-visuals")
-            elif profile_group.get_active_name() == "glx-visuals":
-                button.handler_block_by_func(on_visuals_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_visuals_toggled)
-
-        def on_fbconfig_toggled(button):
-            if button.get_active():
-                profile_group.set_active_name("glx-fbconfig")
-            elif profile_group.get_active_name() == "glx-fbconfig":
-                button.handler_block_by_func(on_fbconfig_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_fbconfig_toggled)
-
-        visuals_button.connect("toggled", on_visuals_toggled)
-        fbconfig_button.connect("toggled", on_fbconfig_toggled)
         profile_group.connect("notify::active-name", on_group_changed)
 
         search_entry.connect("search-changed", _on_search_method_changed, filterFb)
@@ -974,9 +938,21 @@ def OpenGL(self, tab):
         page.append(search_entry)
         
         nonlocal load_framebuffer_data
-        def load_framebuffer_data_impl():
+        framebuffer_loading = {"started": False}
+
+        def load_framebuffer_data_impl(profile="glx-visuals"):
             if "framebuffer-configuration" in loaded_pages:
+                if profile_group.get_active_name() != profile:
+                    profile_group.set_active_name(profile)
                 return
+            if framebuffer_loading["started"]:
+                if profile_group.get_active_name() != profile:
+                    profile_group.set_active_name(profile)
+                return
+            framebuffer_loading["started"] = True
+            profile_group.handler_block_by_func(on_group_changed)
+            profile_group.set_active_name(profile)
+            profile_group.handler_unblock_by_func(on_group_changed)
             show_spinner("framebuffer-configuration")
             def bg():
                 v_lines = fetch_lines(visuals_command)
@@ -992,8 +968,12 @@ def OpenGL(self, tab):
                     nonlocal visuals_lines, fbconfig_lines
                     visuals_lines[:] = v_lines
                     fbconfig_lines[:] = f_lines
-                    visuals_button.set_label(f"GLX Visuals ({len(visuals_lines)})")
-                    fbconfig_button.set_label(f"GLX FBConfig ({len(fbconfig_lines)})")
+                    framebuffer_sidebar_labels["GLX Visuals"].set_text(
+                        f"GLX Visuals ({len(visuals_lines)})"
+                    )
+                    framebuffer_sidebar_labels["GLX FBConfig"].set_text(
+                        f"GLX FBConfig ({len(fbconfig_lines)})"
+                    )
                     
                     # Clear existing columns if any
                     while frameBufferColumnView.get_columns().get_n_items() > 0:
@@ -1019,7 +999,7 @@ def OpenGL(self, tab):
                         fbColumn.set_expand(True)
                         frameBufferColumnView.append_column(fbColumn)
 
-                    set_active_profile("glx-visuals")
+                    set_active_profile(profile_group.get_active_name() or profile)
                     loaded_pages.add("framebuffer-configuration")
                     hide_spinner("framebuffer-configuration")
                     return False
@@ -1088,49 +1068,10 @@ def OpenGL(self, tab):
                 extensionColumn.set_title("Extensions")
 
         type_group = Adw.ToggleGroup.new()
-        opengl_type_toggle = Adw.Toggle.new()
-        opengl_type_toggle.set_name("OpenGL")
-        type_group.add(opengl_type_toggle)
-        opengles_type_toggle = Adw.Toggle.new()
-        opengles_type_toggle.set_name("OpenGL ES")
-        type_group.add(opengles_type_toggle)
-        glx_type_toggle = Adw.Toggle.new()
-        glx_type_toggle.set_name("GLX")
-        type_group.add(glx_type_toggle)
-        egl_type_toggle = Adw.Toggle.new()
-        egl_type_toggle.set_name("EGL")
-        type_group.add(egl_type_toggle)
-
-        def create_toggle_button(label_text, icon_path):
-            button = Gtk.ToggleButton()
-            box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
-            box.set_halign(Gtk.Align.CENTER)
-            image = Gtk.Image.new_from_file(icon_path)
-            image.set_pixel_size(20)
-            label = Gtk.Label.new(label_text)
-            box.append(image)
-            box.append(label)
-            button.set_child(box)
-            return button
-
-        opengl_button = create_toggle_button("OpenGL", const.OPEN_GL_PNG)
-        opengles_button = create_toggle_button("OpenGL ES", const.OPEN_GL_ES_PNG)
-        glx_button = create_toggle_button("GLX", const.GLX_PNG)
-        egl_button = create_toggle_button("EGL", const.EGL_PNG)
-
-        opengl_button.set_active(True)
-        opengl_button.set_valign(Gtk.Align.CENTER)
-        opengles_button.set_valign(Gtk.Align.CENTER)
-        glx_button.set_valign(Gtk.Align.CENTER)
-        egl_button.set_valign(Gtk.Align.CENTER)
-
-        type_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
-        type_box.set_valign(Gtk.Align.CENTER)
-        type_box.append(opengl_button)
-        type_box.append(opengles_button)
-        type_box.append(glx_button)
-        type_box.append(egl_button)
-        page.append(type_box)
+        for type_name in ("OpenGL", "OpenGL ES", "GLX", "EGL"):
+            type_toggle = Adw.Toggle.new()
+            type_toggle.set_name(type_name)
+            type_group.add(type_toggle)
 
         profile_group = Adw.ToggleGroup.new()
         core_profile_toggle = Adw.Toggle.new()
@@ -1247,59 +1188,12 @@ def OpenGL(self, tab):
         def set_profile_visibility(type_name):
             profile_box.set_visible(type_name == "OpenGL")
 
-        def sync_type_buttons(type_name):
-            opengl_button.handler_block_by_func(on_opengl_toggled)
-            opengles_button.handler_block_by_func(on_opengles_toggled)
-            glx_button.handler_block_by_func(on_glx_toggled)
-            egl_button.handler_block_by_func(on_egl_toggled)
-            opengl_button.set_active(type_name == "OpenGL")
-            opengles_button.set_active(type_name == "OpenGL ES")
-            glx_button.set_active(type_name == "GLX")
-            egl_button.set_active(type_name == "EGL")
-            opengl_button.handler_unblock_by_func(on_opengl_toggled)
-            opengles_button.handler_unblock_by_func(on_opengles_toggled)
-            glx_button.handler_unblock_by_func(on_glx_toggled)
-            egl_button.handler_unblock_by_func(on_egl_toggled)
-
         def on_type_group_changed(group, pspec):
             type_name = group.get_active_name()
             if not type_name:
                 return
-            sync_type_buttons(type_name)
             set_profile_visibility(type_name)
             prepare_type_file(type_name, update_extension_list)
-
-        def on_opengl_toggled(button):
-            if button.get_active():
-                type_group.set_active_name("OpenGL")
-            elif type_group.get_active_name() == "OpenGL":
-                button.handler_block_by_func(on_opengl_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_opengl_toggled)
-
-        def on_opengles_toggled(button):
-            if button.get_active():
-                type_group.set_active_name("OpenGL ES")
-            elif type_group.get_active_name() == "OpenGL ES":
-                button.handler_block_by_func(on_opengles_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_opengles_toggled)
-
-        def on_glx_toggled(button):
-            if button.get_active():
-                type_group.set_active_name("GLX")
-            elif type_group.get_active_name() == "GLX":
-                button.handler_block_by_func(on_glx_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_glx_toggled)
-
-        def on_egl_toggled(button):
-            if button.get_active():
-                type_group.set_active_name("EGL")
-            elif type_group.get_active_name() == "EGL":
-                button.handler_block_by_func(on_egl_toggled)
-                button.set_active(True)
-                button.handler_unblock_by_func(on_egl_toggled)
 
         def sync_profile_buttons(profile):
             core_button.handler_block_by_func(on_core_toggled)
@@ -1335,10 +1229,6 @@ def OpenGL(self, tab):
                 button.set_active(True)
                 button.handler_unblock_by_func(on_compat_toggled)
 
-        opengl_button.connect("toggled", on_opengl_toggled)
-        opengles_button.connect("toggled", on_opengles_toggled)
-        glx_button.connect("toggled", on_glx_toggled)
-        egl_button.connect("toggled", on_egl_toggled)
         type_group.connect("notify::active-name", on_type_group_changed)
 
         core_button.connect("toggled", on_core_toggled)
@@ -1354,26 +1244,40 @@ def OpenGL(self, tab):
         page.append(search_entry)
         
         nonlocal load_extensions_data
-        def load_extensions_data_impl():
+        def load_extensions_data_impl(type_name="OpenGL"):
             if "extensions" in loaded_pages:
+                if type_group.get_active_name() != type_name:
+                    type_group.set_active_name(type_name)
                 return
             show_spinner("extensions")
+
             def on_ready():
                 loaded_pages.add("extensions")
                 hide_spinner("extensions")
-            
-            # Use sync flags to prevent multiple loads
-            type_group.set_active_name("OpenGL")
+
+            profile_group.handler_block_by_func(on_profile_group_changed)
             profile_group.set_active_name("core")
-            set_profile_visibility("OpenGL")
-            prepare_type_file("OpenGL", lambda: (update_extension_list(), on_ready()))
+            profile_group.handler_unblock_by_func(on_profile_group_changed)
+            sync_profile_buttons("core")
+            opengl_profile["mode"] = "core"
+
+            type_group.handler_block_by_func(on_type_group_changed)
+            type_group.set_active_name(type_name)
+            type_group.handler_unblock_by_func(on_type_group_changed)
+            set_profile_visibility(type_name)
+            prepare_type_file(type_name, lambda: (update_extension_list(), on_ready()))
             
         load_extensions_data = load_extensions_data_impl
 
         return create_loading_page(page, "extensions")
 
 
+    sidebar_listboxes = []
+
     def on_row_activated(listbox, row):
+        for other_listbox in sidebar_listboxes:
+            if other_listbox is not listbox:
+                other_listbox.unselect_all()
         tab_label = row.get_child()
         tab_name = tab_label.get_label()
         if not row.get_sensitive():
@@ -1381,10 +1285,22 @@ def OpenGL(self, tab):
         sidebar_target_names = {
             "OpenGL Information": "opengl-information",
             "OpenGL Limits": "opengl-limits",
-            "GLX FB Config": "framebuffer-configuration",
-            "Extensions": "extensions",
+            "OpenGL": "extensions",
+            "OpenGL ES": "extensions",
+            "GLX": "extensions",
+            "EGL": "extensions",
         }
+        framebuffer_profiles = {
+            "GLX Visuals": "glx-visuals",
+            "GLX FBConfig": "glx-fbconfig",
+        }
+        framebuffer_profile = next(
+            (profile for label, profile in framebuffer_profiles.items() if tab_name.startswith(label)),
+            None,
+        )
         child_name = sidebar_target_names.get(tab_name)
+        if framebuffer_profile is not None:
+            child_name = "framebuffer-configuration"
         if child_name is not None:
             content_stack.set_visible_child_name(child_name)
             if child_name == "opengl-information":
@@ -1392,9 +1308,9 @@ def OpenGL(self, tab):
             elif child_name == "opengl-limits":
                 load_limits_data()
             elif child_name == "framebuffer-configuration":
-                load_framebuffer_data()
+                load_framebuffer_data(framebuffer_profile or "glx-visuals")
             elif child_name == "extensions":
-                load_extensions_data()
+                load_extensions_data(tab_name)
 
 
     opengl_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
@@ -1456,13 +1372,39 @@ def OpenGL(self, tab):
     split_view.set_vexpand(True)
     split_view.set_hexpand(True)
 
-    sidebar_listbox = Gtk.ListBox.new()
-    sidebar_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-    sidebar_listbox.set_vexpand(True)
-    sidebar_listbox.add_css_class(css_class="boxed-list")
-    sidebar_listbox.add_css_class(css_class="card")
-    sidebar_listbox.add_css_class(css_class="sidebar")
-    sidebar_listbox.set_show_separators(True)
+    sidebar_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+    sidebar_vbox.set_vexpand(True)
+
+    framebuffer_sidebar_labels = {}
+    sidebar_groups = [
+        ("OPENGL", ["OpenGL Information", "OpenGL Limits"]),
+        ("GLX FB Visuals & Config", ["GLX Visuals", "GLX FBConfig"]),
+        ("EXTENSIONS", ["OpenGL", "OpenGL ES", "GLX", "EGL"]),
+    ]
+    for section_title, row_labels in sidebar_groups:
+        heading = Gtk.Label.new(section_title)
+        heading.add_css_class("heading")
+        heading.set_halign(Gtk.Align.FILL)
+        heading.set_hexpand(True)
+        heading.set_xalign(0.5)
+        heading.set_wrap(True)
+        heading.set_margin_top(10)
+        heading.set_margin_bottom(6)
+        sidebar_vbox.append(heading)
+
+        group_listbox = Gtk.ListBox.new()
+        group_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        group_listbox.add_css_class("boxed-list")
+        group_listbox.add_css_class("sidebar")
+        group_listbox.set_show_separators(True)
+        for row_label in row_labels:
+            row = create_sidebar_row(row_label, True)
+            group_listbox.append(row)
+            if row_label in ("GLX Visuals", "GLX FBConfig"):
+                framebuffer_sidebar_labels[row_label] = row.get_child()
+        group_listbox.connect("row-activated", on_row_activated)
+        sidebar_listboxes.append(group_listbox)
+        sidebar_vbox.append(group_listbox)
 
     content_stack = Gtk.Stack.new()
     content_stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
@@ -1552,15 +1494,10 @@ def OpenGL(self, tab):
     content_stack.add_titled(framebuffer_page, "framebuffer-configuration", "GLX FB Config")
     content_stack.add_titled(extensions_page, "extensions", "Extensions")
 
-    sidebar_listbox.append(create_sidebar_row("OpenGL Information", True))
-    sidebar_listbox.append(create_sidebar_row("OpenGL Limits", True))
-    sidebar_listbox.append(create_sidebar_row("GLX FB Config", True))
-    sidebar_listbox.append(create_sidebar_row("Extensions", True))
-
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
     sidebar_scrolled_window.set_vexpand(True)
     sidebar_scrolled_window.set_hexpand(True)
-    sidebar_scrolled_window.set_child(sidebar_listbox)
+    sidebar_scrolled_window.set_child(sidebar_vbox)
 
     sidebar_page = Adw.NavigationPage.new(sidebar_scrolled_window, "Sidebar")
     content_page = Adw.NavigationPage.new(content_stack, "Content")
@@ -1574,8 +1511,7 @@ def OpenGL(self, tab):
     create_sidebar_toggle(opengl_box, split_view)
     opengl_box.append(split_view)
 
-    sidebar_listbox.connect("row-activated", on_row_activated)
-    sidebar_listbox.select_row(sidebar_listbox.get_row_at_index(0))
+    sidebar_listboxes[0].select_row(sidebar_listboxes[0].get_row_at_index(0))
     content_stack.set_visible_child_name("opengl-information")
     opengl_info()
 

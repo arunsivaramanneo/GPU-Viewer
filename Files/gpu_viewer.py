@@ -840,11 +840,8 @@ else:
                 _register("page1", "Vulkan", "Vulkan",
                           lambda: create_vulkan_tab_content(self))
 
-            if results.get("vulkan_video"):
-                def _build_vulkan_video():
-                    box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                    return VulkanVideo(box)
-                _register("vulkan_video_page", "Vulkan Video", "Vulkan-Video", _build_vulkan_video)
+            # Vulkan Video is now integrated inside the Vulkan viewer's grouped sidebar.
+            # No separate top-level tab is registered here anymore.
 
             if results.get("opengl"):
                 def _build_opengl():
