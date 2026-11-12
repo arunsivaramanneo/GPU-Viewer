@@ -37,14 +37,15 @@ from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
 
 import const
 import Filenames
-from Common import (
-    get_gpu_stats_for_index,
-    SparklineWidget,
-)
+from Common import get_gpu_stats_for_index
 from SummaryViewer import (
+    _make_gauge_dashboard,
+    _update_gauge_dict,
     get_realtime_cpu_usage,
     get_realtime_cpu_temp,
     get_realtime_ram_usage,
+    get_realtime_swap_usage,
+    get_realtime_net_speed,
 )
 
 
@@ -147,13 +148,6 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     color: #ffffff;
 }
 
-.gpuz-card-frame {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    background-color: #242429;
-    padding: 3px 6px;
-}
-
 .gpuz-field-box {
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 4px;
@@ -197,24 +191,6 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     -gtk-icon-size: 13px;
     min-width: 14px;
     min-height: 14px;
-}
-
-.gpuz-sensor-row {
-    padding: 2px 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.gpuz-sensor-title {
-    font-size: 9pt;
-    font-weight: 500;
-    color: #ffffff;
-}
-
-.gpuz-sensor-val {
-    font-size: 9pt;
-    font-weight: 700;
-    color: #78aeed;
-    font-family: monospace;
 }
 
 .gpuz-bottom-bar {
@@ -316,13 +292,6 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     color: rgba(0, 0, 0, 0.87);
 }
 
-.gpuz-card-frame {
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 8px;
-    background-color: #ffffff;
-    padding: 3px 6px;
-}
-
 .gpuz-field-box {
     border: 1px solid rgba(0, 0, 0, 0.10);
     border-radius: 4px;
@@ -366,24 +335,6 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     -gtk-icon-size: 13px;
     min-width: 14px;
     min-height: 14px;
-}
-
-.gpuz-sensor-row {
-    padding: 2px 4px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.gpuz-sensor-title {
-    font-size: 9pt;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.87);
-}
-
-.gpuz-sensor-val {
-    font-size: 9pt;
-    font-weight: 700;
-    color: #1c71d8;
-    font-family: monospace;
 }
 
 .gpuz-bottom-bar {
@@ -671,51 +622,115 @@ class GpuZView(Gtk.Box):
 
         v_id = gpu.get("vendor_id", "")
         d_id = gpu.get("device_id", "")
-        pci_addr = (gpu.get("pci_address") or "").lower().strip()
+
+        def parse_hex_id(value):
+            try:
+                return int(value, 16) if value else None
+            except ValueError:
+                return None
+
+        def normalize_pci_address(value):
+            match = re.search(
+                r'(?:(?P<domain>[0-9a-f]{4}):)?(?P<bus>[0-9a-f]{2}):'
+                r'(?P<device>[0-9a-f]{2})\.(?P<function>[0-7])',
+                str(value or ""),
+                re.IGNORECASE,
+            )
+            if not match:
+                return None
+            return (
+                match.group("domain").lower() if match.group("domain") else None,
+                f'{match.group("bus").lower()}:{match.group("device").lower()}.{match.group("function")}',
+            )
+
+        def pci_addresses_match(first, second):
+            return bool(
+                first
+                and second
+                and first[1] == second[1]
+                and (first[0] is None or second[0] is None or first[0] == second[0])
+            )
+
+        gpu_pci = normalize_pci_address(gpu.get("pci_address"))
         gpu_name = self._get_gpu_display_name(gpu).lower()
 
-        try:
-            gpu_v_int = int(v_id, 16) if v_id else None
-        except ValueError:
-            gpu_v_int = None
-
-        try:
-            gpu_d_int = int(d_id, 16) if d_id else None
-        except ValueError:
-            gpu_d_int = None
+        gpu_v_int = parse_hex_id(v_id)
+        gpu_d_int = parse_hex_id(d_id)
 
         # Filter candidates of the same vendor to rank relative index
-        same_vendor_candidates = []
+        same_vendor_candidates_by_platform = {}
         for plat, dev in candidates:
             dev_v = dev.get("vendor_id", "")
-            try:
-                dev_v_int = int(dev_v, 16) if dev_v else None
-            except ValueError:
-                dev_v_int = None
-            if gpu_v_int and dev_v_int and gpu_v_int == dev_v_int:
-                same_vendor_candidates.append((plat, dev))
-            else:
+            dev_v_int = parse_hex_id(dev_v)
+            dev_d_int = parse_hex_id(dev.get("device_id", ""))
+            dev_type = (dev.get("device_type") or "").upper()
+            if not ("GPU" in dev_type or "ACCELERATOR" in dev_type):
+                continue
+            if gpu_v_int is not None and dev_v_int is not None and gpu_v_int != dev_v_int:
+                continue
+            if gpu_d_int is not None and dev_d_int is not None and gpu_d_int != dev_d_int:
+                continue
+
+            same_vendor = bool(gpu_v_int is not None and dev_v_int is not None and gpu_v_int == dev_v_int)
+            if not same_vendor and gpu_v_int == 0x1002:
                 d_vend = (dev.get("vendor") or "").lower()
                 p_name = (plat.get("name") or "").lower()
-                if gpu_v_int == 0x1002 and ("amd" in d_vend or "advanced micro" in d_vend or "radeon" in d_vend or "amd" in p_name or "rusticl" in p_name):
-                    same_vendor_candidates.append((plat, dev))
-                elif gpu_v_int == 0x10de and ("nvidia" in d_vend or "nvidia" in p_name or "cuda" in p_name):
-                    same_vendor_candidates.append((plat, dev))
-                elif gpu_v_int == 0x8086 and ("intel" in d_vend or "intel" in p_name):
-                    same_vendor_candidates.append((plat, dev))
+                same_vendor = any(w in d_vend or w in p_name for w in ("amd", "advanced micro", "radeon", "rusticl"))
+            elif not same_vendor and gpu_v_int == 0x10de:
+                d_vend = (dev.get("vendor") or "").lower()
+                p_name = (plat.get("name") or "").lower()
+                same_vendor = any(w in d_vend or w in p_name for w in ("nvidia", "cuda"))
+            elif not same_vendor and gpu_v_int == 0x8086:
+                d_vend = (dev.get("vendor") or "").lower()
+                p_name = (plat.get("name") or "").lower()
+                same_vendor = "intel" in d_vend or "intel" in p_name
 
-        # Check relative index among same-vendor GPUs
-        same_vendor_gpus = [
-            g for g in self.gpus
-            if g.get("vendor_id") and gpu_v_int and int(g.get("vendor_id"), 16) == gpu_v_int
-        ]
-        relative_gpu_idx = 0
-        if gpu in same_vendor_gpus:
-            relative_gpu_idx = same_vendor_gpus.index(gpu)
+            if same_vendor:
+                same_vendor_candidates_by_platform.setdefault(id(plat), []).append((plat, dev))
+
+        # Use device ID too, so identical-model GPUs can be mapped independently.
+        same_vendor_gpus = [gpu]
+        if gpu_v_int is not None:
+            same_vendor_gpus = []
+            for g in self.gpus:
+                peer_v_int = parse_hex_id(g.get("vendor_id", ""))
+                peer_d_int = parse_hex_id(g.get("device_id", ""))
+                if peer_v_int != gpu_v_int:
+                    continue
+                if gpu_d_int is not None and peer_d_int is not None and peer_d_int != gpu_d_int:
+                    continue
+                same_vendor_gpus.append(g)
+        relative_gpu_idx = next(
+            (i for i, peer in enumerate(same_vendor_gpus) if peer is gpu),
+            0,
+        )
 
         scored_candidates = []
 
         for plat, dev in candidates:
+            dev_v_int = parse_hex_id(dev.get("vendor_id", ""))
+            dev_d_int = parse_hex_id(dev.get("device_id", ""))
+            if gpu_v_int is not None and dev_v_int is not None and gpu_v_int != dev_v_int:
+                continue
+            if gpu_d_int is not None and dev_d_int is not None and gpu_d_int != dev_d_int:
+                continue
+
+            dev_pci = normalize_pci_address(dev.get("pci_address"))
+            pci_match = pci_addresses_match(gpu_pci, dev_pci)
+            if gpu_pci and dev_pci and not pci_match:
+                continue
+
+            platform_candidates = same_vendor_candidates_by_platform.get(id(plat), [])
+            candidate_index = next(
+                (i for i, candidate in enumerate(platform_candidates) if candidate[1] is dev),
+                None,
+            )
+            if len(same_vendor_gpus) > 1 and not pci_match:
+                if len(platform_candidates) != len(same_vendor_gpus):
+                    continue
+                if candidate_index != relative_gpu_idx:
+                    continue
+
             score = 0
             dev_type = (dev.get("device_type") or "").upper()
             is_gpu = "GPU" in dev_type or "ACCELERATOR" in dev_type
@@ -725,26 +740,15 @@ class GpuZView(Gtk.Box):
                 score -= 30
 
             # 1. PCIe topology / bus address
-            dev_pci = (dev.get("pci_address") or "").lower()
-            if pci_addr and dev_pci:
-                clean_pci = re.sub(r'^[0-9a-f]+:', '', pci_addr)
-                if clean_pci in dev_pci or pci_addr in dev_pci:
-                    score += 300
-                else:
-                    score -= 200
+            if pci_match:
+                score += 300
 
             # 2. Vendor ID / Name
             dev_v = dev.get("vendor_id", "")
-            try:
-                dev_v_int = int(dev_v, 16) if dev_v else None
-            except ValueError:
-                dev_v_int = None
 
             if gpu_v_int is not None and dev_v_int is not None:
                 if gpu_v_int == dev_v_int:
                     score += 120
-                else:
-                    score -= 300
             else:
                 d_vend = (dev.get("vendor") or "").lower()
                 p_name = (plat.get("name") or "").lower()
@@ -766,17 +770,9 @@ class GpuZView(Gtk.Box):
                         score -= 200
 
             # 3. Device ID
-            dev_d = dev.get("device_id", "")
-            try:
-                dev_d_int = int(dev_d, 16) if dev_d else None
-            except ValueError:
-                dev_d_int = None
-
             if gpu_d_int is not None and dev_d_int is not None:
                 if gpu_d_int == dev_d_int:
                     score += 150
-                else:
-                    score -= 300
 
             # 4. Name substrings
             d_name = (dev.get("name") or "").lower()
@@ -787,10 +783,8 @@ class GpuZView(Gtk.Box):
                         score += 25
 
             # 5. Relative index match among same vendor
-            if (plat, dev) in same_vendor_candidates:
-                cand_idx = same_vendor_candidates.index((plat, dev))
-                if cand_idx == relative_gpu_idx:
-                    score += 40
+            if candidate_index == relative_gpu_idx:
+                score += 40
 
             if score > 0:
                 scored_candidates.append((score, (plat, dev)))
@@ -852,17 +846,18 @@ class GpuZView(Gtk.Box):
         return os.path.join(base_dir, "Images", filename)
 
     def _get_vendor_logo_path(self, vendor_id_str: str) -> str:
-        """Return vendor logo image path."""
+        """Return the selected GPU vendor's logo image path."""
         try:
-            v = int(vendor_id_str, 16)
-            if v == 0x1002:
-                return self._resolve_image_path("AMD_logo.png")
-            elif v == 0x10de:
-                return self._resolve_image_path("nvidia_logo.png")
-            elif v == 0x8086:
-                return self._resolve_image_path("intel-logo.png")
-        except Exception:
-            pass
+            vendor_id = int(vendor_id_str, 16)
+        except (TypeError, ValueError):
+            vendor_id = None
+
+        if vendor_id == 0x1002:
+            return self._resolve_image_path("AMD_logo.png")
+        if vendor_id == 0x10de:
+            return self._resolve_image_path("nvidia_logo.png")
+        if vendor_id == 0x8086:
+            return self._resolve_image_path("intel-logo.png")
         return self._resolve_image_path("about-us.png")
 
     def _get_distro_logo_path(self, os_str: str) -> str:
@@ -937,7 +932,7 @@ class GpuZView(Gtk.Box):
 
         Shows live API version data and GPU hardware metrics instead of a
         static database lookup — covering Vulkan, OpenGL, EGL, OpenCL,
-        Vulkan Video, VDPAU and GPU hardware stats.
+        VDPAU and GPU hardware stats.
         """
         # Clear previous children
         child = self.card_content_box.get_first_child()
@@ -960,16 +955,12 @@ class GpuZView(Gtk.Box):
         vk_data   = self.summary_data.get("vulkan",       {})
         gl_data   = self.summary_data.get("opengl",       {})
         cl_data   = self.summary_data.get("opencl",       {})
-        vv_data   = self.summary_data.get("vulkan_video", {})
         vdpau_data = self.summary_data.get("vdpau",       {})
 
         # ── Pre-compute API Capabilities & Devices ──────────────────────
         # OpenCL matching
         matched_devices = self._get_all_opencl_devices_for_gpu(gpu)
         has_gpu_opencl = bool(matched_devices)
-
-        # Vulkan Video profiles
-        vv_profiles = vv_data.get("profiles", [])
 
         # Ray tracing and Mesh shader support
         vk_exts = vk_dev.get("extensions", [])
@@ -1016,7 +1007,6 @@ class GpuZView(Gtk.Box):
         has_opengl       = bool(gl_data.get("version"))
         has_egl          = bool(gl_data.get("egl_version")) or gl_data.get("egl_count", 0) > 0
         has_opencl       = has_gpu_opencl
-        has_vulkan_video = vv_data.get("supported", False) or bool(vv_profiles)
         has_vdpau        = vdpau_data.get("supported", False)
         has_raytracing   = bool(has_rt)
         has_mesh_shaders = bool(has_mesh)
@@ -1098,8 +1088,8 @@ class GpuZView(Gtk.Box):
 
             return sect_box
 
-        # ── API Support (Directly below Header) ────────────────────────
-        tech_frame = _make_section("API Support", "preferences-system-symbolic")
+        # ── Graphics, Compute & Video Acceleration (below Header) ──────
+        tech_frame = _make_section("Graphics, Compute & Video Acceleration", "preferences-system-symbolic")
 
         tech_flow = Gtk.FlowBox()
         tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -1114,7 +1104,6 @@ class GpuZView(Gtk.Box):
             ("OpenGL",        has_opengl),
             ("EGL",           has_egl),
             ("OpenCL",        has_opencl),
-            ("Vulkan Video",  has_vulkan_video),
             ("VDPAU",         has_vdpau),
             ("Ray Tracing",   has_raytracing),
             ("Mesh Shaders",  has_mesh_shaders),
@@ -1356,19 +1345,6 @@ class GpuZView(Gtk.Box):
             _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
         self.card_content_box.append(cl_frame)
 
-        # ── Vulkan Video ──────────────────────────────────────────────
-        vv_frame = _make_section("Vulkan Video", "video-x-generic-symbolic")
-        vv_supported = "Yes" if vv_data.get("supported") else "No"
-        # vv_profiles is pre-computed
-        vv_codecs    = ", ".join(vv_profiles) if vv_profiles else "—"
-        vv_count     = str(len(vv_profiles)) if vv_profiles else "0"
-        # Decode / Encode split
-        vv_decode = ", ".join(p for p in vv_profiles if "DECODE" in p.upper() or p.upper() in ("H264","H265","AV1","VP8","VP9","HEVC")) or "—"
-        vv_encode = ", ".join(p for p in vv_profiles if "ENCODE" in p.upper()) or "—"
-        _add_dual_row(vv_frame, "Supported",    vv_supported, "Codec Count",   vv_count)
-        _add_single_row(vv_frame, "Codecs",     vv_codecs)
-        self.card_content_box.append(vv_frame)
-
         # ── VDPAU ─────────────────────────────────────────────────────
         vdpau_frame = _make_section("VDPAU", "media-playback-start-symbolic")
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
@@ -1459,72 +1435,22 @@ class GpuZView(Gtk.Box):
         scroll.set_vexpand(True)
         self.sensors_scroll = scroll
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        box.set_margin_start(8)
-        box.set_margin_end(8)
-        box.set_margin_top(6)
-        box.set_margin_bottom(8)
-
-        sensors_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        sensors_frame.add_css_class("gpuz-card-frame")
-        sensors_grid = Gtk.Grid()
-        sensors_grid.set_column_spacing(10)
-        sensors_grid.set_row_spacing(2)
-        sensors_grid.set_column_homogeneous(True)
-        sensors_grid.set_hexpand(True)
-        sensors_frame.append(sensors_grid)
-
         self.sensor_widgets = {}
-
-        sensor_defs = [
-            ("gpu_clock", "GPU Clock", "MHz", "clock", 0, 3000),
-            ("mem_clock", "Memory Clock", "MHz", "vram_clock", 0, 3000),
-            ("gpu_temp", "GPU Temperature", "°C", "temp", 0, 105),
-            ("hotspot_temp", "GPU Hot Spot", "°C", "temp_hotspot", 0, 115),
-            ("fan_pct", "Fan Speed (%)", "%", "fan", 0, 100),
-            ("fan_rpm", "Fan Speed (RPM)", "RPM", "fan", 0, 4000),
-            ("gpu_load", "GPU Load", "%", "usage", 0, 100),
-            ("mem_busy", "Memory Controller Load", "%", "mem_busy", 0, 100),
-            ("vram_used", "Memory Used (Dedicated)", "MB", "vram", 0, 16384),
-            ("gtt_used", "Memory Used (Shared / GTT)", "MB", "gtt", 0, 16384),
-            ("power", "Board Power Draw", "W", "power", 0, 450),
-            ("voltage", "GPU Voltage (VDDC)", "V", "voltage", 0, 1.5),
-            ("cpu_temp", "CPU Temperature", "°C", "cpu_temp", 0, 105),
-            ("cpu_usage", "CPU Load", "", "cpu", 0, 100),
-            ("ram_used", "System RAM Used", "", "ram", 0, 100),
-        ]
-
-        for index, (key, title, unit, gauge_type, min_v, max_v) in enumerate(sensor_defs):
-            row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            row.add_css_class("gpuz-sensor-row")
-            row.set_hexpand(True)
-
-            t_lbl = Gtk.Label(label=title)
-            t_lbl.add_css_class("gpuz-sensor-title")
-            t_lbl.set_halign(Gtk.Align.START)
-            t_lbl.set_hexpand(True)
-            row.append(t_lbl)
-
-            v_lbl = Gtk.Label(label="—")
-            v_lbl.add_css_class("gpuz-sensor-val")
-            v_lbl.set_halign(Gtk.Align.END)
-            v_lbl.set_size_request(80, -1)
-            row.append(v_lbl)
-
-            sparkline = SparklineWidget(width=90, height=18, gauge_type=gauge_type)
-            row.append(sparkline)
-
-            sensors_grid.attach(row, index % 2, index // 2, 1, 1)
-            self.sensor_widgets[key] = {
-                "label": v_lbl,
-                "sparkline": sparkline,
-                "unit": unit,
-                "min": min_v,
-                "max": max_v,
-            }
-
-        box.append(sensors_frame)
-        scroll.set_child(box)
+        gpu = self._get_current_gpu()
+        gpu_stats = get_gpu_stats_for_index(gpu.get("card_index", 0)) or gpu.get("stats", {}) or {}
+        net_down, net_up = get_realtime_net_speed()
+        scroll.set_child(
+            _make_gauge_dashboard(
+                gpu_stats,
+                self.sensor_widgets,
+                cpu_usage=get_realtime_cpu_usage(),
+                ram_usage=get_realtime_ram_usage(),
+                cpu_temp=get_realtime_cpu_temp(),
+                swap_usage=get_realtime_swap_usage(),
+                net_down_mbps=net_down,
+                net_up_mbps=net_up,
+            )
+        )
         return scroll
 
     def _update_sensors(self):
@@ -1537,67 +1463,18 @@ class GpuZView(Gtk.Box):
         cpu_usage_str = get_realtime_cpu_usage()
         cpu_temp_val = get_realtime_cpu_temp()
         ram_usage_str = get_realtime_ram_usage()
-
-        def _set_val(key, val_num, display_text=None):
-            w = getattr(self, "sensor_widgets", {}).get(key)
-            if not w:
-                return
-            lbl = w["label"]
-            spark = w["sparkline"]
-            unit = w["unit"]
-
-            if val_num is not None and val_num >= 0:
-                text = display_text if display_text else f"{val_num} {unit}".strip()
-                lbl.set_label(text)
-                # Normalise to 0-100 range for sparkline
-                max_v = w["max"] or 100
-                norm_val = min(100.0, max(0.0, (float(val_num) / max_v) * 100.0))
-                spark.push_value(norm_val)
-            else:
-                lbl.set_label("—")
-                spark.push_value(0)
-
-        # GPU stats mapping
-        _set_val("gpu_clock", stats.get("clock_current", 0))
-        _set_val("mem_clock", stats.get("vram_clock", 0))
-        _set_val("gpu_temp", stats.get("temp", 0))
-        _set_val("hotspot_temp", stats.get("temp_hotspot", 0))
-        _set_val("fan_pct", stats.get("fan_speed", -1))
-        _set_val("fan_rpm", stats.get("fan_rpm", -1))
-        _set_val("gpu_load", stats.get("usage", -1))
-        _set_val("mem_busy", stats.get("mem_busy", -1))
-        _set_val("vram_used", stats.get("mem_used", 0))
-        _set_val("gtt_used", stats.get("gtt_used", 0))
-        _set_val("power", stats.get("power_usage", -1))
-        
-        volt = stats.get("voltage", 0.0)
-        _set_val("voltage", volt, f"{volt:.3f} V" if volt > 0 else "—")
-
-        # Dynamic max adjustment for sensors sparklines
-        vram_tot = stats.get("mem_total", 0)
-        sensor_widgets = getattr(self, "sensor_widgets", {})
-        if vram_tot > 0 and "vram_used" in sensor_widgets:
-            sensor_widgets["vram_used"]["max"] = vram_tot
-        gtt_tot = stats.get("gtt_total", 0)
-        if gtt_tot > 0 and "gtt_used" in sensor_widgets:
-            sensor_widgets["gtt_used"]["max"] = gtt_tot
-
-        # CPU & RAM
-        if cpu_temp_val is not None:
-            _set_val("cpu_temp", cpu_temp_val)
-        try:
-            m = re.search(r'(\d+)', cpu_usage_str)
-            if m:
-                _set_val("cpu_usage", int(m.group(1)), cpu_usage_str)
-        except Exception:
-            pass
-
-        try:
-            m = re.search(r'(\d+)%', ram_usage_str)
-            pct = int(m.group(1)) if m else 0
-            _set_val("ram_used", pct, ram_usage_str)
-        except Exception:
-            pass
+        swap_usage = get_realtime_swap_usage()
+        net_down_mbps, net_up_mbps = get_realtime_net_speed()
+        _update_gauge_dict(
+            getattr(self, "sensor_widgets", {}),
+            stats,
+            cpu_usage=cpu_usage_str,
+            ram_usage=ram_usage_str,
+            cpu_temp=cpu_temp_val,
+            swap_usage=swap_usage,
+            net_down_mbps=net_down_mbps,
+            net_up_mbps=net_up_mbps,
+        )
 
         # ── Real-time updates for GPU Hardware tab labels ──────────────────
         live = getattr(self, "_hw_live_labels", {})

@@ -527,8 +527,11 @@ else:
 
             # GPU-Z Mode Toggle Button
             self.gpuz_toggle_btn = Gtk.Button()
-            self.gpuz_toggle_btn.set_icon_name("applications-graphics-symbolic")
+            gpuz_icon = Gtk.Label(label="Z")
+            gpuz_icon.add_css_class("title-3")
+            self.gpuz_toggle_btn.set_child(gpuz_icon)
             self.gpuz_toggle_btn.add_css_class("flat")
+            self.gpuz_toggle_btn.set_size_request(32, 32)
             self.gpuz_toggle_btn.set_valign(Gtk.Align.CENTER)
             self.gpuz_toggle_btn.set_tooltip_text("Switch to GPU-Z View Mode (Ctrl+Z)")
             self.gpuz_toggle_btn.connect("clicked", lambda _: self.toggle_view_mode())
