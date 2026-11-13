@@ -24,8 +24,8 @@ modules:
       - install -Dm644 ../io.github.arunsivaramanneo.GPUViewer.metainfo.xml /app/share/metainfo/io.github.arunsivaramanneo.GPUViewer.metainfo.xml
     sources:
       - type: archive
-        url: https://github.com/arunsivaramanneo/GPU-Viewer/archive/v4.05/GPU-Viewer-4.05.tar.gz
-        sha256: 2f1ac71d6eefafa029927dc335ddb297afb445f7f8419ce8eceeae19c79a274e
+        url: https://api.github.com/repos/arunsivaramanneo/GPU-Viewer/tarball/v4.05
+        sha256: adb61b97286860a0947aa709149e467e082b01526cb1bba9662def84bf3d47f7
         x-checker-data:
           is-main-source: true
           type: json
@@ -114,8 +114,8 @@ modules:
         buildsystem: meson
         sources:
           - type: archive
-            url: https://gitlab.gnome.org/GNOME/pygobject/-/archive/3.50.0/pygobject-3.50.0.tar.gz
-            sha256: 7ffce2399b25e743acf868c9eacd38800ad6fb78bf7409cee2ea87c20e5cc8ce
+            url: https://gitlab.gnome.org/GNOME/pygobject/-/archive/3.58.1/pygobject-3.58.1.tar.gz
+            sha256: 8ff7f0ff0aa976c369f69d324e5a7a870d7761fae1cf988bb80ac89acfc71695
             x-checker-data:
               type: anitya
               project-id: 13158
@@ -126,8 +126,8 @@ modules:
             buildsystem: meson
             sources:
               - type: archive
-                url: https://github.com/pygobject/pycairo/archive/v1.28.0/pycairo-v1.28.0.tar.gz
-                sha256: e7e1a487820467a174512633f3ec4c49d567041e40f2d0135d14679045b054e9
+                url: https://github.com/pygobject/pycairo/archive/v1.29.2/pycairo-v1.29.2.tar.gz
+                sha256: 2195f8a4d78f3a83ea7328cb3c3db6a44b2215bcb866ae32935cc5051760a679
                 x-checker-data:
                   type: anitya
                   project-id: 13166
@@ -141,8 +141,8 @@ modules:
             --prefix=${FLATPAK_DEST} "click" --no-build-isolation
         sources:
           - type: file
-            url: https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz
-            sha256: ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
+            url: https://files.pythonhosted.org/packages/45/37/edbf1b0707709013c0cf2e8317e03d97ed29bf4cac709fe328904ae92a38/click-8.5.1.tar.gz
+            sha256: 9bbfada76703fd1d784b83eea012e3e8c6a001a876543ef104fa56aaaeb072b4
             x-checker-data:
               type: pypi
               name: click
