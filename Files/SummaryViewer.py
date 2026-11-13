@@ -2965,6 +2965,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             font-weight: 700;
             color: #ffffff;
         }
+
+        .summary-page .summary-card .title-3 {
+            font-size: 16pt;
+        }
+
+        .summary-page .summary-card .body {
+            font-size: 11pt;
+        }
+
+        .summary-page .summary-card .caption {
+            font-size: 10pt;
+        }
+
+        .summary-page .summary-tier-header {
+            font-size: 15pt;
+        }
         """
     else:
         card_css = """
@@ -3008,6 +3024,22 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             font-weight: 700;
             color: #171717;
         }
+
+        .summary-page .summary-card .title-3 {
+            font-size: 16pt;
+        }
+
+        .summary-page .summary-card .body {
+            font-size: 11pt;
+        }
+
+        .summary-page .summary-card .caption {
+            font-size: 10pt;
+        }
+
+        .summary-page .summary-tier-header {
+            font-size: 15pt;
+        }
         """
     css_provider.load_from_data(card_css.encode("utf-8"))
     Gtk.StyleContext.add_provider_for_display(
@@ -3017,6 +3049,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     )
     
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    outer.add_css_class("summary-page")
     outer.set_vexpand(True)
     outer.set_hexpand(True)
 

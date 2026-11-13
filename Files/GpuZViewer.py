@@ -199,6 +199,38 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     background-color: #1e1e22;
     box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
 }
+
+.gpuz-card-page .gpuz-header-title,
+.gpuz-system-page .gpuz-header-title {
+    font-size: 14pt;
+}
+
+.gpuz-card-page .gpuz-section-title,
+.gpuz-system-page .gpuz-section-title {
+    font-size: 9pt;
+}
+
+.gpuz-card-page .gpuz-frame-label,
+.gpuz-system-page .gpuz-frame-label {
+    font-size: 8.5pt;
+}
+
+.gpuz-card-page .gpuz-frame-value,
+.gpuz-system-page .gpuz-frame-value {
+    font-size: 10.5pt;
+}
+
+.gpuz-card-page .gpuz-frame-content,
+.gpuz-system-page .gpuz-frame-content {
+    min-height: 24px;
+    padding: 3px 7px 4px;
+}
+
+.gpuz-card-page .gpuz-api-checkbox,
+.gpuz-system-page .gpuz-api-checkbox {
+    font-size: 9.5pt;
+    min-height: 25px;
+}
 """
     else:
         return """
@@ -342,6 +374,38 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     padding: 5px 10px;
     background-color: #ebebed;
     box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.gpuz-card-page .gpuz-header-title,
+.gpuz-system-page .gpuz-header-title {
+    font-size: 14pt;
+}
+
+.gpuz-card-page .gpuz-section-title,
+.gpuz-system-page .gpuz-section-title {
+    font-size: 9pt;
+}
+
+.gpuz-card-page .gpuz-frame-label,
+.gpuz-system-page .gpuz-frame-label {
+    font-size: 8.5pt;
+}
+
+.gpuz-card-page .gpuz-frame-value,
+.gpuz-system-page .gpuz-frame-value {
+    font-size: 10.5pt;
+}
+
+.gpuz-card-page .gpuz-frame-content,
+.gpuz-system-page .gpuz-frame-content {
+    min-height: 24px;
+    padding: 3px 7px 4px;
+}
+
+.gpuz-card-page .gpuz-api-checkbox,
+.gpuz-system-page .gpuz-api-checkbox {
+    font-size: 9.5pt;
+    min-height: 25px;
 }
 """
 
@@ -918,6 +982,7 @@ class GpuZView(Gtk.Box):
         self.card_scroll = scroll
 
         self.card_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.card_content_box.add_css_class("gpuz-card-page")
         self.card_content_box.set_margin_start(8)
         self.card_content_box.set_margin_end(8)
         self.card_content_box.set_margin_top(6)
@@ -972,6 +1037,9 @@ class GpuZView(Gtk.Box):
         if has_mesh is None:
             exts_lower = [e.lower() for e in vk_exts]
             has_mesh = any("mesh_shader" in e for e in exts_lower)
+        has_vulkan_video = bool(
+            vk_dev.get("video_decode_profiles") or vk_dev.get("video_encode_profiles")
+        )
 
         # Fallback to inspecting vulkaninfo output directly if extensions list wasn't populated
         if not vk_exts and not has_rt and not has_mesh and os.path.exists(Filenames.vulkaninfo_output_file):
@@ -1064,7 +1132,7 @@ class GpuZView(Gtk.Box):
             parent.append(row_box)
 
         # Helper: section header with optional icon
-        def _make_section(title, icon_name=None) -> Gtk.Box:
+        def _make_section(title, icon_name=None, fallback_icon_name=None) -> Gtk.Box:
             sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             sect_box.add_css_class("gpuz-section-box")
 
@@ -1072,8 +1140,19 @@ class GpuZView(Gtk.Box):
             hdr_box.add_css_class("gpuz-section-header")
 
             if icon_name:
-                icon = Gtk.Image.new_from_icon_name(icon_name)
-                icon.set_pixel_size(14)
+                if icon_name.endswith((".png", ".svg")):
+                    try:
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_name, 18, 18, True)
+                        icon = Gtk.Picture.new_for_pixbuf(pixbuf)
+                        icon.set_size_request(18, 18)
+                    except GLib.Error:
+                        icon = Gtk.Image.new_from_icon_name(
+                            fallback_icon_name or "application-x-executable-symbolic"
+                        )
+                        icon.set_pixel_size(18)
+                else:
+                    icon = Gtk.Image.new_from_icon_name(icon_name)
+                    icon.set_pixel_size(14)
                 hdr_box.append(icon)
 
             hdr = Gtk.Label(label=title)
@@ -1089,7 +1168,11 @@ class GpuZView(Gtk.Box):
             return sect_box
 
         # ── Graphics, Compute & Video Acceleration (below Header) ──────
-        tech_frame = _make_section("Graphics, Compute & Video Acceleration", "preferences-system-symbolic")
+        tech_frame = _make_section(
+            "Graphics, Compute & Video Acceleration",
+            const.ABOUT_US_PNG,
+            fallback_icon_name="preferences-system-symbolic",
+        )
 
         tech_flow = Gtk.FlowBox()
         tech_flow.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -1101,6 +1184,7 @@ class GpuZView(Gtk.Box):
 
         techs = [
             ("Vulkan",        has_vulkan),
+            ("Vulkan Video",  has_vulkan_video),
             ("OpenGL",        has_opengl),
             ("EGL",           has_egl),
             ("OpenCL",        has_opencl),
@@ -1117,7 +1201,10 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(tech_frame)
 
         # ── GPU Hardware Stats ─────────────────────────────────────────
-        hw_frame = _make_section("GPU Hardware", "video-display-symbolic")
+        hw_frame = _make_section(
+            "GPU Hardware", const.APP_LOGO_PNG,
+            fallback_icon_name="video-display-symbolic",
+        )
 
         dev_id_display = f"{v_id.upper()} / {d_id.upper()}" if v_id or d_id else "—"
         driver_val = gpu.get("driver") or vk_dev.get("driver_name") or "—"
@@ -1186,7 +1273,9 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(hw_frame)
 
         # ── Vulkan ────────────────────────────────────────────────────
-        vk_frame = _make_section("Vulkan", "image-x-generic-symbolic")
+        vk_frame = _make_section(
+            "Vulkan", const.VULKAN_PNG, fallback_icon_name="image-x-generic-symbolic"
+        )
         vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
         vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
         vk_drv_name = (vk_dev.get("driver_name") or "—").strip()
@@ -1262,7 +1351,10 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(vk_frame)
 
         # ── OpenGL & EGL ─────────────────────────────────────────────
-        gl_frame = _make_section("OpenGL / EGL", "applications-engineering-symbolic")
+        gl_frame = _make_section(
+            "OpenGL / EGL", const.OPEN_GL_PNG,
+            fallback_icon_name="applications-engineering-symbolic",
+        )
         gl_vendor   = gl_data.get("vendor", "—")
         gl_renderer = gl_data.get("renderer", "—")
         gl_version  = gl_data.get("version", "—")
@@ -1287,7 +1379,9 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(gl_frame)
 
         # ── OpenCL ────────────────────────────────────────────────────
-        cl_frame = _make_section("OpenCL", "system-run-symbolic")
+        cl_frame = _make_section(
+            "OpenCL", "../Images/OpenCL.svg", fallback_icon_name="system-run-symbolic"
+        )
         cl_platforms = cl_data.get("platforms", [])
         cl_plat_cnt = str(len(cl_platforms)) if cl_platforms else "0"
 
@@ -1346,7 +1440,10 @@ class GpuZView(Gtk.Box):
         self.card_content_box.append(cl_frame)
 
         # ── VDPAU ─────────────────────────────────────────────────────
-        vdpau_frame = _make_section("VDPAU", "media-playback-start-symbolic")
+        vdpau_frame = _make_section(
+            "VDPAU", const.VDPAU_CL_PNG,
+            fallback_icon_name="media-playback-start-symbolic",
+        )
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
         vdpau_api  = vdpau_data.get("api_version", "—")
         vdpau_rend = vdpau_data.get("renderer", "—")
@@ -1572,6 +1669,7 @@ class GpuZView(Gtk.Box):
         self.system_scroll = scroll
 
         self.sys_content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.sys_content_box.add_css_class("gpuz-system-page")
         self.sys_content_box.set_margin_start(8)
         self.sys_content_box.set_margin_end(8)
         self.sys_content_box.set_margin_top(6)
