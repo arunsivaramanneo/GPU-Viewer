@@ -1,0 +1,168 @@
+id: io.github.arunsivaramanneo.GPUViewer
+runtime: org.gnome.Platform
+sdk: org.gnome.Sdk
+runtime-version: '51'
+finish-args:
+  - --device=dri
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+command: gpu-viewer
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - '*.a'
+  - '*.la'
+modules:
+  - name: gpu-viewer
+    buildsystem: meson
+    post-install:
+      # latest desktop-file-utils release (0.26) doesn't support desktop file spec v1.5
+      - desktop-file-edit --set-key=Version --set-value=1.4 /app/share/applications/${FLATPAK_ID}.desktop
+      - python -m compileall /app/share/gpu-viewer/Files
+      - install -Dm644 ../io.github.arunsivaramanneo.GPUViewer.metainfo.xml /app/share/metainfo/io.github.arunsivaramanneo.GPUViewer.metainfo.xml
+    sources:
+      - type: archive
+        url: https://github.com/arunsivaramanneo/GPU-Viewer/archive/v4.05/GPU-Viewer-4.05.tar.gz
+        sha256: 2f1ac71d6eefafa029927dc335ddb297afb445f7f8419ce8eceeae19c79a274e
+        x-checker-data:
+          is-main-source: true
+          type: json
+          url: https://api.github.com/repos/arunsivaramanneo/GPU-Viewer/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .tarball_url
+      - type: file
+        path: io.github.arunsivaramanneo.GPUViewer.metainfo.xml
+
+    modules:
+      - name: vulkan-tools
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DGLSLANG_INSTALL_DIR=/app
+          - -DVULKAN_HEADERS_INSTALL_DIR=/app
+          - -DCMAKE_BUILD_TYPE=Release
+        sources:
+          - type: archive
+            url: https://github.com/KhronosGroup/Vulkan-Tools/archive/v1.4.368/Vulkan-Tools-1.4.368.tar.gz
+            sha256: d7d7f312db38d7b1658bfa1b3b0104c86c456eda175c1b8cccf64a16408926a0
+#           x-checker-data:
+#             type: anitya
+#             project-id: 242111
+#             stable-only: true
+#             url-template: https://github.com/KhronosGroup/Vulkan-Tools/archive/v$version/Vulkan-Tools-$version.tar.gz
+        modules:
+          - name: vulkan-headers
+            buildsystem: cmake-ninja
+            sources:
+              - type: archive
+                url: https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.4.368/Vulkan-Headers-v1.4.368.tar.gz
+                sha256: 5c5c6f64fcce28a24cc934143a048707af036a858e4ed11d7f71fe016006ecda
+
+      - name: mesa-demos
+        buildsystem: meson
+        config-opts:
+          - --bindir=/app/lib/mesa-demos
+          - -Dosmesa=disabled
+        post-install:
+          - mv -v /app/lib/mesa-demos/*info /app/bin/
+        sources:
+          - type: archive
+            url: https://mesa.freedesktop.org/archive/demos/mesa-demos-9.0.0.tar.xz
+            sha256: 3046a3d26a7b051af7ebdd257a5f23bfeb160cad6ed952329cdff1e9f1ed496b
+#           x-checker-data:
+#             type: anitya
+#             project-id: 16781
+#             stable-only: true
+#             url-template: https://mesa.freedesktop.org/archive/demos/$version/mesa-demos-$version.tar.gz
+        cleanup:
+          - /lib/mesa-demos
+        modules:
+          - shared-modules/glew/glew.json
+          - shared-modules/glu/glu-9.json
+
+      - name: clinfo
+        no-autogen: true
+        no-make-install: true
+        build-commands:
+          - install -Dm755 -t /app/bin/ clinfo
+        sources:
+          - type: archive
+            url: https://github.com/Oblomov/clinfo/archive/3.1.26.09.26/clinfo-3.1.26.09.26.tar.gz
+            sha256: e944132329c6613b686ba0fcd373b15ebb553c367a01a734af8519ddb095c01f
+            x-checker-data:
+              type: anitya
+              project-id: 10503
+              stable-only: true
+              url-template: https://github.com/Oblomov/clinfo/archive/$version/clinfo-$version.tar.gz
+        modules:
+          - name: opencl-headers
+            buildsystem: cmake-ninja
+            config-opts:
+              - -DCMAKE_INSTALL_DATADIR=/app/lib
+            sources:
+              - type: archive
+                url: https://github.com/KhronosGroup/OpenCL-Headers/archive/v2026.05.29/OpenCL-Headers-v2026.05.29.tar.gz
+                sha256: d9e6c48357de5002da11ce45de600e0c3ffe6ab4f628a3b9fe2b38603161658a
+                x-checker-data:
+                  type: anitya
+                  project-id: 223257
+                  stable-only: true
+                  url-template: https://github.com/KhronosGroup/OpenCL-Headers/archive/v$version/OpenCL-Headers-v$version.tar.gz
+
+      - name: pygobject
+        buildsystem: meson
+        sources:
+          - type: archive
+            url: https://gitlab.gnome.org/GNOME/pygobject/-/archive/3.50.0/pygobject-3.50.0.tar.gz
+            sha256: 7ffce2399b25e743acf868c9eacd38800ad6fb78bf7409cee2ea87c20e5cc8ce
+            x-checker-data:
+              type: anitya
+              project-id: 13158
+              stable-only: true
+              url-template: https://gitlab.gnome.org/GNOME/pygobject/-/archive/$version/pygobject-$version.tar.gz
+        modules:
+          - name: pycairo
+            buildsystem: meson
+            sources:
+              - type: archive
+                url: https://github.com/pygobject/pycairo/archive/v1.28.0/pycairo-v1.28.0.tar.gz
+                sha256: e7e1a487820467a174512633f3ec4c49d567041e40f2d0135d14679045b054e9
+                x-checker-data:
+                  type: anitya
+                  project-id: 13166
+                  stable-only: true
+                  url-template: https://github.com/pygobject/pycairo/archive/v$version/pycairo-v$version.tar.gz
+
+      - name: python-click
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "click" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz
+            sha256: ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
+            x-checker-data:
+              type: pypi
+              name: click
+
+      - name: vdpauinfo
+        sources:
+          - type: archive
+            url: https://gitlab.freedesktop.org/vdpau/vdpauinfo/-/archive/1.5/vdpauinfo-1.5.tar.gz
+            sha256: 1878d54f6732d02cedef8eabe77e23fc2239b4ec202612403a383f4140a17bc3
+            x-checker-data:
+              type: anitya
+              project-id: 16031
+              stable-only: true
+              url-template: https://gitlab.freedesktop.org/vdpau/vdpauinfo/-/archive/$version/vdpauinfo-$version.tar.gz
+
+      - name: lsb-release-compat
+        buildsystem: simple
+        build-commands:
+          - make install PREFIX=/app
+        sources:
+          - type: git
+            url: https://gitlab.com/nanonyme/lsb-release-compat.git
+            commit: f4f908b62dcc9cd081eb2a42b6ad7cf98db4bb10
