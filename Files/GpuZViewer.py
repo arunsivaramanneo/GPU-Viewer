@@ -68,11 +68,11 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
     background-image: linear-gradient(
-        90deg,
-        rgba(36, 95, 218, 0.18),
-        #242429
+        to bottom,
+        #181818,
+        #111111
     );
-    background-color: #242429;
+    background-color: #181818;
     padding: 6px 10px;
     margin-bottom: 4px;
 }
@@ -90,8 +90,8 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     padding: 6px 8px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
-    background-color: #242429;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: #262626;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .gpuz-section-header {
@@ -103,14 +103,14 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-title {
     font-size: 8pt;
     font-weight: 800;
-    color: #78aeed;
+    color: #d43c50;
     letter-spacing: 0.6px;
     text-transform: uppercase;
 }
 
 .gpuz-section-sep {
-    background-color: rgba(255, 255, 255, 0.10);
-    opacity: 0.35;
+    background-color: #333333;
+    opacity: 0.6;
     margin-top: 1px;
     margin-bottom: 3px;
 }
@@ -119,14 +119,14 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-field-frame {
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 5px;
-    background-color: #1a1a1e;
+    background-color: #1a1a1a;
     margin: 1px 0;
     transition: 150ms ease-in-out;
 }
 
 .gpuz-field-frame:hover {
-    border-color: rgba(120, 174, 237, 0.45);
-    background-color: #222228;
+    border-color: rgba(255, 255, 255, 0.35);
+    background-color: #222222;
 }
 
 .gpuz-frame-label {
@@ -153,7 +153,7 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     border-radius: 4px;
     padding: 2px 6px;
     min-height: 20px;
-    background-color: #1a1a1e;
+    background-color: #1a1a1a;
 }
 
 .gpuz-api-checkbox {
@@ -196,7 +196,7 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-bottom-bar {
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     padding: 5px 10px;
-    background-color: #1e1e22;
+    background-color: #181818;
     box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -235,39 +235,43 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     else:
         return """
 .gpuz-container {
-    background-color: #dcdcdc;
-    color: rgba(0, 0, 0, 0.87);
+    background-color: #eaedf1;
+    color: #0f172a;
     padding: 6px;
 }
 
 .gpuz-header-frame {
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 8px;
     background-image: linear-gradient(
-        90deg,
-        rgba(36, 95, 218, 0.10),
-        #ffffff
+        to bottom,
+        #1e2430,
+        #161b24
     );
-    background-color: #ffffff;
-    padding: 6px 10px;
+    background-color: #1e2430;
+    padding: 8px 12px;
     margin-bottom: 4px;
 }
 
 .gpuz-header-title {
     font-size: 13pt;
     font-weight: 700;
-    color: rgba(0, 0, 0, 0.87);
+    color: #f8fafc;
     letter-spacing: 0.1px;
+}
+
+.gpuz-header-frame .dim-label {
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .gpuz-section-box {
     margin-top: 3px;
     margin-bottom: 3px;
     padding: 6px 8px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: #f8fafc;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
 }
 
 .gpuz-section-header {
@@ -279,36 +283,36 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-title {
     font-size: 8pt;
     font-weight: 800;
-    color: #1c71d8;
+    color: #0f172a;
     letter-spacing: 0.6px;
     text-transform: uppercase;
 }
 
 .gpuz-section-sep {
-    background-color: rgba(0, 0, 0, 0.10);
-    opacity: 0.35;
+    background-color: rgba(0, 0, 0, 0.08);
+    opacity: 0.5;
     margin-top: 1px;
     margin-bottom: 3px;
 }
 
 /* Classic GTK Frame for each field */
 .gpuz-field-frame {
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(15, 23, 42, 0.10);
     border-radius: 5px;
-    background-color: #f6f6f8;
+    background-color: #ffffff;
     margin: 1px 0;
     transition: 150ms ease-in-out;
 }
 
 .gpuz-field-frame:hover {
-    border-color: rgba(28, 113, 216, 0.45);
-    background-color: #eef4fc;
+    border-color: rgba(15, 23, 42, 0.25);
+    background-color: #f1f5f9;
 }
 
 .gpuz-frame-label {
     font-size: 7.5pt;
     font-weight: 700;
-    color: rgba(0, 0, 0, 0.65);
+    color: #475569;
     padding: 0 3px;
     margin-left: 4px;
 }
@@ -321,15 +325,15 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-frame-value {
     font-size: 9pt;
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.87);
+    color: #0f172a;
 }
 
 .gpuz-field-box {
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(15, 23, 42, 0.10);
     border-radius: 4px;
     padding: 2px 6px;
     min-height: 20px;
-    background-color: #f6f6f8;
+    background-color: #ffffff;
 }
 
 .gpuz-api-checkbox {
@@ -344,35 +348,35 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 }
 
 .gpuz-api-supported {
-    color: #2ec27e;
+    color: #16a34a;
 }
 
 .gpuz-api-supported check {
     color: white;
-    background-color: #2ec27e;
-    border-color: #25a969;
+    background-color: #16a34a;
+    border-color: #15803d;
     -gtk-icon-size: 13px;
     min-width: 14px;
     min-height: 14px;
 }
 
 .gpuz-api-unsupported {
-    color: #e01b24;
+    color: #dc2626;
 }
 
 .gpuz-api-unsupported check {
-    color: #e01b24;
+    color: #dc2626;
     background-color: #ffffff;
-    border-color: #e01b24;
+    border-color: #dc2626;
     -gtk-icon-size: 13px;
     min-width: 14px;
     min-height: 14px;
 }
 
 .gpuz-bottom-bar {
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    border-top: 1px solid rgba(0, 0, 0, 0.10);
     padding: 5px 10px;
-    background-color: #ebebed;
+    background-color: #e2e8f0;
     box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
 }
 
@@ -1110,25 +1114,16 @@ class GpuZView(Gtk.Box):
         header_box.append(title_box)
         self.card_content_box.append(header_box)
 
-        # Helper: build a 2-column dual-field row inside a parent box
-        def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        # Helper: build a row of 1–5 fields.
+        # Each item is (label, value) or (label, value, live_key).
+        def _add_row(parent, *items):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
-            row_box.set_homogeneous(True)
-            row_box.append(self._make_field_frame(l1, v1, live_key=live_key1))
-            if l2 or v2:
-                row_box.append(self._make_field_frame(l2, v2, live_key=live_key2))
-            else:
-                row_box.get_first_child().set_hexpand(True)
-            parent.append(row_box)
-
-        # Helper: build a full-width single-field row
-        def _add_single_row(parent, label, value, live_key=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-            row_box.set_hexpand(True)
-            cell = self._make_field_frame(label, value, live_key=live_key)
-            cell.set_hexpand(True)
-            row_box.append(cell)
+            for item in items:
+                lbl_text = item[0]
+                val_text = item[1]
+                lk = item[2] if len(item) > 2 else None
+                row_box.append(self._make_field_frame(lbl_text, val_text, live_key=lk))
             parent.append(row_box)
 
         # Helper: section header with optional icon
@@ -1258,18 +1253,15 @@ class GpuZView(Gtk.Box):
         else:
             gtt_disp = "—"
 
-        _add_dual_row(hw_frame, "Device ID",    dev_id_display,   "Driver",      driver_val)
-        _add_dual_row(hw_frame, "VBIOS",        bios_val,         "PCIe Link",   bus_interface)
-        _add_dual_row(hw_frame, "VRAM",         vram_disp,        "VRAM Type",   vram_type,
-                      live_key1="hw_vram")
-        _add_dual_row(hw_frame, "GTT Memory",   gtt_disp,         "GPU Usage",   usage_disp,
-                      live_key1="hw_gtt", live_key2="hw_usage")
-        _add_dual_row(hw_frame, "GPU Clock",    core_clk,         "Boost Clock", boost_clk,
-                      live_key1="hw_clock")
-        _add_dual_row(hw_frame, "Memory Clock", mem_clk_disp,     "Temperature", temp_disp,
-                      live_key1="hw_mem_clock", live_key2="hw_temp")
-        _add_dual_row(hw_frame, "Power Draw",   power_disp,       "Fan Speed",   fan_disp,
-                      live_key1="hw_power", live_key2="hw_fan")
+        # GPU Hardware – packed into 3–4 fields per row
+        _add_row(hw_frame, ("Device ID", dev_id_display), ("Driver", driver_val), ("VBIOS", bios_val))
+        _add_row(hw_frame, ("PCIe Link", bus_interface), ("VRAM Type", vram_type),
+                            ("VRAM", vram_disp, "hw_vram"), ("GTT Memory", gtt_disp, "hw_gtt"))
+        _add_row(hw_frame, ("GPU Usage", usage_disp, "hw_usage"),
+                            ("GPU Clock", core_clk, "hw_clock"), ("Boost Clock", boost_clk),
+                            ("Memory Clock", mem_clk_disp, "hw_mem_clock"))
+        _add_row(hw_frame, ("Temperature", temp_disp, "hw_temp"),
+                            ("Power Draw", power_disp, "hw_power"), ("Fan Speed", fan_disp, "hw_fan"))
         self.card_content_box.append(hw_frame)
 
         # ── Vulkan ────────────────────────────────────────────────────
@@ -1300,23 +1292,28 @@ class GpuZView(Gtk.Box):
         vk_rt_str = "Supported" if has_rt else "Not Available"
         vk_mesh_str = "Supported" if has_mesh else "Not Available"
 
-        _add_dual_row(vk_frame, "API Version",        vk_api,             "Instance Ver.",   vk_inst_ver)
-        _add_dual_row(vk_frame, "Driver Name",        vk_drv_name,        "Driver Ver.",     vk_drv_ver)
+        # Vulkan – 4 fields per row, long UUIDs on their own full-width row
+        _add_row(vk_frame,
+                 ("API Version", vk_api), ("Instance Ver.", vk_inst_ver),
+                 ("Driver Name", vk_drv_name), ("Driver Ver.", vk_drv_ver))
         if vk_drv_info and vk_drv_info not in ("—", "-"):
-            _add_single_row(vk_frame, "Driver Info", vk_drv_info)
-        _add_dual_row(vk_frame, "Device Type",        vk_dev_type,        "Conformance",     vk_conform)
-        _add_dual_row(vk_frame, "Vendor ID",          vk_vendor_id,       "Device ID",       vk_device_id)
-        _add_dual_row(vk_frame, "Device Extensions",  vk_ext_cnt,         "Device Formats",  vk_fmt_cnt)
-        _add_dual_row(vk_frame, "Instance Ext.",      vk_inst_ext_cnt,    "Instance Layers", vk_inst_layers_cnt)
-        _add_dual_row(vk_frame, "Memory Types",       vk_mem_types,       "Memory Heaps",    vk_mem_heaps)
-        _add_dual_row(vk_frame, "Queue Families",     vk_queue_fam,       "",                "")
-        _add_dual_row(vk_frame, "Ray Tracing",        vk_rt_str,          "Mesh Shaders",    vk_mesh_str)
+            _add_row(vk_frame, ("Driver Info", vk_drv_info))
+        _add_row(vk_frame,
+                 ("Device Type", vk_dev_type), ("Conformance", vk_conform),
+                 ("Vendor ID", vk_vendor_id), ("Device ID", vk_device_id))
+        _add_row(vk_frame,
+                 ("Device Ext.", vk_ext_cnt), ("Device Formats", vk_fmt_cnt),
+                 ("Instance Ext.", vk_inst_ext_cnt), ("Instance Layers", vk_inst_layers_cnt))
+        _add_row(vk_frame,
+                 ("Memory Types", vk_mem_types), ("Memory Heaps", vk_mem_heaps),
+                 ("Queue Families", vk_queue_fam),
+                 ("Ray Tracing", vk_rt_str), ("Mesh Shaders", vk_mesh_str))
         if vk_pipeline_uuid and vk_pipeline_uuid not in ("—", "-"):
-            _add_single_row(vk_frame, "Pipeline Cache UUID", vk_pipeline_uuid)
+            _add_row(vk_frame, ("Pipeline Cache UUID", vk_pipeline_uuid))
         if vk_uuid and vk_uuid not in ("—", "-"):
-            _add_single_row(vk_frame, "Device UUID", vk_uuid)
+            _add_row(vk_frame, ("Device UUID", vk_uuid))
         if vk_drv_uuid and vk_drv_uuid not in ("—", "-"):
-            _add_single_row(vk_frame, "Driver UUID", vk_drv_uuid)
+            _add_row(vk_frame, ("Driver UUID", vk_drv_uuid))
 
         def _format_video_profile_counts(profile_names, profile_counts, mode):
             if not profile_names:
@@ -1337,7 +1334,7 @@ class GpuZView(Gtk.Box):
                 "Decode"
             )
             if decode_text:
-                _add_single_row(vk_frame, "Video Decode Profiles", decode_text)
+                _add_row(vk_frame, ("Video Decode Profiles", decode_text))
 
         if vk_dev.get("video_encode_profiles"):
             encode_text = _format_video_profile_counts(
@@ -1346,7 +1343,7 @@ class GpuZView(Gtk.Box):
                 "Encode"
             )
             if encode_text:
-                _add_single_row(vk_frame, "Video Encode Profiles", encode_text)
+                _add_row(vk_frame, ("Video Encode Profiles", encode_text))
 
         self.card_content_box.append(vk_frame)
 
@@ -1369,13 +1366,17 @@ class GpuZView(Gtk.Box):
         fbcfg_cnt   = str(gl_data.get("fbconfig_count", 0)) if gl_data.get("fbconfig_count") else "—"
         es_ext_cnt  = str(gl_data.get("es_extensions_count", 0)) if gl_data.get("es_extensions_count") else "—"
 
-        _add_dual_row(gl_frame, "Vendor",         gl_vendor,    "Renderer",       gl_renderer)
-        _add_dual_row(gl_frame, "OpenGL Version", gl_version,   "GLSL Version",   gl_glsl)
-        _add_dual_row(gl_frame, "OpenGL ES",      gl_es_ver,    "GLX Version",    gl_glx_ver)
-        _add_dual_row(gl_frame, "EGL Version",    egl_version,  "EGL Extensions", egl_ext_cnt)
-        _add_dual_row(gl_frame, "GL Extensions",  gl_ext_cnt,   "GLX Extensions", glx_ext_cnt)
-        _add_dual_row(gl_frame, "ES Extensions",  es_ext_cnt,   "GLX Visuals",    glx_vis_cnt)
-        _add_dual_row(gl_frame, "FB Configs",     fbcfg_cnt,    "",               "")
+        # OpenGL – 4 fields per row; counts packed 5-wide
+        _add_row(gl_frame,
+                 ("Vendor", gl_vendor), ("Renderer", gl_renderer),
+                 ("OpenGL Version", gl_version), ("GLSL Version", gl_glsl))
+        _add_row(gl_frame,
+                 ("OpenGL ES", gl_es_ver), ("GLX Version", gl_glx_ver),
+                 ("EGL Version", egl_version), ("EGL Ext.", egl_ext_cnt))
+        _add_row(gl_frame,
+                 ("GL Extensions", gl_ext_cnt), ("GLX Extensions", glx_ext_cnt),
+                 ("ES Extensions", es_ext_cnt), ("GLX Visuals", glx_vis_cnt),
+                 ("FB Configs", fbcfg_cnt))
         self.card_content_box.append(gl_frame)
 
         # ── OpenCL ────────────────────────────────────────────────────
@@ -1385,13 +1386,38 @@ class GpuZView(Gtk.Box):
         cl_platforms = cl_data.get("platforms", [])
         cl_plat_cnt = str(len(cl_platforms)) if cl_platforms else "0"
 
+        def _populate_cl_device(cl_frame, matched_plat, matched_dev, cl_plat_cnt):
+            cl_plat_name = matched_plat.get("name", "—")
+            cl_plat_ver  = matched_plat.get("version", "—")
+            cl_plat_ext  = str(matched_plat.get("extensions_count", 0)) if matched_plat.get("extensions_count") else "—"
+            cl_dev_name  = matched_dev.get("name", "—")
+            cl_dev_type  = matched_dev.get("device_type", "—")
+            cl_dev_ver   = matched_dev.get("version", "—")
+            cl_opencl_c  = matched_dev.get("opencl_c_version", "—")
+            cl_cus       = str(matched_dev.get("compute_units", "—"))
+            cl_wgs       = str(matched_dev.get("workgroup_size", "—"))
+            cl_gmem      = matched_dev.get("global_memory", "—")
+            cl_lmem      = matched_dev.get("local_memory", "—")
+            cl_clk       = str(matched_dev.get("max_clock", "—"))
+            cl_drv_ver   = matched_dev.get("driver_version", "—")
+            cl_dev_ext   = str(matched_dev.get("extensions_count", 0)) if matched_dev.get("extensions_count") else "—"
+            _add_row(cl_frame,
+                     ("Platform", cl_plat_name), ("Platforms", cl_plat_cnt),
+                     ("Platform Ver.", cl_plat_ver), ("Plat. Ext.", cl_plat_ext))
+            _add_row(cl_frame,
+                     ("Device", cl_dev_name), ("Device Type", cl_dev_type),
+                     ("Device Ver.", cl_dev_ver), ("OpenCL C", cl_opencl_c))
+            _add_row(cl_frame,
+                     ("Compute Units", cl_cus), ("Max Workgroup", cl_wgs),
+                     ("Global Mem.", cl_gmem), ("Local Mem.", cl_lmem), ("Max Clock", cl_clk))
+            _add_row(cl_frame, ("Driver Ver.", cl_drv_ver), ("Dev. Extensions", cl_dev_ext))
+
         if matched_devices:
             for idx, (matched_plat, matched_dev) in enumerate(matched_devices):
                 if idx > 0:
                     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
                     sep.add_css_class("gpuz-section-sep")
                     cl_frame.append(sep)
-
                 if len(matched_devices) > 1:
                     inst_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
                     inst_box.set_margin_top(2)
@@ -1401,42 +1427,14 @@ class GpuZView(Gtk.Box):
                     inst_lbl.set_halign(Gtk.Align.START)
                     inst_box.append(inst_lbl)
                     cl_frame.append(inst_box)
-
-                cl_plat_name = matched_plat.get("name", "—")
-                cl_plat_ver  = matched_plat.get("version", "—")
-                cl_plat_ext  = str(matched_plat.get("extensions_count", 0)) if matched_plat.get("extensions_count") else "—"
-                cl_dev_name  = matched_dev.get("name", "—")
-                cl_dev_type  = matched_dev.get("device_type", "—")
-                cl_dev_ver   = matched_dev.get("version", "—")
-                cl_opencl_c  = matched_dev.get("opencl_c_version", "—")
-                cl_cus       = str(matched_dev.get("compute_units", "—"))
-                cl_wgs       = str(matched_dev.get("workgroup_size", "—"))
-                cl_gmem      = matched_dev.get("global_memory", "—")
-                cl_lmem      = matched_dev.get("local_memory", "—")
-                cl_clk       = str(matched_dev.get("max_clock", "—"))
-                cl_drv_ver   = matched_dev.get("driver_version", "—")
-                cl_dev_ext   = str(matched_dev.get("extensions_count", 0)) if matched_dev.get("extensions_count") else "—"
-
-                _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
-                _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
-                _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
-                _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
-                _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
-                _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
-                _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
-                _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
+                _populate_cl_device(cl_frame, matched_plat, matched_dev, cl_plat_cnt)
         else:
-            cl_plat_name = cl_plat_ver = cl_plat_ext = "—"
-            cl_dev_name = cl_dev_type = cl_dev_ver = cl_opencl_c = "—"
-            cl_cus = cl_wgs = cl_gmem = cl_lmem = cl_clk = cl_drv_ver = cl_dev_ext = "—"
-            _add_dual_row(cl_frame, "Platform",       cl_plat_name, "Platforms",      cl_plat_cnt)
-            _add_dual_row(cl_frame, "Platform Ver.",  cl_plat_ver,  "Plat. Ext.",     cl_plat_ext)
-            _add_dual_row(cl_frame, "Device",         cl_dev_name,  "Device Type",    cl_dev_type)
-            _add_dual_row(cl_frame, "Device Ver.",    cl_dev_ver,   "OpenCL C",       cl_opencl_c)
-            _add_dual_row(cl_frame, "Compute Units",  cl_cus,       "Max Workgroup",  cl_wgs)
-            _add_dual_row(cl_frame, "Global Mem.",    cl_gmem,      "Local Mem.",     cl_lmem)
-            _add_dual_row(cl_frame, "Max Clock",      cl_clk,       "Dev. Extensions",cl_dev_ext)
-            _add_dual_row(cl_frame, "Driver Ver.",    cl_drv_ver,   "",               "")
+            empty_plat = {"name": "—", "version": "—", "extensions_count": 0}
+            empty_dev  = {"name": "—", "device_type": "—", "version": "—",
+                          "opencl_c_version": "—", "compute_units": "—", "workgroup_size": "—",
+                          "global_memory": "—", "local_memory": "—", "max_clock": "—",
+                          "driver_version": "—", "extensions_count": 0}
+            _populate_cl_device(cl_frame, empty_plat, empty_dev, cl_plat_cnt)
         self.card_content_box.append(cl_frame)
 
         # ── VDPAU ─────────────────────────────────────────────────────
@@ -1447,8 +1445,9 @@ class GpuZView(Gtk.Box):
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
         vdpau_api  = vdpau_data.get("api_version", "—")
         vdpau_rend = vdpau_data.get("renderer", "—")
-        _add_dual_row(vdpau_frame, "Supported",  vdpau_supported, "API Version", vdpau_api)
-        _add_single_row(vdpau_frame, "Renderer", vdpau_rend)
+        _add_row(vdpau_frame,
+                 ("Supported", vdpau_supported), ("API Version", vdpau_api),
+                 ("Renderer", vdpau_rend))
         self.card_content_box.append(vdpau_frame)
 
     def _make_field_frame(self, label: str, value: str, live_key: str = None, registry: dict = None) -> Gtk.Frame:
@@ -1476,6 +1475,7 @@ class GpuZView(Gtk.Box):
         content_box.add_css_class("gpuz-frame-content")
 
         clean_val = str(value).strip() if value is not None and str(value).strip() else "—"
+        clean_val = re.sub(r'\s+', ' ', clean_val).strip()
         clean_val = re.sub(r'\s*\(\d+\)$', '', clean_val).strip()
 
         val = Gtk.Label(label=clean_val)
@@ -1484,8 +1484,7 @@ class GpuZView(Gtk.Box):
         val.set_xalign(0.0)
         val.set_hexpand(True)
         val.set_selectable(True)
-        val.set_wrap(True)
-        val.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        val.set_wrap(False)
         content_box.append(val)
 
         frame.set_child(content_box)
@@ -1550,6 +1549,12 @@ class GpuZView(Gtk.Box):
         )
         return scroll
 
+    def _format_live_val(self, val_str: str) -> str:
+        """Format live sensor / telemetry string: clean whitespace."""
+        clean = re.sub(r'\s+', ' ', str(val_str).strip()) if val_str is not None and str(val_str).strip() else "—"
+        clean = re.sub(r'\s*\(\d+\)$', '', clean).strip()
+        return clean
+
     def _update_sensors(self):
         """Poll telemetry and update values and sparklines."""
         gpu = self._get_current_gpu()
@@ -1578,70 +1583,69 @@ class GpuZView(Gtk.Box):
         if live:
             temp_v = stats.get("temp", 0)
             if "hw_temp" in live:
-                live["hw_temp"].set_label(
-                    f"{temp_v} °C" if temp_v is not None and temp_v > 0 else "—"
-                )
+                val = f"{temp_v} °C" if temp_v is not None and temp_v > 0 else "—"
+                live["hw_temp"].set_label(self._format_live_val(val))
             pwr_v = stats.get("power_usage", -1)
             if "hw_power" in live:
-                live["hw_power"].set_label(
-                    f"{pwr_v} W" if pwr_v is not None and pwr_v >= 0 else "—"
-                )
+                val = f"{pwr_v} W" if pwr_v is not None and pwr_v >= 0 else "—"
+                live["hw_power"].set_label(self._format_live_val(val))
             fan_v = stats.get("fan_speed", -1)
             fan_rpm_v = stats.get("fan_rpm", -1)
             if "hw_fan" in live:
                 if fan_v is not None and fan_v >= 0 and fan_rpm_v is not None and fan_rpm_v > 0:
-                    live["hw_fan"].set_label(f"{fan_v} % ({fan_rpm_v} RPM)")
+                    val = f"{fan_v} % ({fan_rpm_v} RPM)"
                 elif fan_v is not None and fan_v >= 0:
-                    live["hw_fan"].set_label(f"{fan_v} %")
+                    val = f"{fan_v} %"
                 elif fan_rpm_v is not None and fan_rpm_v >= 0:
-                    live["hw_fan"].set_label(f"{fan_rpm_v} RPM")
+                    val = f"{fan_rpm_v} RPM"
                 else:
-                    live["hw_fan"].set_label("—")
+                    val = "—"
+                live["hw_fan"].set_label(self._format_live_val(val))
             usage_v = stats.get("usage", -1)
             if "hw_usage" in live:
-                live["hw_usage"].set_label(
-                    f"{usage_v} %" if usage_v is not None and usage_v >= 0 else "—"
-                )
+                val = f"{usage_v} %" if usage_v is not None and usage_v >= 0 else "—"
+                live["hw_usage"].set_label(self._format_live_val(val))
             vram_tot_v = stats.get("mem_total", 0)
             vram_used_v = stats.get("mem_used", 0)
             if "hw_vram" in live:
                 if vram_tot_v > 0:
-                    live["hw_vram"].set_label(f"{vram_used_v} / {vram_tot_v} MB")
+                    val = f"{vram_used_v} / {vram_tot_v} MB"
                 elif vram_used_v is not None and vram_used_v >= 0:
-                    live["hw_vram"].set_label(f"{vram_used_v} MB")
+                    val = f"{vram_used_v} MB"
                 else:
-                    live["hw_vram"].set_label("—")
+                    val = "—"
+                live["hw_vram"].set_label(self._format_live_val(val))
             gtt_u = stats.get("gtt_used", 0)
             gtt_t = stats.get("gtt_total", 0)
             if "hw_gtt" in live:
                 if gtt_t > 0:
-                    live["hw_gtt"].set_label(f"{gtt_u} / {gtt_t} MB")
+                    val = f"{gtt_u} / {gtt_t} MB"
                 elif gtt_u is not None and gtt_u >= 0:
-                    live["hw_gtt"].set_label(f"{gtt_u} MB")
+                    val = f"{gtt_u} MB"
                 else:
-                    live["hw_gtt"].set_label("—")
+                    val = "—"
+                live["hw_gtt"].set_label(self._format_live_val(val))
             clk_v = stats.get("clock_current", 0)
             if "hw_clock" in live:
-                live["hw_clock"].set_label(
-                    f"{clk_v} MHz" if clk_v and clk_v > 0 else "—"
-                )
+                val = f"{clk_v} MHz" if clk_v and clk_v > 0 else "—"
+                live["hw_clock"].set_label(self._format_live_val(val))
             mclk_v = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
             if "hw_mem_clock" in live:
-                live["hw_mem_clock"].set_label(
-                    f"{mclk_v} MHz" if mclk_v and mclk_v > 0 else "—"
-                )
+                val = f"{mclk_v} MHz" if mclk_v and mclk_v > 0 else "—"
+                live["hw_mem_clock"].set_label(self._format_live_val(val))
 
         # ── Real-time updates for System tab labels ──────────────────────
         sys_live = getattr(self, "_sys_live_labels", {})
         if sys_live:
             if "sys_cpu_usage" in sys_live:
-                sys_live["sys_cpu_usage"].set_label(cpu_usage_str if cpu_usage_str else "—")
+                val = cpu_usage_str if cpu_usage_str else "—"
+                sys_live["sys_cpu_usage"].set_label(self._format_live_val(val))
             if "sys_cpu_temp" in sys_live:
-                sys_live["sys_cpu_temp"].set_label(
-                    f"{cpu_temp_val} °C" if cpu_temp_val and cpu_temp_val > 0 else "—"
-                )
+                val = f"{cpu_temp_val} °C" if cpu_temp_val and cpu_temp_val > 0 else "—"
+                sys_live["sys_cpu_temp"].set_label(self._format_live_val(val))
             if "sys_ram_usage" in sys_live:
-                sys_live["sys_ram_usage"].set_label(ram_usage_str if ram_usage_str else "—")
+                val = ram_usage_str if ram_usage_str else "—"
+                sys_live["sys_ram_usage"].set_label(self._format_live_val(val))
             if "sys_uptime" in sys_live:
                 try:
                     with open("/proc/uptime", "r") as f:
@@ -1654,7 +1658,7 @@ class GpuZView(Gtk.Box):
                         if h > 0: parts.append(f"{int(h)}h")
                         if m > 0: parts.append(f"{int(m)}m")
                         if not parts: parts.append(f"{int(s)}s")
-                        sys_live["sys_uptime"].set_label(" ".join(parts))
+                        sys_live["sys_uptime"].set_label(self._format_live_val(" ".join(parts)))
                 except Exception:
                     pass
 
@@ -1720,22 +1724,32 @@ class GpuZView(Gtk.Box):
             return sect_box
 
         def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
-            row_box.set_homogeneous(True)
             row_box.append(self._make_field_frame(l1, v1, live_key=live_key1, registry=self._sys_live_labels))
             if l2 or v2:
                 row_box.append(self._make_field_frame(l2, v2, live_key=live_key2, registry=self._sys_live_labels))
-            else:
-                row_box.get_first_child().set_hexpand(True)
             parent.append(row_box)
 
         def _add_single_row(parent, label, value, live_key=None):
-            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
             cell = self._make_field_frame(label, value, live_key=live_key, registry=self._sys_live_labels)
             cell.set_hexpand(True)
             row_box.append(cell)
+            parent.append(row_box)
+
+        # Flexible multi-column row helper (up to 5 cols).
+        # Each item: (label, value) or (label, value, live_key).
+        def _add_row(parent, *items):
+            row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+            row_box.set_hexpand(True)
+            for item in items:
+                lbl_text = item[0]
+                val_text = item[1]
+                lk = item[2] if len(item) > 2 else None
+                row_box.append(self._make_field_frame(lbl_text, val_text, live_key=lk,
+                                                      registry=self._sys_live_labels))
             parent.append(row_box)
 
         # ── Header: OS / System Summary Frame with Distro Logo ─────────
@@ -1785,47 +1799,53 @@ class GpuZView(Gtk.Box):
 
         # ── Section 1: Operating System & Session ───────────────────────
         os_frame = _make_section("Operating System", "computer-symbolic")
-        _add_dual_row(os_frame, "OS Name", sys_data.get("os", "—"), "Kernel", sys_data.get("kernel", "—"))
-        _add_dual_row(os_frame, "Desktop", sys_data.get("desktop", "—"), "Windowing", sys_data.get("windowing", "—"))
-        _add_dual_row(os_frame, "Hostname", sys_data.get("hostname", "—"), "Uptime", sys_data.get("uptime", "—"),
-                      live_key2="sys_uptime")
+        _add_row(os_frame,
+                 ("OS Name", sys_data.get("os", "—")), ("Kernel", sys_data.get("kernel", "—")),
+                 ("Desktop", sys_data.get("desktop", "—")), ("Windowing", sys_data.get("windowing", "—")))
+        _add_row(os_frame,
+                 ("Hostname", sys_data.get("hostname", "—")),
+                 ("Uptime", sys_data.get("uptime", "—"), "sys_uptime"))
         self.sys_content_box.append(os_frame)
 
         # ── Section 2: Motherboard & BIOS ──────────────────────────────
         hw_frame = _make_section("Motherboard & BIOS", "preferences-desktop-display-symbolic")
         hw_model = sys_data.get("hardware_model", "—")
+        bios_ver = sys_data.get("bios_version", "—")
+        bios_date = sys_data.get("bios_date", "—")
         if hw_model and hw_model != "—":
-            _add_single_row(hw_frame, "Hardware Model", hw_model)
-        _add_dual_row(hw_frame, "BIOS Version", sys_data.get("bios_version", "—"),
-                      "BIOS Date", sys_data.get("bios_date", "—"))
+            _add_row(hw_frame, ("Hardware Model", hw_model), ("BIOS Version", bios_ver), ("BIOS Date", bios_date))
+        else:
+            _add_row(hw_frame, ("BIOS Version", bios_ver), ("BIOS Date", bios_date))
         self.sys_content_box.append(hw_frame)
 
         # ── Section 3: Processor (CPU) ──────────────────────────────────
         cpu_frame = _make_section("Processor (CPU)", "cpu-symbolic")
         cpu_name = sys_data.get("cpu", "—")
-        _add_single_row(cpu_frame, "Processor", cpu_name)
-        _add_dual_row(cpu_frame, "Architecture", sys_data.get("architecture", "—"),
-                      "Cores / Threads", sys_data.get("cpu_cores_threads", "—"))
-        cpu_cache = sys_data.get("cpu_cache", "—")
-        if cpu_cache and cpu_cache != "—":
-            _add_single_row(cpu_frame, "CPU Cache", cpu_cache)
-
+        _add_row(cpu_frame, ("Processor", cpu_name))
         cpu_u = get_realtime_cpu_usage()
         cpu_t = get_realtime_cpu_temp()
         cpu_t_disp = f"{cpu_t} °C" if cpu_t and cpu_t > 0 else "—"
-        _add_dual_row(cpu_frame, "CPU Load", cpu_u, "CPU Temperature", cpu_t_disp,
-                      live_key1="sys_cpu_usage", live_key2="sys_cpu_temp")
+        cpu_cache = sys_data.get("cpu_cache", "—")
+        row_items = [
+            ("Architecture", sys_data.get("architecture", "—")),
+            ("Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
+            ("CPU Load", cpu_u, "sys_cpu_usage"),
+            ("CPU Temperature", cpu_t_disp, "sys_cpu_temp"),
+        ]
+        if cpu_cache and cpu_cache != "—":
+            row_items.append(("CPU Cache", cpu_cache))
+        _add_row(cpu_frame, *row_items)
         self.sys_content_box.append(cpu_frame)
 
         # ── Section 4: Memory & Storage ────────────────────────────────
         mem_frame = _make_section("Memory & Storage", "drive-harddisk-symbolic")
         ram_tot = sys_data.get("ram", "—")
         ram_u = get_realtime_ram_usage()
-        _add_dual_row(mem_frame, "Total RAM", ram_tot, "RAM Usage", ram_u,
-                      live_key2="sys_ram_usage")
         disk_cap = sys_data.get("disk_capacity", "—")
+        mem_items = [("Total RAM", ram_tot), ("RAM Usage", ram_u, "sys_ram_usage")]
         if disk_cap and disk_cap != "—":
-            _add_single_row(mem_frame, "Storage", disk_cap)
+            mem_items.append(("Storage", disk_cap))
+        _add_row(mem_frame, *mem_items)
         self.sys_content_box.append(mem_frame)
 
     # -----------------------------------------------------------------------

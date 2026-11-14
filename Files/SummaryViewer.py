@@ -1805,6 +1805,7 @@ def _make_action_row(title: str, subtitle: str) -> Gtk.Widget:
 
     # Outer horizontal wrapper
     outer_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+    outer_box.add_css_class("summary-row-container")
     box.set_hexpand(True)
     outer_box.append(box)
     outer_box.append(copy_btn)
@@ -1894,6 +1895,7 @@ def _nav_button(label: str, page_name: str, app, gpu_index=None) -> Gtk.Button:
     btn = Gtk.Button(label=label)
     btn.add_css_class("flat")
     btn.add_css_class("suggested-action")
+    btn.add_css_class("summary-nav-btn")
     btn.set_valign(Gtk.Align.CENTER)
     def on_clicked(_):
         if hasattr(app, "open_tab"):
@@ -1971,6 +1973,7 @@ _active_popout_windows = {}
 
 def _make_section_header(title: str, icon_name: str, subtitle: str = "") -> Gtk.Box:
     box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    box.add_css_class("summary-tier-header-box")
     box.set_margin_top(16)
     box.set_margin_bottom(8)
     box.set_margin_start(4)
@@ -1978,6 +1981,7 @@ def _make_section_header(title: str, icon_name: str, subtitle: str = "") -> Gtk.
 
     icon = Gtk.Image.new_from_icon_name(icon_name)
     icon.set_pixel_size(18)
+    icon.add_css_class("summary-tier-header-icon")
     box.append(icon)
 
     lbl = Gtk.Label(label=title)
@@ -1990,6 +1994,7 @@ def _make_section_header(title: str, icon_name: str, subtitle: str = "") -> Gtk.
         sub = Gtk.Label(label=subtitle)
         sub.add_css_class("dim-label")
         sub.add_css_class("caption")
+        sub.add_css_class("summary-tier-subtitle")
         sub.set_halign(Gtk.Align.START)
         sub.set_margin_start(6)
         box.append(sub)
@@ -2327,6 +2332,8 @@ def _open_card_in_separate_window(title: str, icon_name: str, rows: list = None,
     toolbar_view.set_content(scroll)
 
     card_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    card_container.add_css_class("summary-card-body")
+    card_container.add_css_class("summary-popout-content")
     scroll.set_child(card_container)
 
     popout_widgets = {}
@@ -2722,16 +2729,21 @@ def _make_card(title: str, icon_name: str, rows: list,
     frame.set_margin_bottom(0)
     # Add CSS class for styling
     frame.add_css_class("summary-card")
+    if card_id and card_id.startswith("gpu-") and not card_id.startswith("gpu-hw-"):
+        frame.add_css_class("summary-telemetry-card")
+    elif card_id and (card_id.startswith("gpu-hw-") or card_id == "system"):
+        frame.add_css_class("summary-hero-card")
 
     card_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     frame.set_child(card_box)
 
     # ---------- Header bar ----------
     header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    header.set_margin_start(12)
-    header.set_margin_end(12)
-    header.set_margin_top(10)
-    header.set_margin_bottom(10)
+    header.add_css_class("summary-card-header")
+    header.set_margin_start(0)
+    header.set_margin_end(0)
+    header.set_margin_top(0)
+    header.set_margin_bottom(0)
 
     # Try to load the subsystem logo icon
     try:
@@ -2749,6 +2761,7 @@ def _make_card(title: str, icon_name: str, rows: list,
 
     title_lbl = Gtk.Label(label=title)
     title_lbl.add_css_class("title-3")
+    title_lbl.add_css_class("summary-card-title")
     title_lbl.set_halign(Gtk.Align.START)
     title_lbl.set_hexpand(True)
     header.append(title_lbl)
@@ -2775,6 +2788,7 @@ def _make_card(title: str, icon_name: str, rows: list,
     popout_btn = Gtk.Button()
     popout_btn.set_icon_name("window-new-symbolic")
     popout_btn.add_css_class("flat")
+    popout_btn.add_css_class("summary-popout-btn")
     popout_btn.set_valign(Gtk.Align.CENTER)
     popout_btn.set_tooltip_text(f"Open {title} in separate window")
 
@@ -2807,18 +2821,23 @@ def _make_card(title: str, icon_name: str, rows: list,
 
     # Separator between header and rows
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.add_css_class("summary-card-sep")
     card_box.append(sep)
 
     # ---------- Property rows ----------
+    body_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    body_box.add_css_class("summary-card-body")
+    card_box.append(body_box)
+
     if content_widget is not None and supported:
-        card_box.append(content_widget)
+        body_box.append(content_widget)
     elif not supported:
         no_row = _make_action_row("Status", "This subsystem was not detected on your system.")
-        card_box.append(no_row)
+        body_box.append(no_row)
     else:
         for row_title, row_subtitle in rows:
             row = _make_action_row(row_title, row_subtitle)
-            card_box.append(row)
+            body_box.append(row)
             if row_widgets_out is not None:
                 row_widgets_out[row_title] = row
 
@@ -2925,20 +2944,106 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     css_provider = Gtk.CssProvider()
     if prefer_dark:
         card_css = """
+        .summary-page {
+            background-color: transparent;
+        }
+
+        .summary-tier-header-box {
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        .summary-tier-header {
+            font-weight: 700;
+            font-size: 14pt;
+            color: #ffffff;
+        }
+
+        .summary-tier-header-icon {
+            color: #d43c50;
+        }
+
+        .summary-tier-subtitle {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 9.5pt;
+        }
+
         .summary-card {
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgba(255, 255, 255, 0.12);
             border-radius: 12px;
-            background-color: #242429;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            background-color: #262626;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         }
 
         .summary-card:disabled {
             opacity: 0.55;
         }
 
+        /* Two-tone header: obsidian console framing matching #181818 columnviews */
+        .summary-card-header {
+            background-image: linear-gradient(to bottom, #181818, #111111);
+            background-color: #181818;
+            border-top-left-radius: 11px;
+            border-top-right-radius: 11px;
+            padding: 10px 14px;
+        }
+
+        .summary-card-header .summary-card-title,
         .summary-card .title-3 {
             font-weight: 700;
+            font-size: 13.5pt;
             color: #ffffff;
+        }
+
+        .summary-card-header button.flat {
+            color: rgba(255, 255, 255, 0.75);
+            border-radius: 6px;
+        }
+
+        .summary-card-header button.flat:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        .summary-card-header .summary-nav-btn {
+            background-color: #2d2d2d;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 3px 10px;
+        }
+
+        .summary-card-header .summary-nav-btn:hover {
+            background-color: #383838;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .summary-card-sep {
+            background-color: #333333;
+            min-height: 1px;
+        }
+
+        /* Elevated neutral charcoal body (zero blue tint, matches window #222222 with surface depth) */
+        .summary-card-body {
+            background-color: #262626;
+            border-bottom-left-radius: 11px;
+            border-bottom-right-radius: 11px;
+            padding: 8px 12px 12px 12px;
+        }
+
+        /* Deep cockpit instrument surface for live telemetry dials */
+        .summary-telemetry-card .summary-card-body {
+            background-color: #181818;
+            border-bottom-left-radius: 11px;
+            border-bottom-right-radius: 11px;
+            padding: 10px;
+        }
+
+        .summary-hero-card .summary-card-body {
+            background-color: #232323;
         }
 
         .summary-card row subtitle {
@@ -2950,102 +3055,218 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             font-weight: 500;
         }
 
-        .summary-card button {
-            background-color: #2e2e36;
+        .summary-card-body .body {
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .summary-card-body .caption {
+            font-size: 10.5pt;
+            font-weight: 500;
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-card-body .dim-label {
+            color: rgba(255, 255, 255, 0.38);
+        }
+
+        .summary-row-container {
             border-radius: 6px;
+            padding: 1px 4px;
         }
 
-        .summary-card button:hover {
-            background-color: #383842;
+        .summary-row-container:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
-        .summary-tier-header {
-            font-weight: 700;
-            color: #ffffff;
+        .summary-card .pill {
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 9pt;
+            font-weight: 600;
         }
 
-        .summary-page .summary-card .title-3 {
-            font-size: 16pt;
+        .summary-card .pill.success {
+            background-color: rgba(46, 125, 50, 0.28);
+            color: #81c784;
+            border: 1px solid rgba(129, 199, 132, 0.4);
         }
 
-        .summary-page .summary-card .body {
-            font-size: 11pt;
-        }
-
-        .summary-page .summary-card .caption {
-            font-size: 10pt;
-        }
-
-        .summary-page .summary-tier-header {
-            font-size: 15pt;
+        .summary-card .pill.error {
+            background-color: rgba(198, 40, 40, 0.28);
+            color: #e57373;
+            border: 1px solid rgba(229, 115, 115, 0.4);
         }
         """
     else:
         card_css = """
+        .summary-page {
+            background-color: transparent;
+        }
+
+        .summary-tier-header-box {
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        .summary-tier-header {
+            font-weight: 700;
+            font-size: 14pt;
+            color: #0f172a;
+        }
+
+        .summary-tier-header-icon {
+            color: #2563eb;
+        }
+
+        .summary-tier-subtitle {
+            color: #64748b;
+            font-size: 9.5pt;
+        }
+
         .summary-card {
-            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgba(15, 23, 42, 0.12);
             border-radius: 12px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background-color: #f8fafc;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
         }
 
         .summary-card:disabled {
             opacity: 0.55;
         }
 
+        /* Two-tone hybrid header in light theme: distinguished dark slate bar */
+        .summary-card-header {
+            background-image: linear-gradient(to bottom, #1e2430, #161b24);
+            background-color: #1e2430;
+            border-top-left-radius: 11px;
+            border-top-right-radius: 11px;
+            padding: 10px 14px;
+        }
+
+        .summary-card-header .summary-card-title,
         .summary-card .title-3 {
             font-weight: 700;
-            color: #171717;
+            font-size: 13.5pt;
+            color: #f8fafc;
         }
 
-        .summary-card row subtitle {
-            color: rgba(0, 0, 0, 0.75);
-        }
-
-        .summary-card row title {
-            color: #171717;
-            font-weight: 500;
-        }
-
-        .summary-card button {
-            background-color: #f4f4f5;
-            color: #171717;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+        .summary-card-header button.flat {
+            color: #cbd5e1;
             border-radius: 6px;
         }
 
-        .summary-card button:hover {
-            background-color: #e4e4e7;
+        .summary-card-header button.flat:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
         }
 
-        .summary-tier-header {
-            font-weight: 700;
-            color: #171717;
+        .summary-card-header .summary-nav-btn {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 3px 10px;
         }
 
-        .summary-page .summary-card .title-3 {
-            font-size: 16pt;
+        .summary-card-header .summary-nav-btn:hover {
+            background-color: #2563eb;
         }
 
-        .summary-page .summary-card .body {
-            font-size: 11pt;
+        .summary-card-sep {
+            background-color: rgba(0, 0, 0, 0.08);
+            min-height: 1px;
         }
 
-        .summary-page .summary-card .caption {
-            font-size: 10pt;
+        /* Soft neutral card interior in light theme (eliminates blinding pure white) */
+        .summary-card-body {
+            background-color: #f8fafc;
+            border-bottom-left-radius: 11px;
+            border-bottom-right-radius: 11px;
+            padding: 8px 12px 12px 12px;
         }
 
-        .summary-page .summary-tier-header {
-            font-size: 15pt;
+        .summary-telemetry-card .summary-card-body {
+            background-color: #edf2f7;
+            border-bottom-left-radius: 11px;
+            border-bottom-right-radius: 11px;
+            padding: 10px;
+        }
+
+        .summary-hero-card .summary-card-body {
+            background-color: #f4f6f9;
+        }
+
+        .summary-card row subtitle {
+            color: rgba(15, 23, 42, 0.75);
+        }
+
+        .summary-card row title {
+            color: #0f172a;
+            font-weight: 500;
+        }
+
+        .summary-card-body .body {
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .summary-card-body .caption {
+            font-size: 10.5pt;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .summary-card-body .dim-label {
+            color: #94a3b8;
+        }
+
+        .summary-row-container {
+            border-radius: 6px;
+            padding: 1px 4px;
+        }
+
+        .summary-row-container:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .summary-card .pill {
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 9pt;
+            font-weight: 600;
+        }
+
+        .summary-card .pill.success {
+            background-color: rgba(34, 197, 94, 0.22);
+            color: #16a34a;
+            border: 1px solid rgba(22, 163, 74, 0.35);
+        }
+
+        .summary-card .pill.error {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.35);
         }
         """
+    if app is not None:
+        display = Gdk.Display.get_default()
+        if hasattr(app, "_summary_css_provider") and app._summary_css_provider:
+            try:
+                Gtk.StyleContext.remove_provider_for_display(display, app._summary_css_provider)
+            except Exception:
+                pass
+        app._summary_css_provider = css_provider
+
     css_provider.load_from_data(card_css.encode("utf-8"))
     Gtk.StyleContext.add_provider_for_display(
         Gdk.Display.get_default(),
         css_provider,
-        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        Gtk.STYLE_PROVIDER_PRIORITY_USER
     )
     
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)

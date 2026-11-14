@@ -432,17 +432,17 @@ def openCL(self, tab):
 
     tabs = [
         "Platform Information", "Device Information", "Device Extensions",
-        "Device Memory and Image Information", "Queue Capabilities and Execution",
-        "Device Vector Information"
+        " Memory & Image\n\tInformation", "Queue & Execution\n\tCapabilities",
+        "Vector Information"
     ]
 
     sidebar_groups = [
         ("PLATFORM", ["Platform Information"]),
         ("DEVICE", ["Device Information", "Device Extensions"]),
-        ("DEVICE RESOURCES & EXECUTION", [
-            "Device Memory and Image Information",
-            "Queue Capabilities and Execution",
-            "Device Vector Information",
+        ("DEVICE CAPABILITIES", [
+            " Memory & Image\n\tInformation",
+            "Queue & Execution\n\tCapabilities",
+            "Vector Information",
         ]),
     ]
     sidebar_listboxes = []
@@ -604,7 +604,7 @@ def openCL(self, tab):
 
                 content_box.append(DeviceExtensionDetailsScrollbar)
                 content_box.append(search_entry)
-        elif "Device Memory" in tab_name:
+        elif " Memory & Image\n\tInformation" in tab_name:
                 deviceMemoryImageColumnView = Gtk.ColumnView()
                 deviceMemoryImageColumnView.props.show_row_separators = True
                 deviceMemoryImageColumnView.props.show_column_separators = False
@@ -636,7 +636,7 @@ def openCL(self, tab):
                 DeviceMemoryImageScrollbar = create_scrollbar(deviceMemoryImageColumnView)
 
                 content_box.append(DeviceMemoryImageScrollbar)
-        elif "Queue Capabilities" in tab_name:
+        elif "Queue & Execution\n\tCapabilities" in tab_name:
                 deviceQueueExecutionColumnView = Gtk.ColumnView()
                 deviceQueueExecutionColumnView.props.show_row_separators = True
                 deviceQueueExecutionColumnView.props.show_column_separators = False
@@ -668,7 +668,7 @@ def openCL(self, tab):
                 DeviceQueueExecutionScrollbar = create_scrollbar(deviceQueueExecutionColumnView)
 
                 content_box.append(DeviceQueueExecutionScrollbar)
-        elif "Device Vector" in tab_name:
+        elif "Vector Information" in tab_name:
                 deviceVectorColumnView = Gtk.ColumnView()
                 deviceVectorColumnView.props.show_row_separators = True
                 deviceVectorColumnView.props.show_column_separators = False
