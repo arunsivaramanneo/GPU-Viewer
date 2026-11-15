@@ -115,6 +115,20 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     margin-bottom: 3px;
 }
 
+.gpuz-section-header .gpuz-nav-btn {
+    background-color: #1a1a1a;
+    border: 1px solid #d43c50;
+    color: #d43c50;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 3px 10px;
+}
+
+.gpuz-section-header .gpuz-nav-btn:hover {
+    background-color: #d43c50;
+    color: #ffffff;
+}
+
 /* Classic GTK Frame for each field */
 .gpuz-field-frame {
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -293,6 +307,20 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     opacity: 0.5;
     margin-top: 1px;
     margin-bottom: 3px;
+}
+
+.gpuz-section-header .gpuz-nav-btn {
+    background-color: #ffffff;
+    border: 1px solid #d43c50;
+    color: #d43c50;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 3px 10px;
+}
+
+.gpuz-section-header .gpuz-nav-btn:hover {
+    background-color: #d43c50;
+    color: #ffffff;
 }
 
 /* Classic GTK Frame for each field */
@@ -1127,7 +1155,15 @@ class GpuZView(Gtk.Box):
             parent.append(row_box)
 
         # Helper: section header with optional icon
-        def _make_section(title, icon_name=None, fallback_icon_name=None) -> Gtk.Box:
+        def _open_detail_page(page_name: str):
+            app = self.app
+            if hasattr(app, "set_view_mode"):
+                app.set_view_mode("dashboard")
+            if hasattr(app, "open_tab"):
+                app.open_tab(page_name, gpu_index=gpu.get("card_index", 0))
+
+        def _make_section(title, icon_name=None, fallback_icon_name=None,
+                          nav_actions=()) -> Gtk.Box:
             sect_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             sect_box.add_css_class("gpuz-section-box")
 
@@ -1153,7 +1189,18 @@ class GpuZView(Gtk.Box):
             hdr = Gtk.Label(label=title)
             hdr.add_css_class("gpuz-section-title")
             hdr.set_halign(Gtk.Align.START)
+            hdr.set_hexpand(True)
             hdr_box.append(hdr)
+            for nav_label, page_name in nav_actions:
+                nav_btn = Gtk.Button(label=nav_label)
+                nav_btn.add_css_class("flat")
+                nav_btn.add_css_class("gpuz-nav-btn")
+                nav_btn.set_valign(Gtk.Align.CENTER)
+                nav_btn.connect(
+                    "clicked",
+                    lambda _button, page=page_name: _open_detail_page(page),
+                )
+                hdr_box.append(nav_btn)
             sect_box.append(hdr_box)
 
             sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -1266,7 +1313,8 @@ class GpuZView(Gtk.Box):
 
         # ── Vulkan ────────────────────────────────────────────────────
         vk_frame = _make_section(
-            "Vulkan", const.VULKAN_PNG, fallback_icon_name="image-x-generic-symbolic"
+            "Vulkan", const.VULKAN_PNG, fallback_icon_name="image-x-generic-symbolic",
+            nav_actions=[("Open Vulkan →", "page1")] if has_vulkan else [],
         )
         vk_api = _clean_version(vk_dev.get("api_version") or vk_data.get("instance_version", "—"))
         vk_inst_ver = _clean_version(vk_data.get("instance_version", "—"))
@@ -1351,6 +1399,8 @@ class GpuZView(Gtk.Box):
         gl_frame = _make_section(
             "OpenGL / EGL", const.OPEN_GL_PNG,
             fallback_icon_name="applications-engineering-symbolic",
+            nav_actions=[("Open OpenGL →", "page2")]
+            if has_opengl or has_egl else [],
         )
         gl_vendor   = gl_data.get("vendor", "—")
         gl_renderer = gl_data.get("renderer", "—")
@@ -1381,7 +1431,9 @@ class GpuZView(Gtk.Box):
 
         # ── OpenCL ────────────────────────────────────────────────────
         cl_frame = _make_section(
-            "OpenCL", "../Images/OpenCL.svg", fallback_icon_name="system-run-symbolic"
+            "OpenCL", "../Images/OpenCL.svg", fallback_icon_name="system-run-symbolic",
+            nav_actions=[("Open OpenCL →", "opencl_page")]
+            if has_opencl else [],
         )
         cl_platforms = cl_data.get("platforms", [])
         cl_plat_cnt = str(len(cl_platforms)) if cl_platforms else "0"
@@ -1441,6 +1493,8 @@ class GpuZView(Gtk.Box):
         vdpau_frame = _make_section(
             "VDPAU", const.VDPAU_CL_PNG,
             fallback_icon_name="media-playback-start-symbolic",
+            nav_actions=[("Open VDPAU →", "vdpau_page")]
+            if has_vdpau else [],
         )
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
         vdpau_api  = vdpau_data.get("api_version", "—")
@@ -1486,6 +1540,26 @@ class GpuZView(Gtk.Box):
         val.set_selectable(True)
         val.set_wrap(False)
         content_box.append(val)
+
+        copy_btn = Gtk.Button()
+        copy_btn.set_icon_name("edit-copy-symbolic")
+        copy_btn.add_css_class("flat")
+        copy_btn.set_valign(Gtk.Align.CENTER)
+        copy_btn.set_tooltip_text("Copy to clipboard")
+        copy_btn.set_opacity(0.0)
+
+        def _copy_field_value(_button):
+            display = Gdk.Display.get_default()
+            if display is not None:
+                display.get_clipboard().set(f"{label}: {val.get_label()}")
+
+        copy_btn.connect("clicked", _copy_field_value)
+        content_box.append(copy_btn)
+
+        motion = Gtk.EventControllerMotion()
+        motion.connect("enter", lambda *_args: copy_btn.set_opacity(0.6))
+        motion.connect("leave", lambda *_args: copy_btn.set_opacity(0.0))
+        frame.add_controller(motion)
 
         frame.set_child(content_box)
 

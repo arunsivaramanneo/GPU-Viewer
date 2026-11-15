@@ -78,7 +78,7 @@ class CircularGauge(Gtk.DrawingArea):
         self.value_label = None
 
         self.set_content_width(size)
-        self.set_content_height(int(size * 0.96) if size > 0 else size)
+        self.set_content_height(int(size * 1.10) if size > 0 else size)
         self.set_draw_func(self._on_draw)
 
     def set_value(self, value, subtitle=None, max_value=None):
@@ -235,22 +235,30 @@ class CircularGauge(Gtk.DrawingArea):
         # 6. Title Text below Divider Line (e.g. VRAM, GPU Usage)
         cr.save()
         if self.title:
-            title_font_size = max(10, int(radius * 0.27))
-            cr.set_font_size(title_font_size)
-            cr.set_source_rgba(fg_r, fg_g, fg_b, 0.92)
             cr.select_font_face("Sans", _cairo.FONT_SLANT_NORMAL, _cairo.FONT_WEIGHT_BOLD)
+            title_font_size = max(11, int(radius * 0.30))
+            cr.set_font_size(title_font_size)
+            title_width = cr.text_extents(self.title).width
+            if title_width > width_ref * 0.92:
+                title_font_size = max(9, title_font_size * width_ref * 0.92 / title_width)
+                cr.set_font_size(title_font_size)
+            cr.set_source_rgba(fg_r, fg_g, fg_b, 0.92)
             t_extents = cr.text_extents(self.title)
-            cr.move_to(cx - t_extents.width / 2.0 - t_extents.x_bearing, line_y + 14)
+            cr.move_to(cx - t_extents.width / 2.0 - t_extents.x_bearing, line_y + 17)
             cr.show_text(self.title)
 
         # 7. Subtitle Text below Title (e.g. used/total)
         if self.subtitle:
-            sub_font_size = max(9, int(radius * 0.21))
-            cr.set_font_size(sub_font_size)
-            cr.set_source_rgba(fg_r, fg_g, fg_b, 0.72)
             cr.select_font_face("Sans", _cairo.FONT_SLANT_NORMAL, _cairo.FONT_WEIGHT_NORMAL)
+            sub_font_size = max(11, int(radius * 0.28))
+            cr.set_font_size(sub_font_size)
+            subtitle_width = cr.text_extents(self.subtitle).width
+            if subtitle_width > width_ref * 0.92:
+                sub_font_size = max(9, sub_font_size * width_ref * 0.92 / subtitle_width)
+                cr.set_font_size(sub_font_size)
+            cr.set_source_rgba(fg_r, fg_g, fg_b, 0.82)
             s_extents = cr.text_extents(self.subtitle)
-            cr.move_to(cx - s_extents.width / 2.0 - s_extents.x_bearing, line_y + 26)
+            cr.move_to(cx - s_extents.width / 2.0 - s_extents.x_bearing, line_y + 34)
             cr.show_text(self.subtitle)
 
         cr.restore()

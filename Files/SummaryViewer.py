@@ -3607,10 +3607,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     col4.append(("Video Encode Profiles", _format_video_profile_counts(dev["video_encode_profiles"], dev.get("video_encode_profile_counts", {}), "Encode")))
 
                 columns = [c for c in [col1, col2, col3, col4] if c]
-                extra_nav_actions = []
-                if dev.get("video_decode_profiles") or dev.get("video_encode_profiles"):
-                    extra_nav_actions.append(("Open Vulkan Video →", "vulkan_video_page"))
-
                 content_widget = _make_grid_card_content(columns)
                 label = f"Vulkan" if len(vk_data["devices"]) == 1 else f"Vulkan - {dev['name']}"
                 card = _make_card(
@@ -3622,7 +3618,6 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                     supported=True,
                     content_widget=content_widget,
                     gpu_index=i,
-                    extra_nav_actions=extra_nav_actions,
                     card_id=f"vulkan-{i}",
                     allow_reorder=True,
                     flow_box=dashboard,
