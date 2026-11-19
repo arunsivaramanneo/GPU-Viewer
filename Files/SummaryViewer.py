@@ -1232,84 +1232,121 @@ def get_realtime_cpu_usage() -> str:
 
 
 def _get_cpu_cache_info() -> str:
-    """Return CPU cache details as a semicolon-separated string for tree row display.
-    e.g. 'L1 Data Cache: 32 KiB; L1 Instruction Cache: 32 KiB; L2 Cache: 512 KiB; L3 Cache: 16 MiB'
+    """Return CPU cache details as a semicolon-separated string matching lscpu output.
+    e.g. 'L1d: 256 KiB (8 instances) ; L1i: 256 KiB (8 instances) ; L2: 4 MiB (8 instances) ; L3: 16 MiB (1 instance)'
     """
     caches = []
-    try:
-        index_dirs = sorted(glob.glob("/sys/devices/system/cpu/cpu0/cache/index*"))
-        if index_dirs:
-            for d in index_dirs:
-                level_path = os.path.join(d, "level")
-                type_path = os.path.join(d, "type")
-                size_path = os.path.join(d, "size")
-                if os.path.exists(level_path) and os.path.exists(size_path):
-                    with open(level_path, "r", encoding="utf-8") as f:
-                        level = f.read().strip()
-                    with open(size_path, "r", encoding="utf-8") as f:
-                        size = f.read().strip()
-                    
-                    ctype = ""
-                    if os.path.exists(type_path):
-                        with open(type_path, "r", encoding="utf-8") as f:
-                            ctype = f.read().strip()
-                    
-                    if level == "1" and ctype.lower() == "data":
-                        name = "L1 Data Cache"
-                    elif level == "1" and ctype.lower() == "instruction":
-                        name = "L1 Instruction Cache"
-                    elif ctype and ctype.lower() != "unified":
-                        name = f"L{level} {ctype.capitalize()} Cache"
-                    else:
-                        name = f"L{level} Cache"
-                    
-                    if size.endswith("K") or size.endswith("k"):
-                        try:
-                            k_val = int(size[:-1])
-                            if k_val >= 1024 and k_val % 1024 == 0:
-                                size_formatted = f"{k_val // 1024} MiB"
-                            else:
-                                size_formatted = f"{k_val} KiB"
-                        except Exception:
-                            size_formatted = f"{size[:-1]} KiB"
-                    elif size.endswith("M") or size.endswith("m"):
-                        size_formatted = f"{size[:-1]} MiB"
-                    elif size.endswith("G") or size.endswith("g"):
-                        size_formatted = f"{size[:-1]} GiB"
-                    else:
-                        size_formatted = size
-                    
-                    caches.append(f"{name}: {size_formatted}")
-    except Exception:
-        pass
-
-    if caches:
-        return " ; ".join(caches)
-
+    # 1. Query lscpu first for exact match with system lscpu output
     try:
         res = subprocess.run(
             ["lscpu"], capture_output=True, text=True, timeout=3
         )
         if res.returncode == 0:
             for line in res.stdout.splitlines():
-                if "cache:" in line.lower():
-                    parts = line.split(":", 1)
-                    k_str = parts[0].strip()
-                    v_str = parts[1].strip()
-                    if k_str.lower().startswith("l1d"):
-                        k_str = "L1 Data Cache"
-                    elif k_str.lower().startswith("l1i"):
-                        k_str = "L1 Instruction Cache"
-                    elif k_str.lower().startswith("l2"):
-                        k_str = "L2 Cache"
-                    elif k_str.lower().startswith("l3"):
-                        k_str = "L3 Cache"
-                    caches.append(f"{k_str}: {v_str}")
+                line_s = line.strip()
+                m = re.match(r'^(L\d+[di]?(?:\s+(?:data|instruction))?)\s*(?:cache)?\s*:\s*(.+)$', line_s, re.IGNORECASE)
+                if m and not line_s.lower().startswith("vulnerability"):
+                    raw_k = m.group(1).strip()
+                    val = m.group(2).strip()
+                    k_lower = raw_k.lower()
+                    if k_lower.startswith("l1d") or "data" in k_lower:
+                        k_norm = "L1d"
+                    elif k_lower.startswith("l1i") or "instruction" in k_lower:
+                        k_norm = "L1i"
+                    elif k_lower.startswith("l2"):
+                        k_norm = "L2"
+                    elif k_lower.startswith("l3"):
+                        k_norm = "L3"
+                    elif k_lower.startswith("l4"):
+                        k_norm = "L4"
+                    else:
+                        k_norm = raw_k
+                    caches.append(f"{k_norm}: {val}")
     except Exception:
         pass
 
     if caches:
         return " ; ".join(caches)
+
+    # 2. Sysfs fallback: aggregate across all CPU cores to calculate total sum and instance counts
+    try:
+        cache_dict = {}
+        for d in sorted(glob.glob("/sys/devices/system/cpu/cpu*/cache/index*")):
+            level_path = os.path.join(d, "level")
+            type_path = os.path.join(d, "type")
+            size_path = os.path.join(d, "size")
+            id_path = os.path.join(d, "id")
+            shared_path = os.path.join(d, "shared_cpu_list")
+
+            if os.path.exists(level_path) and os.path.exists(size_path):
+                with open(level_path, "r", encoding="utf-8") as f:
+                    level = f.read().strip()
+                with open(size_path, "r", encoding="utf-8") as f:
+                    size_str = f.read().strip()
+                ctype = ""
+                if os.path.exists(type_path):
+                    with open(type_path, "r", encoding="utf-8") as f:
+                        ctype = f.read().strip()
+
+                cache_id = None
+                if os.path.exists(id_path):
+                    with open(id_path, "r", encoding="utf-8") as f:
+                        cache_id = f.read().strip()
+                elif os.path.exists(shared_path):
+                    with open(shared_path, "r", encoding="utf-8") as f:
+                        cache_id = f.read().strip()
+
+                key = (level, ctype.lower())
+                if key not in cache_dict:
+                    cache_dict[key] = {}
+                inst_key = cache_id if cache_id is not None else len(cache_dict[key])
+                cache_dict[key][inst_key] = size_str
+
+        def _parse_size_kb(s: str) -> int:
+            s = s.strip()
+            if s.endswith(("K", "k")):
+                return int(s[:-1])
+            elif s.endswith(("M", "m")):
+                return int(s[:-1]) * 1024
+            elif s.endswith(("G", "g")):
+                return int(s[:-1]) * 1024 * 1024
+            return int(s) // 1024 if s.isdigit() else 0
+
+        def _fmt_size(kb: int) -> str:
+            if kb >= 1024 and kb % 1024 == 0:
+                return f"{kb // 1024} MiB"
+            elif kb >= 1024:
+                return f"{kb / 1024:.1f} MiB"
+            return f"{kb} KiB"
+
+        order = [("1", "data"), ("1", "instruction"), ("2", "unified"), ("2", ""), ("3", "unified"), ("3", "")]
+        seen_keys = set()
+        for lvl, ct in order:
+            key = (lvl, ct)
+            if key in cache_dict and key not in seen_keys:
+                seen_keys.add(key)
+                instances = cache_dict[key]
+                cnt = len(instances)
+                total_kb = sum(_parse_size_kb(sz) for sz in instances.values())
+                if lvl == "1" and ct == "data":
+                    label = "L1d"
+                elif lvl == "1" and ct == "instruction":
+                    label = "L1i"
+                else:
+                    label = f"L{lvl}"
+
+                size_disp = _fmt_size(total_kb)
+                if cnt > 1:
+                    caches.append(f"{label}: {size_disp} ({cnt} instances)")
+                elif cnt == 1:
+                    caches.append(f"{label}: {size_disp} (1 instance)")
+                else:
+                    caches.append(f"{label}: {size_disp}")
+
+        if caches:
+            return " ; ".join(caches)
+    except Exception:
+        pass
 
     return "—"
 
@@ -1411,6 +1448,8 @@ def _parse_system() -> dict:
         "cpu": "",
         "cpu_cores_threads": "—",
         "cpu_cache": "—",
+        "cpu_boost": "—",
+        "virtualization": "—",
         "ram": "",
         "cpu_usage": "—",
         "ram_usage": "—",
@@ -1466,6 +1505,55 @@ def _parse_system() -> dict:
             info["cpu_cores_threads"] = f"{threads} Threads"
     except Exception:
         pass
+
+    # Frequency Boost & Virtualization via lscpu (with sysfs & /proc/cpuinfo fallbacks)
+    try:
+        res = subprocess.run(
+            ["lscpu"], capture_output=True, text=True, timeout=3
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                line_s = line.strip()
+                m_b = re.match(r'^Frequency\s+boost\s*:\s*(.+)$', line_s, re.IGNORECASE)
+                if m_b and info["cpu_boost"] == "—":
+                    info["cpu_boost"] = m_b.group(1).strip().capitalize()
+                m_v = re.match(r'^Virtualization(?:\s+features)?\s*:\s*(.+)$', line_s, re.IGNORECASE)
+                if m_v and info["virtualization"] == "—":
+                    v_val = m_v.group(1).strip()
+                    if v_val:
+                        info["virtualization"] = v_val
+    except Exception:
+        pass
+
+    if info["cpu_boost"] == "—":
+        if os.path.exists("/sys/devices/system/cpu/cpufreq/boost"):
+            try:
+                with open("/sys/devices/system/cpu/cpufreq/boost", "r") as f:
+                    b_val = f.read().strip()
+                info["cpu_boost"] = "Enabled" if b_val == "1" else "Disabled"
+            except Exception:
+                pass
+        elif os.path.exists("/sys/devices/system/cpu/intel_pstate/no_turbo"):
+            try:
+                with open("/sys/devices/system/cpu/intel_pstate/no_turbo", "r") as f:
+                    b_val = f.read().strip()
+                info["cpu_boost"] = "Enabled" if b_val == "0" else "Disabled"
+            except Exception:
+                pass
+
+    if info["virtualization"] == "—":
+        try:
+            with open("/proc/cpuinfo", "r") as f:
+                content = f.read()
+            m = re.search(r'flags\s*:\s*(.*)', content)
+            if m:
+                fl = set(m.group(1).split())
+                if "svm" in fl:
+                    info["virtualization"] = "AMD-V"
+                elif "vmx" in fl:
+                    info["virtualization"] = "VT-x"
+        except Exception:
+            pass
 
     try:
         with open("/proc/meminfo", "r") as f:
@@ -1669,6 +1757,8 @@ METRIC_TOOLTIPS = {
     "Processor": "Central Processing Unit (CPU) model and architecture specifications.",
     "CPU Cores / Threads": "Number of physical CPU cores and logical hardware threads.",
     "CPU Cache": "Hardware cache hierarchy (L1 Data, L1 Instruction, L2, and L3 caches).",
+    "Frequency Boost": "Processor dynamic frequency boost / turbo state (e.g. Enabled, Disabled).",
+    "Virtualization": "Hardware-assisted CPU virtualization technology (e.g. AMD-V, Intel VT-x).",
     "Kernel": "Linux kernel version currently running.",
     "Architecture": "CPU instruction set architecture (e.g. x86_64, aarch64).",
     "Hostname": "System network hostname.",
@@ -3353,6 +3443,8 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
                 ("Operating System", sys_data.get("os", "—")),
                 ("Processor", sys_data.get("cpu", "—")),
                 ("CPU Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
+                ("Frequency Boost", sys_data.get("cpu_boost", "—")),
+                ("Virtualization", sys_data.get("virtualization", "—")),
                 ("CPU Cache", sys_data.get("cpu_cache", "—")),
             ],
             [

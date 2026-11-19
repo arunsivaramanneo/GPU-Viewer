@@ -630,17 +630,27 @@ else:
                     self.gpuz_view.apply_theme(self.config.get_theme_preference())
 
                 if self.current_view_mode == "dashboard":
-                    self._dashboard_width = self.window.get_width()
-                    self._dashboard_height = self.window.get_height()
+                    curr_w = self.window.get_width()
+                    curr_h = self.window.get_height()
+                    if curr_w > 100:
+                        self._dashboard_width = curr_w
+                    if curr_h > 100:
+                        self._dashboard_height = curr_h
 
-                self.window.set_size_request(460, 680)
-                self.window.set_default_size(480, 740)
+                dashboard_h = getattr(self, "_dashboard_height", 650)
+                self.window.set_size_request(460, min(500, dashboard_h))
+                self.window.set_default_size(480, dashboard_h)
                 self.root_stack.set_visible_child_name("gpuz")
                 self.window.set_title("GPU-Viewer — GPU-Z Mode")
                 self.current_view_mode = "gpuz"
                 if hasattr(self, "config"):
                     self.config.set_view_mode("gpuz")
             else:
+                if self.current_view_mode == "gpuz":
+                    curr_h = self.window.get_height()
+                    if curr_h > 100:
+                        self._dashboard_height = curr_h
+
                 self.window.set_size_request(750, 500)
                 dashboard_w = getattr(self, "_dashboard_width", 950)
                 dashboard_h = getattr(self, "_dashboard_height", 650)

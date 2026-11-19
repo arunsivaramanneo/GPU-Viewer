@@ -64,6 +64,16 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     padding: 6px;
 }
 
+.gpuz-container headerbar {
+    background-image: linear-gradient(
+        to bottom,
+        #181818,
+        #111111
+    );
+    background-color: #181818;
+    color: #ffffff;
+}
+
 .gpuz-header-frame {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
@@ -87,7 +97,7 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-box {
     margin-top: 3px;
     margin-bottom: 3px;
-    padding: 6px 8px;
+    padding: 0 0 5px 0;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
     background-color: #262626;
@@ -95,15 +105,26 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 }
 
 .gpuz-section-header {
-    margin-top: 1px;
-    margin-bottom: 1px;
-    padding-left: 2px;
+    background-image: linear-gradient(
+        to bottom,
+        #181818,
+        #111111
+    );
+    background-color: #181818;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    padding: 6px 10px;
+    margin: 0;
+}
+
+.gpuz-section-header image {
+    color: #ffffff;
 }
 
 .gpuz-section-title {
-    font-size: 8pt;
+    font-size: 8.5pt;
     font-weight: 800;
-    color: #d43c50;
+    color: #ffffff;
     letter-spacing: 0.6px;
     text-transform: uppercase;
 }
@@ -111,8 +132,8 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-sep {
     background-color: #333333;
     opacity: 0.6;
-    margin-top: 1px;
-    margin-bottom: 3px;
+    margin: 0 0 3px 0;
+    min-height: 1px;
 }
 
 .gpuz-section-header .gpuz-nav-btn {
@@ -127,6 +148,12 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-header .gpuz-nav-btn:hover {
     background-color: #d43c50;
     color: #ffffff;
+}
+
+.gpuz-section-box > flowbox,
+.gpuz-section-box > box:not(.gpuz-section-header) {
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 /* Classic GTK Frame for each field */
@@ -254,6 +281,16 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     padding: 6px;
 }
 
+.gpuz-container headerbar {
+    background-image: linear-gradient(
+        to bottom,
+        #1e2430,
+        #161b24
+    );
+    background-color: #1e2430;
+    color: #f8fafc;
+}
+
 .gpuz-header-frame {
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 8px;
@@ -281,7 +318,7 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-box {
     margin-top: 3px;
     margin-bottom: 3px;
-    padding: 6px 8px;
+    padding: 0 0 5px 0;
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 8px;
     background-color: #f8fafc;
@@ -289,15 +326,26 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 }
 
 .gpuz-section-header {
-    margin-top: 1px;
-    margin-bottom: 1px;
-    padding-left: 2px;
+    background-image: linear-gradient(
+        to bottom,
+        #1e2430,
+        #161b24
+    );
+    background-color: #1e2430;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    padding: 6px 10px;
+    margin: 0;
+}
+
+.gpuz-section-header image {
+    color: #f8fafc;
 }
 
 .gpuz-section-title {
-    font-size: 8pt;
+    font-size: 8.5pt;
     font-weight: 800;
-    color: #0f172a;
+    color: #f8fafc;
     letter-spacing: 0.6px;
     text-transform: uppercase;
 }
@@ -305,14 +353,14 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 .gpuz-section-sep {
     background-color: rgba(0, 0, 0, 0.08);
     opacity: 0.5;
-    margin-top: 1px;
-    margin-bottom: 3px;
+    margin: 0 0 3px 0;
+    min-height: 1px;
 }
 
 .gpuz-section-header .gpuz-nav-btn {
-    background-color: #ffffff;
-    border: 1px solid #d43c50;
-    color: #d43c50;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
     border-radius: 6px;
     font-weight: 600;
     padding: 3px 10px;
@@ -320,7 +368,14 @@ def get_gpuz_css(is_dark: bool = True) -> str:
 
 .gpuz-section-header .gpuz-nav-btn:hover {
     background-color: #d43c50;
+    border-color: #d43c50;
     color: #ffffff;
+}
+
+.gpuz-section-box > flowbox,
+.gpuz-section-box > box:not(.gpuz-section-header) {
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 /* Classic GTK Frame for each field */
@@ -1130,7 +1185,9 @@ class GpuZView(Gtk.Box):
         name_lbl.add_css_class("gpuz-header-title")
         name_lbl.set_halign(Gtk.Align.START)
         name_lbl.set_wrap(True)
-        name_lbl.set_max_width_chars(32)
+        name_lbl.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        if hasattr(Gtk, "NaturalWrapMode") and hasattr(name_lbl, "set_natural_wrap_mode"):
+            name_lbl.set_natural_wrap_mode(Gtk.NaturalWrapMode.NONE)
         title_box.append(name_lbl)
 
         sub_text = f"Card: {gpu.get('card_name', 'card0')} • PCI: {gpu.get('pci_address', '—')}"
@@ -1147,6 +1204,8 @@ class GpuZView(Gtk.Box):
         def _add_row(parent, *items):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
+            row_box.set_margin_start(6)
+            row_box.set_margin_end(6)
             for item in items:
                 lbl_text = item[0]
                 val_text = item[1]
@@ -1209,6 +1268,38 @@ class GpuZView(Gtk.Box):
 
             return sect_box
 
+        def _apply_unsupported_state(section_box: Gtk.Box, supported: bool, label: str = "This feature") -> None:
+            """When the feature is not detected, remove any field rows so only
+            the header and a single not-detected line are shown, matching Summary viewer."""
+            if supported:
+                return
+            # Remove any children except the header box and separator (first 2 children)
+            child = section_box.get_first_child()
+            if child:
+                child = child.get_next_sibling()  # sep
+            if child:
+                child = child.get_next_sibling()  # first field row, if any
+            while child:
+                next_sib = child.get_next_sibling()
+                section_box.remove(child)
+                child = next_sib
+
+            # Single notice line: header and a line feature was not detected
+            notice_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            notice_box.set_margin_start(10)
+            notice_box.set_margin_end(10)
+            notice_box.set_margin_top(8)
+            notice_box.set_margin_bottom(8)
+
+            notice = Gtk.Label(label="This feature was not detected on your system.")
+            notice.add_css_class("dim-label")
+            notice.set_halign(Gtk.Align.START)
+            notice_box.append(notice)
+            section_box.append(notice_box)
+
+            section_box.set_sensitive(False)
+            section_box.set_opacity(0.55)
+
         # ── Graphics, Compute & Video Acceleration (below Header) ──────
         tech_frame = _make_section(
             "Graphics, Compute & Video Acceleration",
@@ -1223,6 +1314,10 @@ class GpuZView(Gtk.Box):
         tech_flow.set_row_spacing(2)
         tech_flow.set_column_spacing(4)
         tech_flow.set_homogeneous(True)
+        tech_flow.set_margin_start(6)
+        tech_flow.set_margin_end(6)
+        tech_flow.set_margin_top(2)
+        tech_flow.set_margin_bottom(2)
 
         techs = [
             ("Vulkan",        has_vulkan),
@@ -1302,7 +1397,7 @@ class GpuZView(Gtk.Box):
 
         # GPU Hardware – packed into 3–4 fields per row
         _add_row(hw_frame, ("Device ID", dev_id_display), ("Driver", driver_val), ("VBIOS", bios_val))
-        _add_row(hw_frame, ("PCIe Link", bus_interface), ("VRAM Type", vram_type),
+        _add_row(hw_frame, ("PCIe Link", bus_interface),
                             ("VRAM", vram_disp, "hw_vram"), ("GTT Memory", gtt_disp, "hw_gtt"))
         _add_row(hw_frame, ("GPU Usage", usage_disp, "hw_usage"),
                             ("GPU Clock", core_clk, "hw_clock"), ("Boost Clock", boost_clk),
@@ -1341,58 +1436,60 @@ class GpuZView(Gtk.Box):
         vk_mesh_str = "Supported" if has_mesh else "Not Available"
 
         # Vulkan – 4 fields per row, long UUIDs on their own full-width row
-        _add_row(vk_frame,
-                 ("API Version", vk_api), ("Instance Ver.", vk_inst_ver),
-                 ("Driver Name", vk_drv_name), ("Driver Ver.", vk_drv_ver))
-        if vk_drv_info and vk_drv_info not in ("—", "-"):
-            _add_row(vk_frame, ("Driver Info", vk_drv_info))
-        _add_row(vk_frame,
-                 ("Device Type", vk_dev_type), ("Conformance", vk_conform),
-                 ("Vendor ID", vk_vendor_id), ("Device ID", vk_device_id))
-        _add_row(vk_frame,
-                 ("Device Ext.", vk_ext_cnt), ("Device Formats", vk_fmt_cnt),
-                 ("Instance Ext.", vk_inst_ext_cnt), ("Instance Layers", vk_inst_layers_cnt))
-        _add_row(vk_frame,
-                 ("Memory Types", vk_mem_types), ("Memory Heaps", vk_mem_heaps),
-                 ("Queue Families", vk_queue_fam),
-                 ("Ray Tracing", vk_rt_str), ("Mesh Shaders", vk_mesh_str))
-        if vk_pipeline_uuid and vk_pipeline_uuid not in ("—", "-"):
-            _add_row(vk_frame, ("Pipeline Cache UUID", vk_pipeline_uuid))
-        if vk_uuid and vk_uuid not in ("—", "-"):
-            _add_row(vk_frame, ("Device UUID", vk_uuid))
-        if vk_drv_uuid and vk_drv_uuid not in ("—", "-"):
-            _add_row(vk_frame, ("Driver UUID", vk_drv_uuid))
+        if has_vulkan:
+            _add_row(vk_frame,
+                     ("API Version", vk_api), ("Instance Ver.", vk_inst_ver),
+                     ("Driver Name", vk_drv_name), ("Driver Ver.", vk_drv_ver))
+            if vk_drv_info and vk_drv_info not in ("—", "-"):
+                _add_row(vk_frame, ("Driver Info", vk_drv_info))
+            _add_row(vk_frame,
+                     ("Device Type", vk_dev_type), ("Conformance", vk_conform),
+                     ("Vendor ID", vk_vendor_id), ("Device ID", vk_device_id))
+            _add_row(vk_frame,
+                     ("Device Ext.", vk_ext_cnt), ("Device Formats", vk_fmt_cnt),
+                     ("Instance Ext.", vk_inst_ext_cnt), ("Instance Layers", vk_inst_layers_cnt))
+            _add_row(vk_frame,
+                     ("Memory Types", vk_mem_types), ("Memory Heaps", vk_mem_heaps),
+                     ("Queue Families", vk_queue_fam),
+                     ("Ray Tracing", vk_rt_str), ("Mesh Shaders", vk_mesh_str))
+            if vk_pipeline_uuid and vk_pipeline_uuid not in ("—", "-"):
+                _add_row(vk_frame, ("Pipeline Cache UUID", vk_pipeline_uuid))
+            if vk_uuid and vk_uuid not in ("—", "-"):
+                _add_row(vk_frame, ("Device UUID", vk_uuid))
+            if vk_drv_uuid and vk_drv_uuid not in ("—", "-"):
+                _add_row(vk_frame, ("Driver UUID", vk_drv_uuid))
 
-        def _format_video_profile_counts(profile_names, profile_counts, mode):
-            if not profile_names:
-                return None
-            parts = []
-            for profile_name in profile_names:
-                count = profile_counts.get(profile_name, 0)
-                label = f"{profile_name} {mode}"
-                if count > 0:
-                    label = f"{label} - {count}"
-                parts.append(label)
-            return "; ".join(parts)
+            def _format_video_profile_counts(profile_names, profile_counts, mode):
+                if not profile_names:
+                    return None
+                parts = []
+                for profile_name in profile_names:
+                    count = profile_counts.get(profile_name, 0)
+                    label = f"{profile_name} {mode}"
+                    if count > 0:
+                        label = f"{label} - {count}"
+                    parts.append(label)
+                return "; ".join(parts)
 
-        if vk_dev.get("video_decode_profiles"):
-            decode_text = _format_video_profile_counts(
-                vk_dev["video_decode_profiles"],
-                vk_dev.get("video_decode_profile_counts", {}),
-                "Decode"
-            )
-            if decode_text:
-                _add_row(vk_frame, ("Video Decode Profiles", decode_text))
+            if vk_dev.get("video_decode_profiles"):
+                decode_text = _format_video_profile_counts(
+                    vk_dev["video_decode_profiles"],
+                    vk_dev.get("video_decode_profile_counts", {}),
+                    "Decode"
+                )
+                if decode_text:
+                    _add_row(vk_frame, ("Video Decode Profiles", decode_text))
 
-        if vk_dev.get("video_encode_profiles"):
-            encode_text = _format_video_profile_counts(
-                vk_dev["video_encode_profiles"],
-                vk_dev.get("video_encode_profile_counts", {}),
-                "Encode"
-            )
-            if encode_text:
-                _add_row(vk_frame, ("Video Encode Profiles", encode_text))
+            if vk_dev.get("video_encode_profiles"):
+                encode_text = _format_video_profile_counts(
+                    vk_dev["video_encode_profiles"],
+                    vk_dev.get("video_encode_profile_counts", {}),
+                    "Encode"
+                )
+                if encode_text:
+                    _add_row(vk_frame, ("Video Encode Profiles", encode_text))
 
+        _apply_unsupported_state(vk_frame, has_vulkan, "Vulkan")
         self.card_content_box.append(vk_frame)
 
         # ── OpenGL & EGL ─────────────────────────────────────────────
@@ -1417,16 +1514,18 @@ class GpuZView(Gtk.Box):
         es_ext_cnt  = str(gl_data.get("es_extensions_count", 0)) if gl_data.get("es_extensions_count") else "—"
 
         # OpenGL – 4 fields per row; counts packed 5-wide
-        _add_row(gl_frame,
-                 ("Vendor", gl_vendor), ("Renderer", gl_renderer),
-                 ("OpenGL Version", gl_version), ("GLSL Version", gl_glsl))
-        _add_row(gl_frame,
-                 ("OpenGL ES", gl_es_ver), ("GLX Version", gl_glx_ver),
-                 ("EGL Version", egl_version), ("EGL Ext.", egl_ext_cnt))
-        _add_row(gl_frame,
-                 ("GL Extensions", gl_ext_cnt), ("GLX Extensions", glx_ext_cnt),
-                 ("ES Extensions", es_ext_cnt), ("GLX Visuals", glx_vis_cnt),
-                 ("FB Configs", fbcfg_cnt))
+        if has_opengl or has_egl:
+            _add_row(gl_frame,
+                     ("Vendor", gl_vendor), ("Renderer", gl_renderer),
+                     ("OpenGL Version", gl_version), ("GLSL Version", gl_glsl))
+            _add_row(gl_frame,
+                     ("OpenGL ES", gl_es_ver), ("GLX Version", gl_glx_ver),
+                     ("EGL Version", egl_version), ("EGL Ext.", egl_ext_cnt))
+            _add_row(gl_frame,
+                     ("GL Extensions", gl_ext_cnt), ("GLX Extensions", glx_ext_cnt),
+                     ("ES Extensions", es_ext_cnt), ("GLX Visuals", glx_vis_cnt),
+                     ("FB Configs", fbcfg_cnt))
+        _apply_unsupported_state(gl_frame, has_opengl or has_egl, "OpenGL / EGL")
         self.card_content_box.append(gl_frame)
 
         # ── OpenCL ────────────────────────────────────────────────────
@@ -1464,29 +1563,31 @@ class GpuZView(Gtk.Box):
                      ("Global Mem.", cl_gmem), ("Local Mem.", cl_lmem), ("Max Clock", cl_clk))
             _add_row(cl_frame, ("Driver Ver.", cl_drv_ver), ("Dev. Extensions", cl_dev_ext))
 
-        if matched_devices:
-            for idx, (matched_plat, matched_dev) in enumerate(matched_devices):
-                if idx > 0:
-                    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-                    sep.add_css_class("gpuz-section-sep")
-                    cl_frame.append(sep)
-                if len(matched_devices) > 1:
-                    inst_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-                    inst_box.set_margin_top(2)
-                    inst_box.set_margin_bottom(2)
-                    inst_lbl = Gtk.Label(label=f"OpenCL Device #{idx + 1} — {matched_plat.get('name', 'Platform')}")
-                    inst_lbl.add_css_class("gpuz-frame-label")
-                    inst_lbl.set_halign(Gtk.Align.START)
-                    inst_box.append(inst_lbl)
-                    cl_frame.append(inst_box)
-                _populate_cl_device(cl_frame, matched_plat, matched_dev, cl_plat_cnt)
-        else:
-            empty_plat = {"name": "—", "version": "—", "extensions_count": 0}
-            empty_dev  = {"name": "—", "device_type": "—", "version": "—",
-                          "opencl_c_version": "—", "compute_units": "—", "workgroup_size": "—",
-                          "global_memory": "—", "local_memory": "—", "max_clock": "—",
-                          "driver_version": "—", "extensions_count": 0}
-            _populate_cl_device(cl_frame, empty_plat, empty_dev, cl_plat_cnt)
+        if has_opencl:
+            if matched_devices:
+                for idx, (matched_plat, matched_dev) in enumerate(matched_devices):
+                    if idx > 0:
+                        sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+                        sep.add_css_class("gpuz-section-sep")
+                        cl_frame.append(sep)
+                    if len(matched_devices) > 1:
+                        inst_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+                        inst_box.set_margin_top(2)
+                        inst_box.set_margin_bottom(2)
+                        inst_lbl = Gtk.Label(label=f"OpenCL Device #{idx + 1} — {matched_plat.get('name', 'Platform')}")
+                        inst_lbl.add_css_class("gpuz-frame-label")
+                        inst_lbl.set_halign(Gtk.Align.START)
+                        inst_box.append(inst_lbl)
+                        cl_frame.append(inst_box)
+                    _populate_cl_device(cl_frame, matched_plat, matched_dev, cl_plat_cnt)
+            else:
+                empty_plat = {"name": "—", "version": "—", "extensions_count": 0}
+                empty_dev  = {"name": "—", "device_type": "—", "version": "—",
+                              "opencl_c_version": "—", "compute_units": "—", "workgroup_size": "—",
+                              "global_memory": "—", "local_memory": "—", "max_clock": "—",
+                              "driver_version": "—", "extensions_count": 0}
+                _populate_cl_device(cl_frame, empty_plat, empty_dev, cl_plat_cnt)
+        _apply_unsupported_state(cl_frame, has_opencl, "OpenCL")
         self.card_content_box.append(cl_frame)
 
         # ── VDPAU ─────────────────────────────────────────────────────
@@ -1499,9 +1600,11 @@ class GpuZView(Gtk.Box):
         vdpau_supported = "Yes" if vdpau_data.get("supported") else "No"
         vdpau_api  = vdpau_data.get("api_version", "—")
         vdpau_rend = vdpau_data.get("renderer", "—")
-        _add_row(vdpau_frame,
-                 ("Supported", vdpau_supported), ("API Version", vdpau_api),
-                 ("Renderer", vdpau_rend))
+        if has_vdpau:
+            _add_row(vdpau_frame,
+                     ("Supported", vdpau_supported), ("API Version", vdpau_api),
+                     ("Renderer", vdpau_rend))
+        _apply_unsupported_state(vdpau_frame, has_vdpau, "VDPAU")
         self.card_content_box.append(vdpau_frame)
 
     def _make_field_frame(self, label: str, value: str, live_key: str = None, registry: dict = None) -> Gtk.Frame:
@@ -1538,7 +1641,15 @@ class GpuZView(Gtk.Box):
         val.set_xalign(0.0)
         val.set_hexpand(True)
         val.set_selectable(True)
-        val.set_wrap(False)
+        # Wrap long values only when they exceed the available field frame width
+        val.set_wrap(True)
+        val.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        if hasattr(Gtk, "NaturalWrapMode") and hasattr(val, "set_natural_wrap_mode"):
+            val.set_natural_wrap_mode(Gtk.NaturalWrapMode.NONE)
+        val.set_ellipsize(Pango.EllipsizeMode.NONE)
+        val.set_max_width_chars(-1)
+        val.set_width_chars(-1)
+        val.set_tooltip_text(clean_val)
         content_box.append(val)
 
         copy_btn = Gtk.Button()
@@ -1800,6 +1911,8 @@ class GpuZView(Gtk.Box):
         def _add_dual_row(parent, l1, v1, l2="", v2="", live_key1=None, live_key2=None):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
+            row_box.set_margin_start(6)
+            row_box.set_margin_end(6)
             row_box.append(self._make_field_frame(l1, v1, live_key=live_key1, registry=self._sys_live_labels))
             if l2 or v2:
                 row_box.append(self._make_field_frame(l2, v2, live_key=live_key2, registry=self._sys_live_labels))
@@ -1808,6 +1921,8 @@ class GpuZView(Gtk.Box):
         def _add_single_row(parent, label, value, live_key=None):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
+            row_box.set_margin_start(6)
+            row_box.set_margin_end(6)
             cell = self._make_field_frame(label, value, live_key=live_key, registry=self._sys_live_labels)
             cell.set_hexpand(True)
             row_box.append(cell)
@@ -1818,6 +1933,8 @@ class GpuZView(Gtk.Box):
         def _add_row(parent, *items):
             row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
             row_box.set_hexpand(True)
+            row_box.set_margin_start(6)
+            row_box.set_margin_end(6)
             for item in items:
                 lbl_text = item[0]
                 val_text = item[1]
@@ -1857,7 +1974,9 @@ class GpuZView(Gtk.Box):
         title_lbl.add_css_class("gpuz-header-title")
         title_lbl.set_halign(Gtk.Align.START)
         title_lbl.set_wrap(True)
-        title_lbl.set_max_width_chars(32)
+        title_lbl.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        if hasattr(Gtk, "NaturalWrapMode") and hasattr(title_lbl, "set_natural_wrap_mode"):
+            title_lbl.set_natural_wrap_mode(Gtk.NaturalWrapMode.NONE)
         title_box.append(title_lbl)
 
         host_model = sys_data.get("hardware_model") or sys_data.get("hostname") or "System Information"
@@ -1900,15 +2019,27 @@ class GpuZView(Gtk.Box):
         cpu_t = get_realtime_cpu_temp()
         cpu_t_disp = f"{cpu_t} °C" if cpu_t and cpu_t > 0 else "—"
         cpu_cache = sys_data.get("cpu_cache", "—")
-        row_items = [
+        cpu_boost = sys_data.get("cpu_boost", "—")
+        cpu_virt = sys_data.get("virtualization", "—")
+
+        _add_row(
+            cpu_frame,
             ("Architecture", sys_data.get("architecture", "—")),
             ("Cores / Threads", sys_data.get("cpu_cores_threads", "—")),
+        )
+        if (cpu_boost and cpu_boost != "—") or (cpu_virt and cpu_virt != "—"):
+            _add_row(
+                cpu_frame,
+                ("Frequency Boost", cpu_boost),
+                ("Virtualization", cpu_virt),
+            )
+        _add_row(
+            cpu_frame,
             ("CPU Load", cpu_u, "sys_cpu_usage"),
             ("CPU Temperature", cpu_t_disp, "sys_cpu_temp"),
-        ]
+        )
         if cpu_cache and cpu_cache != "—":
-            row_items.append(("CPU Cache", cpu_cache))
-        _add_row(cpu_frame, *row_items)
+            _add_row(cpu_frame, ("CPU Cache", cpu_cache))
         self.sys_content_box.append(cpu_frame)
 
         # ── Section 4: Memory & Storage ────────────────────────────────
