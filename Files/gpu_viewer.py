@@ -35,15 +35,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # It ensures we are using the correct versions of the libraries.
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GObject, Gdk, Gio, GLib
+from gi.repository import Gtk, Adw, Gdk, Gio, GLib
 from vulkan_viewer import create_vulkan_tab_content
 import Filenames, const
-from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand,setMargin,Config
+from Common import copyContentsFromFile,getScreenSize,fetchContentsFromCommand,Config
 from aboutPage import about_page
 from OpenGLViewer import OpenGL
-from OpenCL import openCL
+from OpenCL import openCL, ClinfoParser
 from VdpauViewer import vdpauinfo
-from VulkanVideoViewer import VulkanVideo
 from SummaryViewer import create_summary_page
 from GpuZViewer import GpuZView
 from pathlib import Path
@@ -799,10 +798,19 @@ else:
                 self._tab_built[page_name] = False
 
             def _build_tab_async(page_name):
-                """Build tab widgets on the main thread to avoid GTK thread issues."""
+                """Prepare tab data off-thread, then build GTK widgets on the main thread."""
                 builder = self._tab_builders[page_name]
+                preparer = getattr(self, "_tab_preparers", {}).get(page_name)
+                prepared_key = [None]
+
+                def _prepare():
+                    if preparer is not None:
+                        prepared_key[0] = preparer()
+
                 def _build_on_main():
                     try:
+                        if prepared_key[0] is not None:
+                            self._prepared_tab_data[page_name] = prepared_key[0]
                         real_widget = builder()
                         return _reveal_content(page_name, real_widget)
                     except Exception as e:
@@ -815,7 +823,13 @@ else:
                         lbl.add_css_class("error")
                         err_box.append(lbl)
                         return _reveal_content(page_name, err_box)
-                GLib.idle_add(_build_on_main)
+                if preparer is None:
+                    GLib.idle_add(_build_on_main)
+                else:
+                    def _prepare_and_schedule():
+                        _prepare()
+                        GLib.idle_add(_build_on_main)
+                    threading.Thread(target=_prepare_and_schedule, daemon=True).start()
 
             def _reveal_content(page_name, real_widget):
                 """Swap spinner → real content inside the inner stack (main thread)."""
@@ -832,6 +846,8 @@ else:
 
             # Keep builder callables in a separate dict (needed by _build_tab_async)
             self._tab_builders = {}
+            self._tab_preparers = {}
+            self._prepared_tab_data = {}
 
             def _register(page_name, title, icon, builder):
                 self._tab_builders[page_name] = builder
@@ -865,8 +881,22 @@ else:
             if results.get("opencl"):
                 def _build_opencl():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
-                    return openCL(self, box)
+                    platforms = self._prepared_tab_data.get("opencl_page")
+                    return openCL(self, box, preloaded_platforms=platforms)
+
+                def _prepare_opencl():
+                    try:
+                        with open(Filenames.opencl_output_file, "r") as file:
+                            output = file.read()
+                        if not output.strip():
+                            return None
+                        parser = ClinfoParser(output=output)
+                        return parser.platforms
+                    except Exception:
+                        return None
+
                 _register("opencl_page", "OpenCL", "OpenCL", _build_opencl)
+                self._tab_preparers["opencl_page"] = _prepare_opencl
 
             if results.get("vdpau"):
                 def _build_vdpau():

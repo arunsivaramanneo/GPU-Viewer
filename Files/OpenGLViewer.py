@@ -13,18 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
 import os
 import re
 import gi
 import const
 import Filenames
 import subprocess
-from FrameBuffer import FrameBuffer
 gi.require_version('Gtk','4.0')
 gi.require_version(namespace='Adw', version='1')
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from gi.repository import GLib
 
 
@@ -33,11 +30,122 @@ from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf,Pango
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,copyContentsFromFile,fetchContentsFromCommand,getGpuImage,fetchImageFromUrl,appendLimitsRHS,create_tab,getLogo, create_sidebar_toggle
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,fetchContentsFromCommand,appendLimitsRHS,create_tab,getLogo, create_sidebar_toggle
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
 LimitsTitle = ["OpenGL Hardware Limits", "Value"]
+
+
+def parse_limit_lines(lines):
+    """Split OpenGL limit lines into the same labels and values used by the UI."""
+    labels = []
+    values = []
+    for line in lines:
+        if not line.strip():
+            continue
+        labels.append(re.sub(r"[=,:].*", "", line))
+        value_match = re.search(r".*[=,:]\s*", line)
+        values.append(line[value_match.end():] if value_match else "")
+    return labels, values
+
+
+def select_limit_section(lines, title):
+    """Return one named limits section, excluding its heading and next heading."""
+    selected = []
+    active = False
+    for line in lines:
+        if not active:
+            if f"{title}:" in line:
+                active = True
+            continue
+        if ":" in line:
+            break
+        if line.strip():
+            selected.append(line)
+    return selected
+
+
+def parse_glx_limits(lines, profile):
+    """Extract the requested core or compatibility limit block from glxinfo."""
+    if profile == "core":
+        start_marker = "OpenGL core profile limits:"
+        stop_marker = "OpenGL version string"
+    else:
+        start_marker = "OpenGL limits:"
+        stop_marker = "OpenGL ES profile"
+
+    selected = []
+    active = False
+    for line in lines:
+        if not active:
+            if start_marker in line:
+                active = True
+            continue
+        if stop_marker in line:
+            break
+        if line.strip():
+            selected.append(line if line.endswith("\n") else f"{line}\n")
+    return selected
+
+
+def parse_framebuffer_sections(lines):
+    """Extract GLX Visual and FBConfig rows after their separator lines."""
+    sections = {"visuals": [], "fbconfigs": []}
+    section = None
+    past_separator = False
+    for line in lines:
+        if "GLX Visuals" in line:
+            section = "visuals"
+            past_separator = False
+            continue
+        if "GLXFBConfigs" in line:
+            section = "fbconfigs"
+            past_separator = False
+            continue
+        if section is None:
+            continue
+        if not past_separator:
+            if "----" in line:
+                past_separator = True
+            continue
+        if line.strip():
+            sections[section].append(line)
+    return sections["visuals"], sections["fbconfigs"]
+
+
+def parse_extension_section(lines, start_marker, stop_marker, prefix):
+    """Extract sorted extension rows from one section of a saved info file."""
+    extensions = []
+    active = False
+    for line in lines:
+        if not active:
+            if start_marker in line:
+                active = True
+            continue
+        if stop_marker in line:
+            break
+        if prefix in line:
+            extensions.append(line.strip())
+    return sorted(extensions)
+
+
+def parse_egl_extensions(lines):
+    """Extract EGL extension tokens from the es2_info extension block."""
+    extensions = []
+    active = False
+    for line in lines:
+        if not active:
+            if "EGL_EXTENSIONS" in line:
+                active = True
+            continue
+        if "EGL_CLIENT" in line:
+            break
+        for token in line.split(","):
+            start = token.find("EGL")
+            if start >= 0:
+                extensions.append(token[start:].strip())
+    return extensions
 
 
 class ExpandDataObject(GObject.GObject):
@@ -253,7 +361,17 @@ def OpenGL(self, tab):
             egl_root = ExpandDataObject3("EGL Information", dummy_transparent, "")
             egl_lines = []
             try:
-                egl_lines = fetchContentsFromCommand("es2_info 2>/dev/null | awk '/^EGL_VERSION|^EGL_VENDOR/ {print}'")
+                result = subprocess.run(
+                    ["es2_info"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                egl_lines = [
+                    line
+                    for line in result.stdout.splitlines()
+                    if line.startswith(("EGL_VERSION", "EGL_VENDOR"))
+                ]
             except Exception:
                 egl_lines = []
 
@@ -492,31 +610,18 @@ def OpenGL(self, tab):
         def bg_worker(limitValue):
             k = 0
             count = 0
-            fetch_show_opengl_limits_lhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_rhs_Command) 
-            fetch_show_opengl_limits_rhs_command = "cat %s | %s " %(openGLLimits,Filenames.remove_lhs_command)
-            # Escape limit_val for awk
-            fetch_show_select_opengl_limits_command = "cat %s | awk '/%s:/{flag=1;next}/:.*/{flag=0}flag'  "%(openGLLimits,limitValue)
-            opengl_limits_lhs = []
-            opengl_limits_rhs = []
             select_opengl_limits_file = Filenames.select_opengl_limits_file
             if "Show All OpenGL Hardware Core Limits" in limitValue or "Show All OpenGL Hardware Compatible Limits" in limitValue:
-                fetch_show_limits_lhs_process = subprocess.Popen(fetch_show_opengl_limits_lhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
-                opengl_limits_lhs = fetch_show_limits_lhs_process.communicate()[0].splitlines()
-                fetch_show_limits_rhs_process = subprocess.Popen(fetch_show_opengl_limits_rhs_command,shell=True,stdout=subprocess.PIPE,universal_newlines=True)
-                opengl_limits_rhs = fetch_show_limits_rhs_process.communicate()[0].splitlines()
                 select_opengl_limits_file = openGLLimits
+                with open(select_opengl_limits_file, "r") as file:
+                    limit_lines = file.readlines()
             else:
-                with open(select_opengl_limits_file,"w") as file:
-                    fetch_show_select_opengl_limits_process = subprocess.Popen(fetch_show_select_opengl_limits_command,shell=True,stdout=file,universal_newlines=True)
-                    fetch_show_select_opengl_limits_process.communicate()
+                with open(openGLLimits, "r") as file:
+                    limit_lines = select_limit_section(file, limitValue)
+                with open(select_opengl_limits_file, "w") as file:
+                    file.writelines(limit_lines)
 
-                fetch_show_select_opengl_limits_lhs_command = "cat %s | %s " %(select_opengl_limits_file, Filenames.remove_rhs_Command)
-                fetch_show_select_opengl_limits_rhs_command = "cat %s | %s " %(select_opengl_limits_file, Filenames.remove_lhs_command)
-                fetch_show_select_opengl_limits_lhs_process = subprocess.Popen(fetch_show_select_opengl_limits_lhs_command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-                opengl_limits_lhs = fetch_show_select_opengl_limits_lhs_process.communicate()[0].splitlines()
-                fetch_show_select_opengl_limits_rhs_process = subprocess.Popen(fetch_show_select_opengl_limits_rhs_command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-                opengl_limits_rhs = fetch_show_select_opengl_limits_rhs_process.communicate()[0].splitlines()
-
+            opengl_limits_lhs, opengl_limits_rhs = parse_limit_lines(limit_lines)
             LimitsRHS,LimitRHSValue = appendLimitsRHS(select_opengl_limits_file,opengl_limits_rhs)
 
             def update_ui():
@@ -647,9 +752,13 @@ def OpenGL(self, tab):
 # ------------------------------ Check es2_info Supported ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def es2_infoSupported():
-        es2_info_check_process = subprocess.Popen("es2_info",shell=True,stdout=subprocess.PIPE)
-        es2_info_check_process.communicate()
-        return es2_info_check_process.returncode == 0
+        try:
+            result = subprocess.run(
+                ["es2_info"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            return result.returncode == 0
+        except OSError:
+            return False
 
     def create_sidebar_row(label_text, sensitive=True, css_class=None):
         row = Gtk.ListBoxRow()
@@ -670,9 +779,7 @@ def OpenGL(self, tab):
         return row
 
     def create_limits_page(core_file, core_lhs_file, compat_file, compat_lhs_file,
-                              core_label, compat_label,
-                              core_command, core_lhs_command,
-                              compat_command, compat_lhs_command):
+                              core_label, compat_label):
 
         limits_page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         limits_page.add_css_class('toolbar')
@@ -746,23 +853,51 @@ def OpenGL(self, tab):
         limitsColumnView.append_column(limitColumnRhs)
 
         current_mode = {"profile": "core", "file": core_file, "lhs": core_lhs_file, "label": core_label}
+        limits_output = {"text": None}
+        limits_output_lock = threading.Lock()
 
         def load_limits_profile(profile):
             def bg():
+                if limits_output["text"] is None:
+                    with limits_output_lock:
+                        if limits_output["text"] is None:
+                            try:
+                                result = subprocess.run(
+                                    ["glxinfo", "-l"],
+                                    capture_output=True,
+                                    text=True,
+                                    check=False,
+                                )
+                                if result.returncode != 0:
+                                    print(f"glxinfo -l failed: {result.stderr.strip()}")
+                                limits_output["text"] = result.stdout
+                            except OSError as error:
+                                print(f"Failed to query OpenGL limits: {error}")
+                                limits_output["text"] = ""
+
                 if profile == "core":
-                    createMainFile(core_file, core_command)
-                    createMainFile(core_lhs_file, core_lhs_command)
-                    current_mode["file"] = core_file
-                    current_mode["lhs"] = core_lhs_file
-                    current_mode["label"] = core_label
+                    profile_file = core_file
+                    profile_lhs_file = core_lhs_file
+                    profile_label = core_label
                 else:
-                    createMainFile(compat_file, compat_command)
-                    createMainFile(compat_lhs_file, compat_lhs_command)
-                    current_mode["file"] = compat_file
-                    current_mode["lhs"] = compat_lhs_file
-                    current_mode["label"] = compat_label
+                    profile_file = compat_file
+                    profile_lhs_file = compat_lhs_file
+                    profile_label = compat_label
+
+                limit_lines = parse_glx_limits(
+                    limits_output["text"].splitlines(keepends=True), profile
+                )
+                with open(profile_file, "w") as file:
+                    file.writelines(limit_lines)
+                with open(profile_lhs_file, "w") as file:
+                    file.writelines(
+                        re.sub(r"=.*", "", line) for line in limit_lines
+                    )
 
                 def ui():
+                    current_mode["file"] = profile_file
+                    current_mode["lhs"] = profile_lhs_file
+                    current_mode["label"] = profile_label
                     if profile == "core":
                         limitColumnLhs.set_title("OpenGL Hardware Core Limits")
                     else:
@@ -828,11 +963,6 @@ def OpenGL(self, tab):
                 return
             show_spinner("opengl-limits")
             def bg():
-                # Ensure files exist for initial load
-                if not os.path.exists(core_file) or not os.path.exists(core_lhs_file):
-                    createMainFile(core_file, core_command)
-                    createMainFile(core_lhs_file, core_lhs_command)
-                
                 def ui():
                     load_limits_profile("core")
                     loaded_pages.add("opengl-limits")
@@ -845,13 +975,9 @@ def OpenGL(self, tab):
         return create_loading_page(limits_page, "opengl-limits")
 
 
-    def create_framebuffer_page(visuals_command, fbconfig_command):
+    def create_framebuffer_page():
         page = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
         page.add_css_class('toolbar')
-
-        def fetch_lines(command):
-            fetch_process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-            return [line for line in fetch_process.communicate()[0].splitlines() if line.strip()]
 
         visuals_lines = []
         fbconfig_lines = []
@@ -955,8 +1081,11 @@ def OpenGL(self, tab):
             profile_group.handler_unblock_by_func(on_group_changed)
             show_spinner("framebuffer-configuration")
             def bg():
-                v_lines = fetch_lines(visuals_command)
-                f_lines = fetch_lines(fbconfig_command)
+                try:
+                    with open(Filenames.opengl_outpuf_file, "r") as file:
+                        v_lines, f_lines = parse_framebuffer_sections(file)
+                except OSError:
+                    v_lines, f_lines = [], []
                 all_lines = v_lines + f_lines
                 max_cols = 0
                 for line in all_lines:
@@ -1142,19 +1271,38 @@ def OpenGL(self, tab):
                     prepare_opengl_extension_file(opengl_profile["mode"])
                 elif type_name == "OpenGL ES":
                     current_type["file"] = Filenames.opengl_vendor_es_extension_file
+                    with open(Filenames.opengl_outpuf_file, "r") as source:
+                        extensions = parse_extension_section(
+                            source,
+                            "OpenGL ES profile",
+                            "80 GLX Visuals",
+                            "GL_",
+                        )
                     with open(current_type["file"], "w") as file:
-                        fetch_process = subprocess.Popen(Filenames.fetch_opengl_es_vendor_extensions_command, shell=True, stdout=file, universal_newlines=True)
-                        fetch_process.communicate()
+                        file.write("\n".join(extensions))
                 elif type_name == "GLX":
                     current_type["file"] = Filenames.opengl_vendor_gl_extension_file
+                    with open(Filenames.opengl_outpuf_file, "r") as source:
+                        extensions = parse_extension_section(
+                            source,
+                            "client glx extensions",
+                            "GLX version",
+                            "GLX_",
+                        )
                     with open(current_type["file"], "w") as file:
-                        fetch_process = subprocess.Popen(Filenames.fetch_openglx_vendor_extensions_command, shell=True, stdout=file, universal_newlines=True)
-                        fetch_process.communicate()
+                        file.write("\n".join(extensions))
                 else:
                     current_type["file"] = Filenames.egl_vendor_extension_file
+                    try:
+                        result = subprocess.run(
+                            ["es2_info"], capture_output=True, text=True, check=False
+                        )
+                        extensions = parse_egl_extensions(result.stdout.splitlines())
+                    except OSError as error:
+                        print(f"Failed to query EGL extensions: {error}")
+                        extensions = []
                     with open(current_type["file"], "w") as file:
-                        fetch_process = subprocess.Popen(Filenames.fetch_egl_vendor_extension_command, shell=True, stdout=file, universal_newlines=True)
-                        fetch_process.communicate()
+                        file.write("\n".join(extensions))
                 
                 def ui():
                     update_extension_header()
@@ -1476,16 +1624,9 @@ def OpenGL(self, tab):
         Filenames.opengl_compat_limits_lhs_file,
         "Show All OpenGL Hardware Core Limits",
         "Show All OpenGL Hardware Compatible Limits",
-        Filenames.fetch_opengl_core_limits_command,
-        Filenames.fetch_opengl_core_limits_lhs_command,
-        Filenames.fetch_opengl_compat_limits_command,
-        Filenames.fetch_opengl_compat_limits_lhs_command,
     )
 
-    glx_visuals_command = "cat %s  | awk '/GLX Visuals.*/{flag=1;next}/GLXFBConfigs.*/{flag=0}flag' | awk '/----.*/{flag=1;next}flag' " %(Filenames.opengl_outpuf_file)
-    glx_fbconfig_command = "cat %s | awk '/GLXFBConfigs.*/{flag=1;next}flag' | awk '/----.*/{flag=1;next}flag' " %(Filenames.opengl_outpuf_file)
-
-    framebuffer_page = create_framebuffer_page(glx_visuals_command, glx_fbconfig_command)
+    framebuffer_page = create_framebuffer_page()
 
     extensions_page = create_extensions_page()
 

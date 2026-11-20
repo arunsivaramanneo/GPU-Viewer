@@ -82,18 +82,30 @@ class CircularGauge(Gtk.DrawingArea):
         self.set_draw_func(self._on_draw)
 
     def set_value(self, value, subtitle=None, max_value=None):
+        changed = False
         if max_value is not None and max_value > 0:
-            self.max_value = float(max_value)
+            new_max = float(max_value)
+            if self.max_value != new_max:
+                self.max_value = new_max
+                changed = True
+        new_value = None
         if value is None:
-            self.value = None
+            new_value = None
         else:
             try:
-                self.value = float(value)
+                new_value = float(value)
             except (ValueError, TypeError):
-                self.value = None
+                new_value = None
+        if self.value != new_value:
+            self.value = new_value
+            changed = True
         if subtitle is not None:
-            self.subtitle = str(subtitle)
-        self.queue_draw()
+            new_subtitle = str(subtitle)
+            if self.subtitle != new_subtitle:
+                self.subtitle = new_subtitle
+                changed = True
+        if changed:
+            self.queue_draw()
 
     def set_max_value(self, max_value):
         if max_value > 0:

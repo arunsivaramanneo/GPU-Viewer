@@ -1749,7 +1749,16 @@ class GpuZView(Gtk.Box):
         clean = re.sub(r'\s*\(\d+\)$', '', clean).strip()
         return clean
 
-    def _update_sensors(self):
+    def _set_live_label(self, registry, key, val):
+        """Avoid GTK relayout work when a live label has not changed."""
+        label = registry.get(key)
+        if label is None:
+            return
+        val = self._format_live_val(val)
+        if label.get_label() != val:
+            label.set_label(val)
+
+    def _update_sensors(self, rebuild_dashboard=False):
         """Poll telemetry and update values and sparklines."""
         gpu = self._get_current_gpu()
         idx = gpu.get("card_index", 0)
@@ -1761,16 +1770,30 @@ class GpuZView(Gtk.Box):
         ram_usage_str = get_realtime_ram_usage()
         swap_usage = get_realtime_swap_usage()
         net_down_mbps, net_up_mbps = get_realtime_net_speed()
-        _update_gauge_dict(
-            getattr(self, "sensor_widgets", {}),
-            stats,
-            cpu_usage=cpu_usage_str,
-            ram_usage=ram_usage_str,
-            cpu_temp=cpu_temp_val,
-            swap_usage=swap_usage,
-            net_down_mbps=net_down_mbps,
-            net_up_mbps=net_up_mbps,
-        )
+        if rebuild_dashboard and hasattr(self, "sensors_scroll"):
+            self.sensor_widgets = {}
+            dashboard = _make_gauge_dashboard(
+                stats,
+                self.sensor_widgets,
+                cpu_usage=cpu_usage_str,
+                ram_usage=ram_usage_str,
+                cpu_temp=cpu_temp_val,
+                swap_usage=swap_usage,
+                net_down_mbps=net_down_mbps,
+                net_up_mbps=net_up_mbps,
+            )
+            self.sensors_scroll.set_child(dashboard)
+        else:
+            _update_gauge_dict(
+                getattr(self, "sensor_widgets", {}),
+                stats,
+                cpu_usage=cpu_usage_str,
+                ram_usage=ram_usage_str,
+                cpu_temp=cpu_temp_val,
+                swap_usage=swap_usage,
+                net_down_mbps=net_down_mbps,
+                net_up_mbps=net_up_mbps,
+            )
 
         # ── Real-time updates for GPU Hardware tab labels ──────────────────
         live = getattr(self, "_hw_live_labels", {})
@@ -1778,11 +1801,11 @@ class GpuZView(Gtk.Box):
             temp_v = stats.get("temp", 0)
             if "hw_temp" in live:
                 val = f"{temp_v} °C" if temp_v is not None and temp_v > 0 else "—"
-                live["hw_temp"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_temp", val)
             pwr_v = stats.get("power_usage", -1)
             if "hw_power" in live:
                 val = f"{pwr_v} W" if pwr_v is not None and pwr_v >= 0 else "—"
-                live["hw_power"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_power", val)
             fan_v = stats.get("fan_speed", -1)
             fan_rpm_v = stats.get("fan_rpm", -1)
             if "hw_fan" in live:
@@ -1794,11 +1817,11 @@ class GpuZView(Gtk.Box):
                     val = f"{fan_rpm_v} RPM"
                 else:
                     val = "—"
-                live["hw_fan"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_fan", val)
             usage_v = stats.get("usage", -1)
             if "hw_usage" in live:
                 val = f"{usage_v} %" if usage_v is not None and usage_v >= 0 else "—"
-                live["hw_usage"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_usage", val)
             vram_tot_v = stats.get("mem_total", 0)
             vram_used_v = stats.get("mem_used", 0)
             if "hw_vram" in live:
@@ -1808,7 +1831,7 @@ class GpuZView(Gtk.Box):
                     val = f"{vram_used_v} MB"
                 else:
                     val = "—"
-                live["hw_vram"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_vram", val)
             gtt_u = stats.get("gtt_used", 0)
             gtt_t = stats.get("gtt_total", 0)
             if "hw_gtt" in live:
@@ -1818,11 +1841,11 @@ class GpuZView(Gtk.Box):
                     val = f"{gtt_u} MB"
                 else:
                     val = "—"
-                live["hw_gtt"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_gtt", val)
             clk_v = stats.get("clock_current", 0)
             if "hw_clock" in live:
                 val = f"{clk_v} MHz" if clk_v and clk_v > 0 else "—"
-                live["hw_clock"].set_label(self._format_live_val(val))
+                self._set_live_label(live, "hw_clock", val)
             vram_clk_used_v = stats.get("vram_clock", 0)
             vram_clk_total_v = stats.get("vram_clock_max", 0)
             if vram_clk_used_v > 0 and vram_clk_total_v > 0:
@@ -1834,22 +1857,22 @@ class GpuZView(Gtk.Box):
             else:
                 vram_clk_val = "—"
             if "hw_vram_clock" in live:
-                live["hw_vram_clock"].set_label(self._format_live_val(vram_clk_val))
+                self._set_live_label(live, "hw_vram_clock", vram_clk_val)
             if "hw_mem_clock" in live:
-                live["hw_mem_clock"].set_label(self._format_live_val(vram_clk_val))
+                self._set_live_label(live, "hw_mem_clock", vram_clk_val)
 
         # ── Real-time updates for System tab labels ──────────────────────
         sys_live = getattr(self, "_sys_live_labels", {})
         if sys_live:
             if "sys_cpu_usage" in sys_live:
                 val = cpu_usage_str if cpu_usage_str else "—"
-                sys_live["sys_cpu_usage"].set_label(self._format_live_val(val))
+                self._set_live_label(sys_live, "sys_cpu_usage", val)
             if "sys_cpu_temp" in sys_live:
                 val = f"{cpu_temp_val} °C" if cpu_temp_val and cpu_temp_val > 0 else "—"
-                sys_live["sys_cpu_temp"].set_label(self._format_live_val(val))
+                self._set_live_label(sys_live, "sys_cpu_temp", val)
             if "sys_ram_usage" in sys_live:
                 val = ram_usage_str if ram_usage_str else "—"
-                sys_live["sys_ram_usage"].set_label(self._format_live_val(val))
+                self._set_live_label(sys_live, "sys_ram_usage", val)
             if "sys_uptime" in sys_live:
                 try:
                     with open("/proc/uptime", "r") as f:
@@ -1862,7 +1885,7 @@ class GpuZView(Gtk.Box):
                         if h > 0: parts.append(f"{int(h)}h")
                         if m > 0: parts.append(f"{int(m)}m")
                         if not parts: parts.append(f"{int(s)}s")
-                        sys_live["sys_uptime"].set_label(self._format_live_val(" ".join(parts)))
+                        self._set_live_label(sys_live, "sys_uptime", " ".join(parts))
                 except Exception:
                     pass
 
@@ -2125,14 +2148,14 @@ class GpuZView(Gtk.Box):
 
         self._refresh_graphics_card_content()
         self._refresh_system_content()
-        self._update_sensors()
+        self._update_sensors(rebuild_dashboard=True)
 
     def _on_gpu_selected(self, dropdown, _pspec):
         idx = dropdown.get_selected()
         if 0 <= idx < len(self.gpus):
             self.selected_gpu_idx = idx
             self._refresh_graphics_card_content()
-            self._update_sensors()
+            self._update_sensors(rebuild_dashboard=True)
             self._scroll_gpu_pages_to_top()
 
     def _scroll_gpu_pages_to_top(self):
@@ -2156,6 +2179,8 @@ class GpuZView(Gtk.Box):
     def _start_sensor_polling(self):
         def _poll():
             if not self.get_mapped():
+                return True
+            if getattr(self.app, "current_view_mode", "gpuz") != "gpuz":
                 return True
             self._update_sensors()
             return True

@@ -46,6 +46,27 @@ except Exception:
     ClinfoParser = None
 
 
+_LSCPU_CACHE = None
+
+
+def _get_lscpu_output() -> str:
+    """Run lscpu once and reuse the static CPU data for the summary page."""
+    global _LSCPU_CACHE
+    if _LSCPU_CACHE is None:
+        try:
+            result = subprocess.run(
+                ["lscpu"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+                env={**os.environ, "LC_ALL": "C"},
+            )
+            _LSCPU_CACHE = result.stdout if result.returncode == 0 else ""
+        except Exception:
+            _LSCPU_CACHE = ""
+    return _LSCPU_CACHE
+
+
 # ---------------------------------------------------------------------------
 # Data-gathering helpers (all run in a background thread)
 # ---------------------------------------------------------------------------
@@ -1238,11 +1259,9 @@ def _get_cpu_cache_info() -> str:
     caches = []
     # 1. Query lscpu first for exact match with system lscpu output
     try:
-        res = subprocess.run(
-            ["lscpu"], capture_output=True, text=True, timeout=3
-        )
-        if res.returncode == 0:
-            for line in res.stdout.splitlines():
+        lscpu_output = _get_lscpu_output()
+        if lscpu_output:
+            for line in lscpu_output.splitlines():
                 line_s = line.strip()
                 m = re.match(r'^(L\d+[di]?(?:\s+(?:data|instruction))?)\s*(?:cache)?\s*:\s*(.+)$', line_s, re.IGNORECASE)
                 if m and not line_s.lower().startswith("vulnerability"):
@@ -1478,11 +1497,7 @@ def _parse_system() -> dict:
         pass
 
     try:
-        result = subprocess.run(
-            "LC_ALL=C lscpu | grep -E 'Model name'",
-            shell=True, capture_output=True, text=True, timeout=3
-        )
-        for line in result.stdout.splitlines():
+        for line in _get_lscpu_output().splitlines():
             if "Model name" in line:
                 info["cpu"] = line.split(":", 1)[1].strip()
                 break
@@ -1508,11 +1523,9 @@ def _parse_system() -> dict:
 
     # Frequency Boost & Virtualization via lscpu (with sysfs & /proc/cpuinfo fallbacks)
     try:
-        res = subprocess.run(
-            ["lscpu"], capture_output=True, text=True, timeout=3
-        )
-        if res.returncode == 0:
-            for line in res.stdout.splitlines():
+        lscpu_output = _get_lscpu_output()
+        if lscpu_output:
+            for line in lscpu_output.splitlines():
                 line_s = line.strip()
                 m_b = re.match(r'^Frequency\s+boost\s*:\s*(.+)$', line_s, re.IGNORECASE)
                 if m_b and info["cpu_boost"] == "—":

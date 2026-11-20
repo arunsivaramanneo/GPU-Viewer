@@ -23,7 +23,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk,Gio,Adw,GdkPixbuf
 
-from Common import setup_expander, createSubTab, create_scrollbar, bind_expander,setMargin, setup,bind1, createMainFile, fetchContentsFromCommand,ExpandDataObject,add_tree_node,getGpuImage, create_sidebar_toggle
+from Common import setup_expander, create_scrollbar, bind_expander,setMargin, setup,bind1, ExpandDataObject,add_tree_node,getGpuImage, create_sidebar_toggle
 
 platformDetailsHeader = ["Platform Information ", "Details "]
 deviceDetailsHeader = ["Device Information ", "Details "]
@@ -31,9 +31,12 @@ deviceMemoryImageHeader = ["Device Information ", "Details "]
 
 
 class ClinfoParser:
-    def __init__(self):
+    def __init__(self, output=None):
         self.platforms = []
-        self.fetch_data()
+        if output is not None:
+            self.platforms = self.parse(output)
+        else:
+            self.fetch_data()
 
     def fetch_data(self):
         # Fix #3: Re-use the clinfo output file already written by
@@ -123,11 +126,14 @@ class ClinfoParser:
                     
         return [p for p in platforms if p.get("devices")]
 
-def openCL(self, tab):
+def openCL(self, tab, preloaded_platforms=None):
     gpu_index_map = []
     self.opencl_gpu_index_map = gpu_index_map
-    parser = ClinfoParser()
-    oclPlatforms = parser.platforms
+    if preloaded_platforms is not None:
+        oclPlatforms = preloaded_platforms
+    else:
+        parser = ClinfoParser()
+        oclPlatforms = parser.platforms
     self.opencl_platforms = oclPlatforms
     platformDetails_Store = Gio.ListStore.new(ExpandDataObject)
     PlatformExtensionDetails_Store = Gio.ListStore.new(ExpandDataObject)
