@@ -1365,8 +1365,16 @@ class GpuZView(Gtk.Box):
 
         core_clk = f"{stats.get('clock_current', 0)} MHz" if stats.get("clock_current", 0) > 0 else "—"
         boost_clk = f"{stats.get('clock_max', 0)} MHz" if stats.get("clock_max", 0) > 0 else "—"
-        mem_clk = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
-        mem_clk_disp = f"{mem_clk} MHz" if mem_clk > 0 else "—"
+        vram_clk_used = stats.get("vram_clock", 0)
+        vram_clk_total = stats.get("vram_clock_max", 0)
+        if vram_clk_used > 0 and vram_clk_total > 0:
+            vram_clk_disp = f"{vram_clk_used} / {vram_clk_total} MHz"
+        elif vram_clk_used > 0:
+            vram_clk_disp = f"{vram_clk_used} MHz"
+        elif vram_clk_total > 0:
+            vram_clk_disp = f"{vram_clk_total} MHz"
+        else:
+            vram_clk_disp = "—"
 
         temp_val = stats.get("temp", 0)
         temp_disp = f"{temp_val} °C" if temp_val is not None and temp_val > 0 else "—"
@@ -1396,12 +1404,14 @@ class GpuZView(Gtk.Box):
             gtt_disp = "—"
 
         # GPU Hardware – packed into 3–4 fields per row
-        _add_row(hw_frame, ("Device ID", dev_id_display), ("Driver", driver_val), ("VBIOS", bios_val))
+        _add_row(hw_frame, ("Device ID", dev_id_display),
+                            ("Device Type", _clean_device_type(vk_dev.get("device_type", "—"))),
+                            ("Driver", driver_val), ("VBIOS", bios_val))
         _add_row(hw_frame, ("PCIe Link", bus_interface),
                             ("VRAM", vram_disp, "hw_vram"), ("GTT Memory", gtt_disp, "hw_gtt"))
         _add_row(hw_frame, ("GPU Usage", usage_disp, "hw_usage"),
                             ("GPU Clock", core_clk, "hw_clock"), ("Boost Clock", boost_clk),
-                            ("Memory Clock", mem_clk_disp, "hw_mem_clock"))
+                            ("VRAM Clock", vram_clk_disp, "hw_vram_clock"))
         _add_row(hw_frame, ("Temperature", temp_disp, "hw_temp"),
                             ("Power Draw", power_disp, "hw_power"), ("Fan Speed", fan_disp, "hw_fan"))
         self.card_content_box.append(hw_frame)
@@ -1439,12 +1449,11 @@ class GpuZView(Gtk.Box):
         if has_vulkan:
             _add_row(vk_frame,
                      ("API Version", vk_api), ("Instance Ver.", vk_inst_ver),
-                     ("Driver Name", vk_drv_name), ("Driver Ver.", vk_drv_ver))
-            if vk_drv_info and vk_drv_info not in ("—", "-"):
-                _add_row(vk_frame, ("Driver Info", vk_drv_info))
+                     ("Conformance", vk_conform), ("Device Type", vk_dev_type))
             _add_row(vk_frame,
-                     ("Device Type", vk_dev_type), ("Conformance", vk_conform),
-                     ("Vendor ID", vk_vendor_id), ("Device ID", vk_device_id))
+                     ("Driver Name", vk_drv_name), ("Driver Info", vk_drv_info),
+                     ("Driver Ver.", vk_drv_ver))
+            _add_row(vk_frame, ("Vendor ID", vk_vendor_id), ("Device ID", vk_device_id))
             _add_row(vk_frame,
                      ("Device Ext.", vk_ext_cnt), ("Device Formats", vk_fmt_cnt),
                      ("Instance Ext.", vk_inst_ext_cnt), ("Instance Layers", vk_inst_layers_cnt))
@@ -1513,18 +1522,18 @@ class GpuZView(Gtk.Box):
         fbcfg_cnt   = str(gl_data.get("fbconfig_count", 0)) if gl_data.get("fbconfig_count") else "—"
         es_ext_cnt  = str(gl_data.get("es_extensions_count", 0)) if gl_data.get("es_extensions_count") else "—"
 
-        # OpenGL – 4 fields per row; counts packed 5-wide
+        # OpenGL – related versions and extension counts share rows
         if has_opengl or has_egl:
             _add_row(gl_frame,
                      ("Vendor", gl_vendor), ("Renderer", gl_renderer),
-                     ("OpenGL Version", gl_version), ("GLSL Version", gl_glsl))
+                     ("OpenGL Version", gl_version), ("GLSL Version", gl_glsl),
+                     ("GL Extensions", gl_ext_cnt))
             _add_row(gl_frame,
-                     ("OpenGL ES", gl_es_ver), ("GLX Version", gl_glx_ver),
+                     ("OpenGL ES", gl_es_ver), ("ES Extensions", es_ext_cnt),
                      ("EGL Version", egl_version), ("EGL Ext.", egl_ext_cnt))
             _add_row(gl_frame,
-                     ("GL Extensions", gl_ext_cnt), ("GLX Extensions", glx_ext_cnt),
-                     ("ES Extensions", es_ext_cnt), ("GLX Visuals", glx_vis_cnt),
-                     ("FB Configs", fbcfg_cnt))
+                     ("GLX Version", gl_glx_ver), ("GLX Extensions", glx_ext_cnt),
+                     ("GLX Visuals", glx_vis_cnt), ("FB Configs", fbcfg_cnt))
         _apply_unsupported_state(gl_frame, has_opengl or has_egl, "OpenGL / EGL")
         self.card_content_box.append(gl_frame)
 
@@ -1814,10 +1823,20 @@ class GpuZView(Gtk.Box):
             if "hw_clock" in live:
                 val = f"{clk_v} MHz" if clk_v and clk_v > 0 else "—"
                 live["hw_clock"].set_label(self._format_live_val(val))
-            mclk_v = stats.get("vram_clock_max") or stats.get("vram_clock", 0)
+            vram_clk_used_v = stats.get("vram_clock", 0)
+            vram_clk_total_v = stats.get("vram_clock_max", 0)
+            if vram_clk_used_v > 0 and vram_clk_total_v > 0:
+                vram_clk_val = f"{vram_clk_used_v} / {vram_clk_total_v} MHz"
+            elif vram_clk_used_v > 0:
+                vram_clk_val = f"{vram_clk_used_v} MHz"
+            elif vram_clk_total_v > 0:
+                vram_clk_val = f"{vram_clk_total_v} MHz"
+            else:
+                vram_clk_val = "—"
+            if "hw_vram_clock" in live:
+                live["hw_vram_clock"].set_label(self._format_live_val(vram_clk_val))
             if "hw_mem_clock" in live:
-                val = f"{mclk_v} MHz" if mclk_v and mclk_v > 0 else "—"
-                live["hw_mem_clock"].set_label(self._format_live_val(val))
+                live["hw_mem_clock"].set_label(self._format_live_val(vram_clk_val))
 
         # ── Real-time updates for System tab labels ──────────────────────
         sys_live = getattr(self, "_sys_live_labels", {})

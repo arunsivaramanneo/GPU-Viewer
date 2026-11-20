@@ -1807,6 +1807,12 @@ METRIC_TOOLTIPS = {
     "Mesh Shaders": "Mesh and task shader pipeline support replacing traditional geometry pipelines (VK_EXT_mesh_shader, VK_NV_mesh_shader).",
 }
 
+METRIC_DISPLAY_NAMES = {
+    "Temp": "GPU Core Temp",
+    "Hotspot": "GPU Hotspot",
+    "Voltage": "GPU Core Voltage",
+}
+
 
 # ---------------------------------------------------------------------------
 # UI helpers
@@ -2672,10 +2678,11 @@ def _make_gauge_dashboard(gpu_stats: dict, gauges_out: dict,
         vbox.set_valign(Gtk.Align.CENTER)
 
         tooltip = METRIC_TOOLTIPS.get(title)
+        display_title = METRIC_DISPLAY_NAMES.get(title, title)
         if tooltip:
             vbox.set_tooltip_text(tooltip)
 
-        g = CircularGauge(size=GAUGE_SIZE, title=title, unit=unit,
+        g = CircularGauge(size=GAUGE_SIZE, title=display_title, unit=unit,
                           min_value=0.0, max_value=max_value,
                           gauge_type=gauge_type)
         if tooltip:
