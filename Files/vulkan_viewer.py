@@ -562,7 +562,7 @@ def create_vulkan_tab_content(self):
             #    notebook.set_tab_label(ExtensionTab, Gtk.Label(label=label))
 
             GLib.idle_add(update_ui)
-    def Formats(GPUname):
+    def Formats(GPUname, generation=None):
                 # noinspection PyPep8
         fetch_vulkan_device_formats_types_command = "cat %s | grep FORMAT_  | grep -v FORMAT_FEATURE  | awk '/./'" %(Filenames.vulkan_device_formats_file)
         fetch_vulkan_device_format_types_count_command = "cat %s | grep Formats | grep -o '=.*' | grep -o ' .*' | awk '/./' " %(Filenames.vulkan_device_formats_file)
@@ -586,14 +586,21 @@ def create_vulkan_tab_content(self):
         createMainFile(Filenames.vulkan_device_format_types_buffer_count_file,fetch_vulkan_device_format_type_buffer_count_command)  
 
         def update_ui():
+            if generation is not None and generation != formats_generation["value"]:
+                return False
+
             FormatsList.remove_all()
             FormatsList.append(DataObject("Show All Device Formats",""))
             with open(Filenames.vulkan_device_formats_types_file,"r") as file:
                 for line in file:
                     FormatsList.append(DataObject(((line.replace("FORMAT_","")).strip("\n")).strip("\t"),""))
 
+            formats_loaded_for_gpu["gpu"] = GPUname
+            formats_loading_for_gpu["gpu"] = None
+            FormatsDropDown.set_selected(0)
             # Hide spinner and show content
             hide_spinner_for_tab("Formats")
+            return False
 
         GLib.idle_add(update_ui)
     def selectFormats(dropdown,_pspec):
@@ -1329,6 +1336,46 @@ def create_vulkan_tab_content(self):
         return search_text_widget.upper() in item.column1.upper()
 
 
+    formats_loaded_for_gpu = {"gpu": None}
+    formats_loading_for_gpu = {"gpu": None}
+    formats_generation = {"value": 0}
+    formats_load_lock = threading.Lock()
+
+    def start_formats_load(gpu_name):
+        if (
+            formats_loaded_for_gpu["gpu"] == gpu_name
+            or formats_loading_for_gpu["gpu"] == gpu_name
+        ):
+            return
+
+        formats_generation["value"] += 1
+        generation = formats_generation["value"]
+        formats_loading_for_gpu["gpu"] = gpu_name
+        if "Formats" in tab_spinners:
+            tab_spinners["Formats"].start()
+            tab_spinners["Formats"].set_visible(True)
+        if "Formats" in tab_content_containers:
+            content_box, spinner_box = tab_content_containers["Formats"]
+            content_box.set_visible(False)
+            spinner_box.set_visible(True)
+
+        def load():
+            try:
+                with formats_load_lock:
+                    Formats(gpu_name, generation)
+            except Exception as error:
+                print(f"Error loading Formats for GPU {gpu_name}: {error}")
+
+                def show_error_state():
+                    if generation == formats_generation["value"]:
+                        formats_loading_for_gpu["gpu"] = None
+                        hide_spinner_for_tab("Formats")
+                    return False
+
+                GLib.idle_add(show_error_state)
+
+        threading.Thread(target=load, daemon=True).start()
+
     def on_gpu_dropdown_changed(gpu_dropdown,dummy):
         idx = gpu_dropdown.props.selected
         if idx == Gtk.INVALID_LIST_POSITION:
@@ -1339,6 +1386,9 @@ def create_vulkan_tab_content(self):
             idx = 0
 
         text = gpu_index_map[idx]
+        formats_loaded_for_gpu["gpu"] = None
+        formats_loading_for_gpu["gpu"] = None
+        formats_generation["value"] += 1
         video_supported = vulkan_video_support.get(text, False)
         if video_sidebar_heading is not None:
             video_sidebar_heading.set_visible(video_supported)
@@ -1351,6 +1401,9 @@ def create_vulkan_tab_content(self):
                     other_listbox.unselect_all()
             lb_instance.select_row(lb_instance.get_row_at_index(0))
             content_stack.set_visible_child_name("system-information")
+
+        if content_stack.get_visible_child_name() == "formats":
+            start_formats_load(text)
 
         # Reset and show the loading spinner
         tabs_loading_count["count"] = 7  # Omit Formats for lazy loading
@@ -1570,29 +1623,13 @@ def create_vulkan_tab_content(self):
             child_name = _row_stack_map.get((id(emitting_lb), row_idx))
             if child_name:
                 content_stack.set_visible_child_name(child_name)
-                # Lazy-load Formats when first visited
+                # Lazy-load or refresh Formats for the selected GPU.
                 if child_name == "formats":
                     idx = gpu_Dropdown.props.selected
                     if idx == Gtk.INVALID_LIST_POSITION:
                         idx = 0
                     if gpu_index_map and idx < len(gpu_index_map):
-                        text = gpu_index_map[idx]
-                        if formats_loaded_for_gpu.get("gpu") != text:
-                            formats_loaded_for_gpu["gpu"] = text
-                            if "Formats" in tab_spinners:
-                                tab_spinners["Formats"].start()
-                                tab_spinners["Formats"].set_visible(True)
-                            if "Formats" in tab_content_containers:
-                                cb, sb = tab_content_containers["Formats"]
-                                cb.set_visible(False)
-                                sb.set_visible(True)
-                            import threading
-                            def _load_formats_lazy():
-                                try:
-                                    Formats(text)
-                                except Exception as e:
-                                    print(f"Error loading Formats lazily: {e}")
-                            threading.Thread(target=_load_formats_lazy, daemon=True).start()
+                        start_formats_load(gpu_index_map[idx])
 
         listbox.connect("row-activated", on_row_activated)
 
@@ -2507,8 +2544,6 @@ def create_vulkan_tab_content(self):
     # ── Sidebar scroll window wraps the grouped sidebar vbox ───────────────
     sidebar_scrolled_window = Gtk.ScrolledWindow.new()
     sidebar_scrolled_window.set_child(sidebar_vbox)
-
-    formats_loaded_for_gpu = {"gpu": None}
 
     # row-activated is now handled inside _connect_group() for each group.
     # Select the first row of the first group to show System Information.

@@ -3363,6 +3363,19 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             border: 1px solid rgba(220, 38, 38, 0.35);
         }
         """
+    card_css += """
+    .summary-page,
+    .summary-page scrolledwindow,
+    .summary-page viewport {
+        background-color: #c0c0c0;
+    }
+    .summary-page .summary-nav-btn {
+        color: #d43c50;
+    }
+    .summary-page .summary-nav-btn:hover {
+        color: #d43c50;
+    }
+    """
     if app is not None:
         display = Gdk.Display.get_default()
         if hasattr(app, "_summary_css_provider") and app._summary_css_provider:
