@@ -64,6 +64,14 @@ def get_gpuz_css(is_dark: bool = True) -> str:
     padding: 6px;
 }
 
+.gpuz-container > stack,
+.gpuz-container scrolledwindow,
+.gpuz-container viewport,
+.gpuz-card-page,
+.gpuz-system-page {
+    background-color: #222222;
+}
+
 .gpuz-container headerbar {
     background-image: linear-gradient(
         to bottom,
@@ -996,6 +1004,9 @@ class GpuZView(Gtk.Box):
                 return p
         return os.path.join(base_dir, "Images", filename)
 
+    def _load_header_logo_pixbuf(self, path: str) -> GdkPixbuf.Pixbuf:
+        return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 38, 38, True)
+
     def _get_vendor_logo_path(self, vendor_id_str: str) -> str:
         """Return the selected GPU vendor's logo image path."""
         try:
@@ -1004,7 +1015,7 @@ class GpuZView(Gtk.Box):
             vendor_id = None
 
         if vendor_id == 0x1002:
-            return self._resolve_image_path("AMD_logo.png")
+            return self._resolve_image_path("AMD_D.png")
         if vendor_id == 0x10de:
             return self._resolve_image_path("nvidia_logo.png")
         if vendor_id == 0x8086:
@@ -1172,7 +1183,7 @@ class GpuZView(Gtk.Box):
 
         logo_path = self._get_vendor_logo_path(v_id)
         try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 38, 38, True)
+            pixbuf = self._load_header_logo_pixbuf(logo_path)
             logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
             logo_img.set_size_request(38, 38)
             header_box.append(logo_img)
@@ -1994,7 +2005,7 @@ class GpuZView(Gtk.Box):
         logo_loaded = False
         if distro_logo_path and os.path.exists(distro_logo_path):
             try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(distro_logo_path, 38, 38, True)
+                pixbuf = self._load_header_logo_pixbuf(distro_logo_path)
                 logo_img = Gtk.Picture.new_for_pixbuf(pixbuf)
                 logo_img.set_size_request(38, 38)
                 logo_img.set_valign(Gtk.Align.CENTER)

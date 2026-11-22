@@ -3055,7 +3055,7 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     if prefer_dark:
         card_css = """
         .summary-page {
-            background-color: transparent;
+            background-color: #222222;
         }
 
         .summary-tier-header-box {
@@ -3363,12 +3363,23 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
             border: 1px solid rgba(220, 38, 38, 0.35);
         }
         """
-    card_css += """
+    if prefer_dark:
+        card_css += """
+    .summary-page,
+    .summary-page scrolledwindow,
+    .summary-page viewport {
+        background-color: #222222;
+    }
+    """
+    else:
+        card_css += """
     .summary-page,
     .summary-page scrolledwindow,
     .summary-page viewport {
         background-color: #c0c0c0;
     }
+    """
+    card_css += """
     .summary-page .summary-nav-btn {
         color: #d43c50;
     }
