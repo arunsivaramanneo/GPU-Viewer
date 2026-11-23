@@ -33,7 +33,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk
+from gi.repository import Gtk, Adw, GLib, GdkPixbuf, Pango, Gdk, Gio
 
 import const
 import Filenames
@@ -547,6 +547,9 @@ class GpuZView(Gtk.Box):
         self.sensor_timer_id = 0
         self._css_provider = None
         self.theme_btn = None
+        self.repository_btn = None
+        self._refresh_interval_dropdown = None
+        self._syncing_refresh_interval = False
         self.add_css_class("gpuz-container")
 
         self.set_vexpand(True)
@@ -572,7 +575,13 @@ class GpuZView(Gtk.Box):
         self.dashboard_button.connect("clicked", lambda _: self.app.set_view_mode("dashboard"))
         self.header_bar.pack_start(self.dashboard_button)
 
-        # Theme toggle on top right
+        # Theme and repository controls on the right
+        self.repository_btn = Gtk.Button()
+        self.repository_btn.add_css_class("flat")
+        self.repository_btn.set_tooltip_text("Open GPU-Viewer GitHub repository")
+        self.repository_btn.connect("clicked", self._open_repository)
+        self.header_bar.pack_end(self.repository_btn)
+
         if hasattr(self.app, "_on_theme_button_clicked"):
             self.theme_btn = Gtk.Button()
             self.theme_btn.add_css_class("flat")
@@ -632,6 +641,12 @@ class GpuZView(Gtk.Box):
             self.theme_btn.set_icon_name("display-brightness-symbolic" if is_dark else "weather-clear-night-symbolic")
             self.theme_btn.set_tooltip_text("Switch to Light Theme" if is_dark else "Switch to Dark Theme")
             self.theme_btn.set_sensitive(True)
+        if self.repository_btn is not None:
+            logo_path = self._resolve_image_path("github.png")
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 16, 16, True)
+            logo = Gtk.Picture.new_for_pixbuf(pixbuf)
+            logo.set_size_request(16, 16)
+            self.repository_btn.set_child(logo)
 
         css_data = get_gpuz_css(is_dark)
         display = Gdk.Display.get_default()
@@ -648,6 +663,10 @@ class GpuZView(Gtk.Box):
                 self._css_provider,
                 Gtk.STYLE_PROVIDER_PRIORITY_USER,
             )
+
+    def _open_repository(self, _button):
+        if not Gio.AppInfo.launch_default_for_uri(const.GITHUB_LINK, None):
+            print(f"Could not open GPU-Viewer repository: {const.GITHUB_LINK}")
 
     # -----------------------------------------------------------------------
     # Multi-GPU List & Data Helpers
@@ -1731,6 +1750,34 @@ class GpuZView(Gtk.Box):
     # -----------------------------------------------------------------------
 
     def _build_sensors_tab(self) -> Gtk.Widget:
+        sensor_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        sensor_page.add_css_class("gpuz-sensor-page")
+        interval_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        interval_box.set_halign(Gtk.Align.END)
+        interval_box.set_margin_top(6)
+        interval_box.set_margin_end(12)
+        interval_label = Gtk.Label(label="Stats refresh interval:")
+        interval_label.add_css_class("gpuz-frame-label")
+        interval_box.append(interval_label)
+        refresh_interval_values = getattr(
+            self.app, "_refresh_interval_values", [250, 500, 1000, 2000, 5000]
+        )
+        interval_options = ["250 ms", "500 ms", "1 s", "2 s", "5 s"]
+        self._refresh_interval_dropdown = Gtk.DropDown.new(
+            Gtk.StringList.new(interval_options), None
+        )
+        current_interval = getattr(self.app, "_current_refresh_interval_ms", 1000)
+        try:
+            selected_interval = refresh_interval_values.index(current_interval)
+        except ValueError:
+            selected_interval = 2
+        self._refresh_interval_dropdown.set_selected(selected_interval)
+        self._refresh_interval_dropdown.connect(
+            "notify::selected", self._on_refresh_interval_selected
+        )
+        interval_box.append(self._refresh_interval_dropdown)
+        sensor_page.append(interval_box)
+
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
@@ -1752,7 +1799,29 @@ class GpuZView(Gtk.Box):
                 net_up_mbps=net_up,
             )
         )
-        return scroll
+        sensor_page.append(scroll)
+        return sensor_page
+
+    def _on_refresh_interval_selected(self, dropdown, _pspec):
+        if self._syncing_refresh_interval:
+            return
+        selected = dropdown.get_selected()
+        values = getattr(
+            self.app, "_refresh_interval_values", [250, 500, 1000, 2000, 5000]
+        )
+        if selected >= len(values):
+            return
+
+        interval_ms = values[selected]
+        if hasattr(self.app, "config"):
+            self.app.config.set_refresh_interval(interval_ms)
+        self.app._current_refresh_interval_ms = interval_ms
+
+        dashboard_dropdown = getattr(self.app, "_interval_dropdown", None)
+        if dashboard_dropdown is not None and dashboard_dropdown.get_selected() != selected:
+            dashboard_dropdown.set_selected(selected)
+        else:
+            self.set_refresh_interval(interval_ms)
 
     def _format_live_val(self, val_str: str) -> str:
         """Format live sensor / telemetry string: clean whitespace."""
@@ -2188,6 +2257,10 @@ class GpuZView(Gtk.Box):
     # -----------------------------------------------------------------------
 
     def _start_sensor_polling(self):
+        if self.sensor_timer_id:
+            GLib.source_remove(self.sensor_timer_id)
+            self.sensor_timer_id = 0
+
         def _poll():
             if not self.get_mapped():
                 return True
@@ -2196,10 +2269,24 @@ class GpuZView(Gtk.Box):
             self._update_sensors()
             return True
 
-        interval = 1000
-        if hasattr(self.app, "_current_refresh_interval_ms"):
-            interval = self.app._current_refresh_interval_ms
+        interval = getattr(self.app, "_current_refresh_interval_ms", 1000)
         self.sensor_timer_id = GLib.timeout_add(interval, _poll)
+
+    def set_refresh_interval(self, interval_ms: int):
+        self.app._current_refresh_interval_ms = interval_ms
+        values = getattr(
+            self.app, "_refresh_interval_values", [250, 500, 1000, 2000, 5000]
+        )
+        if self._refresh_interval_dropdown is not None and interval_ms in values:
+            selected = values.index(interval_ms)
+            if self._refresh_interval_dropdown.get_selected() != selected:
+                self._syncing_refresh_interval = True
+                try:
+                    self._refresh_interval_dropdown.set_selected(selected)
+                finally:
+                    self._syncing_refresh_interval = False
+        if self.sensor_timer_id:
+            self._start_sensor_polling()
 
     def _on_destroy(self, _widget):
         if self.sensor_timer_id:

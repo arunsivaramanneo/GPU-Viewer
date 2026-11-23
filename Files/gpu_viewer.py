@@ -514,6 +514,8 @@ else:
                     ms = self._refresh_interval_values[idx]
                     self.config.set_refresh_interval(ms)
                     self._current_refresh_interval_ms = ms
+                    if getattr(self, "gpuz_view", None) is not None:
+                        self.gpuz_view.set_refresh_interval(ms)
             self._interval_dropdown.connect("notify::selected", _on_interval_selected)
 
             # Search toggle button
@@ -532,7 +534,7 @@ else:
             self.gpuz_toggle_btn.add_css_class("flat")
             self.gpuz_toggle_btn.set_size_request(32, 32)
             self.gpuz_toggle_btn.set_valign(Gtk.Align.CENTER)
-            self.gpuz_toggle_btn.set_tooltip_text("Switch to GPU-Z View Mode (Ctrl+Z)")
+            self.gpuz_toggle_btn.set_tooltip_text("Switch to Compact GPU Viewer (Ctrl+Z)")
             self.gpuz_toggle_btn.connect("clicked", lambda _: self.toggle_view_mode())
 
             header_buttons_box.append(self.refresh_menu_button)
