@@ -30,6 +30,7 @@ import glob
 import subprocess
 import threading
 import shutil
+from concurrent.futures import ThreadPoolExecutor, wait
 
 import gi
 gi.require_version("Gtk", "4.0")
@@ -399,6 +400,80 @@ def _parse_vulkan(results: dict) -> dict:
     else:
         data["instance_layers_count"] = len(re.findall(r'VK_LAYER_[A-Za-z0-9_]+', content))
 
+    # Populate / supplement with eglinfo -p <platform> so OpenGL, ES, EGL, and Config counts are accurate
+    try:
+        from OpenGLViewer import (
+            detect_egl_platform,
+            parse_device_extensions,
+            parse_egl_configurations,
+            parse_eglinfo_devices,
+        )
+        egl_lines = []
+        for platform in detect_egl_platform():
+            proc = subprocess.run(
+                ["eglinfo", "-p", platform],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10,
+            )
+            candidate_lines = proc.stdout.splitlines()
+            if proc.returncode == 0 and parse_eglinfo_devices(candidate_lines):
+                egl_lines = candidate_lines
+                break
+
+        if egl_lines:
+            devs = parse_eglinfo_devices(egl_lines)
+            if devs:
+                dev_exts = parse_device_extensions(devs[0])
+                core_cnt = len(dev_exts.get("OpenGL core", []))
+                compat_cnt = len(dev_exts.get("OpenGL compatibility", []))
+                es_cnt = len(dev_exts.get("OpenGL ES", []))
+                egl_cnt = len(dev_exts.get("EGL", []))
+                if core_cnt or compat_cnt:
+                    data["extensions_count"] = max(data["extensions_count"], core_cnt or compat_cnt)
+                if es_cnt:
+                    data["es_extensions_count"] = max(data["es_extensions_count"], es_cnt)
+                if egl_cnt:
+                    data["egl_count"] = max(data["egl_count"], egl_cnt)
+
+            cfg_cnt = len(parse_egl_configurations(egl_lines))
+            if cfg_cnt and not data["fbconfig_count"]:
+                data["fbconfig_count"] = cfg_cnt
+
+            for line in egl_lines:
+                s = line.strip()
+                if not data["vendor"] and (
+                    s.startswith("OpenGL core profile vendor:")
+                    or s.startswith("OpenGL compatibility profile vendor:")
+                ):
+                    data["vendor"] = s.split(":", 1)[1].strip()
+                elif not data["renderer"] and (
+                    s.startswith("OpenGL core profile renderer:")
+                    or s.startswith("OpenGL compatibility profile renderer:")
+                ):
+                    data["renderer"] = s.split(":", 1)[1].strip()
+                elif not data["version"] and (
+                    s.startswith("OpenGL core profile version:")
+                    or s.startswith("OpenGL compatibility profile version:")
+                ):
+                    data["version"] = s.split(":", 1)[1].strip()
+                elif not data["shading_language_version"] and (
+                    s.startswith("OpenGL core profile shading language version:")
+                    or s.startswith("OpenGL compatibility profile shading language version:")
+                ):
+                    data["shading_language_version"] = s.split(":", 1)[1].strip()
+                elif not data["es_version"] and s.startswith("OpenGL ES profile version:"):
+                    data["es_version"] = s.split(":", 1)[1].strip()
+                elif not data["es_shading_language_version"] and s.startswith(
+                    "OpenGL ES profile shading language version:"
+                ):
+                    data["es_shading_language_version"] = s.split(":", 1)[1].strip()
+                elif not data["egl_version"] and s.startswith("EGL version string:"):
+                    data["egl_version"] = s.split(":", 1)[1].strip()
+    except Exception:
+        pass
+
     return data
 
 
@@ -440,6 +515,8 @@ def _parse_opengl(results: dict) -> dict:
         # If the file is empty / too small, fall back to glxinfo -B
         if len(lines) < 5:
             lines = fetchContentsFromCommand("glxinfo -B 2>/dev/null")
+        if len(lines) < 5:
+            lines = fetchContentsFromCommand("EGL_PLATFORM=surfaceless eglinfo -B 2>/dev/null")
     except Exception:
         return data
 
@@ -3424,7 +3501,28 @@ def create_summary_page(app, results: dict) -> Gtk.Widget:
     outer.append(loading_box)
 
     def _bg_worker():
-        data = _gather_all(results)
+        executor = ThreadPoolExecutor(max_workers=1)
+        gather_future = executor.submit(_gather_all, results)
+        done, _pending = wait({gather_future}, timeout=25)
+        if gather_future in done:
+            try:
+                data = gather_future.result()
+            except Exception:
+                data = None
+        else:
+            data = None
+        executor.shutdown(wait=False, cancel_futures=True)
+
+        if data is None:
+            data = {
+                "vulkan": {"supported": False, "devices": [], "instance_extensions_count": 0},
+                "opengl": {"supported": False, "renderer": "", "vendor": "", "version": ""},
+                "opencl": {"supported": False, "platforms": []},
+                "vdpau": {"supported": False},
+                "vulkan_video": {"supported": False, "profiles": []},
+                "gpui_stats": [],
+                "system": {},
+            }
         if app is not None:
             app.summary_data = data
             if hasattr(app, "_on_summary_data_ready"):

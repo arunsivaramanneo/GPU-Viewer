@@ -29,7 +29,7 @@ import gi
 import subprocess
 import shutil
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait
 
 # This line is crucial for working with PyGObject.
 # It ensures we are using the correct versions of the libraries.
@@ -59,21 +59,59 @@ def isVulkanSupported():
             Filenames.vulkaninfo_output_command,
             shell=True, stdout=file, universal_newlines=True
         )
-        vulkan_process.wait()
-        vulkan_process.communicate()
+        try:
+            vulkan_process.wait(timeout=12)
+        except subprocess.TimeoutExpired:
+            vulkan_process.terminate()
+            vulkan_process.wait(timeout=2)
     vulkaninfo_output = copyContentsFromFile(Filenames.vulkaninfo_output_file)
     return len(vulkaninfo_output) > 10 and vulkan_process.returncode == 0
 
+def probe_opengl_output(run_command=subprocess.run):
+    output_sections = []
+    egl_environment = {**os.environ, "EGL_PLATFORM": "surfaceless"}
+    for command in (
+        ["glxinfo", "-B"],
+        ["eglinfo", "-B"],
+    ):
+        try:
+            env = egl_environment if command[0] == "eglinfo" else None
+            process = run_command(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=3,
+                check=False,
+                env=env,
+            )
+            if process.returncode == 0:
+                section = process.stdout.strip()
+                if section:
+                    output_sections.append(section)
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            continue
+    return "\n".join(output_sections)
+
+
 def isOpenglSupported():
+    opengl_output = probe_opengl_output()
+    os.makedirs(os.path.dirname(Filenames.opengl_outpuf_file), exist_ok=True)
     with open(Filenames.opengl_outpuf_file, "w") as file:
-        opengl_process = subprocess.Popen(
-            Filenames.opengl_output_command,
-            shell=True, stdout=file, universal_newlines=True
+        file.write(opengl_output)
+
+    return (
+        len(opengl_output) > 10
+        and any(
+            marker in opengl_output
+            for marker in (
+                "OpenGL",
+                "GLX",
+                "EGL",
+                "GL_VERSION",
+                "GL_VENDOR",
+            )
         )
-        opengl_process.wait()
-        opengl_process.communicate()
-    opengl_output = copyContentsFromFile(Filenames.opengl_outpuf_file)
-    return len(opengl_output) > 10 and opengl_process.returncode == 0
+    )
 
 def isOpenclSupported():
     # Fix #3 (part 1): Write clinfo output to the shared file so OpenCL.py
@@ -83,7 +121,11 @@ def isOpenclSupported():
             "clinfo",
             shell=True, stdout=file, universal_newlines=True
         )
-        clinfo_process.wait()
+        try:
+            clinfo_process.wait(timeout=12)
+        except subprocess.TimeoutExpired:
+            clinfo_process.terminate()
+            clinfo_process.wait(timeout=2)
         clinfo_process.communicate()
     clinfo_output = copyContentsFromFile(Filenames.opencl_output_file)
     clinfo_text = "".join(clinfo_output) if isinstance(clinfo_output, (list, tuple)) else str(clinfo_output)
@@ -95,18 +137,20 @@ def isVdpauinfoSupported():
             Filenames.vdpauinfo_output_command,
             shell=True, stdout=file, universal_newlines=True
         )
-        vdpauinfo_process.wait()
+        try:
+            vdpauinfo_process.wait(timeout=12)
+        except subprocess.TimeoutExpired:
+            vdpauinfo_process.terminate()
+            vdpauinfo_process.wait(timeout=2)
         vdpauinfo_process.communicate()
     vdpauinfo_output = copyContentsFromFile(Filenames.vdpauinfo_output_file)
     return len(vdpauinfo_output) > 10 and vdpauinfo_process.returncode == 0
 
 def isVulkanVideoSupported():
-    # Fix #1 & #6: Grep the file already written by isVulkanSupported() —
-    # no need to spawn a second vulkaninfo process.
+    # Reuse the file already written by isVulkanSupported().
     try:
-        return len(fetchContentsFromCommand(
-            f"grep 'Video Profiles' {Filenames.vulkaninfo_output_file}"
-        )) > 0
+        with open(Filenames.vulkaninfo_output_file, "r") as file:
+            return "Video Profiles" in file.read()
     except Exception:
         return False
 
@@ -704,6 +748,27 @@ else:
             # Ensure the /tmp/gpu-viewer directory exists before threads start
             subprocess.Popen(Filenames.mkdir_output_command, stdout=subprocess.PIPE, shell=True).communicate()
 
+            self._tabs_probe_completed = False
+            def _probe_fallback_timeout():
+                if getattr(self, "_tabs_probe_completed", False):
+                    return False
+                fallback_results = {
+                    "vulkan": os.path.exists(Filenames.vulkaninfo_output_file)
+                    and os.path.getsize(Filenames.vulkaninfo_output_file) > 10,
+                    "opengl": os.path.exists(Filenames.opengl_outpuf_file)
+                    and os.path.getsize(Filenames.opengl_outpuf_file) > 10,
+                    "opencl": os.path.exists(Filenames.opencl_output_file)
+                    and os.path.getsize(Filenames.opencl_output_file) > 10,
+                    "vdpau": os.path.exists(Filenames.vdpauinfo_output_file)
+                    and os.path.getsize(Filenames.vdpauinfo_output_file) > 10,
+                    "vulkan_video": False,
+                }
+                print("Support probe watchdog reached: building available cached results")
+                self._build_tabs_on_main_thread(fallback_results)
+                return False
+
+            GLib.timeout_add(25000, _probe_fallback_timeout)
+
             # Fix #2: Run all support checks in parallel, then build UI on main thread
             thread = threading.Thread(target=self._probe_and_build_tabs, daemon=True)
             thread.start()
@@ -711,22 +776,28 @@ else:
 
         def _probe_and_build_tabs(self):
             """Run support checks in parallel (background thread), then schedule UI build."""
-            # Fix #2: parallel support checks via ThreadPoolExecutor
-            with ThreadPoolExecutor(max_workers=4) as executor:
-                futures = {
-                    executor.submit(isVulkanSupported):   "vulkan",
-                    executor.submit(isOpenglSupported):   "opengl",
-                    executor.submit(isOpenclSupported):   "opencl",
-                    executor.submit(isVdpauinfoSupported): "vdpau",
-                }
-                results = {}
-                for future in as_completed(futures):
-                    key = futures[future]
-                    try:
-                        results[key] = future.result()
-                    except Exception as e:
-                        print(f"Support check failed for {key}: {e}")
-                        results[key] = False
+            executor = ThreadPoolExecutor(max_workers=4)
+            futures = {
+                executor.submit(isVulkanSupported): "vulkan",
+                executor.submit(isOpenglSupported): "opengl",
+                executor.submit(isOpenclSupported): "opencl",
+                executor.submit(isVdpauinfoSupported): "vdpau",
+            }
+            results = {}
+            done, pending = wait(futures, timeout=20)
+            for future in done:
+                key = futures[future]
+                try:
+                    results[key] = future.result()
+                except Exception as e:
+                    print(f"Support check failed for {key}: {e}")
+                    results[key] = False
+            for future in pending:
+                key = futures[future]
+                print(f"Support check timed out for {key}")
+                results[key] = False
+                future.cancel()
+            executor.shutdown(wait=False, cancel_futures=True)
 
             # If the parallel probe missed OpenCL but a clinfo output file
             # exists with device information, treat OpenCL as available so
@@ -754,6 +825,9 @@ else:
             ready the inner stack simply switches to its "content" child — the outer
             ViewStack page never moves, so tabs never jump or reorder.
             """
+            if getattr(self, "_tabs_probe_completed", False):
+                return False
+            self._tabs_probe_completed = True
             self._results = results
             # Debug: print probe results for troubleshooting OpenCL tab
             pass
@@ -878,7 +952,7 @@ else:
                 def _build_opengl():
                     box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 10)
                     return OpenGL(self, box)
-                _register("page2", "OpenGL", "OpenGL", _build_opengl)
+                _register("page2", "EGL", "OpenGL", _build_opengl)
 
             if results.get("opencl"):
                 def _build_opencl():

@@ -30,7 +30,7 @@ from gi.repository import Gtk,Gio,GObject,Adw,GdkPixbuf,Pango
 
 Adw.init()
 
-from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,fetchContentsFromCommand,appendLimitsRHS,create_tab,getLogo, create_sidebar_toggle
+from Common import getScreenSize,createMainFile,create_scrollbar,setMargin,fetchContentsFromCommand,appendLimitsRHS,create_tab,getLogo,getGpuImage, create_sidebar_toggle
 
 Title = [""]
 Title2 = ["OpenGL Information ", " Details"]
@@ -130,22 +130,179 @@ def parse_extension_section(lines, start_marker, stop_marker, prefix):
     return sorted(extensions)
 
 
-def parse_egl_extensions(lines):
-    """Extract EGL extension tokens from the es2_info extension block."""
+def parse_extension_tokens(lines, start_marker, prefix):
+    """Extract individual extension tokens from an indented tool output block."""
     extensions = []
     active = False
     for line in lines:
+        stripped = line.strip()
         if not active:
-            if "EGL_EXTENSIONS" in line:
+            if stripped.startswith(start_marker):
                 active = True
             continue
-        if "EGL_CLIENT" in line:
+        if not stripped:
+            continue
+        if not line[0].isspace():
             break
-        for token in line.split(","):
-            start = token.find("EGL")
-            if start >= 0:
-                extensions.append(token[start:].strip())
-    return extensions
+        extensions.extend(
+            re.findall(rf"\b{re.escape(prefix)}[A-Za-z0-9_]+\b", stripped)
+        )
+    return sorted(set(extensions))
+
+
+def parse_egl_extensions(lines):
+    """Extract EGL extensions from the es2_info extension block."""
+    return parse_extension_tokens(lines, "EGL_EXTENSIONS", "EGL_")
+
+
+def _resolve_image_path(filename):
+    """Resolve an image filename across development and installed environments."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for candidate in (
+        os.path.join(base_dir, "Images", filename),
+        os.path.join("../Images", filename),
+        os.path.join("Images", filename),
+    ):
+        if os.path.exists(candidate):
+            return candidate
+    return ""
+
+
+def get_gpuz_vendor_logo_pixbuf(renderer):
+    """Return a 38x38 vendor logo pixbuf matching GpuZViewer's header style."""
+    text = (renderer or "").lower()
+    if any(tok in text for tok in ("amd", "radeon", "ryzen", "ati")):
+        filename = "AMD_D.png"
+    elif any(tok in text for tok in ("nvidia", "geforce")):
+        filename = "nvidia_logo.png"
+    elif "intel" in text:
+        filename = "intel-logo.png"
+    else:
+        filename = "about-us.png"
+
+    path = _resolve_image_path(filename)
+    if path:
+        try:
+            return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 38, 38, True)
+        except Exception:
+            pass
+    return None
+
+
+def detect_egl_platform(env=None):
+    """Return ordered candidate eglinfo -p platforms based on the windowing session."""
+    environ = env if env is not None else os.environ
+    session = environ.get("XDG_SESSION_TYPE", "").strip().lower()
+    candidates = []
+    if session == "wayland" or environ.get("WAYLAND_DISPLAY"):
+        candidates.append("wayland")
+    if session == "x11" or environ.get("DISPLAY"):
+        if "x11" not in candidates:
+            candidates.append("x11")
+    for fallback in ("gbm", "surfaceless"):
+        if fallback not in candidates:
+            candidates.append(fallback)
+    return candidates
+
+
+def parse_egl_limits(lines, profile):
+    """Extract core, compatibility, or ES limits from eglinfo -l output."""
+    if profile == "core":
+        start_marker = "OpenGL core profile limits:"
+    elif profile == "compat":
+        start_marker = "OpenGL compatibility profile limits:"
+    else:
+        start_marker = "OpenGL ES profile limits:"
+
+    selected = []
+    active = False
+    for line in lines:
+        stripped = line.strip()
+        if not active:
+            if stripped.startswith(start_marker):
+                active = True
+            continue
+        if (
+            stripped.startswith("OpenGL core profile ")
+            or stripped.startswith("OpenGL compatibility profile ")
+            or stripped.startswith("OpenGL ES profile ")
+            or stripped.startswith("Configurations:")
+            or re.match(r"^\S.* platform:$", stripped)
+        ):
+            break
+        if stripped:
+            selected.append(line if line.endswith("\n") else f"{line}\n")
+    return selected
+
+
+EGL_CONFIG_COLUMNS = [
+    "ID", "Buffer", "Level", "R", "G", "B", "A", "Depth", "Stencil",
+    "Samples", "Buf", "Visual ID", "Caveat", "Bind", "GL", "ES", "ES2", "VG", "Surfaces",
+]
+
+
+def parse_egl_configurations(lines):
+    """Parse the Configurations table from eglinfo output into 19-column rows."""
+    rows = []
+    in_section = False
+    past_separator = False
+    for raw_line in lines:
+        line = raw_line.rstrip("\n")
+        stripped = line.strip()
+        if not in_section:
+            if stripped.startswith("Configurations:"):
+                in_section = True
+            continue
+        if not past_separator:
+            if "----" in stripped:
+                past_separator = True
+            continue
+        if not stripped:
+            if rows:
+                break
+            continue
+        if re.match(r"^\S.* platform:$", stripped):
+            break
+        if len(line) < 35:
+            continue
+        slices = (
+            line[0:4], line[4:7], line[7:10], line[10:13], line[13:16],
+            line[16:19], line[19:22], line[22:25], line[25:28], line[28:31],
+            line[31:34], line[34:44], line[44:48], line[48:53], line[53:56],
+            line[56:59], line[59:63], line[63:66], line[66:],
+        )
+        rows.append([part.strip() for part in slices])
+    return rows
+
+
+def extract_egl_brief_lines(lines):
+    """Keep only summary lines from eglinfo -p <platform> -l for the Info tree."""
+    brief = []
+    skip_indented = False
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            skip_indented = False
+            continue
+        if (
+            stripped.startswith("EGL client extensions string:")
+            or stripped.startswith("EGL extensions string:")
+            or stripped.startswith("OpenGL core profile extensions:")
+            or stripped.startswith("OpenGL core profile limits:")
+            or stripped.startswith("OpenGL compatibility profile extensions:")
+            or stripped.startswith("OpenGL compatibility profile limits:")
+            or stripped.startswith("OpenGL ES profile extensions:")
+            or stripped.startswith("OpenGL ES profile limits:")
+            or stripped.startswith("Configurations:")
+        ):
+            skip_indented = True
+            continue
+        if skip_indented:
+            if line[0].isspace() or stripped.startswith("---") or re.match(r"^0x[0-9a-fA-F]+", stripped):
+                continue
+            skip_indented = False
+        brief.append(line)
+    return brief
 
 
 class ExpandDataObject(GObject.GObject):
@@ -241,6 +398,144 @@ def parse_glxinfo_brief(lines, dummy_transparent, getLogo):
         stack.append((indent, node))
     return parsed_rows
 
+
+def parse_eglinfo_devices(lines):
+    """Group eglinfo platform sections by their OpenGL renderer/device index."""
+    sections = []
+    current_section = None
+    device_indices = []
+
+    for line in lines:
+        if re.match(r"^\S.* platform:$", line):
+            if current_section is not None:
+                sections.append(current_section)
+            current_section = {"platform": line.strip()[:-1], "lines": []}
+            continue
+
+        if current_section is None:
+            continue
+
+        if current_section["platform"] == "Device platform":
+            device_match = re.match(r"\s*Device #(\d+):", line)
+            if device_match:
+                device_indices.append(int(device_match.group(1)))
+        current_section["lines"].append(line)
+
+    if current_section is not None:
+        sections.append(current_section)
+
+    def renderer_for(section):
+        for line in section["lines"]:
+            match = re.match(
+                r"\s*(?:OpenGL (?:core|compatibility|ES) profile renderer|GL_RENDERER):\s*(.*)",
+                line,
+            )
+            if match:
+                return match.group(1).strip()
+        return ""
+
+    devices = []
+    device_sections = [
+        section for section in sections
+        if section["platform"] == "Platform Device platform"
+    ]
+    for position, section in enumerate(device_sections):
+        renderer = renderer_for(section)
+        if not renderer:
+            continue
+        device_index = (
+            device_indices[position] if position < len(device_indices) else position
+        )
+        devices.append({
+            "index": device_index,
+            "renderer": renderer,
+            "label": f"GPU {device_index}: {renderer}",
+            "sections": [{
+                "platform": f"Platform Device #{device_index}",
+                "lines": section["lines"],
+            }],
+        })
+
+    other_sections = [
+        section for section in sections
+        if section["platform"] not in ("Device platform", "Platform Device platform")
+    ]
+    if not devices:
+        for section in other_sections:
+            renderer = renderer_for(section)
+            if not renderer:
+                continue
+            device = next(
+                (item for item in devices if item["renderer"] == renderer), None
+            )
+            if device is None:
+                device_index = len(devices)
+                device = {
+                    "index": device_index,
+                    "renderer": renderer,
+                    "label": f"GPU {device_index}: {renderer}",
+                    "sections": [],
+                }
+                devices.append(device)
+            device["sections"].append(section)
+        return devices
+
+    for section in other_sections:
+        renderer = renderer_for(section)
+        if not renderer:
+            continue
+        matching_devices = [
+            item for item in devices if item["renderer"] == renderer
+        ]
+        if matching_devices:
+            matching_devices[0]["sections"].append(section)
+
+    return devices
+
+
+def parse_device_extensions(device):
+    """Return OpenGL, GLES, and EGL extension tokens for one EGL device."""
+    sections = device.get("ext_sections") or device.get("sections", [])
+    lines = [
+        line
+        for section in sections
+        for line in section.get("lines", [])
+    ]
+    egl_extensions = parse_extension_tokens(
+        lines, "EGL extensions string:", "EGL_"
+    )
+    if not egl_extensions:
+        egl_extensions = parse_extension_tokens(lines, "EGL_EXTENSIONS:", "EGL_")
+
+    return {
+        "OpenGL core": parse_extension_tokens(
+            lines, "OpenGL core profile extensions:", "GL_"
+        ),
+        "OpenGL compatibility": parse_extension_tokens(
+            lines, "OpenGL compatibility profile extensions:", "GL_"
+        ),
+        "OpenGL ES": parse_extension_tokens(
+            lines, "OpenGL ES profile extensions:", "GL_"
+        ),
+        "EGL": egl_extensions,
+    }
+
+
+def parse_glx_renderer(lines):
+    """Return the renderer queried by glxinfo, if present."""
+    for line in lines:
+        if line.strip().startswith("OpenGL renderer string:"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+
+def renderers_match(first, second):
+    """Compare renderer names while allowing driver suffixes to differ."""
+    first = " ".join(first.casefold().split())
+    second = " ".join(second.casefold().split())
+    return bool(first and second and (first == second or first in second or second in first))
+
+
 class DataObject2(GObject.GObject):
     def __init__(self, column1: str):
         super(DataObject2, self).__init__()
@@ -325,6 +620,122 @@ def OpenGL(self, tab):
     loaded_pages = set()
     page_spinners = {}
     page_content_containers = {}
+    egl_state = {
+        "devices": [],
+        "pixbuf": None,
+        "ready": False,
+        "egl_lines": [],
+        "egl_configs": [],
+        "platform": "",
+    }
+    info_roots = {"egl": None}
+    sidebar_rows = {}
+    sidebar_headings = {}
+    sidebar_group_rows = {}
+    sidebar_listbox_map = {}
+    refresh_extensions_callback = None
+    refresh_framebuffer_callback = None
+
+    def update_sidebar_support(device):
+        device_extensions = parse_device_extensions(device) if device else {}
+        has_limits = bool(
+            parse_egl_limits(egl_state["egl_lines"], "core")
+            or parse_egl_limits(egl_state["egl_lines"], "compat")
+            or parse_egl_limits(egl_state["egl_lines"], "gles")
+        )
+        support = {
+            "EGL Information": True,
+            "OpenGL Limits": has_limits,
+            "OpenGL": bool(
+                device_extensions.get("OpenGL core")
+                or device_extensions.get("OpenGL compatibility")
+            ),
+            "OpenGL ES": bool(device_extensions.get("OpenGL ES")),
+            "EGL": bool(device_extensions.get("EGL")),
+            "EGL Configurations": bool(egl_state["egl_configs"]),
+        }
+
+        for label, row in sidebar_rows.items():
+            row.set_visible(support.get(label, True))
+
+        # Hide section headings when all their rows are invisible
+        for heading, rows in sidebar_group_rows.items():
+            heading_visible = any(support.get(label, True) for label in rows)
+            sidebar_headings[heading].set_visible(heading_visible)
+            # Also hide the associated listbox stored alongside heading
+            if heading in sidebar_listbox_map:
+                sidebar_listbox_map[heading].set_visible(heading_visible)
+        visible_page = content_stack.get_visible_child_name()
+        if visible_page == "framebuffer-configuration" and not support["EGL Configurations"]:
+            content_stack.set_visible_child_name("opengl-information")
+            sidebar_listboxes[0].select_row(sidebar_listboxes[0].get_row_at_index(0))
+        if visible_page == "extensions" and not any(
+            support[name] for name in ("OpenGL", "OpenGL ES", "EGL")
+        ):
+            content_stack.set_visible_child_name("opengl-information")
+            sidebar_listboxes[0].select_row(sidebar_listboxes[0].get_row_at_index(0))
+
+        if refresh_extensions_callback is not None:
+            refresh_extensions_callback(device_extensions, [])
+        if refresh_framebuffer_callback is not None:
+            refresh_framebuffer_callback(device)
+
+    def refresh_egl_device(*_):
+        if not egl_state["ready"]:
+            return
+
+        egl_root = info_roots["egl"]
+        pixbuf = egl_state["pixbuf"]
+        devices = egl_state["devices"]
+        egl_root.children.clear()
+
+        if devices:
+            device = devices[0]
+            renderer = device["renderer"]
+            short_name = re.sub(r"\s*\([^)]*\)\s*$", "", renderer).strip() or renderer
+            gpu_name_label.set_text(short_name)
+
+            gl_version = ""
+            egl_version = ""
+            for line in egl_state["egl_lines"]:
+                s = line.strip()
+                if not gl_version and s.startswith("OpenGL core profile version:"):
+                    gl_version = s.split(":", 1)[1].strip()
+                elif not gl_version and s.startswith("OpenGL ES profile version:"):
+                    gl_version = s.split(":", 1)[1].strip()
+                elif not egl_version and s.startswith("EGL version string:"):
+                    egl_version = f"EGL {s.split(':', 1)[1].strip()}"
+            subtitle_parts = []
+            if egl_state["platform"]:
+                subtitle_parts.append(f"Platform: {egl_state['platform'].upper()}")
+            if egl_version:
+                subtitle_parts.append(egl_version)
+            if gl_version:
+                subtitle_parts.append(f"OpenGL {gl_version}")
+            gpu_subtitle_label.set_text("  •  ".join(subtitle_parts))
+            gpu_subtitle_label.set_visible(bool(subtitle_parts))
+
+            gpu_logo.set_pixbuf(
+                get_gpuz_vendor_logo_pixbuf(renderer) or getLogo(renderer)
+            )
+            device_root = ExpandDataObject3(device["label"], pixbuf, "")
+            for section in device["sections"]:
+                platform_root = ExpandDataObject3(section["platform"], pixbuf, "")
+                platform_root.children.extend(section["rows"])
+                device_root.children.append(platform_root)
+            egl_root.children.append(device_root)
+        else:
+            gpu_name_label.set_text("No EGL GPUs detected")
+            gpu_subtitle_label.set_text("")
+            gpu_subtitle_label.set_visible(False)
+            gpu_logo.set_pixbuf(pixbuf)
+            egl_root.children.append(
+                ExpandDataObject3("No EGL GPU details available", pixbuf, "")
+            )
+
+        opengl_info_list.remove_all()
+        opengl_info_list.append(egl_root)
+        update_sidebar_support(devices[0] if devices else None)
 
     def show_spinner(page_name):
         if page_name in page_spinners:
@@ -347,58 +758,45 @@ def OpenGL(self, tab):
         def bg_worker():
             dummy_transparent = GdkPixbuf.Pixbuf.new_from_file_at_size(const.TRANSPARENT_PIXBUF, 24, 20)
 
-            openGL_root = ExpandDataObject3("OpenGL Details", dummy_transparent, "")
-            glx_root = ExpandDataObject3("GLX Info - Brief", dummy_transparent, "")
-
-            glxinfo_brief_lines = []
-            try:
-                glxinfo_brief_lines = fetchContentsFromCommand("glxinfo -B 2>/dev/null")
-            except Exception:
-                glxinfo_brief_lines = []
-
-            parsed_rows = parse_glxinfo_brief(glxinfo_brief_lines, dummy_transparent, getLogo)
-            
-            egl_root = ExpandDataObject3("EGL Information", dummy_transparent, "")
             egl_lines = []
-            try:
-                result = subprocess.run(
-                    ["es2_info"],
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                egl_lines = [
-                    line
-                    for line in result.stdout.splitlines()
-                    if line.startswith(("EGL_VERSION", "EGL_VENDOR"))
-                ]
-            except Exception:
-                egl_lines = []
+            used_platform = ""
+            for platform in detect_egl_platform():
+                try:
+                    result = subprocess.run(
+                        ["eglinfo", "-p", platform, "-l"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        timeout=15,
+                    )
+                    lines = result.stdout.splitlines()
+                    if result.returncode == 0 and parse_eglinfo_devices(lines):
+                        egl_lines = lines
+                        used_platform = platform
+                        break
+                except (OSError, subprocess.TimeoutExpired) as error:
+                    print(f"Failed to query eglinfo -p {platform} -l: {error}")
 
-            parsed_egl_rows = parse_glxinfo_brief(egl_lines, dummy_transparent, getLogo)
+            egl_state["platform"] = used_platform
+            egl_state["egl_lines"] = egl_lines
+            egl_state["devices"] = parse_eglinfo_devices(egl_lines)
+            for device in egl_state["devices"]:
+                for section in device["sections"]:
+                    brief_lines = extract_egl_brief_lines(section["lines"])
+                    section["rows"] = parse_glxinfo_brief(
+                        brief_lines, dummy_transparent, getLogo
+                    )
+            egl_state["egl_configs"] = parse_egl_configurations(egl_lines)
 
             def update_ui():
                 opengl_info_list.remove_all()
-                if parsed_rows:
-                    for row in parsed_rows:
-                        if row.data.startswith("OpenGL"):
-                            openGL_root.children.append(row)
-                        else:
-                            glx_root.children.append(row)
-                else:
-                    glx_root.children.append(ExpandDataObject3("No glxinfo -B output available", dummy_transparent, ""))
+                info_roots["egl"] = ExpandDataObject3(
+                    "EGL Information", dummy_transparent, ""
+                )
+                egl_state["pixbuf"] = dummy_transparent
+                egl_state["ready"] = True
+                refresh_egl_device()
 
-                if parsed_egl_rows:
-                    for row in parsed_egl_rows:
-                        egl_root.children.append(row)
-                else:
-                    egl_root.children.append(ExpandDataObject3("No EGL information available", dummy_transparent, ""))
-
-                if openGL_root.children:
-                    opengl_info_list.append(openGL_root)
-                opengl_info_list.append(egl_root)
-                opengl_info_list.append(glx_root)
-                
                 loaded_pages.add("opengl-information")
                 hide_spinner("opengl-information")
                 return False
@@ -675,7 +1073,7 @@ def OpenGL(self, tab):
         threading.Thread(target=bg_worker, args=(limitValue,), daemon=True).start()
 
 
-    def radcall2(dropdown,dummy,List,filename,Store,tree,filter):
+    def radcall2(dropdown,dummy,List,filename,Store,tree,filter,type_name="OpenGL"):
         selected = dropdown.props.selected_item
         value = 0
         if selected is not None:
@@ -714,6 +1112,8 @@ def OpenGL(self, tab):
 
         for text in GL_All:
             Store.append(DataObject2(text.strip(' \n')))
+        if not GL_All:
+            Store.append(DataObject2(f"No {type_name} extensions available"))
 
     def getVendorList(filename):
         vendor_counts = {}
@@ -858,22 +1258,25 @@ def OpenGL(self, tab):
 
         def load_limits_profile(profile):
             def bg():
-                if limits_output["text"] is None:
+                if not egl_state["egl_lines"]:
                     with limits_output_lock:
-                        if limits_output["text"] is None:
-                            try:
-                                result = subprocess.run(
-                                    ["glxinfo", "-l"],
-                                    capture_output=True,
-                                    text=True,
-                                    check=False,
-                                )
-                                if result.returncode != 0:
-                                    print(f"glxinfo -l failed: {result.stderr.strip()}")
-                                limits_output["text"] = result.stdout
-                            except OSError as error:
-                                print(f"Failed to query OpenGL limits: {error}")
-                                limits_output["text"] = ""
+                        if not egl_state["egl_lines"]:
+                            for platform in detect_egl_platform():
+                                try:
+                                    result = subprocess.run(
+                                        ["eglinfo", "-p", platform, "-l"],
+                                        capture_output=True,
+                                        text=True,
+                                        check=False,
+                                        timeout=15,
+                                    )
+                                    lines = result.stdout.splitlines()
+                                    if result.returncode == 0 and lines:
+                                        egl_state["egl_lines"] = lines
+                                        egl_state["platform"] = platform
+                                        break
+                                except (OSError, subprocess.TimeoutExpired) as error:
+                                    print(f"Failed to query OpenGL limits: {error}")
 
                 if profile == "core":
                     profile_file = core_file
@@ -884,9 +1287,11 @@ def OpenGL(self, tab):
                     profile_lhs_file = compat_lhs_file
                     profile_label = compat_label
 
-                limit_lines = parse_glx_limits(
-                    limits_output["text"].splitlines(keepends=True), profile
-                )
+                limit_lines = parse_egl_limits(egl_state["egl_lines"], profile)
+                if not limit_lines:
+                    limit_lines = [
+                        "OpenGL hardware limits unavailable.\n"
+                    ]
                 with open(profile_file, "w") as file:
                     file.writelines(limit_lines)
                 with open(profile_lhs_file, "w") as file:
@@ -1047,9 +1452,12 @@ def OpenGL(self, tab):
 
         def set_active_profile(profile):
             if profile == "glx-visuals":
-                populate_lines(visuals_lines)
+                lines = visuals_lines
+                message = "GLX visual data unavailable (requires GLX)."
             else:
-                populate_lines(fbconfig_lines)
+                lines = fbconfig_lines
+                message = "GLX framebuffer data unavailable (requires GLX)."
+            populate_lines(lines or [message])
 
         def on_group_changed(group, pspec):
             profile = group.get_active_name()
@@ -1066,74 +1474,68 @@ def OpenGL(self, tab):
         nonlocal load_framebuffer_data
         framebuffer_loading = {"started": False}
 
-        def load_framebuffer_data_impl(profile="glx-visuals"):
+        def setup_fb_cell(widget, item):
+            label = Gtk.Label()
+            label.props.xalign = 0.0
+            label.set_margin_start(6)
+            label.set_margin_end(6)
+            item.set_child(label)
+
+        def display_framebuffer_data():
+            config_rows = egl_state["egl_configs"]
+            while frameBufferColumnView.get_columns().get_n_items() > 0:
+                frameBufferColumnView.remove_column(
+                    frameBufferColumnView.get_columns().get_item(0)
+                )
+
+            if config_rows:
+                for index, column_name in enumerate(EGL_CONFIG_COLUMNS, start=1):
+                    factory = Gtk.SignalListItemFactory()
+                    factory.connect("setup", setup_fb_cell)
+                    factory.connect("bind", make_bind(index))
+                    column = Gtk.ColumnViewColumn.new(column_name, factory)
+                    column.set_resizable(True)
+                    if index == len(EGL_CONFIG_COLUMNS):
+                        column.set_expand(True)
+                    frameBufferColumnView.append_column(column)
+                fb_store.remove_all()
+                for row in config_rows:
+                    fb_store.append(FramebufferRow(row))
+            else:
+                factory_fb = Gtk.SignalListItemFactory()
+                factory_fb.connect("setup", setup_fb_cell)
+                factory_fb.connect("bind", bind_column1)
+                fb_column = Gtk.ColumnViewColumn.new("EGL Configurations", factory_fb)
+                fb_column.set_expand(True)
+                frameBufferColumnView.append_column(fb_column)
+                fb_store.remove_all()
+                fb_store.append(FramebufferRow(["EGL configuration data unavailable."]))
+
+        def refresh_framebuffer_data(device):
+            config_rows = egl_state["egl_configs"] if device else []
+            if "EGL Configurations" in framebuffer_sidebar_labels:
+                framebuffer_sidebar_labels["EGL Configurations"].set_text(
+                    f"EGL Configurations ({len(config_rows)})"
+                )
             if "framebuffer-configuration" in loaded_pages:
-                if profile_group.get_active_name() != profile:
-                    profile_group.set_active_name(profile)
+                display_framebuffer_data()
+
+        nonlocal refresh_framebuffer_callback
+        refresh_framebuffer_callback = refresh_framebuffer_data
+
+        def load_framebuffer_data_impl(profile="egl-configs"):
+            if "framebuffer-configuration" in loaded_pages:
                 return
             if framebuffer_loading["started"]:
-                if profile_group.get_active_name() != profile:
-                    profile_group.set_active_name(profile)
                 return
             framebuffer_loading["started"] = True
-            profile_group.handler_block_by_func(on_group_changed)
-            profile_group.set_active_name(profile)
-            profile_group.handler_unblock_by_func(on_group_changed)
             show_spinner("framebuffer-configuration")
-            def bg():
-                try:
-                    with open(Filenames.opengl_outpuf_file, "r") as file:
-                        v_lines, f_lines = parse_framebuffer_sections(file)
-                except OSError:
-                    v_lines, f_lines = [], []
-                all_lines = v_lines + f_lines
-                max_cols = 0
-                for line in all_lines:
-                    tokens = line.strip().split()
-                    if len(tokens) > max_cols:
-                        max_cols = len(tokens)
-                
-                def ui():
-                    nonlocal visuals_lines, fbconfig_lines
-                    visuals_lines[:] = v_lines
-                    fbconfig_lines[:] = f_lines
-                    framebuffer_sidebar_labels["GLX Visuals"].set_text(
-                        f"GLX Visuals ({len(visuals_lines)})"
-                    )
-                    framebuffer_sidebar_labels["GLX FBConfig"].set_text(
-                        f"GLX FBConfig ({len(fbconfig_lines)})"
-                    )
-                    
-                    # Clear existing columns if any
-                    while frameBufferColumnView.get_columns().get_n_items() > 0:
-                        frameBufferColumnView.remove_column(frameBufferColumnView.get_columns().get_item(0))
-
-                    if max_cols > 0:
-                        for index in range(1, max_cols + 1):
-                            factory = Gtk.SignalListItemFactory()
-                            factory.connect("setup", setup)
-                            factory.connect("bind", make_bind(index))
-                            column_name = headings[index - 1] if index <= len(headings) else f"Column {index}"
-                            column = Gtk.ColumnViewColumn.new(column_name, factory)
-                            column.set_resizable(True)
-                            column.set_fixed_width(60)
-                            if index == max_cols:
-                                column.set_expand(True)
-                            frameBufferColumnView.append_column(column)
-                    else:
-                        factory_fb = Gtk.SignalListItemFactory()
-                        factory_fb.connect("setup", setup)
-                        factory_fb.connect("bind", bind_column1)
-                        fbColumn = Gtk.ColumnViewColumn.new("Framebuffer Data", factory_fb)
-                        fbColumn.set_expand(True)
-                        frameBufferColumnView.append_column(fbColumn)
-
-                    set_active_profile(profile_group.get_active_name() or profile)
-                    loaded_pages.add("framebuffer-configuration")
-                    hide_spinner("framebuffer-configuration")
-                    return False
-                GLib.idle_add(ui)
-            threading.Thread(target=bg, daemon=True).start()
+            refresh_framebuffer_data(
+                egl_state["devices"][0] if egl_state["devices"] else None
+            )
+            display_framebuffer_data()
+            loaded_pages.add("framebuffer-configuration")
+            hide_spinner("framebuffer-configuration")
         load_framebuffer_data = load_framebuffer_data_impl
 
         return create_loading_page(page, "framebuffer-configuration")
@@ -1180,6 +1582,11 @@ def OpenGL(self, tab):
 
         current_type = {"name": "OpenGL", "file": Filenames.opengl_vendor_gl_extension_file}
         opengl_profile = {"mode": "core"}
+        tool_output_cache = {"eglinfo": None, "es2_info": None}
+        tool_output_lock = threading.Lock()
+
+        # Map type name -> Adw.Toggle widget for show/hide on GPU change
+        type_toggle_widgets = {}
 
         def update_extension_header():
             if current_type["name"] == "OpenGL":
@@ -1201,6 +1608,7 @@ def OpenGL(self, tab):
             type_toggle = Adw.Toggle.new()
             type_toggle.set_name(type_name)
             type_group.add(type_toggle)
+            type_toggle_widgets[type_name] = type_toggle
 
         profile_group = Adw.ToggleGroup.new()
         core_profile_toggle = Adw.Toggle.new()
@@ -1227,83 +1635,84 @@ def OpenGL(self, tab):
         vendor_box.append(vendor_dropdown)
         vendor_box.append(profile_box)
 
-        def prepare_opengl_extension_file(profile):
-            def collect_section(start_marker, stop_markers):
-                lines = []
-                writing = False
-                if os.path.exists(Filenames.opengl_outpuf_file):
-                    with open(Filenames.opengl_outpuf_file, "r") as src:
-                        for raw_line in src:
-                            line = raw_line.strip()
-                            if writing and any(line.startswith(stop) for stop in stop_markers):
-                                break
-                            if writing:
-                                if line.startswith("GL_"):
-                                    lines.append(line)
-                            elif line.startswith(start_marker):
-                                writing = True
-                return lines
-
-            if profile == "core":
-                lines = collect_section(
-                    "OpenGL core profile extensions:",
-                    ["OpenGL compatibility profile extensions:", "OpenGL extensions:", "OpenGL ES profile"]
-                )
-            else:
-                lines = collect_section(
-                    "OpenGL compatibility profile extensions:",
-                    ["OpenGL ES profile", "OpenGL core profile extensions:", "OpenGL extensions:"]
-                )
-                if not lines:
-                    lines = collect_section(
-                        "OpenGL extensions:",
-                        ["OpenGL ES profile"]
+        def get_tool_output(tool):
+            with tool_output_lock:
+                cached = tool_output_cache[tool]
+                if cached is not None:
+                    return cached
+                environment = {**os.environ, "EGL_PLATFORM": "surfaceless"}
+                try:
+                    result = subprocess.run(
+                        [tool],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        timeout=15,
+                        env=environment,
                     )
-            
+                    if result.returncode != 0:
+                        print(f"{tool} failed: {result.stderr.strip()}")
+                    output = result.stdout.splitlines()
+                except (OSError, subprocess.TimeoutExpired) as error:
+                    print(f"Failed to query {tool}: {error}")
+                    output = []
+                tool_output_cache[tool] = output
+                return output
+
+        def prepare_opengl_extension_file(profile, device_ext_lines=None):
+            if profile == "core":
+                start_marker = "OpenGL core profile extensions:"
+            else:
+                start_marker = "OpenGL compatibility profile extensions:"
+
+            lines = []
+            # First try to use per-device extension data from eglinfo
+            if device_ext_lines is not None:
+                lines = parse_extension_tokens(device_ext_lines, start_marker, "GL_")
+            if not lines and os.path.exists(Filenames.opengl_outpuf_file):
+                with open(Filenames.opengl_outpuf_file, "r") as src:
+                    lines = parse_extension_tokens(src, start_marker, "GL_")
+            if not lines:
+                lines = parse_extension_tokens(
+                    get_tool_output("eglinfo"), start_marker, "GL_"
+                )
+
             with open(Filenames.opengl_vendor_gl_extension_file, "w") as file:
                 file.write("\n".join(sorted(lines)))
 
+        # Device-specific extension lines from the currently selected EGL device
+        device_ext_lines_cache = {"lines": None}
+
         def prepare_type_file(type_name, callback=None):
             current_type["name"] = type_name
+            dev_lines = device_ext_lines_cache["lines"] or egl_state["egl_lines"]
             def bg():
                 if type_name == "OpenGL":
                     current_type["file"] = Filenames.opengl_vendor_gl_extension_file
-                    prepare_opengl_extension_file(opengl_profile["mode"])
+                    prepare_opengl_extension_file(opengl_profile["mode"], dev_lines)
                 elif type_name == "OpenGL ES":
                     current_type["file"] = Filenames.opengl_vendor_es_extension_file
-                    with open(Filenames.opengl_outpuf_file, "r") as source:
-                        extensions = parse_extension_section(
-                            source,
-                            "OpenGL ES profile",
-                            "80 GLX Visuals",
-                            "GL_",
-                        )
-                    with open(current_type["file"], "w") as file:
-                        file.write("\n".join(extensions))
-                elif type_name == "GLX":
-                    current_type["file"] = Filenames.opengl_vendor_gl_extension_file
-                    with open(Filenames.opengl_outpuf_file, "r") as source:
-                        extensions = parse_extension_section(
-                            source,
-                            "client glx extensions",
-                            "GLX version",
-                            "GLX_",
+                    extensions = parse_extension_tokens(
+                        dev_lines, "OpenGL ES profile extensions:", "GL_"
+                    )
+                    if not extensions:
+                        extensions = parse_extension_tokens(
+                            get_tool_output("es2_info"), "GL_EXTENSIONS", "GL_"
                         )
                     with open(current_type["file"], "w") as file:
                         file.write("\n".join(extensions))
                 else:
                     current_type["file"] = Filenames.egl_vendor_extension_file
-                    try:
-                        result = subprocess.run(
-                            ["es2_info"], capture_output=True, text=True, check=False
+                    extensions = parse_extension_tokens(
+                        dev_lines, "EGL extensions string:", "EGL_"
+                    )
+                    if not extensions:
+                        extensions = parse_extension_tokens(
+                            dev_lines, "EGL_EXTENSIONS:", "EGL_"
                         )
-                        extensions = parse_egl_extensions(result.stdout.splitlines())
-                    except OSError as error:
-                        print(f"Failed to query EGL extensions: {error}")
-                        extensions = []
                     with open(current_type["file"], "w") as file:
                         file.write("\n".join(extensions))
-                
+
                 def ui():
                     update_extension_header()
                     if callback: callback()
@@ -1330,7 +1739,11 @@ def OpenGL(self, tab):
         def update_extension_list():
             def on_vendors_ready(VendorList, vendor_names):
                 current_vendors["names"] = vendor_names
-                radcall2(vendor_dropdown, 0, vendor_names, current_type["file"], extension_list, extensionColumnView, extension_list)
+                radcall2(
+                    vendor_dropdown, 0, vendor_names, current_type["file"],
+                    extension_list, extensionColumnView, extension_list,
+                    current_type["name"],
+                )
             refresh_vendors(on_vendors_ready)
 
         def set_profile_visibility(type_name):
@@ -1377,20 +1790,77 @@ def OpenGL(self, tab):
                 button.set_active(True)
                 button.handler_unblock_by_func(on_compat_toggled)
 
+        def apply_device_extension_support(device_extensions, glx_extensions):
+            """Called when device data loads — update toggle state and reload."""
+            if egl_state["devices"]:
+                dev = egl_state["devices"][0]
+                ext_sections = dev.get("ext_sections") or dev.get("sections", [])
+                device_ext_lines_cache["lines"] = [
+                    line
+                    for section in ext_sections
+                    for line in section.get("lines", [])
+                ]
+            else:
+                device_ext_lines_cache["lines"] = None
+
+            type_support = {
+                "OpenGL": bool(
+                    device_extensions.get("OpenGL core")
+                    or device_extensions.get("OpenGL compatibility")
+                ),
+                "OpenGL ES": bool(device_extensions.get("OpenGL ES")),
+                "GLX": bool(glx_extensions),
+                "EGL": bool(device_extensions.get("EGL")),
+            }
+
+            # Update type toggles without triggering the signal
+            type_group.handler_block_by_func(on_type_group_changed)
+            for tname, toggle in type_toggle_widgets.items():
+                toggle.set_enabled(type_support.get(tname, False))
+            type_group.handler_unblock_by_func(on_type_group_changed)
+
+            # If the current type is now hidden, switch to first visible type
+            current = current_type["name"]
+            if not type_support.get(current, False):
+                first_visible = next(
+                    (t for t in ("OpenGL", "OpenGL ES", "GLX", "EGL") if type_support.get(t, False)),
+                    None,
+                )
+                if first_visible:
+                    type_group.handler_block_by_func(on_type_group_changed)
+                    type_group.set_active_name(first_visible)
+                    type_group.handler_unblock_by_func(on_type_group_changed)
+                    set_profile_visibility(first_visible)
+                    current_type["name"] = first_visible
+
+            # Reload current extension content if the page is already loaded
+            if "extensions" in loaded_pages:
+                prepare_type_file(current_type["name"], update_extension_list)
+
+        nonlocal refresh_extensions_callback
+        refresh_extensions_callback = apply_device_extension_support
+
         type_group.connect("notify::active-name", on_type_group_changed)
 
         core_button.connect("toggled", on_core_toggled)
         compat_button.connect("toggled", on_compat_toggled)
         profile_group.connect("notify::active-name", on_profile_group_changed)
 
-        vendor_dropdown.connect('notify::selected-item', lambda dropdown, *_: radcall2(dropdown, 0, current_vendors["names"], current_type["file"], extension_list, extensionColumnView, extension_list))
+        vendor_dropdown.connect(
+            'notify::selected-item',
+            lambda dropdown, *_: radcall2(
+                dropdown, 0, current_vendors["names"], current_type["file"],
+                extension_list, extensionColumnView, extension_list,
+                current_type["name"],
+            ),
+        )
 
         search_entry.connect("search-changed", _on_search_method_changed, filterExtensions)
 
         page.append(vendor_box)
         page.append(create_scrollbar(extensionColumnView))
         page.append(search_entry)
-        
+
         nonlocal load_extensions_data
         def load_extensions_data_impl(type_name="OpenGL"):
             if "extensions" in loaded_pages:
@@ -1414,7 +1884,7 @@ def OpenGL(self, tab):
             type_group.handler_unblock_by_func(on_type_group_changed)
             set_profile_visibility(type_name)
             prepare_type_file(type_name, lambda: (update_extension_list(), on_ready()))
-            
+
         load_extensions_data = load_extensions_data_impl
 
         return create_loading_page(page, "extensions")
@@ -1431,16 +1901,14 @@ def OpenGL(self, tab):
         if not row.get_sensitive():
             return
         sidebar_target_names = {
-            "OpenGL Information": "opengl-information",
+            "EGL Information": "opengl-information",
             "OpenGL Limits": "opengl-limits",
             "OpenGL": "extensions",
             "OpenGL ES": "extensions",
-            "GLX": "extensions",
             "EGL": "extensions",
         }
         framebuffer_profiles = {
-            "GLX Visuals": "glx-visuals",
-            "GLX FBConfig": "glx-fbconfig",
+            "EGL Configurations": "egl-configs",
         }
         framebuffer_profile = next(
             (profile for label, profile in framebuffer_profiles.items() if tab_name.startswith(label)),
@@ -1456,7 +1924,7 @@ def OpenGL(self, tab):
             elif child_name == "opengl-limits":
                 load_limits_data()
             elif child_name == "framebuffer-configuration":
-                load_framebuffer_data(framebuffer_profile or "glx-visuals")
+                load_framebuffer_data(framebuffer_profile or "egl-configs")
             elif child_name == "extensions":
                 load_extensions_data(tab_name)
 
@@ -1465,56 +1933,6 @@ def OpenGL(self, tab):
     opengl_box.set_vexpand(True)
     opengl_box.set_hexpand(True)
     tab.append(opengl_box)
-
-    # --- OpenGL Summary Box ---
-    summary_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 20)
-    summary_box.set_halign(Gtk.Align.CENTER)
-    summary_box.set_margin_top(20)
-    summary_box.set_margin_bottom(10)
-    opengl_box.append(summary_box)
-
-    def load_summary_data():
-        def bg():
-            glxinfo_lines = []
-            try:
-                glxinfo_lines = fetchContentsFromCommand("glxinfo -B 2>/dev/null")
-            except Exception:
-                glxinfo_lines = []
-            
-            renderer = ""
-            vendor = ""
-            for line in glxinfo_lines:
-                if "OpenGL renderer string:" in line:
-                    renderer = line.split(":", 1)[1].strip()
-                if "OpenGL vendor string:" in line:
-                    vendor = line.split(":", 1)[1].strip()
-            
-            def ui():
-                if renderer:
-                    logo_pixbuf = getLogo(renderer)
-                    logo_img = Gtk.Picture.new_for_pixbuf(logo_pixbuf)
-                    logo_img.set_size_request(48, 48)
-                    summary_box.append(logo_img)
-
-                    labels_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 2)
-                    labels_box.set_valign(Gtk.Align.CENTER)
-
-                    device_label = Gtk.Label.new(renderer)
-                    device_label.add_css_class("title-1")
-                    device_label.set_halign(Gtk.Align.START)
-                    labels_box.append(device_label)
-
-                    vendor_label = Gtk.Label.new(f"Vendor: {vendor}")
-                    vendor_label.add_css_class("caption")
-                    vendor_label.set_halign(Gtk.Align.START)
-                    labels_box.append(vendor_label)
-
-                    summary_box.append(labels_box)
-                return False
-            GLib.idle_add(ui)
-        threading.Thread(target=bg, daemon=True).start()
-
-    load_summary_data()
 
     split_view = Adw.NavigationSplitView.new()
     split_view.set_vexpand(True)
@@ -1525,9 +1943,9 @@ def OpenGL(self, tab):
 
     framebuffer_sidebar_labels = {}
     sidebar_groups = [
-        ("OPENGL", ["OpenGL Information", "OpenGL Limits"]),
-        ("GLX FB Visuals & Config", ["GLX Visuals", "GLX FBConfig"]),
-        ("EXTENSIONS", ["OpenGL", "OpenGL ES", "GLX", "EGL"]),
+        ("EGL", ["EGL Information", "OpenGL Limits"]),
+        ("EGL FB Config", ["EGL Configurations"]),
+        ("EXTENSIONS", ["OpenGL", "OpenGL ES", "EGL"]),
     ]
     for section_title, row_labels in sidebar_groups:
         heading = Gtk.Label.new(section_title)
@@ -1539,6 +1957,8 @@ def OpenGL(self, tab):
         heading.set_margin_top(10)
         heading.set_margin_bottom(6)
         sidebar_vbox.append(heading)
+        sidebar_headings[section_title] = heading
+        sidebar_group_rows[section_title] = row_labels
 
         group_listbox = Gtk.ListBox.new()
         group_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
@@ -1547,11 +1967,15 @@ def OpenGL(self, tab):
         group_listbox.set_show_separators(True)
         for row_label in row_labels:
             row = create_sidebar_row(row_label, True)
+            if row_label not in ("EGL Information", "OpenGL Limits"):
+                row.set_visible(False)
+            sidebar_rows[row_label] = row
             group_listbox.append(row)
-            if row_label in ("GLX Visuals", "GLX FBConfig"):
+            if row_label == "EGL Configurations":
                 framebuffer_sidebar_labels[row_label] = row.get_child()
         group_listbox.connect("row-activated", on_row_activated)
         sidebar_listboxes.append(group_listbox)
+        sidebar_listbox_map[section_title] = group_listbox
         sidebar_vbox.append(group_listbox)
 
     content_stack = Gtk.Stack.new()
@@ -1582,7 +2006,7 @@ def OpenGL(self, tab):
     factoryOpenglRhs.connect("setup", setup)
     factoryOpenglRhs.connect("bind", bind_column3)
 
-    openglColumn1 = Gtk.ColumnViewColumn.new("OpenGL Information")
+    openglColumn1 = Gtk.ColumnViewColumn.new("EGL Information")
     openglColumn1.set_factory(factoryOpenglLhs)
     openglColumn1.set_expand(False)
     openglColumn1.set_resizable(True)
@@ -1608,6 +2032,55 @@ def OpenGL(self, tab):
     opengl_info_scrollbar.set_hexpand(True)
     opengl_info_scrollbar.set_valign(Gtk.Align.FILL)
     opengl_info_scrollbar.set_min_content_height(440)
+
+    # --- Compact Libadwaita Card Banner for Active EGL Device ---
+    gpu_logo_pixbuf = (
+        get_gpuz_vendor_logo_pixbuf("")
+        or GdkPixbuf.Pixbuf.new_from_file_at_size(const.APP_LOGO_PNG, 38, 38)
+    )
+    gpu_logo = Gtk.Picture.new_for_pixbuf(gpu_logo_pixbuf)
+    gpu_logo.set_content_fit(Gtk.ContentFit.CONTAIN)
+    gpu_logo.set_size_request(38, 38)
+    gpu_logo.set_valign(Gtk.Align.CENTER)
+
+    gpu_name_label = Gtk.Label.new("Detecting EGL device...")
+    gpu_name_label.add_css_class("title-4")
+    gpu_name_label.set_xalign(0.0)
+    gpu_name_label.set_ellipsize(Pango.EllipsizeMode.END)
+
+    gpu_subtitle_label = Gtk.Label.new("")
+    gpu_subtitle_label.add_css_class("dim-label")
+    gpu_subtitle_label.add_css_class("caption")
+    gpu_subtitle_label.set_xalign(0.0)
+    gpu_subtitle_label.set_ellipsize(Pango.EllipsizeMode.END)
+    gpu_subtitle_label.set_visible(False)
+
+    banner_text_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 2)
+    banner_text_box.set_valign(Gtk.Align.CENTER)
+    banner_text_box.set_hexpand(True)
+    banner_text_box.append(gpu_name_label)
+    banner_text_box.append(gpu_subtitle_label)
+
+    banner_row = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 14)
+    banner_row.set_margin_top(10)
+    banner_row.set_margin_bottom(10)
+    banner_row.set_margin_start(14)
+    banner_row.set_margin_end(14)
+    banner_row.append(gpu_logo)
+    banner_row.append(banner_text_box)
+
+    banner_card = Adw.Bin.new()
+    banner_card.add_css_class("card")
+    banner_card.set_child(banner_row)
+
+    banner_clamp = Adw.Clamp.new()
+    banner_clamp.set_maximum_size(720)
+    banner_clamp.set_margin_top(8)
+    banner_clamp.set_margin_bottom(4)
+    banner_clamp.set_margin_start(12)
+    banner_clamp.set_margin_end(12)
+    banner_clamp.set_child(banner_card)
+    opengl_box.append(banner_clamp)
 
     info_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 10)
     info_box.set_hexpand(True)

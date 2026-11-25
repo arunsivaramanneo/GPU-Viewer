@@ -1535,7 +1535,7 @@ class GpuZView(Gtk.Box):
         gl_frame = _make_section(
             "OpenGL / EGL", const.OPEN_GL_PNG,
             fallback_icon_name="applications-engineering-symbolic",
-            nav_actions=[("Open OpenGL →", "page2")]
+            nav_actions=[("Open EGL →", "page2")]
             if has_opengl or has_egl else [],
         )
         gl_vendor   = gl_data.get("vendor", "—")
